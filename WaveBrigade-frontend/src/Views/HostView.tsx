@@ -1,6 +1,9 @@
 import { useEffect } from "react";
 import { useParams } from "react-router-dom";
 
+
+{/*This is what the host will see while people do their labs*/}
+
 export default function HostView()
 {
     const {room} = useParams();

@@ -4,8 +4,11 @@ import App from './App.tsx'
 import './index.css'
 //Routes are defined here
 import{createBrowserRouter, RouterProvider } from "react-router-dom";
+
 import HostView from './Views/HostView.tsx';
 import Home from "./Views/Home.tsx"
+import JoinPage from './Views/JoinPage.tsx';
+import HostCreateRoom from './Views/HostCreateRoom.tsx';
 
 const router = createBrowserRouter([
   {
@@ -17,13 +20,17 @@ const router = createBrowserRouter([
         element: <Home />
       },
       {
+        path: "host/create",
+        element: <HostCreateRoom/>
+      },
+      {
         path: "host/:room",
         element: <HostView />
       },
       {
         path: "join",
-        element: <p>Join</p>
-      }]
+        element: <JoinPage />
+      },]
   }
 ])
 
