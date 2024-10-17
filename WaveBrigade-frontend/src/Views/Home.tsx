@@ -8,6 +8,10 @@ export default function Home()
     {
         navigateTo("join");
     }
+    function handleHostButtonClick()
+    {
+        navigateTo("host/create");
+    }
 
     return (
         <div>
@@ -18,7 +22,7 @@ export default function Home()
         
         <div className="flex justify-center items-center h-screen">
             <button className="px-20" onClick={handleJoinButtonClick}>Join</button> 
-            <button className="px-20" onClick={() => console.log("Host Clicked")}>Host</button> {/*redirect to /host --Sebastian*/}
+            <button className="px-20" onClick={handleHostButtonClick}>Host</button> 
         </div>
 
         </div>
