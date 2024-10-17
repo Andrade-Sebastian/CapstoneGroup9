@@ -1,6 +1,14 @@
+import { useNavigate } from "react-router-dom";
 
 export default function Home()
 {
+    const navigateTo = useNavigate();
+
+    function handleJoinButtonClick()
+    {
+        navigateTo("join");
+    }
+
     return (
         <div>
 
@@ -9,8 +17,7 @@ export default function Home()
         </div>
         
         <div className="flex justify-center items-center h-screen">
-            <button className="px-20" onClick={() => console.log("Join Clicked")}>Join</button> {/* redirect to /join --Eman*/}
-            <p> hi brtohasfij </p>
+            <button className="px-20" onClick={handleJoinButtonClick}>Join</button> 
             <button className="px-20" onClick={() => console.log("Host Clicked")}>Host</button> {/*redirect to /host --Sebastian*/}
         </div>
 
