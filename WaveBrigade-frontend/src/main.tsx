@@ -9,6 +9,7 @@ import HostView from './Views/HostView.tsx';
 import Home from "./Views/Home.tsx"
 import JoinPage from './Views/JoinPage.tsx';
 import HostCreateRoom from './Views/HostCreateRoom.tsx';
+import HostSelectLabPage from './Views/HostSelectLabPage.tsx';
 
 const router = createBrowserRouter([
   {
@@ -22,6 +23,10 @@ const router = createBrowserRouter([
       {
         path: "host/create",
         element: <HostCreateRoom/>
+      },
+      {
+        path: "host/select-lab",
+        element: <HostSelectLabPage/>
       },
       {
         path: "host/:room",
