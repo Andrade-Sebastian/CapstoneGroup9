@@ -11,6 +11,7 @@ import JoinPage from './Views/JoinPage.tsx';
 import HostCreateRoom from './Views/HostCreateRoom.tsx';
 import HostSelectLabPage from './Views/HostSelectLabPage.tsx';
 import HostSelectMedia from './Views/SelectMedia.tsx';
+import UserWaitingRoom from './Views/UserWaitingRoom.tsx';
 
 const router = createBrowserRouter([
   {
@@ -40,6 +41,10 @@ const router = createBrowserRouter([
       {
         path: "join",
         element: <JoinPage />
+      },
+      {
+        path: "join/user-waiting-room",
+        element: <UserWaitingRoom />
       },]
   }
 ])
