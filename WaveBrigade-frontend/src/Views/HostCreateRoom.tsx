@@ -1,32 +1,38 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 // This is where the host will create the room 
 
-export default function HostCreateRoom(){
+export default function HostCreateRoom()
+{
 
-    const [name, setUsername] = useState("");
-    const [roomCode, setRoomCode] = useState("0000");
-    const [lobbyName, setLobbyName] = useState("");
+    const [experimentName, setExperimentName] = useState("");
+    const [labDescription, setLabDescription] = useState("");
+    const navigateTo = useNavigate();
+
 
     function handleSubmit(e)
     {
         e.preventDefault(); {/* For now*/}
 
-        console.log("Username: " + name)
-        console.log("Room Code: " + roomCode)
-        console.log("Lobby Name: " + lobbyName)
+        console.log("Lab Name: " + experimentName);
+        console.log("Lab Description: " + labDescription);
+        console.log("Continue Button clicked");
+        console.log("Navigating to Media");
+
+        navigateTo("/")//for now
     }
 
     return( 
        <div>
         <form onSubmit={handleSubmit}>
-            <label htmlFor="userName" > Enter your name </label>
-                <input type="text" id="userName" onChange={(e) => setUsername(e.target.value)}/> 
-            <label htmlFor="roomCode" >Enter a custom room code </label>
-                <input type="text" id="roomCode" onChange={(e) => setRoomCode(e.target.value)}/> 
-            <label htmlFor="lobbyName">Enter lobby name </label>
-                <input type="text" id="lobbyName" onChange={(e) => setLobbyName(e.target.value)}/> 
-            <input type="submit" value={"Host Lobby"}></input> {/*This will redirect to Select Lab Page */}
+            <label htmlFor="experimentName" > Enter Name of Experiment* </label>
+                <input type="text" id="experimentName" onChange={(e) => setExperimentName(e.target.value)}/> 
+
+            <label htmlFor="labDescription"> Description* </label>    
+            <input type="text" id="labDescription" onChange={(e) => setLabDescription(e.target.value)} />
+
+            <input type="submit" value={"Continue"}></input> {/*This will redirect to Media Page */}
         </form>
        </div> 
     )
