@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { Listbox, ListboxItem } from "@nextui-org/listbox";
 import {LabContainer} from "../Components/LabContainer.tsx"
+import { useNavigate } from "react-router-dom";
 
 //added routing to /host/select-lab
 //8:49 - 
@@ -11,34 +12,37 @@ import {LabContainer} from "../Components/LabContainer.tsx"
 //https://nextui.org/docs/components/listbox
 
 
-// example import React, { useState } from 'react';
-
-// function MyComponent() {
-//     const [items, setItems] = useState([]);
-  
-//     const addItem = () => {
-//       // Create a new array with the new item added
-//       setItems([...items, 'New Item']);
-//     };
-  
-//     return (
-//       <div>
-//         <ul>
-//           {items.map((item, index) => (
-//             <li key={index}>{item}</li>
-//           ))}
-//         </ul>
-//         <button onClick={addItem}>Add Item</button>
-//       </div>
-//     );
-//   }
 export default function HostSelectLabPage()
 {
+    const [experimentName, setExperimentName] = useState("");
+    const [labDescription, setLabDescription] = useState("");
+    const navigateTo = useNavigate();
+
+
     const [labs, setLabs] = useState([]); //will hold the labs 
+
+    function handleSubmit(e)
+    {
+        e.preventDefault(); {/* For now*/}
+        
+        console.log("Lab Name: " + experimentName);
+        console.log("Lab Description: " + labDescription);
+        console.log("Continue Button clicked");
+        console.log("Navigating to Media");
+    }
 
 
     return (
         <div>
+
+            <form onSubmit={handleSubmit}>
+                <label htmlFor="experimentName" > Enter Name of Experiment* </label>
+                    <input type="text" id="experimentName" onChange={(e) => setExperimentName(e.target.value)}/> 
+
+                <label htmlFor="labDescription"> Description* </label>    
+                <input type="text" id="labDescription" onChange={(e) => setLabDescription(e.target.value)} />
+            </form>
+
             <div className="flex flex-col gap-4">
                 <LabContainer>
                     <label htmlFor="labList" >Choose a Lab</label>
@@ -51,7 +55,7 @@ export default function HostSelectLabPage()
                     </Listbox>
                 </LabContainer>
             </div>
-            <button onClick={() => console.log("Host Lab Button Clicked")}>Host Lobby</button>
+            <button onClick={() => navigateTo("/host/select-media")}>Host Lobby</button>
         </div>
     )
 }

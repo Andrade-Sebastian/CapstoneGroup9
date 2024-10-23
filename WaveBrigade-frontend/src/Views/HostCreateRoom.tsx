@@ -5,9 +5,7 @@ import { useNavigate } from "react-router-dom";
 
 export default function HostCreateRoom()
 {
-
-    const [experimentName, setExperimentName] = useState("");
-    const [labDescription, setLabDescription] = useState("");
+    const [userName, setUserName] = useState("");
     const navigateTo = useNavigate();
 
 
@@ -15,23 +13,18 @@ export default function HostCreateRoom()
     {
         e.preventDefault(); {/* For now*/}
 
-        console.log("Lab Name: " + experimentName);
-        console.log("Lab Description: " + labDescription);
+        console.log("Username: " + userName);
         console.log("Continue Button clicked");
         console.log("Navigating to Media");
 
-        navigateTo("/")//for now
+        navigateTo("/host/select-lab")//for now
     }
 
     return( 
        <div>
         <form onSubmit={handleSubmit}>
-            <label htmlFor="experimentName" > Enter Name of Experiment* </label>
-                <input type="text" id="experimentName" onChange={(e) => setExperimentName(e.target.value)}/> 
-
-            <label htmlFor="labDescription"> Description* </label>    
-            <input type="text" id="labDescription" onChange={(e) => setLabDescription(e.target.value)} />
-
+            <label htmlFor="userName"> Enter your name </label>
+            <input type="text" id="userName" onChange={(e) => setUserName(e.target.value)}></input>
             <input type="submit" value={"Continue"}></input> {/*This will redirect to Media Page */}
         </form>
        </div> 
