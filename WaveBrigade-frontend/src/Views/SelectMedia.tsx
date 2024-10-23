@@ -6,7 +6,7 @@ export default function SelectMedia(){
 
     function handleCreateLobbyButtonClick()
     {
-        navigateTo("waitingRoom");
+        navigateTo("/host/host-waiting-room");
     }
 
     const [URL, setURL] = useState("")

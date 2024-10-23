@@ -10,7 +10,8 @@ import Home from "./Views/Home.tsx"
 import JoinPage from './Views/JoinPage.tsx';
 import HostCreateRoom from './Views/HostCreateRoom.tsx';
 import HostSelectLabPage from './Views/HostSelectLabPage.tsx';
-import HostSelectMedia from './Views/SelectMedia.tsx';
+import SelectMedia from './Views/SelectMedia.tsx';
+import HostWaitingRoom from './Views/HostWaitingRoom.tsx';
 import UserWaitingRoom from './Views/UserWaitingRoom.tsx';
 
 const router = createBrowserRouter([
@@ -36,7 +37,11 @@ const router = createBrowserRouter([
       },
       {
         path: "host/select-media",
-        element: <HostSelectMedia/>
+        element: <SelectMedia/>
+      },
+      {
+        path: "host/host-waiting-room",
+        element: <HostWaitingRoom />
       },
       {
         path: "join",
