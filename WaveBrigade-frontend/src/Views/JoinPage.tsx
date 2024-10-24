@@ -1,5 +1,8 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom";
+
+import { io } from 'socket.io-client';
+const socket = io("http://localhost:3001");
 
 export default function JoinPage()
 {
@@ -7,6 +10,16 @@ export default function JoinPage()
     const [roomCode, setRoomCode] = useState("")
     const navigateTo = useNavigate();
 
+    //socketio stuff 
+    const [nickNameReceived, setNickNameReceived] = useState("");
+
+    function joinRoom()
+    {
+        if (roomCode !== "")
+            {
+            socket.emit("join_room", roomCode)
+        }
+    }
     
     function handleSubmit(e: { preventDefault: () => void; }){
         e.preventDefault()

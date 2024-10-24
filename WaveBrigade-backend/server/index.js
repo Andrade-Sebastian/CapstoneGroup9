@@ -18,7 +18,15 @@ app.get('/', (req, res) => {
 
 io.on("connection", (socket) =>{
     console.log(`User Connected: ${socket.id}`);
+    socket.on("join_room", (data) => {
+        socket.join(data);
+    });
+
+    socket.on("send_name"), (data) => {
+        socket.to(data.room).emit("receive_name", data);
+    }
 });
+
 server.listen(3001, () => {
     console.log("Server is running...");
 });
