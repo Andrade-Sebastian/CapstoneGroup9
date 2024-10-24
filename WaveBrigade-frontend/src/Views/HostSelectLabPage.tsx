@@ -19,9 +19,9 @@ export default function HostSelectLabPage()
     const navigateTo = useNavigate();
 
 
-    const [labs, setLabs] = useState([]); //will hold the labs 
+    //const [labs, setLabs] = useState([]); //will hold the labs 
 
-    function handleSubmit(e)
+    function handleSubmit(e: { preventDefault: () => void; })
     {
         e.preventDefault(); {/* For now*/}
         
@@ -55,7 +55,7 @@ export default function HostSelectLabPage()
                     </Listbox>
                 </LabContainer>
             </div>
-            <button onClick={() => navigateTo("/host/select-media")}>Host Lobby</button>
+            <button onClick={() => navigateTo("/host/select-media")}>Continue</button>
         </div>
     )
 }

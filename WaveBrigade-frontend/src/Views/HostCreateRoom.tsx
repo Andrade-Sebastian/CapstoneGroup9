@@ -9,7 +9,7 @@ export default function HostCreateRoom()
     const navigateTo = useNavigate();
 
 
-    function handleSubmit(e)
+    function handleSubmit(e: { preventDefault: () => void; })
     {
         e.preventDefault(); {/* For now*/}
 
@@ -25,7 +25,7 @@ export default function HostCreateRoom()
         <form onSubmit={handleSubmit}>
             <label htmlFor="userName"> Enter your name </label>
             <input type="text" id="userName" onChange={(e) => setUserName(e.target.value)}></input>
-            <input type="submit" value={"Continue"}></input> {/*This will redirect to Media Page */}
+            <input type="submit" value={"Host Lobby"}></input> {/*This will redirect to Media Page */}
         </form>
        </div> 
     )

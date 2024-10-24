@@ -8,7 +8,7 @@ export default function JoinPage()
     const navigateTo = useNavigate();
 
     
-    function handleSubmit(e){
+    function handleSubmit(e: { preventDefault: () => void; }){
         e.preventDefault()
         console.log("Nickname:" + nickName)
         console.log("Room Code:" + roomCode)
@@ -19,10 +19,11 @@ export default function JoinPage()
         <div>
             <p>Join Page</p>
             <form onSubmit={handleSubmit}>
-                <label htmlFor="nickName"> Enter your nickname </label>
-                <input type="text" id="nickName" onChange={(e) => setNickName(e.target.value)} />
+                <label htmlFor="nickName"> Enter your nickname </label>     
+                    <input type="text" id="nickName" onChange={(e) => setNickName(e.target.value)} />
                 <label htmlFor="roomCode"> Room Code </label>
-                <input type="text" id="roomCode" onChange={(e) => setRoomCode(e.target.value)}/> 
+                    <input type="text" id="roomCode" onChange={(e) => setRoomCode(e.target.value)}/> 
+                    
                 <input type="submit" value={"Join"}/> {/*This will redirect to the waiting room */}
             </form>
         </div>
