@@ -13,6 +13,7 @@ import HostSelectLabPage from './Views/HostSelectLabPage.tsx';
 import SelectMedia from './Views/SelectMedia.tsx';
 import HostWaitingRoom from './Views/HostWaitingRoom.tsx';
 import UserWaitingRoom from './Views/UserWaitingRoom.tsx';
+import HostRoot from './Views/HostRoot.tsx';
 
 const router = createBrowserRouter([
   {
@@ -24,24 +25,29 @@ const router = createBrowserRouter([
         element: <Home />
       },
       {
-        path: "host/create",
-        element: <HostCreateRoom/>
+        path: "host",
+        element: <HostRoot/>,
+        children:[{
+          path: "host/create",
+          element: <HostCreateRoom/>
+        },
+        {
+          path: "host/select-lab",
+          element: <HostSelectLabPage/>
+        },
+        {
+          path: "host/:room",
+          element: <HostView />
+        },
+        {
+          path: "host/select-media",
+          element: <SelectMedia/>
+        },
+        {
+          path: "host/host-waiting-room",
+          element: <HostWaitingRoom/>
       },
-      {
-        path: "host/select-lab",
-        element: <HostSelectLabPage/>
-      },
-      {
-        path: "host/:room",
-        element: <HostView />
-      },
-      {
-        path: "host/select-media",
-        element: <SelectMedia/>
-      },
-      {
-        path: "host/host-waiting-room",
-        element: <HostWaitingRoom />
+    ]
       },
       {
         path: "join",
