@@ -42,16 +42,29 @@ interface auxData {
     timestamp: number;
     unknown: number;
 }
-const Headers = ['Package', 'EDA', 'Temperature', 'Thermistor', 'Timestamp', 'Unkown'].join('\t') + '\n';
-const FilePath = '/Users/haley/Capstone_2024/CapstoneGroup9/WaveBrigade-backend/anc_from_streamer.csv';
-const writeStream = fs.createWriteStream(FilePath);
-writeStream.write(Headers);
-writeStream.close();
+//function to write headers that represent the data to the csv
+function writeHeaderstoCSV(FilePath: string, Headers: string[]){
+    const headers = Headers.join('\t') + '\n';
+    const writeStream = fs.createWriteStream(FilePath);
+    writeStream.write(headers);
+    writeStream.end();
+}
+
+const ancHeaders = ['Package', 'EDA', 'Temperature', 'Thermistor', 'Timestamp', 'Unknown'];
+const ancFilePath = '/Users/haley/Capstone_2024/CapstoneGroup9/WaveBrigade-backend/anc_from_streamer.csv';
+writeHeaderstoCSV(ancFilePath, ancHeaders);
+
+const auxHeaders = ['Package', 'PPG_Red', 'PPG_Infa_Red', 'PPG_Green', 'Timestamp', 'Unknown'];
+const auxFilePath = '/Users/haley/Capstone_2024/CapstoneGroup9/WaveBrigade-backend/aux_from_streamer.csv';
+writeHeaderstoCSV(auxFilePath, auxHeaders);
 
 //const params = new BrainFlowInputParams();
 const board = new BoardShim(BoardIds.EMOTIBIT_BOARD, {});
 const board_id = BoardIds.EMOTIBIT_BOARD;
-const csv = fs.createReadStream('/Users/haley/Capstone_2024/CapstoneGroup9/WaveBrigade-backend/anc_from_streamer.csv');
+const ancCSV = fs.createReadStream(ancFilePath);
+const auxCSV = fs.createReadStream(auxFilePath);
+
+
 
 async function runExample (): Promise<void>
 {
@@ -60,7 +73,7 @@ async function runExample (): Promise<void>
     board.prepareSession();
     const presets = BoardShim.getBoardPresets(board_id);
     
-    //board.addStreamer("file://aux_from_streamer.csv:w", BrainFlowPresets.AUXILIARY_PRESET);
+    board.addStreamer("file://aux_from_streamer.csv:a", BrainFlowPresets.AUXILIARY_PRESET);
     board.addStreamer("file://anc_from_streamer.csv:a", BrainFlowPresets.ANCILLARY_PRESET);
     board.startStream();
     await sleep (3000);
@@ -78,18 +91,33 @@ async function runExample (): Promise<void>
     console.info('Data');
     console.info(data_current);
 
-    Papa.parse<ancData>(csv, {
+    Papa.parse<ancData>(ancCSV, {
         header: true,
         delimiter: '\t',
         dynamicTyping: true,
           
         complete: () => {
-            console.log("Finished parsing");
+            console.log("Finished parsing ANC data");
         },
         step: (results) => {
           console.log("Row data:", results.data);
         },
-        });
+        }
+    );
+
+    Papa.parse<auxData>(auxCSV, {
+        header: true,
+        delimiter: '\t',
+        dynamicTyping: true,
+          
+        complete: () => {
+            console.log("Finished parsing AUX data");
+        },
+        step: (results) => {
+          console.log("Row data:", results.data);
+        },
+        }
+    );
 }
 
 runExample();

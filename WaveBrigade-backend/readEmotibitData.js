@@ -43,25 +43,33 @@ function sleep(ms) {
         setTimeout(resolve, ms);
     });
 }
-const Headers = ['Package', 'EDA', 'Temperature', 'Thermistor', 'Timestamp', 'Unkown'].join('\t') + '\n';
-const FilePath = '/Users/haley/Capstone_2024/CapstoneGroup9/WaveBrigade-backend/anc_from_streamer.csv';
-const writeStream = fs.createWriteStream(FilePath);
-writeStream.write(Headers);
-writeStream.close();
+function writeHeaderstoCSV(FilePath, Headers) {
+    const headers = Headers.join('\t') + '\n';
+    const writeStream = fs.createWriteStream(FilePath);
+    writeStream.write(headers);
+    writeStream.end();
+}
+const ancHeaders = ['Package', 'EDA', 'Temperature', 'Thermistor', 'Timestamp', 'Unknown'];
+const ancFilePath = '/Users/haley/Capstone_2024/CapstoneGroup9/WaveBrigade-backend/anc_from_streamer.csv';
+writeHeaderstoCSV(ancFilePath, ancHeaders);
+const auxHeaders = ['Package', 'PPG_Red', 'PPG_Infa_Red', 'PPG_Green', 'Timestamp', 'Unknown'];
+const auxFilePath = '/Users/haley/Capstone_2024/CapstoneGroup9/WaveBrigade-backend/aux_from_streamer.csv';
+writeHeaderstoCSV(auxFilePath, auxHeaders);
 //const params = new BrainFlowInputParams();
 const board = new brainflow_1.BoardShim(brainflow_1.BoardIds.EMOTIBIT_BOARD, {});
 const board_id = brainflow_1.BoardIds.EMOTIBIT_BOARD;
-const csv = fs.createReadStream('/Users/haley/Capstone_2024/CapstoneGroup9/WaveBrigade-backend/anc_from_streamer.csv');
+const ancCSV = fs.createReadStream('/Users/haley/Capstone_2024/CapstoneGroup9/WaveBrigade-backend/anc_from_streamer.csv');
+const auxCSV = fs.createReadStream('/Users/haley/Capstone_2024/CapstoneGroup9/WaveBrigade-backend/aux_from_streamer.csv');
 function runExample() {
     return __awaiter(this, void 0, void 0, function* () {
         board.prepareSession();
         const presets = brainflow_1.BoardShim.getBoardPresets(board_id);
-        //board.addStreamer("file://aux_from_streamer.csv:w", BrainFlowPresets.AUXILIARY_PRESET);
+        board.addStreamer("file://aux_from_streamer.csv:a", brainflow_1.BrainFlowPresets.AUXILIARY_PRESET);
         board.addStreamer("file://anc_from_streamer.csv:a", brainflow_1.BrainFlowPresets.ANCILLARY_PRESET);
         board.startStream();
         yield sleep(3000);
         board.stopStream();
-        const data_current = board.getBoardData(25, brainflow_1.BrainFlowPresets.ANCILLARY_PRESET);
+        const data_current = board.getBoardData(100, brainflow_1.BrainFlowPresets.ANCILLARY_PRESET);
         //to find which channel each data is on
         //const channel_number = BoardShim.getPpgChannels(board_id, BrainFlowPresets.AUXILIARY_PRESET);
         board.releaseSession();
@@ -70,12 +78,23 @@ function runExample() {
         console.info(brainflow_1.BoardShim.getBoardDescr(brainflow_1.BoardIds.EMOTIBIT_BOARD));
         console.info('Data');
         console.info(data_current);
-        papaparse_1.default.parse(csv, {
+        papaparse_1.default.parse(ancCSV, {
             header: true,
             delimiter: '\t',
             dynamicTyping: true,
             complete: () => {
-                console.log("Finished parsing");
+                console.log("Finished parsing ANC data");
+            },
+            step: (results) => {
+                console.log("Row data:", results.data);
+            },
+        });
+        papaparse_1.default.parse(auxCSV, {
+            header: true,
+            delimiter: '\t',
+            dynamicTyping: true,
+            complete: () => {
+                console.log("Finished parsing AUX data");
             },
             step: (results) => {
                 console.log("Row data:", results.data);
