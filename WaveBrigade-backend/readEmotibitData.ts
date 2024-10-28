@@ -24,7 +24,7 @@ AUXILIARY
 [4] Timestamp
  */
 
-
+//interfaces to specify what each column header represents
 interface ancData {
     package: number;
     eda: number;
@@ -44,13 +44,13 @@ interface auxData {
 }
 //function to write headers that represent the data to the csv
 function writeHeaderstoCSV(FilePath: string, Headers: string[]){
-    const headers = Headers.join('\t') + '\n';
+    const headers = Headers.join('\t') + '\n'; //need to specify that the list is a string joined by tabs since that is the delimiter
     const writeStream = fs.createWriteStream(FilePath);
     writeStream.write(headers);
     writeStream.end();
 }
 
-const ancHeaders = ['Package', 'EDA', 'Temperature', 'Thermistor', 'Timestamp', 'Unknown'];
+const ancHeaders = ['Package', 'EDA', 'Temperature', 'Thermistor', 'Timestamp', 'Unknown']; //create a list of headers for the csv
 const ancFilePath = '/Users/haley/Capstone_2024/CapstoneGroup9/WaveBrigade-backend/anc_from_streamer.csv';
 writeHeaderstoCSV(ancFilePath, ancHeaders);
 
@@ -69,7 +69,6 @@ const auxCSV = fs.createReadStream(auxFilePath);
 async function runExample (): Promise<void>
 {
     
-    
     board.prepareSession();
     const presets = BoardShim.getBoardPresets(board_id);
     
@@ -86,10 +85,11 @@ async function runExample (): Promise<void>
     board.releaseSession();
 
     //console.info(channel_number);
-    console.info("Description");
+    //used to display info about the board and to see how the current data is stored
+    /*console.info("Description");
     console.info(BoardShim.getBoardDescr(BoardIds.EMOTIBIT_BOARD));
     console.info('Data');
-    console.info(data_current);
+    console.info(data_current);*/
 
     Papa.parse<ancData>(ancCSV, {
         header: true,
