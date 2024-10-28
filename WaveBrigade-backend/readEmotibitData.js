@@ -1,4 +1,27 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -8,39 +31,56 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const brainflow_1 = require("brainflow");
+const papaparse_1 = __importDefault(require("papaparse"));
+const fs = __importStar(require("fs"));
 function sleep(ms) {
     return new Promise((resolve) => {
         setTimeout(resolve, ms);
     });
 }
+const Headers = ['Package', 'EDA', 'Temperature', 'Thermistor', 'Timestamp', 'Unkown'].join('\t') + '\n';
+const FilePath = '/Users/haley/Capstone_2024/CapstoneGroup9/WaveBrigade-backend/anc_from_streamer.csv';
+const writeStream = fs.createWriteStream(FilePath);
+writeStream.write(Headers);
+writeStream.close();
 //const params = new BrainFlowInputParams();
 const board = new brainflow_1.BoardShim(brainflow_1.BoardIds.EMOTIBIT_BOARD, {});
 const board_id = brainflow_1.BoardIds.EMOTIBIT_BOARD;
+const csv = fs.createReadStream('/Users/haley/Capstone_2024/CapstoneGroup9/WaveBrigade-backend/anc_from_streamer.csv');
 function runExample() {
     return __awaiter(this, void 0, void 0, function* () {
         board.prepareSession();
-        // board.addStreamer("file://aux_from_streamer.csv:w", BrainFlowPresets.AUXILIARY_PRESET);
-        // board.addStreamer("file://mag_from_streamer.csv:w", BrainFlowPresets.DEFAULT_PRESET);
-        board.addStreamer("file://temp_from_streamer.csv:w", brainflow_1.BrainFlowPresets.ANCILLARY_PRESET);
+        const presets = brainflow_1.BoardShim.getBoardPresets(board_id);
+        //board.addStreamer("file://aux_from_streamer.csv:w", BrainFlowPresets.AUXILIARY_PRESET);
+        board.addStreamer("file://anc_from_streamer.csv:a", brainflow_1.BrainFlowPresets.ANCILLARY_PRESET);
         board.startStream();
         yield sleep(3000);
         board.stopStream();
-        //const data = board.getBoardData();
-        // const data_aux = board.getBoardData(100, BrainFlowPresets.AUXILIARY_PRESET);
-        //const data_eeg = BoardShim.getMagnetometerChannels(board_id, BrainFlowPresets.DEFAULT_PRESET);
-        const data_current = board.getBoardData(100, brainflow_1.BrainFlowPresets.ANCILLARY_PRESET);
-        const data_temp = brainflow_1.BoardShim.getTemperatureChannels(board_id, brainflow_1.BrainFlowPresets.ANCILLARY_PRESET);
+        const data_current = board.getBoardData(25, brainflow_1.BrainFlowPresets.ANCILLARY_PRESET);
+        //to find which channel each data is on
+        //const channel_number = BoardShim.getPpgChannels(board_id, BrainFlowPresets.AUXILIARY_PRESET);
         board.releaseSession();
-        console.info(brainflow_1.BoardShim.getDeviceName(board_id));
+        //console.info(channel_number);
         console.info("Description");
         console.info(brainflow_1.BoardShim.getBoardDescr(brainflow_1.BoardIds.EMOTIBIT_BOARD));
         console.info('Data');
-        //console.info(data);
         console.info(data_current);
-        /* const csvContent = data_aux.map(row => row.join(',')).join('\n');
-         fs.writeFileSync("aux.csv", csvContent);*/
+        papaparse_1.default.parse(csv, {
+            header: true,
+            delimiter: '\t',
+            dynamicTyping: true,
+            complete: () => {
+                console.log("Finished parsing");
+            },
+            step: (results) => {
+                console.log("Row data:", results.data);
+            },
+        });
     });
 }
 runExample();
