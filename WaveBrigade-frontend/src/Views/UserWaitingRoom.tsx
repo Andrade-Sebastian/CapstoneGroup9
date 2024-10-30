@@ -1,6 +1,7 @@
 import { useLocation } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo} from "react";
 import { io } from "socket.io-client";
+
 
 const socket = io("http://localhost:3002");
 
@@ -12,9 +13,14 @@ export default function UserWaitingRoom() {
     const [nicknames, setNickNames] = useState<string[]>([]);
 
     //use memo for rendering users 
+    const nickNameMapping = useMemo(() =>
+        nicknames.map((name, index) => ( 
+            <li key={index}> {name}</li>
+        )), [nicknames]
+    )
     // {nicknames.map((name, index) => ( 
     //     <li key={index}> {name}</li>
-    
+
     useEffect(() => {
         const userInformation = {
             nickName: nickName,
@@ -50,10 +56,7 @@ export default function UserWaitingRoom() {
             <h3> Users in the room:</h3>
             <ul>
                 {/* Array is mapped over, supposed to update when new nicknames are added */}
-                
-                {nicknames.map((name, index) => ( 
-                    <li key={index}> {name}</li>
-                ))}
+                {nickNameMapping}
             </ul>
         </div>
     );
