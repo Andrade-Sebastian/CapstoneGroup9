@@ -24,7 +24,8 @@ io.on("connection", (socket) => {
     console.log(`User Connected: ${socket.id}`); //when a new client connects to the server, it will log it
 
     //user joins a room
-    socket.on("join_room", ({ roomCode, nickName }) => { //listens for join_room event from client, expects room code and nickName
+    socket.on("join_room", (data) => { //listens for join_room event from client, expects room code and nickName
+        const {nickName, roomCode} = data;
         socket.join(roomCode);  //adds user to room
         if (!rooms[roomCode]) { //if room doesn't exist
             rooms[roomCode] = []; //create empty list for that room
@@ -37,7 +38,8 @@ io.on("connection", (socket) => {
     });
 
    //sending nickname
-    socket.on("send_name", ({ nickName, roomCode }) => { //listens for send_name event from client
+    socket.on("send_name", (data) => { //listens for send_name event from client
+        const {nickName, roomCode} = data;
         if (!rooms[roomCode]) {
             rooms[roomCode] = []; 
         }
@@ -49,14 +51,17 @@ io.on("connection", (socket) => {
         console.log(`Updated nicknames in room ${roomCode}:`, rooms[roomCode]);
     });
 
-    socket.on("join_waiting_room", ({nickName, roomCode }) => {
+    socket.on("join_waiting_room", (data) => {
         // io.to(roomCode).emit("receive_names", rooms[roomCode]);
+        const {nickName, roomCode} = data;
         console.log(nickName, roomCode);
-        socket.emit("receive_names", json.stringify(rooms[0]));
+        socket.emit("receive_names", rooms[roomCode]);
         console.log(roomCode, rooms);
         
     })
 });
+
+//Disconnect feature, two users, if one user disconnects, their name should be gone from the other user's device
 
 server.listen(3002, () => {
     console.log("Server is running on port 3002...");

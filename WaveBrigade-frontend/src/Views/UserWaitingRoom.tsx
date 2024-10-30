@@ -11,9 +11,18 @@ export default function UserWaitingRoom() {
     const { nickName, roomCode } = location.state || {};
     const [nicknames, setNickNames] = useState<string[]>([]);
 
+    //use memo for rendering users 
+    // {nicknames.map((name, index) => ( 
+    //     <li key={index}> {name}</li>
+    
     useEffect(() => {
+        const userInformation = {
+            nickName: nickName,
+            roomCode: roomCode,
+        };
+        //json object nickname roomcode (key value pair)
         console.log("Joined waiting room");
-        socket.emit("join_waiting_room", {"moe": 12345});
+        socket.emit("join_waiting_room", userInformation);
         return () => {
             socket.off("join_waiting_room");
         };
