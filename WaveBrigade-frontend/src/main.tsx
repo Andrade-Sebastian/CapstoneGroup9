@@ -28,25 +28,25 @@ const router = createBrowserRouter([
         path: "host",
         element: <HostRoot/>,
         children:[{
-          path: "host/create",
+          path: "create",
           element: <HostCreateRoom/>
         },
         {
-          path: "host/select-lab",
+          path: "select-lab",
           element: <HostSelectLabPage/>
         },
         {
-          path: "host/:room",
+          path: ":room",
           element: <HostView />
         },
         {
-          path: "host/select-media",
+          path: "select-media",
           element: <SelectMedia/>
         },
         {
-          path: "host/host-waiting-room",
+          path: "host-waiting-room",
           element: <HostWaitingRoom/>
-      },
+        },
     ]
       },
       {
