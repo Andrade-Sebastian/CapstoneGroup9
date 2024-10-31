@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { io } from 'socket.io-client';
+import {Checkbox} from "@nextui-org/react";
 
 const socket = io("http://localhost:3002");
 
@@ -37,11 +38,14 @@ export default function JoinPage() {
         };
     }, []);
 
+    // function validateRoomCode(){
+
+    // }
     function handleSubmit(e) { //form submits so the events are triggered
         e.preventDefault();
         joinRoom();
         sendNickName();
-        navigateTo("user-waiting-room", { state: { nickName, roomCode } });
+        navigateTo("/waiting-room", { state: { nickName, roomCode } });
     }
     
     return (
@@ -52,6 +56,10 @@ export default function JoinPage() {
                 <input type="text" id="nickName" onChange={(e) => setNickName(e.target.value)} />
                 <label htmlFor="roomCode"> Room Code </label>
                 <input type="text" id="roomCode" onChange={(e) => setRoomCode(e.target.value)} /> 
+                <div className="flex gap-4">
+                <Checkbox defaultSelected size="sm">Spectator</Checkbox>
+                </div>
+
                 <input type="submit" value={"Join"} />
             </form>
             <p>{nickNameReceived}</p>

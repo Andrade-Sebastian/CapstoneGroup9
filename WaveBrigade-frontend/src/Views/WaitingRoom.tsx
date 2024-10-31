@@ -5,7 +5,7 @@ import { io } from "socket.io-client";
 
 const socket = io("http://localhost:3002");
 
-export default function UserWaitingRoom() {
+export default function WaitingRoom() {
 
     //states + previous data from join page
     const location = useLocation(); //data passed when going to waiting room

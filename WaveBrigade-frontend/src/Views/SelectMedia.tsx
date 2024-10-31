@@ -1,28 +1,34 @@
 //Select Media Page (Page for importing media)
 import { useState } from "react"
 import { useNavigate } from "react-router-dom";
+import { io } from 'socket.io-client';
+
+const socket = io("http://localhost:3002");
 
 export default function SelectMedia(){
-    const navigateTo = useNavigate();
 
+    //States
     const [URL, setURL] = useState("")
     const [code, setCode] = useState("")
+    
+    const navigateTo = useNavigate();
 
+    //Create Lobby Button || When button is clicked, lobby code is generated
     function handleCreateLobbyButtonClick()
     {   const lobbyCode = generateRandomCode(6);
         setCode(lobbyCode);
         console.log("Generated Lobby Code: ", lobbyCode);
-        //navigateTo("/host/host-waiting-room");
-        navigateTo("/host/select-media") //kept so lobby code can be seen
+        navigateTo("/waiting-room") //kept so lobby code can be seen
     }
 
-    //URL Submission
+    //URL Submission || Select Media Logic
     function handleSubmit(e: { preventDefault: () => void; }){
-        e.preventDefault()
+        e.preventDefault();
+        send_generated_code();
         console.log("URL:" + URL)
     }
 
-    //generate random code
+    //generate random code || Must send code to server
     function generateRandomCode(length: number){
         const numbers = '0123456789';
         let lobbyCode = '';
@@ -31,6 +37,17 @@ export default function SelectMedia(){
         }
         return lobbyCode;
     }
+
+    //Socket IO Stuff
+    function send_generated_code() {
+        const lobbyCode = generateRandomCode(6);
+        setCode(lobbyCode);
+        console.log("Generated Lobby Code: ", lobbyCode);
+        if (lobbyCode) {
+            socket.emit("send_code", { lobbyCode }); //emits generated code event with room code
+            console.log("Room code sent", lobbyCode);
+        }
+    };
     return(
         <div>
             <p>Select Media Page</p>

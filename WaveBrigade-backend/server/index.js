@@ -37,6 +37,15 @@ io.on("connection", (socket) => {
         console.log(`User ${nickName} joined room: ${roomCode}`);
     });
 
+    socket.on("send_code", (roomCode) => {
+        console.log("code recieved!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+        socket.join(roomCode);
+        if (!rooms[roomCode]) { //if room doesn't exist
+            rooms[roomCode] = []; //create empty list for that room
+        }
+        console.log(`Room number: ${roomCode}`);
+    });
+
    //sending nickname
     socket.on("send_name", (data) => { //listens for send_name event from client
         const {nickName, roomCode} = data;
