@@ -15,9 +15,8 @@ export default function SelectMedia(){
 
     //Create Lobby Button || When button is clicked, lobby code is generated
     function handleCreateLobbyButtonClick()
-    {   const lobbyCode = generateRandomCode(6);
-        setCode(lobbyCode);
-        console.log("Generated Lobby Code: ", lobbyCode);
+    {  
+        send_generated_code();
         navigateTo("/waiting-room") //kept so lobby code can be seen
     }
 
