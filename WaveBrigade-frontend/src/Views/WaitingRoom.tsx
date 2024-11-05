@@ -9,7 +9,7 @@ export default function WaitingRoom() {
 
     //states + previous data from join page
     const location = useLocation(); //data passed when going to waiting room
-    const { nickName, roomCode } = location.state || {};
+    const { nickName, StudentInputRoomCode } = location.state || {};
     const [nicknames, setNickNames] = useState<string[]>([]);
 
     //use memo for rendering users 
@@ -21,10 +21,12 @@ export default function WaitingRoom() {
     // {nicknames.map((name, index) => ( 
     //     <li key={index}> {name}</li>
 
+
+
     useEffect(() => {
         const userInformation = {
-            nickName: nickName,
-            roomCode: roomCode,
+            nickName: nickName, 
+            roomCode: StudentInputRoomCode,
         };
         //json object nickname roomcode (key value pair)
         console.log("Joined waiting room");
@@ -51,7 +53,7 @@ export default function WaitingRoom() {
     return (
         <div>
             <h1>Waiting Room</h1>
-            <p>Room Code: {roomCode}</p>
+            <p>Room Code: {StudentInputRoomCode}</p>
             <p>Nickname: {nickName}</p>
             <h3> Users in the room:</h3>
             <ul>

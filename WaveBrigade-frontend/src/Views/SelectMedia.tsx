@@ -7,24 +7,25 @@ const socket = io("http://localhost:3002");
 
 export default function SelectMedia(){
 
+    // useLocation to retrieve information about host name 
     //States
     const [URL, setURL] = useState("")
     const [code, setCode] = useState("")
-    
     const navigateTo = useNavigate();
+    
 
     //Create Lobby Button || When button is clicked, lobby code is generated
     function handleCreateLobbyButtonClick()
     {   const lobbyCode = generateRandomCode(6);
-        setCode(lobbyCode);
         console.log("Generated Lobby Code: ", lobbyCode);
-        navigateTo("/waiting-room") //kept so lobby code can be seen
+        setCode(lobbyCode);
+        createRoom(lobbyCode);
+        //navigateTo("/waiting-room") //kept so lobby code can be seen
     }
 
     //URL Submission || Select Media Logic
     function handleSubmit(e: { preventDefault: () => void; }){
         e.preventDefault();
-        send_generated_code();
         console.log("URL:" + URL)
     }
 
@@ -38,16 +39,19 @@ export default function SelectMedia(){
         return lobbyCode;
     }
 
-    //Socket IO Stuff
-    function send_generated_code() {
-        const lobbyCode = generateRandomCode(6);
-        setCode(lobbyCode);
-        console.log("Generated Lobby Code: ", lobbyCode);
-        if (lobbyCode) {
-            socket.emit("send_code", { lobbyCode }); //emits generated code event with room code
-            console.log("Room code sent", lobbyCode);
-        }
+    //Socket IO Stuff to create room
+    function createRoom(roomCode: string) {
+        // const lobbyCode = generateRandomCode(6);
+        // setCode(lobbyCode);
+        
+        socket.emit("create_room", {roomCode}); //emits generated code event with room code 
+        console.log("Room code sent", roomCode);
+        socket.on("room_created", () => {
+            console.log("Lobby created with code:", roomCode);
+            navigateTo("/waiting-room") //include room code as part of route??
+        });
     };
+
     return(
         <div>
             <p>Select Media Page</p>
