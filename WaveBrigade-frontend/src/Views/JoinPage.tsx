@@ -1,36 +1,56 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { io } from 'socket.io-client';
-import {Checkbox} from "@nextui-org/react";
 
-const socket = io("http://localhost:3002");
+import {Checkbox} from "@nextui-org/react";
+import socket from './socket.tsx';
+
 
 export default function JoinPage() {
     //states
     const [nickName, setNickName] = useState("");
     const [StudentInputRoomCode, setStudentInputRoomCode] = useState("");
     const [nickNameReceived, setNickNameReceived] = useState("");
+    const [error, setError] = useState("");
     
     const navigateTo = useNavigate();
 
     //socketIO stuff
     function joinRoom() {
+        console.log("-------------"+ "In JOINPAGE.TSX -> joinRoom function."+"-------------")
         if (StudentInputRoomCode && nickName) { //if both are entered
-            socket.emit("join_room", { StudentInputRoomCode, nickName }); //emits join_room event with roomCode and nickName
+            socket.emit("join_room", { nickName, StudentInputRoomCode }); //emits join_room event with roomCode and nickName
             console.log("Room code sent", StudentInputRoomCode);
+            socket.on("error", (err)=>{
+                setError(err.message);
+                console.log("room does not exist1")
+            })
         }
+        console.log("-------------")
     };
 
     function sendNickName(){ // sends nickname to the server
+        console.log("-------------" +"In JOINPAGE.TSX -> sendNickName function."+"-------------")
         socket.emit("send_name", { nickName, StudentInputRoomCode });
         console.log("Name Sent:", nickName);
+        console.log("------------------------------")
     };
     
     useEffect(() => {
         socket.on("receive_names", (names) => { //listens for receive_names from server, nickNameReceieved updates when it does
+            console.log("-------------"+"IN JOIN PAGE, IN RECEIVE_NAMES: Received names: ", JSON.stringify(names) + "-------------")
             if (Array.isArray(names)) { //array of nicknames of users in the room is sent
+                console.log("Dis shit do be an array")
                 setNickNameReceived(names.join(", "));
+                console.log("sending to waiting room: ", names, " ", StudentInputRoomCode)
+                navigateTo("/waiting-room", { state: { nickName, StudentInputRoomCode } });
             }
+            else if (names && names.users){
+                console.log("Hooooraaaaaay its hitting else if!")
+            }
+            else{
+                console.log("Dis shit aint an array")
+            }
+            console.log("-------------------------")
         });
 
         return () => {
@@ -43,11 +63,10 @@ export default function JoinPage() {
         
     // }
 
-    function handleSubmit(e) { //form submits so the events are triggered
+    function handleSubmit(e: { preventDefault: () => void; }) { //form submits so the events are triggered
         e.preventDefault();
         joinRoom();
         sendNickName();
-        navigateTo("/waiting-room", { state: { nickName, StudentInputRoomCode } });
     }
     
     return (
@@ -61,7 +80,6 @@ export default function JoinPage() {
                 <div className="flex gap-4">
                 <Checkbox defaultSelected size="sm">Spectator</Checkbox>
                 </div>
-
                 <input type="submit" value={"Join"} />
             </form>
             <p>{nickNameReceived}</p>

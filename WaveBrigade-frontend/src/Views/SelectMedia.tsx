@@ -41,15 +41,17 @@ export default function SelectMedia(){
 
     //Socket IO Stuff to create room
     function createRoom(roomCode: string) {
-        // const lobbyCode = generateRandomCode(6);
-        // setCode(lobbyCode);
-        
         socket.emit("create_room", {roomCode}); //emits generated code event with room code 
         console.log("Room code sent", roomCode);
+        //add a parameter?
         socket.on("room_created", () => {
-            console.log("Lobby created with code:", roomCode);
-            navigateTo("/waiting-room") //include room code as part of route??
+            console.log("Lobby created with code:", JSON.stringify(roomCode));
+            navigateTo("/waiting-room", {state: {roomCode}}); //include room code as part of route??
         });
+        socket.on("error", (err)=> {
+            console.error(err.message);
+            console.log("Creation of room error hit...")
+        })
     };
 
     return(
