@@ -2,7 +2,7 @@
 
 //--------------------------------------------------------------
 void ofApp::setup(){
-
+    emotiBitWiFi.begin();
 }
 
 //--------------------------------------------------------------
@@ -79,3 +79,27 @@ void ofApp::gotMessage(ofMessage msg){
 void ofApp::dragEvent(ofDragInfo dragInfo){ 
 
 }
+
+void ofApp::discoverEmotiBits(){
+    auto discoveredEmotibits = emotiBitWiFi.getdiscoveredEmotibits();
+        for (auto it = discoveredEmotibits.begin(); it != discoveredEmotibits.end(); it++)
+        {
+            string deviceId = it->first;
+            bool available = it->second.isAvailable;
+            bool found = false;
+            
+            for (auto device = deviceList.begin(); device != deviceList.end(); device++)
+            {
+                if (*device == deviceId)
+                {
+                    found = true;
+                    break;
+                }
+            }
+            if(!found){
+                deviceList.push_back(deviceId);
+                found = true;
+            }
+        }
+}
+

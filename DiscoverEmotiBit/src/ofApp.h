@@ -24,6 +24,8 @@ class ofApp : public ofBaseApp{
 		void dragEvent(ofDragInfo dragInfo) override;
 		void gotMessage(ofMessage msg) override;
     
-    EmotiBitWiFiHost emotiBitWifi;
+        EmotiBitWiFiHost emotiBitWiFi;
+        void discoverEmotiBits();
+        vector<string> deviceList;
 		
 };
