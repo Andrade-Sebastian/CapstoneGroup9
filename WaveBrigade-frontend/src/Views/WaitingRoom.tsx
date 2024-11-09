@@ -12,7 +12,9 @@ export default function WaitingRoom() {
     console.log("@Waiting room | location.state:", JSON.stringify(location.state));
 
     const { nickName, roomCode } = location.state || {};
+    console.log("(WAITING ROOM) nickName: " + nickName + "roomCode: " + roomCode)
     const [nicknames, setNickNames] = useState<string[]>([]);
+
 
     //use memo for rendering users 
     const nickNameMapping = useMemo(() =>
@@ -30,11 +32,15 @@ export default function WaitingRoom() {
 
         const userInformation = {
             nickName: nickName, 
-            StudentInputRoomCode: roomCode,
+            roomCode: roomCode
         };
+        
+        console.log("Student name" + nickName)
+        console.log("Room codeeeeeeeeeeeeeeeeeeeeeee: " + roomCode)
         //json object nickname roomcode (key value pair)
         console.log("-------------" + "In WAITINGROOM.TSX -> First useEffect." + "-------------")
         console.log("Emitting join_waiting_room event with: ", JSON.stringify(userInformation));
+        
         socket.emit("join_waiting_room", userInformation);
         console.log("done sending" + userInformation)
         

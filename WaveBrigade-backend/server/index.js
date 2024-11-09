@@ -6,7 +6,6 @@ const { Server } = require("socket.io");
 const cors = require("cors");
 
 
-
 app.use(cors());
 
 //cors setup
@@ -17,7 +16,6 @@ const io = new Server(server, {
     },
 });
 
-// const nicknames = {};
 const rooms = {}; //stores nickname per room
 let isHost = true;
 let roomObject = {
@@ -28,12 +26,13 @@ let roomObject = {
     hostSocketID: undefined,
     discoveredEmotiBits: []
 };
+
 //UID library, to generate user IDs
 const userObject = {
     nickName: undefined,
     socketID: undefined,
     userID: undefined,
-    associatedEmotiBit:{
+    associatedEmotiBit: {
         serialNumber: undefined,
         IPAddress: undefined,
     }
@@ -48,46 +47,46 @@ const emotiBitObject = {
 io.on("connection", (socket) => {
     console.log(`User Connected: ${socket.id}`); //when a new client connects to the server, it will log it
     
-    //From Host Select Media Page
-    socket.on("create_room", (data) => { //listens for send_code event from SelectMedia Page
-        //Have generated code here
+    //listens for send_code event from HostSelectMedia Page
+    socket.on("create_room", (data) => {
+        //TODO: Have generated code here(Check google docs)
+
         isHost = true;
         const {roomCode} = data;
+
         console.log("====================================NEW SESSION STARTED HERE==========================================================")
-        console.log("------------ \n" + "In INDEX.JS -> create_room event." + "-------------")
-        console.log("Data received from client:", data);
-        console.log("Extracted roomCode:", roomCode);
-        console.log("code recieved!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+        console.log("------------" + "In INDEX.JS -> create_room event." + "-------------")
+        console.log("Data received from client: ", data);
+        console.log("roomCode recieved: ", roomCode);
+
         if(isHost){
-            //this code is not running
-        if (!rooms[roomCode]) { //if room doesn't exist
-            rooms[roomCode] = {
-                users: [],
-            }; //create empty list for that room
-            socket.join(roomCode);
-            socket.emit("room_created", {roomCode});
-        }
-        else{
-            socket.emit("error", { message: "Room already exists."});
-            console.log("Room exists");
-        }
+            
+            if (!rooms[roomCode]) { //if room doesn't exist
+                rooms[roomCode] = {
+                    users: [], //create empty list for that room
+                }; 
+                socket.join(roomCode);
+                socket.emit("room_created", {roomCode});
+            }
+            else{
+                socket.emit("error", { message: "Room already exists."});
+            }
 
-        console.log(`Room number: ${roomCode}`);
-        console.log("-------------")
-
+            console.log("------END CREATE ROOM EVENT-------")
         }
-});
+    });
 
     //user joins a room || From join page
-    socket.on("join_room", (data) => { //listens for join_room event from client, expects room code and nickName
-        //this does hit
-        console.log("-------------"+"In INDEX.JS -> join_room event." + "-------------")
+    socket.on("join_room", (data) => { //listens for join_room event from a Student ONLY, expects room code and nickName
+
         const {nickName, StudentInputRoomCode} = data;
         var isValidRoomCode = StudentInputRoomCode in rooms;
         var nameIsDuplicate = isValidRoomCode && nickName in rooms[StudentInputRoomCode].users
-        console.log("Receievd room code: " + StudentInputRoomCode)
-        console.log("isValidRoomCode " + isValidRoomCode)
-        console.log("nameIsDupe: " + nameIsDuplicate)
+
+        console.log("-------------"+"In INDEX.JS -> join_room event." + "-------------")
+        console.log("Received room code from Student: " + StudentInputRoomCode)
+        console.log("Is it a valid room code? " + isValidRoomCode)
+        console.log("Is the name a duplicate?  " + nameIsDuplicate)
         
         
         //Checking if room exists, if it does already, send error
@@ -95,9 +94,9 @@ io.on("connection", (socket) => {
         {
             socket.join(StudentInputRoomCode); //adds user to room
 
-            
             if (!nameIsDuplicate) 
-            { //prevents duplicate nicknames
+            {   
+                //prevents duplicate nicknames
                 rooms[StudentInputRoomCode].users.push(nickName);
                 io.to(StudentInputRoomCode).emit("receive_names", rooms[StudentInputRoomCode].users); //should broadcast the updated list of names to everyone in the room
                 
@@ -106,50 +105,35 @@ io.on("connection", (socket) => {
             }
             
         }
-        else if (!isValidRoomCode) //room code is not valid
+        else if (!isValidRoomCode) //if the room code is not valid
         {
             socket.emit("error", {message: "Room does not exist."});
             console.log("ERROR: Room doesn't exist")
+
             return;
         }
 
-        ////////////////////////////////////////////////////////////
-        // if (!rooms[StudentInputRoomCode]){
-        //     socket.emit("error", {message: "Room does not exist."});
-        //     console.log("ERROR: Room doesn't exist")
-        //     return;
-        // }
-        // else{
-        //     socket.join(StudentInputRoomCode);  //adds user to room
-        //     if (!rooms[StudentInputRoomCode].users.includes(nickName)) { //prevents duplicate nicknames
-        //         rooms[StudentInputRoomCode].users.push(nickName);
-        //     }
-        //     io.to(StudentInputRoomCode).emit("receive_names", rooms[StudentInputRoomCode].users); //should broadcast the updated list of names to everyone in the room
-        //     console.log(`User ${nickName} joined room: ${StudentInputRoomCode}`);
-        // }
-        console.log("-------------")
+        console.log("------END OF JOIN ROOM EVENT-------")
     });
 
-   //sending nickname || From Join Page
+    //sending nickname || From Join Page
     socket.on("send_name", (data) => { //listens for send_name event from client
         const {nickName, StudentInputRoomCode} = data;
         var isValidRoomCode = StudentInputRoomCode in rooms;
         var nameIsDuplicate = isValidRoomCode && nickName in rooms[StudentInputRoomCode].users
 
         console.log("-------------" + "In INDEX.JS -> send_name event." + "-------------")
-        if (!isValidRoomCode) {
+        if (!isValidRoomCode) 
+        {
             rooms[StudentInputRoomCode] = {users: []}; 
         }
-        if (!nameIsDuplicate && isValidRoomCode) {
-            // rooms[StudentInputRoomCode].users.push(nickName);
-            console.log("send_name event to emit receieve names hit")
+        if (!nameIsDuplicate && isValidRoomCode) 
+        {
             io.to(StudentInputRoomCode).emit("receive_names", rooms[StudentInputRoomCode].users);
-            
-            
-        
+
             // console.log(`Updated nicknames in room ${StudentInputRoomCode}:`, rooms[StudentInputRoomCode]);
         }
-        console.log("-------------")
+        console.log("-------END OF SEND_NAME EVENT------")
         
     });
 
@@ -163,31 +147,24 @@ io.on("connection", (socket) => {
         console.log("nickname: "+ nickName)
         console.log("All Rooms: " + JSON.stringify(rooms, null, 2))
         console.log("StudentInputRoomCode: " + StudentInputRoomCode )
-        console.log("Join_waiting_room @ index.js | Valid room code? " +isValidRoomCode);
+        console.log("Valid room code? " +isValidRoomCode);
 
-        if(!isHost){
-            if(isValidRoomCode){
-                // if(!rooms[roomCode].users.includes(nickName)){
-                //     //rooms[roomCode].users.push(nickName);
-                // }
-                
-                io.to(StudentInputRoomCode).emit("receive_names", rooms[StudentInputRoomCode].users);
-                console.log("users in room: " + rooms[StudentInputRoomCode].users)
-                //console.log(`Updated nicknames in room ${StudentInputRoomCode}:`, rooms[StudentInputRoomCode].users);
-            }
-            else{
-                socket.emit("error",{message:"Room doesn't exist."});
-            }
+        
+        if(isValidRoomCode)
+        {
+            io.to(StudentInputRoomCode).emit("receive_names", rooms[StudentInputRoomCode].users);
+            console.log("users in room: " + rooms[StudentInputRoomCode].users)
         }
-        isHost = false;
-        // console.log(nickName, roomCode);
-        // socket.emit("receive_names", rooms[roomCode]);
-        // console.log(roomCode, rooms);
-        console.log("-------------")
+        else
+        {
+            socket.emit("error",{message:"Room doesn't exist."});
+        }
+        
+        console.log("------END OF JOIN_WAITING_ROOM EVENT-------")
     })
 });
 
-//Disconnect feature, two users, if one user disconnects, their name should be gone from the other user's device
+//TODO: Disconnect feature, two users, if one user disconnects, their name should be gone from the other user's device
 
 server.listen(3002, () => {
     console.log("Server is running on port 3002...");

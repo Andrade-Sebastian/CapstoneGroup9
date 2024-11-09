@@ -20,7 +20,7 @@ export default function HostCreateRoom()
         console.log("Continue Button clicked");
         console.log("Navigating to Media");
 
-        navigateTo("/host/select-lab")//for now
+        navigateTo("/host/select-lab", {state: {userName}})//for now
     }
 
     console.log("Is the password selected? " + passwordIsSelected);
@@ -37,7 +37,7 @@ export default function HostCreateRoom()
             </form>
             <div className="flex gap-4" >
                 <Checkbox size="sm" color="primary" onValueChange={() => setPasswordIsSelected(!passwordIsSelected)}>Use Password</Checkbox>
-                {passwordIsSelected ? <div><label htmlFor="Password">Password</label><input id="Password" type="text" >Password</input></div> : null}
+                {passwordIsSelected ? <div><label htmlFor="Password">Password</label><input id="Password" type="text" ></input></div> : null}
                 <Checkbox size="sm" color="primary" onValueChange={() => setAllowSpectators(!allowSpectators)}>Allow Spectators</Checkbox>
             </div> 
        </div>

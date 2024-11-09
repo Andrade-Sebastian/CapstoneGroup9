@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 
+
 export default function Home()
 {
     const navigateTo = useNavigate();
@@ -8,6 +9,7 @@ export default function Home()
     {
         navigateTo("join");
     }
+
     function handleHostButtonClick()
     {
         navigateTo("host/create");
@@ -15,16 +17,14 @@ export default function Home()
 
     return (
         <div>
-
-        <div className="justify-center">
-            <p>Welcome to Wavebrigade!</p>
-        </div>
-        
-        <div className="flex justify-center items-center h-screen">
-            <button className="px-20" onClick={handleHostButtonClick}>Host</button> 
-            <button className="px-20" onClick={handleJoinButtonClick}>Join</button> 
-        </div>
-
+            <div className="justify-center">
+                <p>Welcome to Wavebrigade!</p>
+            </div>
+            
+            <div className="flex justify-center items-center h-screen">
+                <button className="px-20" onClick={handleHostButtonClick}>Host</button> 
+                <button className="px-20" onClick={handleJoinButtonClick}>Join</button> 
+            </div>
         </div>
     )
 }

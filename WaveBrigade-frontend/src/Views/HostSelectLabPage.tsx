@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Listbox, ListboxItem } from "@nextui-org/listbox";
 import {LabContainer} from "../Components/LabContainer.tsx"
 import { useNavigate } from "react-router-dom";
-
+import { useLocation } from "react-router-dom";
 //added routing to /host/select-lab
 //8:49 - 
 //created HostSelectlabPage
@@ -11,9 +11,14 @@ import { useNavigate } from "react-router-dom";
 //Use a listbox from nextUI
 //https://nextui.org/docs/components/listbox
 
-
+//    const { nickName, roomCode } = location.state || {};
 export default function HostSelectLabPage()
 {
+    const location = useLocation()
+    console.log("@HOST SELECT LAB | location.state:", JSON.stringify(location.state));
+
+    const {userName} = location.state
+    console.log("HOSTSELECTLAB userName: " + userName)
     const [experimentName, setExperimentName] = useState("");
     const [labDescription, setLabDescription] = useState("");
     const navigateTo = useNavigate();
@@ -55,9 +60,9 @@ export default function HostSelectLabPage()
                     </Listbox>
                 </LabContainer>
             </div>
-            <button onClick={() => navigateTo("/host/select-media")}>Continue</button>
+            <button onClick={() => navigateTo("/host/select-media", {state: {userName}})}>Continue</button>
         </div>
-    )
+    );
 }
 
 

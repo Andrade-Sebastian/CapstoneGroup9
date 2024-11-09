@@ -1,17 +1,24 @@
 //Select Media Page (Page for importing media)
 import { useState } from "react"
 import { useNavigate } from "react-router-dom";
-import { io } from 'socket.io-client';
+import { useLocation } from "react-router-dom";
 
-const socket = io("http://localhost:3002");
+import socket from './socket.tsx';
 
 export default function SelectMedia(){
 
     // useLocation to retrieve information about host name 
     //States
+    const location = useLocation()
+    console.log("@SELECT MEDIA | location.state:", JSON.stringify(location.state));
+
+    const {userName} = location.state || {}
+    console.log("SELECTMEDIA userName: "  + userName)
+
     const [URL, setURL] = useState("")
     const [code, setCode] = useState("")
     const navigateTo = useNavigate();
+
     
 
     //Create Lobby Button || When button is clicked, lobby code is generated
@@ -29,7 +36,7 @@ export default function SelectMedia(){
         console.log("URL:" + URL)
     }
 
-    //generate random code || Must send code to server
+    //generate random code || Must send code to server || Note:  generate in backend, not here
     function generateRandomCode(length: number){
         const numbers = '0123456789';
         let lobbyCode = '';
@@ -46,7 +53,7 @@ export default function SelectMedia(){
         //add a parameter?
         socket.on("room_created", () => {
             console.log("Lobby created with code:", JSON.stringify(roomCode));
-            navigateTo("/waiting-room", {state: {roomCode}}); //include room code as part of route??
+            navigateTo("/waiting-room", {state: {nickName: userName, roomCode}}); //include room code as part of route??
         });
         socket.on("error", (err)=> {
             console.error(err.message);
