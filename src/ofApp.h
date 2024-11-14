@@ -4,6 +4,11 @@
 #include "EmotiBitWiFiHost.h"
 
 class ofApp : public ofBaseApp{
+    
+    struct foundDevice{
+        string deviceID;
+        string deviceIP;
+    };
 
 	public:
 		void setup() override;
@@ -26,6 +31,6 @@ class ofApp : public ofBaseApp{
 		
 		EmotiBitWiFiHost emotiBitWiFi;
         void discoverEmotiBits();
-        vector<string> deviceList;
+        vector<foundDevice> deviceList;
 
 };

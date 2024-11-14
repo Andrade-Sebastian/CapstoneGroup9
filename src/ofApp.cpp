@@ -87,23 +87,27 @@ void ofApp::discoverEmotiBits(){
             string deviceId = it->first;
             bool available = it->second.isAvailable;
             bool found = false;
+            string ip = discoveredEmotibits[deviceId].ip;
             
-        for (auto device = deviceList.begin(); device != deviceList.end(); device++)
+            for (auto &device : deviceList)
             {
-                if (*device == deviceId)
+                if (device.deviceID == deviceId)
                 {
                     cout << "device already found" << endl;
-                    cout << "device found: " << *device << endl;
+                    cout << "device found: " << device.deviceID << " ip: " << device.deviceIP << endl;
                     found = true;
                     break;
                 }
             }
             
             if(!found){
-                deviceList.push_back(deviceId);
+                foundDevice newDevice;
+                newDevice.deviceID = deviceId;
+                newDevice.deviceIP = ip;
+                deviceList.push_back(newDevice);
                 found = true;
                 cout << "new device added" << endl;
-                cout << "device added: " << deviceId << endl;
+                cout << "device added: " << newDevice.deviceID << " ip: " << newDevice.deviceIP << endl;
             }
         }
 }
