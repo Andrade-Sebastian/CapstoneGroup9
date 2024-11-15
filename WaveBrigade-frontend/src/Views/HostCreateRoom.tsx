@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Checkbox } from "@nextui-org/react";
+import React from "react";
+import axios from "axios";
 
 // This is where the host will create the room 
 
@@ -10,17 +12,55 @@ export default function HostCreateRoom()
     const navigateTo = useNavigate();
     const [passwordIsSelected, setPasswordIsSelected] = useState(false);
     const [allowSpectators, setAllowSpectators] = useState(false);
+    const [password, setPassword] = useState('');//store this in backend!!
+
+    //hardcoded to test host/session/create
+    const [sessionInfo, setSessionInfo] = useState({
+        sessionName: "",
+        selectedExperimentId: "17", //(ideally this would be undefined)
+        credentials: {
+            passwordEnabled: false,
+            password: password
+        },
+        allowSpectators: true
+    });
+
+
+    const testSessionInfo= {
+            "sessionName": "Awesome", "selectedExperimentId": "17", "allowSpectators": true, "credentials": {
+            "passwordEnabled": false, "password": ""}};
+
+
+
 
 
     function handleSubmit(e: { preventDefault: () => void; })
     {
         e.preventDefault(); {/* For now*/}
+        //this is not setting the values
+        setSessionInfo({
+            sessionName: "Awesome", // FUTURE
+            selectedExperimentId: "17", // (ideally this would be undefined)
+            credentials: {
+                passwordEnabled: passwordIsSelected,
+                password: password
+            },
+            allowSpectators: allowSpectators,
+        });
+
+        console.log("sessionInfo: " + JSON.stringify(sessionInfo));
+
+        axios.post("http://localhost:3000/host/session/create", sessionInfo).then(response => {
+            console.log(response.data.configuration);
+        })
+
 
         console.log("Username: " + userName);
         console.log("Continue Button clicked");
         console.log("Navigating to Media");
 
         navigateTo("/host/select-lab", {state: {userName}})//for now
+
     }
 
     console.log("Is the password selected? " + passwordIsSelected);
@@ -37,7 +77,7 @@ export default function HostCreateRoom()
             </form>
             <div className="flex gap-4" >
                 <Checkbox size="sm" color="primary" onValueChange={() => setPasswordIsSelected(!passwordIsSelected)}>Use Password</Checkbox>
-                {passwordIsSelected ? <div><label htmlFor="Password">Password</label><input id="Password" type="text" ></input></div> : null}
+                {passwordIsSelected ? <div><label htmlFor="Password">Password</label><input id="Password" type="text" onChange={(e)=> setPassword(e.target.value)}></input></div> : null}
                 <Checkbox size="sm" color="primary" onValueChange={() => setAllowSpectators(!allowSpectators)}>Allow Spectators</Checkbox>
             </div> 
        </div>

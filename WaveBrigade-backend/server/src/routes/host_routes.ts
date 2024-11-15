@@ -5,20 +5,15 @@ const hostRouter = express.Router();
 hostRouter.use(express.json());
 
 /*
-INPUT:
+What will be sent:
 {
-    "sessionName": "SessionSAUCE",
-    "selectedExperimentId": "selectedExperimentId",
-    "credentials": {
-        "passwordEnabled": false,
-        "password": "password"
-    },
-    "hostSocketId": "123",
-
-    "allowSpectators": false
+    "sessionName": "Awesome", "selectedExperimentId": "17", "allowSpectators": true, "credentials": {
+        "passwordEnabled": false, "password": ""
+    }
 }
 
-OUTPUT:
+
+What you receive:
 {
     "sessionId": "f0c79422",
     "sessionName": "Awesome",
@@ -41,7 +36,7 @@ OUTPUT:
 
 
 hostRouter.post("/session/create", (req: Request, res: Response) => {
-
+    console.log("At /session/create | recieved: " + JSON.stringify(req.body));
     const hostSocketId: string = req.body.hostSocketId;
 
     try {

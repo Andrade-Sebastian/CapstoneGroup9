@@ -12,6 +12,7 @@
   "dependencies": {
     "@nextui-org/listbox": "^2.1.27",
     "@nextui-org/react": "^2.4.8",
+    "axios": "^1.7.7",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.27.0",
