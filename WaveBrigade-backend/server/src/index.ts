@@ -10,8 +10,8 @@ import cors from "cors";
 app.use(cors());
 const io = new Server(server, {
     cors: {
-        origin: "http://localhost:5173", //this is for frontend
-        methods: ["GET", "POST"], //this allows get and post to be used
+        origin: "*", //this is for frontend
+        //methods: ["GET", "POST"], //this allows get and post to be used
     },
 });
 
@@ -20,12 +20,11 @@ const io = new Server(server, {
 //     res.send('Hello, TypeScript Express!');
 // });
 
-app.get('/', (req, res) => {
+app.get('/', (req: Request, res: Response) => {
   res.sendFile(__dirname + '/index.html');
 });
 
 
-
 server.listen(3000, () => {
-  console.log('TYPESCRIPT listening on *:3000');
+  console.log('TYPESCRIPT listening on http://localhost:3000');
 });

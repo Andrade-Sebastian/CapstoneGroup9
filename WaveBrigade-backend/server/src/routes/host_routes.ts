@@ -37,6 +37,7 @@ What you receive:
 
 hostRouter.post("/session/create", (req: Request, res: Response) => {
     console.log("At /session/create | recieved: " + JSON.stringify(req.body));
+    
     const hostSocketId: string = req.body.hostSocketId;
 
     try {
@@ -64,6 +65,9 @@ hostRouter.post("/session/create", (req: Request, res: Response) => {
     }
 })
 
+
+
+
 hostRouter.post("/session/:sessionId/device_registration", (req: Request, res: Response) => {
     const session = req.params.sessionId;
     const devices: Array<IDevice> = req.body.selectedDevices;
@@ -84,6 +88,10 @@ hostRouter.post("/session/:sessionId/device_registration", (req: Request, res: R
         }
     }
 })
+
+
+
+
 
 hostRouter.get("/session/:sessionId", (req: Request, res: Response) => {
     const session = req.params.sessionId;
