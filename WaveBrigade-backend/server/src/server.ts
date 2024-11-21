@@ -1,8 +1,9 @@
 import http from "node:http"
 import express from "npm:express";
-import {Server} from "npm:socket.io";
 import {ISession} from "./controllers/session_controller.ts";
 import hostRouter from "./routes/host_routes.ts";
+import {Server, type Socket} from "npm:socket.io@4.8.1";
+import {CLIENT_SOCKET_ASSIGNMENT} from "./events.ts";
 
 const app = express();
 const server = http.createServer(app);
@@ -32,6 +33,8 @@ const io = new Server(server, {
 const currentSessions: { [key: string]: ISession } = {}
 
 app.use('/host', hostRouter)
+
+const sessionNamespace = io.of("/session");
 
 server.listen(3000, () => {
     console.log('express running at http://localhost:3000 -> server.ts');
