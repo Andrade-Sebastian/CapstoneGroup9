@@ -50,7 +50,11 @@ export default function HostCreateRoom()
 
         console.log("sessionInfo: " + JSON.stringify(sessionInfo));
 
-        axios.post("http://localhost:3000/host/session/create", sessionInfo).then(response => {
+        axios.post("http://localhost:3000/host/session/create", {
+            "sessionName": "Awesome", "selectedExperimentId": "17", "allowSpectators": true, "credentials": {
+                "passwordEnabled": false, "password": ""
+            }
+        }).then(response => {
             console.log(response.data.configuration);
         })
 

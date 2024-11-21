@@ -1,6 +1,6 @@
-import express, { type Request, type Response } from "npm:express";
+import express, { Request, Response } from "express";
 import {addDiscoveredDevice, getSessionState, IDevice, createSession} from "../controllers/session_controller.ts";
-
+const app = express();
 const hostRouter = express.Router();
 hostRouter.use(express.json());
 

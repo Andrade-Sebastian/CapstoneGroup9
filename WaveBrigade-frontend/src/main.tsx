@@ -13,6 +13,9 @@ import HostSelectLabPage from './Views/HostSelectLabPage.tsx';
 import SelectMedia from './Views/SelectMedia.tsx';
 import HostRoot from './Views/HostRoot.tsx';
 import WaitingRoom from './Views/WaitingRoom.tsx';
+import React from 'react';
+import PreviouslyMadeExperiments from './Views/PreviouslyMadeExperiments.tsx';
+
 
 const router = createBrowserRouter([
   {
@@ -23,6 +26,7 @@ const router = createBrowserRouter([
         index: true, 
         element: <Home />
       },
+      
       {
         path: "host",
         element: <HostRoot/>,
@@ -45,13 +49,25 @@ const router = createBrowserRouter([
     ]
       },
       {
+        path: "createLab",
+        element: <PreviouslyMadeExperiments />,
+        children: [{
+              path: "select-la",
+              element: <HostSelectLabPage /> 
+        }]
+        
+      },
+      {
         path: "join",
         element: <JoinPage />
       },
       {
         path: "waiting-room",
         element: <WaitingRoom />
-      },]
+      },
+    
+  ]
+      
   }
 ])
 
