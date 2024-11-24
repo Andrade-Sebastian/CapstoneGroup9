@@ -59,7 +59,16 @@ export default function WaitingRoom() {
 
             if (Array.isArray(names)) { 
                 console.log("Nicknames received:", names);
-                setNickNames(names); 
+                setNickNames(prevState => {
+                    const uniqueNames: string[] = [];
+                    prevState.forEach((name, i) => {
+                        if(name !== names[i]){
+                            uniqueNames.push(name);
+                        }
+
+                    })
+                    return [...prevState, ...uniqueNames]
+                }); 
             }
             else{
                 console.error("Did not receive an array of names, only received: ", names)

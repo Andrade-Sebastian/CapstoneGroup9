@@ -16,6 +16,11 @@ export default function Home()
         navigateTo("host/create");
     }
 
+    function handleLabButtonClick()
+    {
+        navigateTo("create-lab");
+    }
+
     return (
         <div>
             <div className="justify-center">
@@ -26,7 +31,8 @@ export default function Home()
                 <button className="px-20" onClick={handleHostButtonClick}>Host</button> 
                 <button className="px-20" onClick={handleJoinButtonClick}>Join</button> 
                 {/* replace google.com with the link to the next page on Figma */}
-                <p>Educator: <a href="createLab">Create New Experiment</a></p>
+                <button className="px-20" onClick={handleLabButtonClick}> Create New Experiment </button>
+                {/* <p>Educator: <a href="create-lab">Create New Experiment</a></p> */}
             </div>
             
         </div>

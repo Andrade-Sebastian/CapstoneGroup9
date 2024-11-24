@@ -16,6 +16,10 @@ export default function JoinPage() {
     
     const navigateTo = useNavigate();
     
+    // const useMemo(() => {
+
+    // })
+
     useEffect(() => {
         socket.on("receive_names", (names) => {
             if (Array.isArray(names)) {
@@ -52,18 +56,13 @@ export default function JoinPage() {
         console.log("-------------"+ "In JOINPAGE.TSX -> joinRoom function."+"-------------")
         if (StudentInputRoomCode && nickName) { //if both are entered
             if (!isJoining) {
-                setIsJoining(true); // Prevent further clicks while waiting for server response
-                
-                // Emit the join_room event to the server
+                setIsJoining(true); 
                 socket.emit("join_room", { nickName, StudentInputRoomCode });
-                
                 console.log("Room code sent", StudentInputRoomCode);
-                // After emitting, wait for response (assuming success/error handling via socket)
                 socket.on("error", (error) => {
                     console.error(error.message);
                     setIsJoining(false); // Allow retry if an error occurs
                 });
-                
                 socket.on("receive_names", (names) => {
                     console.log("Names received", names);
                     setIsJoining(false); // Join successful, reset flag

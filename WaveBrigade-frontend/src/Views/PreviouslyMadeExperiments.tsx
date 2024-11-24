@@ -1,5 +1,5 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, } from "react-router-dom";
 
 export default function PreviouslyMadeExperiments(){
     const navigateTo = useNavigate()
@@ -30,10 +30,9 @@ export default function PreviouslyMadeExperiments(){
             
             <h2 style={{textAlign: "center"}}> Create an Experiment</h2>
             <div style={{display: "flex", justifyContent: "center", }}>
-                <button style={{backgroundColor: "blue"}} onClick={() => navigateTo("/createLab/select-lab")}>Create Experiment</button>
+                <button style={{backgroundColor: "blue"}} onClick={() => navigateTo("/create-lab/select-lab", { state: { userName: "defaultUser" }})}>Create Experiment</button>
             </div>
         </div>
-
 
 
     </>

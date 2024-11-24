@@ -13,8 +13,8 @@ import HostSelectLabPage from './Views/HostSelectLabPage.tsx';
 import SelectMedia from './Views/SelectMedia.tsx';
 import HostRoot from './Views/HostRoot.tsx';
 import WaitingRoom from './Views/WaitingRoom.tsx';
-import React from 'react';
 import PreviouslyMadeExperiments from './Views/PreviouslyMadeExperiments.tsx';
+import ExperimentCreaterRoot from './Views/ExperimentCreaterRoot.tsx';
 
 
 const router = createBrowserRouter([
@@ -49,13 +49,17 @@ const router = createBrowserRouter([
     ]
       },
       {
-        path: "createLab",
-        element: <PreviouslyMadeExperiments />,
+        path: "create-lab",
+        element: <ExperimentCreaterRoot />,
         children: [{
-              path: "select-la",
+              path: "select-lab",
               element: <HostSelectLabPage /> 
+        },
+        {
+          index: true,
+          element: <PreviouslyMadeExperiments />
         }]
-        
+          
       },
       {
         path: "join",
