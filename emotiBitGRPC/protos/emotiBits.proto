@@ -1,0 +1,22 @@
+syntax = "proto3";
+package emotiBits;
+
+service findDevices{
+    rpc getDevices(stream Device) returns (stream DeviceList);
+    rpc foundDevices(DeviceRequest) returns (stream Device);
+}
+
+message Device {
+    string serial = 1;
+    string ip = 2;
+}
+
+message DeviceRequest{
+    string sessionName = 1;
+}
+
+message DeviceList{
+    repeated Device allDevices = 1; 
+}
+
+
