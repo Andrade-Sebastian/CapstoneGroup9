@@ -5,7 +5,7 @@ import warnings
 
 import emotiBits_pb2 as emotiBits__pb2
 
-GRPC_GENERATED_VERSION = '1.67.1'
+GRPC_GENERATED_VERSION = '1.68.0'
 GRPC_VERSION = grpc.__version__
 _version_not_supported = False
 
@@ -34,10 +34,10 @@ class findDevicesStub(object):
         Args:
             channel: A grpc.Channel.
         """
-        self.getDevices = channel.stream_stream(
+        self.getDevices = channel.unary_stream(
                 '/emotiBits.findDevices/getDevices',
-                request_serializer=emotiBits__pb2.Device.SerializeToString,
-                response_deserializer=emotiBits__pb2.DeviceList.FromString,
+                request_serializer=emotiBits__pb2.DeviceList.SerializeToString,
+                response_deserializer=emotiBits__pb2.DeviceResponse.FromString,
                 _registered_method=True)
         self.foundDevices = channel.unary_stream(
                 '/emotiBits.findDevices/foundDevices',
@@ -49,7 +49,7 @@ class findDevicesStub(object):
 class findDevicesServicer(object):
     """Missing associated documentation comment in .proto file."""
 
-    def getDevices(self, request_iterator, context):
+    def getDevices(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -64,10 +64,10 @@ class findDevicesServicer(object):
 
 def add_findDevicesServicer_to_server(servicer, server):
     rpc_method_handlers = {
-            'getDevices': grpc.stream_stream_rpc_method_handler(
+            'getDevices': grpc.unary_stream_rpc_method_handler(
                     servicer.getDevices,
-                    request_deserializer=emotiBits__pb2.Device.FromString,
-                    response_serializer=emotiBits__pb2.DeviceList.SerializeToString,
+                    request_deserializer=emotiBits__pb2.DeviceList.FromString,
+                    response_serializer=emotiBits__pb2.DeviceResponse.SerializeToString,
             ),
             'foundDevices': grpc.unary_stream_rpc_method_handler(
                     servicer.foundDevices,
@@ -86,7 +86,7 @@ class findDevices(object):
     """Missing associated documentation comment in .proto file."""
 
     @staticmethod
-    def getDevices(request_iterator,
+    def getDevices(request,
             target,
             options=(),
             channel_credentials=None,
@@ -96,12 +96,12 @@ class findDevices(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.stream_stream(
-            request_iterator,
+        return grpc.experimental.unary_stream(
+            request,
             target,
             '/emotiBits.findDevices/getDevices',
-            emotiBits__pb2.Device.SerializeToString,
-            emotiBits__pb2.DeviceList.FromString,
+            emotiBits__pb2.DeviceList.SerializeToString,
+            emotiBits__pb2.DeviceResponse.FromString,
             options,
             channel_credentials,
             insecure,

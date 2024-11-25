@@ -35,14 +35,14 @@ class findDevices final {
   class StubInterface {
    public:
     virtual ~StubInterface() {}
-    std::unique_ptr< ::grpc::ClientReaderWriterInterface< ::emotiBits::Device, ::emotiBits::DeviceList>> getDevices(::grpc::ClientContext* context) {
-      return std::unique_ptr< ::grpc::ClientReaderWriterInterface< ::emotiBits::Device, ::emotiBits::DeviceList>>(getDevicesRaw(context));
+    std::unique_ptr< ::grpc::ClientReaderInterface< ::emotiBits::DeviceResponse>> getDevices(::grpc::ClientContext* context, const ::emotiBits::DeviceList& request) {
+      return std::unique_ptr< ::grpc::ClientReaderInterface< ::emotiBits::DeviceResponse>>(getDevicesRaw(context, request));
     }
-    std::unique_ptr< ::grpc::ClientAsyncReaderWriterInterface< ::emotiBits::Device, ::emotiBits::DeviceList>> AsyncgetDevices(::grpc::ClientContext* context, ::grpc::CompletionQueue* cq, void* tag) {
-      return std::unique_ptr< ::grpc::ClientAsyncReaderWriterInterface< ::emotiBits::Device, ::emotiBits::DeviceList>>(AsyncgetDevicesRaw(context, cq, tag));
+    std::unique_ptr< ::grpc::ClientAsyncReaderInterface< ::emotiBits::DeviceResponse>> AsyncgetDevices(::grpc::ClientContext* context, const ::emotiBits::DeviceList& request, ::grpc::CompletionQueue* cq, void* tag) {
+      return std::unique_ptr< ::grpc::ClientAsyncReaderInterface< ::emotiBits::DeviceResponse>>(AsyncgetDevicesRaw(context, request, cq, tag));
     }
-    std::unique_ptr< ::grpc::ClientAsyncReaderWriterInterface< ::emotiBits::Device, ::emotiBits::DeviceList>> PrepareAsyncgetDevices(::grpc::ClientContext* context, ::grpc::CompletionQueue* cq) {
-      return std::unique_ptr< ::grpc::ClientAsyncReaderWriterInterface< ::emotiBits::Device, ::emotiBits::DeviceList>>(PrepareAsyncgetDevicesRaw(context, cq));
+    std::unique_ptr< ::grpc::ClientAsyncReaderInterface< ::emotiBits::DeviceResponse>> PrepareAsyncgetDevices(::grpc::ClientContext* context, const ::emotiBits::DeviceList& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncReaderInterface< ::emotiBits::DeviceResponse>>(PrepareAsyncgetDevicesRaw(context, request, cq));
     }
     std::unique_ptr< ::grpc::ClientReaderInterface< ::emotiBits::Device>> foundDevices(::grpc::ClientContext* context, const ::emotiBits::DeviceRequest& request) {
       return std::unique_ptr< ::grpc::ClientReaderInterface< ::emotiBits::Device>>(foundDevicesRaw(context, request));
@@ -56,16 +56,16 @@ class findDevices final {
     class async_interface {
      public:
       virtual ~async_interface() {}
-      virtual void getDevices(::grpc::ClientContext* context, ::grpc::ClientBidiReactor< ::emotiBits::Device,::emotiBits::DeviceList>* reactor) = 0;
+      virtual void getDevices(::grpc::ClientContext* context, const ::emotiBits::DeviceList* request, ::grpc::ClientReadReactor< ::emotiBits::DeviceResponse>* reactor) = 0;
       virtual void foundDevices(::grpc::ClientContext* context, const ::emotiBits::DeviceRequest* request, ::grpc::ClientReadReactor< ::emotiBits::Device>* reactor) = 0;
     };
     typedef class async_interface experimental_async_interface;
     virtual class async_interface* async() { return nullptr; }
     class async_interface* experimental_async() { return async(); }
    private:
-    virtual ::grpc::ClientReaderWriterInterface< ::emotiBits::Device, ::emotiBits::DeviceList>* getDevicesRaw(::grpc::ClientContext* context) = 0;
-    virtual ::grpc::ClientAsyncReaderWriterInterface< ::emotiBits::Device, ::emotiBits::DeviceList>* AsyncgetDevicesRaw(::grpc::ClientContext* context, ::grpc::CompletionQueue* cq, void* tag) = 0;
-    virtual ::grpc::ClientAsyncReaderWriterInterface< ::emotiBits::Device, ::emotiBits::DeviceList>* PrepareAsyncgetDevicesRaw(::grpc::ClientContext* context, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientReaderInterface< ::emotiBits::DeviceResponse>* getDevicesRaw(::grpc::ClientContext* context, const ::emotiBits::DeviceList& request) = 0;
+    virtual ::grpc::ClientAsyncReaderInterface< ::emotiBits::DeviceResponse>* AsyncgetDevicesRaw(::grpc::ClientContext* context, const ::emotiBits::DeviceList& request, ::grpc::CompletionQueue* cq, void* tag) = 0;
+    virtual ::grpc::ClientAsyncReaderInterface< ::emotiBits::DeviceResponse>* PrepareAsyncgetDevicesRaw(::grpc::ClientContext* context, const ::emotiBits::DeviceList& request, ::grpc::CompletionQueue* cq) = 0;
     virtual ::grpc::ClientReaderInterface< ::emotiBits::Device>* foundDevicesRaw(::grpc::ClientContext* context, const ::emotiBits::DeviceRequest& request) = 0;
     virtual ::grpc::ClientAsyncReaderInterface< ::emotiBits::Device>* AsyncfoundDevicesRaw(::grpc::ClientContext* context, const ::emotiBits::DeviceRequest& request, ::grpc::CompletionQueue* cq, void* tag) = 0;
     virtual ::grpc::ClientAsyncReaderInterface< ::emotiBits::Device>* PrepareAsyncfoundDevicesRaw(::grpc::ClientContext* context, const ::emotiBits::DeviceRequest& request, ::grpc::CompletionQueue* cq) = 0;
@@ -73,14 +73,14 @@ class findDevices final {
   class Stub final : public StubInterface {
    public:
     Stub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, const ::grpc::StubOptions& options = ::grpc::StubOptions());
-    std::unique_ptr< ::grpc::ClientReaderWriter< ::emotiBits::Device, ::emotiBits::DeviceList>> getDevices(::grpc::ClientContext* context) {
-      return std::unique_ptr< ::grpc::ClientReaderWriter< ::emotiBits::Device, ::emotiBits::DeviceList>>(getDevicesRaw(context));
+    std::unique_ptr< ::grpc::ClientReader< ::emotiBits::DeviceResponse>> getDevices(::grpc::ClientContext* context, const ::emotiBits::DeviceList& request) {
+      return std::unique_ptr< ::grpc::ClientReader< ::emotiBits::DeviceResponse>>(getDevicesRaw(context, request));
     }
-    std::unique_ptr<  ::grpc::ClientAsyncReaderWriter< ::emotiBits::Device, ::emotiBits::DeviceList>> AsyncgetDevices(::grpc::ClientContext* context, ::grpc::CompletionQueue* cq, void* tag) {
-      return std::unique_ptr< ::grpc::ClientAsyncReaderWriter< ::emotiBits::Device, ::emotiBits::DeviceList>>(AsyncgetDevicesRaw(context, cq, tag));
+    std::unique_ptr< ::grpc::ClientAsyncReader< ::emotiBits::DeviceResponse>> AsyncgetDevices(::grpc::ClientContext* context, const ::emotiBits::DeviceList& request, ::grpc::CompletionQueue* cq, void* tag) {
+      return std::unique_ptr< ::grpc::ClientAsyncReader< ::emotiBits::DeviceResponse>>(AsyncgetDevicesRaw(context, request, cq, tag));
     }
-    std::unique_ptr<  ::grpc::ClientAsyncReaderWriter< ::emotiBits::Device, ::emotiBits::DeviceList>> PrepareAsyncgetDevices(::grpc::ClientContext* context, ::grpc::CompletionQueue* cq) {
-      return std::unique_ptr< ::grpc::ClientAsyncReaderWriter< ::emotiBits::Device, ::emotiBits::DeviceList>>(PrepareAsyncgetDevicesRaw(context, cq));
+    std::unique_ptr< ::grpc::ClientAsyncReader< ::emotiBits::DeviceResponse>> PrepareAsyncgetDevices(::grpc::ClientContext* context, const ::emotiBits::DeviceList& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncReader< ::emotiBits::DeviceResponse>>(PrepareAsyncgetDevicesRaw(context, request, cq));
     }
     std::unique_ptr< ::grpc::ClientReader< ::emotiBits::Device>> foundDevices(::grpc::ClientContext* context, const ::emotiBits::DeviceRequest& request) {
       return std::unique_ptr< ::grpc::ClientReader< ::emotiBits::Device>>(foundDevicesRaw(context, request));
@@ -94,7 +94,7 @@ class findDevices final {
     class async final :
       public StubInterface::async_interface {
      public:
-      void getDevices(::grpc::ClientContext* context, ::grpc::ClientBidiReactor< ::emotiBits::Device,::emotiBits::DeviceList>* reactor) override;
+      void getDevices(::grpc::ClientContext* context, const ::emotiBits::DeviceList* request, ::grpc::ClientReadReactor< ::emotiBits::DeviceResponse>* reactor) override;
       void foundDevices(::grpc::ClientContext* context, const ::emotiBits::DeviceRequest* request, ::grpc::ClientReadReactor< ::emotiBits::Device>* reactor) override;
      private:
       friend class Stub;
@@ -107,9 +107,9 @@ class findDevices final {
    private:
     std::shared_ptr< ::grpc::ChannelInterface> channel_;
     class async async_stub_{this};
-    ::grpc::ClientReaderWriter< ::emotiBits::Device, ::emotiBits::DeviceList>* getDevicesRaw(::grpc::ClientContext* context) override;
-    ::grpc::ClientAsyncReaderWriter< ::emotiBits::Device, ::emotiBits::DeviceList>* AsyncgetDevicesRaw(::grpc::ClientContext* context, ::grpc::CompletionQueue* cq, void* tag) override;
-    ::grpc::ClientAsyncReaderWriter< ::emotiBits::Device, ::emotiBits::DeviceList>* PrepareAsyncgetDevicesRaw(::grpc::ClientContext* context, ::grpc::CompletionQueue* cq) override;
+    ::grpc::ClientReader< ::emotiBits::DeviceResponse>* getDevicesRaw(::grpc::ClientContext* context, const ::emotiBits::DeviceList& request) override;
+    ::grpc::ClientAsyncReader< ::emotiBits::DeviceResponse>* AsyncgetDevicesRaw(::grpc::ClientContext* context, const ::emotiBits::DeviceList& request, ::grpc::CompletionQueue* cq, void* tag) override;
+    ::grpc::ClientAsyncReader< ::emotiBits::DeviceResponse>* PrepareAsyncgetDevicesRaw(::grpc::ClientContext* context, const ::emotiBits::DeviceList& request, ::grpc::CompletionQueue* cq) override;
     ::grpc::ClientReader< ::emotiBits::Device>* foundDevicesRaw(::grpc::ClientContext* context, const ::emotiBits::DeviceRequest& request) override;
     ::grpc::ClientAsyncReader< ::emotiBits::Device>* AsyncfoundDevicesRaw(::grpc::ClientContext* context, const ::emotiBits::DeviceRequest& request, ::grpc::CompletionQueue* cq, void* tag) override;
     ::grpc::ClientAsyncReader< ::emotiBits::Device>* PrepareAsyncfoundDevicesRaw(::grpc::ClientContext* context, const ::emotiBits::DeviceRequest& request, ::grpc::CompletionQueue* cq) override;
@@ -122,7 +122,7 @@ class findDevices final {
    public:
     Service();
     virtual ~Service();
-    virtual ::grpc::Status getDevices(::grpc::ServerContext* context, ::grpc::ServerReaderWriter< ::emotiBits::DeviceList, ::emotiBits::Device>* stream);
+    virtual ::grpc::Status getDevices(::grpc::ServerContext* context, const ::emotiBits::DeviceList* request, ::grpc::ServerWriter< ::emotiBits::DeviceResponse>* writer);
     virtual ::grpc::Status foundDevices(::grpc::ServerContext* context, const ::emotiBits::DeviceRequest* request, ::grpc::ServerWriter< ::emotiBits::Device>* writer);
   };
   template <class BaseClass>
@@ -137,12 +137,12 @@ class findDevices final {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status getDevices(::grpc::ServerContext* /*context*/, ::grpc::ServerReaderWriter< ::emotiBits::DeviceList, ::emotiBits::Device>* /*stream*/)  override {
+    ::grpc::Status getDevices(::grpc::ServerContext* /*context*/, const ::emotiBits::DeviceList* /*request*/, ::grpc::ServerWriter< ::emotiBits::DeviceResponse>* /*writer*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    void RequestgetDevices(::grpc::ServerContext* context, ::grpc::ServerAsyncReaderWriter< ::emotiBits::DeviceList, ::emotiBits::Device>* stream, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
-      ::grpc::Service::RequestAsyncBidiStreaming(0, context, stream, new_call_cq, notification_cq, tag);
+    void RequestgetDevices(::grpc::ServerContext* context, ::emotiBits::DeviceList* request, ::grpc::ServerAsyncWriter< ::emotiBits::DeviceResponse>* writer, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+      ::grpc::Service::RequestAsyncServerStreaming(0, context, request, writer, new_call_cq, notification_cq, tag);
     }
   };
   template <class BaseClass>
@@ -173,21 +173,20 @@ class findDevices final {
    public:
     WithCallbackMethod_getDevices() {
       ::grpc::Service::MarkMethodCallback(0,
-          new ::grpc::internal::CallbackBidiHandler< ::emotiBits::Device, ::emotiBits::DeviceList>(
+          new ::grpc::internal::CallbackServerStreamingHandler< ::emotiBits::DeviceList, ::emotiBits::DeviceResponse>(
             [this](
-                   ::grpc::CallbackServerContext* context) { return this->getDevices(context); }));
+                   ::grpc::CallbackServerContext* context, const ::emotiBits::DeviceList* request) { return this->getDevices(context, request); }));
     }
     ~WithCallbackMethod_getDevices() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status getDevices(::grpc::ServerContext* /*context*/, ::grpc::ServerReaderWriter< ::emotiBits::DeviceList, ::emotiBits::Device>* /*stream*/)  override {
+    ::grpc::Status getDevices(::grpc::ServerContext* /*context*/, const ::emotiBits::DeviceList* /*request*/, ::grpc::ServerWriter< ::emotiBits::DeviceResponse>* /*writer*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    virtual ::grpc::ServerBidiReactor< ::emotiBits::Device, ::emotiBits::DeviceList>* getDevices(
-      ::grpc::CallbackServerContext* /*context*/)
-      { return nullptr; }
+    virtual ::grpc::ServerWriteReactor< ::emotiBits::DeviceResponse>* getDevices(
+      ::grpc::CallbackServerContext* /*context*/, const ::emotiBits::DeviceList* /*request*/)  { return nullptr; }
   };
   template <class BaseClass>
   class WithCallbackMethod_foundDevices : public BaseClass {
@@ -225,7 +224,7 @@ class findDevices final {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status getDevices(::grpc::ServerContext* /*context*/, ::grpc::ServerReaderWriter< ::emotiBits::DeviceList, ::emotiBits::Device>* /*stream*/)  override {
+    ::grpc::Status getDevices(::grpc::ServerContext* /*context*/, const ::emotiBits::DeviceList* /*request*/, ::grpc::ServerWriter< ::emotiBits::DeviceResponse>* /*writer*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -259,12 +258,12 @@ class findDevices final {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status getDevices(::grpc::ServerContext* /*context*/, ::grpc::ServerReaderWriter< ::emotiBits::DeviceList, ::emotiBits::Device>* /*stream*/)  override {
+    ::grpc::Status getDevices(::grpc::ServerContext* /*context*/, const ::emotiBits::DeviceList* /*request*/, ::grpc::ServerWriter< ::emotiBits::DeviceResponse>* /*writer*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    void RequestgetDevices(::grpc::ServerContext* context, ::grpc::ServerAsyncReaderWriter< ::grpc::ByteBuffer, ::grpc::ByteBuffer>* stream, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
-      ::grpc::Service::RequestAsyncBidiStreaming(0, context, stream, new_call_cq, notification_cq, tag);
+    void RequestgetDevices(::grpc::ServerContext* context, ::grpc::ByteBuffer* request, ::grpc::ServerAsyncWriter< ::grpc::ByteBuffer>* writer, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+      ::grpc::Service::RequestAsyncServerStreaming(0, context, request, writer, new_call_cq, notification_cq, tag);
     }
   };
   template <class BaseClass>
@@ -294,21 +293,20 @@ class findDevices final {
    public:
     WithRawCallbackMethod_getDevices() {
       ::grpc::Service::MarkMethodRawCallback(0,
-          new ::grpc::internal::CallbackBidiHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+          new ::grpc::internal::CallbackServerStreamingHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
             [this](
-                   ::grpc::CallbackServerContext* context) { return this->getDevices(context); }));
+                   ::grpc::CallbackServerContext* context, const::grpc::ByteBuffer* request) { return this->getDevices(context, request); }));
     }
     ~WithRawCallbackMethod_getDevices() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status getDevices(::grpc::ServerContext* /*context*/, ::grpc::ServerReaderWriter< ::emotiBits::DeviceList, ::emotiBits::Device>* /*stream*/)  override {
+    ::grpc::Status getDevices(::grpc::ServerContext* /*context*/, const ::emotiBits::DeviceList* /*request*/, ::grpc::ServerWriter< ::emotiBits::DeviceResponse>* /*writer*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    virtual ::grpc::ServerBidiReactor< ::grpc::ByteBuffer, ::grpc::ByteBuffer>* getDevices(
-      ::grpc::CallbackServerContext* /*context*/)
-      { return nullptr; }
+    virtual ::grpc::ServerWriteReactor< ::grpc::ByteBuffer>* getDevices(
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/)  { return nullptr; }
   };
   template <class BaseClass>
   class WithRawCallbackMethod_foundDevices : public BaseClass {
@@ -333,6 +331,33 @@ class findDevices final {
       ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/)  { return nullptr; }
   };
   typedef Service StreamedUnaryService;
+  template <class BaseClass>
+  class WithSplitStreamingMethod_getDevices : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithSplitStreamingMethod_getDevices() {
+      ::grpc::Service::MarkMethodStreamed(0,
+        new ::grpc::internal::SplitServerStreamingHandler<
+          ::emotiBits::DeviceList, ::emotiBits::DeviceResponse>(
+            [this](::grpc::ServerContext* context,
+                   ::grpc::ServerSplitStreamer<
+                     ::emotiBits::DeviceList, ::emotiBits::DeviceResponse>* streamer) {
+                       return this->StreamedgetDevices(context,
+                         streamer);
+                  }));
+    }
+    ~WithSplitStreamingMethod_getDevices() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable regular version of this method
+    ::grpc::Status getDevices(::grpc::ServerContext* /*context*/, const ::emotiBits::DeviceList* /*request*/, ::grpc::ServerWriter< ::emotiBits::DeviceResponse>* /*writer*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    // replace default version of method with split streamed
+    virtual ::grpc::Status StreamedgetDevices(::grpc::ServerContext* context, ::grpc::ServerSplitStreamer< ::emotiBits::DeviceList,::emotiBits::DeviceResponse>* server_split_streamer) = 0;
+  };
   template <class BaseClass>
   class WithSplitStreamingMethod_foundDevices : public BaseClass {
    private:
@@ -360,8 +385,8 @@ class findDevices final {
     // replace default version of method with split streamed
     virtual ::grpc::Status StreamedfoundDevices(::grpc::ServerContext* context, ::grpc::ServerSplitStreamer< ::emotiBits::DeviceRequest,::emotiBits::Device>* server_split_streamer) = 0;
   };
-  typedef WithSplitStreamingMethod_foundDevices<Service > SplitStreamedService;
-  typedef WithSplitStreamingMethod_foundDevices<Service > StreamedService;
+  typedef WithSplitStreamingMethod_getDevices<WithSplitStreamingMethod_foundDevices<Service > > SplitStreamedService;
+  typedef WithSplitStreamingMethod_getDevices<WithSplitStreamingMethod_foundDevices<Service > > StreamedService;
 };
 
 }  // namespace emotiBits

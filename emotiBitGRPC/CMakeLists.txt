@@ -6,9 +6,6 @@ project(emotiBits)
 
 # Protobuf
 set(Protobuf_DIR "/opt/homebrew/bin/protoc")
-
-message(STATUS "Found Protobuf version: ${Protobuf_VERSION}")
-
 #set(CMAKE_PREFIX_PATH "/Users/haley/grpc/cmake" CACHE STRING "Path to gRPC CMake files")
 set(GRPC_DIR "/Users/haley/grpc/cmake/build")
 find_package(gRPC REQUIRED)
@@ -21,7 +18,9 @@ find_package(Protobuf REQUIRED)
 #else()
   # Build gRPC using FetchContent or add_subdirectory
 #find_package(gRPC REQUIRED)
+message(STATUS "Found Protobuf version: ${Protobuf_VERSION}")
 message(STATUS "Found gRPC version: ${gRPC_VERSION}")
+
 #endif()
 
 

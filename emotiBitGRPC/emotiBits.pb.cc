@@ -25,6 +25,33 @@ namespace _pbi = ::google::protobuf::internal;
 namespace _fl = ::google::protobuf::internal::field_layout;
 namespace emotiBits {
 
+inline constexpr DeviceResponse::Impl_::Impl_(
+    ::_pbi::ConstantInitialized) noexcept
+      : status_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
+        _cached_size_{0} {}
+
+template <typename>
+PROTOBUF_CONSTEXPR DeviceResponse::DeviceResponse(::_pbi::ConstantInitialized)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(_class_data_.base()),
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(),
+#endif  // PROTOBUF_CUSTOM_VTABLE
+      _impl_(::_pbi::ConstantInitialized()) {
+}
+struct DeviceResponseDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR DeviceResponseDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
+  ~DeviceResponseDefaultTypeInternal() {}
+  union {
+    DeviceResponse _instance;
+  };
+};
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 DeviceResponseDefaultTypeInternal _DeviceResponse_default_instance_;
+
 inline constexpr DeviceRequest::Impl_::Impl_(
     ::_pbi::ConstantInitialized) noexcept
       : sessionname_(
@@ -142,6 +169,15 @@ const ::uint32_t
         ~0u,  // no _split_
         ~0u,  // no sizeof(Split)
         PROTOBUF_FIELD_OFFSET(::emotiBits::DeviceList, _impl_.alldevices_),
+        ~0u,  // no _has_bits_
+        PROTOBUF_FIELD_OFFSET(::emotiBits::DeviceResponse, _internal_metadata_),
+        ~0u,  // no _extensions_
+        ~0u,  // no _oneof_case_
+        ~0u,  // no _weak_field_map_
+        ~0u,  // no _inlined_string_donated_
+        ~0u,  // no _split_
+        ~0u,  // no sizeof(Split)
+        PROTOBUF_FIELD_OFFSET(::emotiBits::DeviceResponse, _impl_.status_),
 };
 
 static const ::_pbi::MigrationSchema
@@ -149,20 +185,23 @@ static const ::_pbi::MigrationSchema
         {0, -1, -1, sizeof(::emotiBits::Device)},
         {10, -1, -1, sizeof(::emotiBits::DeviceRequest)},
         {19, -1, -1, sizeof(::emotiBits::DeviceList)},
+        {28, -1, -1, sizeof(::emotiBits::DeviceResponse)},
 };
 static const ::_pb::Message* const file_default_instances[] = {
     &::emotiBits::_Device_default_instance_._instance,
     &::emotiBits::_DeviceRequest_default_instance_._instance,
     &::emotiBits::_DeviceList_default_instance_._instance,
+    &::emotiBits::_DeviceResponse_default_instance_._instance,
 };
 const char descriptor_table_protodef_emotiBits_2eproto[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
     protodesc_cold) = {
     "\n\017emotiBits.proto\022\temotiBits\"$\n\006Device\022\016"
     "\n\006serial\030\001 \001(\t\022\n\n\002ip\030\002 \001(\t\"$\n\rDeviceRequ"
     "est\022\023\n\013sessionName\030\001 \001(\t\"3\n\nDeviceList\022%"
-    "\n\nallDevices\030\001 \003(\0132\021.emotiBits.Device2\210\001"
-    "\n\013findDevices\022:\n\ngetDevices\022\021.emotiBits."
-    "Device\032\025.emotiBits.DeviceList(\0010\001\022=\n\014fou"
+    "\n\nallDevices\030\001 \003(\0132\021.emotiBits.Device\" \n"
+    "\016DeviceResponse\022\016\n\006status\030\001 \001(\t2\216\001\n\013find"
+    "Devices\022@\n\ngetDevices\022\025.emotiBits.Device"
+    "List\032\031.emotiBits.DeviceResponse0\001\022=\n\014fou"
     "ndDevices\022\030.emotiBits.DeviceRequest\032\021.em"
     "otiBits.Device0\001b\006proto3"
 };
@@ -170,13 +209,13 @@ static ::absl::once_flag descriptor_table_emotiBits_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_emotiBits_2eproto = {
     false,
     false,
-    304,
+    344,
     descriptor_table_protodef_emotiBits_2eproto,
     "emotiBits.proto",
     &descriptor_table_emotiBits_2eproto_once,
     nullptr,
     0,
-    3,
+    4,
     schemas,
     file_default_instances,
     TableStruct_emotiBits_2eproto::offsets,
@@ -879,6 +918,229 @@ void DeviceList::InternalSwap(DeviceList* PROTOBUF_RESTRICT other) {
 }
 
 ::google::protobuf::Metadata DeviceList::GetMetadata() const {
+  return ::google::protobuf::Message::GetMetadataImpl(GetClassData()->full());
+}
+// ===================================================================
+
+class DeviceResponse::_Internal {
+ public:
+};
+
+DeviceResponse::DeviceResponse(::google::protobuf::Arena* arena)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(arena, _class_data_.base()) {
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(arena) {
+#endif  // PROTOBUF_CUSTOM_VTABLE
+  SharedCtor(arena);
+  // @@protoc_insertion_point(arena_constructor:emotiBits.DeviceResponse)
+}
+inline PROTOBUF_NDEBUG_INLINE DeviceResponse::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility, ::google::protobuf::Arena* arena,
+    const Impl_& from, const ::emotiBits::DeviceResponse& from_msg)
+      : status_(arena, from.status_),
+        _cached_size_{0} {}
+
+DeviceResponse::DeviceResponse(
+    ::google::protobuf::Arena* arena,
+    const DeviceResponse& from)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(arena, _class_data_.base()) {
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(arena) {
+#endif  // PROTOBUF_CUSTOM_VTABLE
+  DeviceResponse* const _this = this;
+  (void)_this;
+  _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
+      from._internal_metadata_);
+  new (&_impl_) Impl_(internal_visibility(), arena, from._impl_, from);
+
+  // @@protoc_insertion_point(copy_constructor:emotiBits.DeviceResponse)
+}
+inline PROTOBUF_NDEBUG_INLINE DeviceResponse::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility,
+    ::google::protobuf::Arena* arena)
+      : status_(arena),
+        _cached_size_{0} {}
+
+inline void DeviceResponse::SharedCtor(::_pb::Arena* arena) {
+  new (&_impl_) Impl_(internal_visibility(), arena);
+}
+DeviceResponse::~DeviceResponse() {
+  // @@protoc_insertion_point(destructor:emotiBits.DeviceResponse)
+  _internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
+  SharedDtor();
+}
+inline void DeviceResponse::SharedDtor() {
+  ABSL_DCHECK(GetArena() == nullptr);
+  _impl_.status_.Destroy();
+  _impl_.~Impl_();
+}
+
+PROTOBUF_CONSTINIT
+PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
+const ::google::protobuf::MessageLite::ClassDataFull
+    DeviceResponse::_class_data_ = {
+        ::google::protobuf::Message::ClassData{
+            &_DeviceResponse_default_instance_._instance,
+            &_table_.header,
+            nullptr,  // OnDemandRegisterArenaDtor
+            nullptr,  // IsInitialized
+            &DeviceResponse::MergeImpl,
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+            ::google::protobuf::Message::GetDeleteImpl<DeviceResponse>(),
+            ::google::protobuf::Message::GetNewImpl<DeviceResponse>(),
+            ::google::protobuf::Message::GetClearImpl<DeviceResponse>(), &DeviceResponse::ByteSizeLong,
+                &DeviceResponse::_InternalSerialize,
+#endif  // PROTOBUF_CUSTOM_VTABLE
+            PROTOBUF_FIELD_OFFSET(DeviceResponse, _impl_._cached_size_),
+            false,
+        },
+        &DeviceResponse::kDescriptorMethods,
+        &descriptor_table_emotiBits_2eproto,
+        nullptr,  // tracker
+};
+const ::google::protobuf::MessageLite::ClassData* DeviceResponse::GetClassData() const {
+  ::google::protobuf::internal::PrefetchToLocalCache(&_class_data_);
+  ::google::protobuf::internal::PrefetchToLocalCache(_class_data_.tc_table);
+  return _class_data_.base();
+}
+PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
+const ::_pbi::TcParseTable<0, 1, 0, 39, 2> DeviceResponse::_table_ = {
+  {
+    0,  // no _has_bits_
+    0, // no _extensions_
+    1, 0,  // max_field_number, fast_idx_mask
+    offsetof(decltype(_table_), field_lookup_table),
+    4294967294,  // skipmap
+    offsetof(decltype(_table_), field_entries),
+    1,  // num_field_entries
+    0,  // num_aux_entries
+    offsetof(decltype(_table_), field_names),  // no aux_entries
+    _class_data_.base(),
+    nullptr,  // post_loop_handler
+    ::_pbi::TcParser::GenericFallback,  // fallback
+    #ifdef PROTOBUF_PREFETCH_PARSE_TABLE
+    ::_pbi::TcParser::GetTable<::emotiBits::DeviceResponse>(),  // to_prefetch
+    #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
+  }, {{
+    // string status = 1;
+    {::_pbi::TcParser::FastUS1,
+     {10, 63, 0, PROTOBUF_FIELD_OFFSET(DeviceResponse, _impl_.status_)}},
+  }}, {{
+    65535, 65535
+  }}, {{
+    // string status = 1;
+    {PROTOBUF_FIELD_OFFSET(DeviceResponse, _impl_.status_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
+  }},
+  // no aux_entries
+  {{
+    "\30\6\0\0\0\0\0\0"
+    "emotiBits.DeviceResponse"
+    "status"
+  }},
+};
+
+PROTOBUF_NOINLINE void DeviceResponse::Clear() {
+// @@protoc_insertion_point(message_clear_start:emotiBits.DeviceResponse)
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  ::uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  _impl_.status_.ClearToEmpty();
+  _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
+}
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+        ::uint8_t* DeviceResponse::_InternalSerialize(
+            const MessageLite& base, ::uint8_t* target,
+            ::google::protobuf::io::EpsCopyOutputStream* stream) {
+          const DeviceResponse& this_ = static_cast<const DeviceResponse&>(base);
+#else   // PROTOBUF_CUSTOM_VTABLE
+        ::uint8_t* DeviceResponse::_InternalSerialize(
+            ::uint8_t* target,
+            ::google::protobuf::io::EpsCopyOutputStream* stream) const {
+          const DeviceResponse& this_ = *this;
+#endif  // PROTOBUF_CUSTOM_VTABLE
+          // @@protoc_insertion_point(serialize_to_array_start:emotiBits.DeviceResponse)
+          ::uint32_t cached_has_bits = 0;
+          (void)cached_has_bits;
+
+          // string status = 1;
+          if (!this_._internal_status().empty()) {
+            const std::string& _s = this_._internal_status();
+            ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+                _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "emotiBits.DeviceResponse.status");
+            target = stream->WriteStringMaybeAliased(1, _s, target);
+          }
+
+          if (PROTOBUF_PREDICT_FALSE(this_._internal_metadata_.have_unknown_fields())) {
+            target =
+                ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
+                    this_._internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance), target, stream);
+          }
+          // @@protoc_insertion_point(serialize_to_array_end:emotiBits.DeviceResponse)
+          return target;
+        }
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+        ::size_t DeviceResponse::ByteSizeLong(const MessageLite& base) {
+          const DeviceResponse& this_ = static_cast<const DeviceResponse&>(base);
+#else   // PROTOBUF_CUSTOM_VTABLE
+        ::size_t DeviceResponse::ByteSizeLong() const {
+          const DeviceResponse& this_ = *this;
+#endif  // PROTOBUF_CUSTOM_VTABLE
+          // @@protoc_insertion_point(message_byte_size_start:emotiBits.DeviceResponse)
+          ::size_t total_size = 0;
+
+          ::uint32_t cached_has_bits = 0;
+          // Prevent compiler warnings about cached_has_bits being unused
+          (void)cached_has_bits;
+
+           {
+            // string status = 1;
+            if (!this_._internal_status().empty()) {
+              total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
+                                              this_._internal_status());
+            }
+          }
+          return this_.MaybeComputeUnknownFieldsSize(total_size,
+                                                     &this_._impl_._cached_size_);
+        }
+
+void DeviceResponse::MergeImpl(::google::protobuf::MessageLite& to_msg, const ::google::protobuf::MessageLite& from_msg) {
+  auto* const _this = static_cast<DeviceResponse*>(&to_msg);
+  auto& from = static_cast<const DeviceResponse&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:emotiBits.DeviceResponse)
+  ABSL_DCHECK_NE(&from, _this);
+  ::uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  if (!from._internal_status().empty()) {
+    _this->_internal_set_status(from._internal_status());
+  }
+  _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(from._internal_metadata_);
+}
+
+void DeviceResponse::CopyFrom(const DeviceResponse& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:emotiBits.DeviceResponse)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+
+void DeviceResponse::InternalSwap(DeviceResponse* PROTOBUF_RESTRICT other) {
+  using std::swap;
+  auto* arena = GetArena();
+  ABSL_DCHECK_EQ(arena, other->GetArena());
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.status_, &other->_impl_.status_, arena);
+}
+
+::google::protobuf::Metadata DeviceResponse::GetMetadata() const {
   return ::google::protobuf::Message::GetMetadataImpl(GetClassData()->full());
 }
 // @@protoc_insertion_point(namespace_scope)

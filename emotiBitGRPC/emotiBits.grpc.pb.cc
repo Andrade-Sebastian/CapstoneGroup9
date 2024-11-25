@@ -33,24 +33,24 @@ std::unique_ptr< findDevices::Stub> findDevices::NewStub(const std::shared_ptr< 
 }
 
 findDevices::Stub::Stub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, const ::grpc::StubOptions& options)
-  : channel_(channel), rpcmethod_getDevices_(findDevices_method_names[0], options.suffix_for_stats(),::grpc::internal::RpcMethod::BIDI_STREAMING, channel)
+  : channel_(channel), rpcmethod_getDevices_(findDevices_method_names[0], options.suffix_for_stats(),::grpc::internal::RpcMethod::SERVER_STREAMING, channel)
   , rpcmethod_foundDevices_(findDevices_method_names[1], options.suffix_for_stats(),::grpc::internal::RpcMethod::SERVER_STREAMING, channel)
   {}
 
-::grpc::ClientReaderWriter< ::emotiBits::Device, ::emotiBits::DeviceList>* findDevices::Stub::getDevicesRaw(::grpc::ClientContext* context) {
-  return ::grpc::internal::ClientReaderWriterFactory< ::emotiBits::Device, ::emotiBits::DeviceList>::Create(channel_.get(), rpcmethod_getDevices_, context);
+::grpc::ClientReader< ::emotiBits::DeviceResponse>* findDevices::Stub::getDevicesRaw(::grpc::ClientContext* context, const ::emotiBits::DeviceList& request) {
+  return ::grpc::internal::ClientReaderFactory< ::emotiBits::DeviceResponse>::Create(channel_.get(), rpcmethod_getDevices_, context, request);
 }
 
-void findDevices::Stub::async::getDevices(::grpc::ClientContext* context, ::grpc::ClientBidiReactor< ::emotiBits::Device,::emotiBits::DeviceList>* reactor) {
-  ::grpc::internal::ClientCallbackReaderWriterFactory< ::emotiBits::Device,::emotiBits::DeviceList>::Create(stub_->channel_.get(), stub_->rpcmethod_getDevices_, context, reactor);
+void findDevices::Stub::async::getDevices(::grpc::ClientContext* context, const ::emotiBits::DeviceList* request, ::grpc::ClientReadReactor< ::emotiBits::DeviceResponse>* reactor) {
+  ::grpc::internal::ClientCallbackReaderFactory< ::emotiBits::DeviceResponse>::Create(stub_->channel_.get(), stub_->rpcmethod_getDevices_, context, request, reactor);
 }
 
-::grpc::ClientAsyncReaderWriter< ::emotiBits::Device, ::emotiBits::DeviceList>* findDevices::Stub::AsyncgetDevicesRaw(::grpc::ClientContext* context, ::grpc::CompletionQueue* cq, void* tag) {
-  return ::grpc::internal::ClientAsyncReaderWriterFactory< ::emotiBits::Device, ::emotiBits::DeviceList>::Create(channel_.get(), cq, rpcmethod_getDevices_, context, true, tag);
+::grpc::ClientAsyncReader< ::emotiBits::DeviceResponse>* findDevices::Stub::AsyncgetDevicesRaw(::grpc::ClientContext* context, const ::emotiBits::DeviceList& request, ::grpc::CompletionQueue* cq, void* tag) {
+  return ::grpc::internal::ClientAsyncReaderFactory< ::emotiBits::DeviceResponse>::Create(channel_.get(), cq, rpcmethod_getDevices_, context, request, true, tag);
 }
 
-::grpc::ClientAsyncReaderWriter< ::emotiBits::Device, ::emotiBits::DeviceList>* findDevices::Stub::PrepareAsyncgetDevicesRaw(::grpc::ClientContext* context, ::grpc::CompletionQueue* cq) {
-  return ::grpc::internal::ClientAsyncReaderWriterFactory< ::emotiBits::Device, ::emotiBits::DeviceList>::Create(channel_.get(), cq, rpcmethod_getDevices_, context, false, nullptr);
+::grpc::ClientAsyncReader< ::emotiBits::DeviceResponse>* findDevices::Stub::PrepareAsyncgetDevicesRaw(::grpc::ClientContext* context, const ::emotiBits::DeviceList& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc::internal::ClientAsyncReaderFactory< ::emotiBits::DeviceResponse>::Create(channel_.get(), cq, rpcmethod_getDevices_, context, request, false, nullptr);
 }
 
 ::grpc::ClientReader< ::emotiBits::Device>* findDevices::Stub::foundDevicesRaw(::grpc::ClientContext* context, const ::emotiBits::DeviceRequest& request) {
@@ -72,13 +72,13 @@ void findDevices::Stub::async::foundDevices(::grpc::ClientContext* context, cons
 findDevices::Service::Service() {
   AddMethod(new ::grpc::internal::RpcServiceMethod(
       findDevices_method_names[0],
-      ::grpc::internal::RpcMethod::BIDI_STREAMING,
-      new ::grpc::internal::BidiStreamingHandler< findDevices::Service, ::emotiBits::Device, ::emotiBits::DeviceList>(
+      ::grpc::internal::RpcMethod::SERVER_STREAMING,
+      new ::grpc::internal::ServerStreamingHandler< findDevices::Service, ::emotiBits::DeviceList, ::emotiBits::DeviceResponse>(
           [](findDevices::Service* service,
              ::grpc::ServerContext* ctx,
-             ::grpc::ServerReaderWriter<::emotiBits::DeviceList,
-             ::emotiBits::Device>* stream) {
-               return service->getDevices(ctx, stream);
+             const ::emotiBits::DeviceList* req,
+             ::grpc::ServerWriter<::emotiBits::DeviceResponse>* writer) {
+               return service->getDevices(ctx, req, writer);
              }, this)));
   AddMethod(new ::grpc::internal::RpcServiceMethod(
       findDevices_method_names[1],
@@ -95,9 +95,10 @@ findDevices::Service::Service() {
 findDevices::Service::~Service() {
 }
 
-::grpc::Status findDevices::Service::getDevices(::grpc::ServerContext* context, ::grpc::ServerReaderWriter< ::emotiBits::DeviceList, ::emotiBits::Device>* stream) {
+::grpc::Status findDevices::Service::getDevices(::grpc::ServerContext* context, const ::emotiBits::DeviceList* request, ::grpc::ServerWriter< ::emotiBits::DeviceResponse>* writer) {
   (void) context;
-  (void) stream;
+  (void) request;
+  (void) writer;
   return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
 }
 

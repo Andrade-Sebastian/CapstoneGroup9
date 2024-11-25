@@ -17,6 +17,7 @@ using grpc::Status;
 using emotiBits::Device;
 using emotiBits::findDevices;
 using emotiBits::DeviceList;
+using emotiBits::DeviceResponse;
 
 
 Device MakeDevice(std::string serial, std::string ip){
@@ -32,34 +33,54 @@ class EmotiBitsClient{
             : stub_(findDevices::NewStub(channel)){}
         
         void getDevices(){
+            DeviceList list;
+            DeviceResponse response;
             ClientContext context;
-            std::shared_ptr<ClientReaderWriter<Device, DeviceList> > stream(
-                stub_->getDevices(&context));
 
-            std::thread writer([stream] (){
-                std::vector<Device> device{MakeDevice("47WX", "192.68.275"),
-                                            MakeDevice("69T3", "192.68.275")};
-                for(const Device& device: device){
-                    std::cout << "Sending serial " << device.serial() << " at " << device.ip() << std::endl;
-                    stream->Write(device);
-                }
-                stream->WritesDone();
+            *list.add_alldevices() = MakeDevice("47WX", "192.168.1.1");
+            *list.add_alldevices() = MakeDevice("69T3", "192.168.1.2");
 
-                });
+            std::cout << "GetDevices Response Received: " << std::endl;
+            std::cout << "Sending device list with " << list.alldevices_size() << " devices" << std::endl;
+            std::unique_ptr<ClientReader<DeviceResponse>> reader(
+                stub_->getDevices(&context, list));
+                while(reader->Read(&response)){
+                    std::cout << "Status: " << response.status() << std::endl;
+                }
+                Status status = reader->Finish();
+                if(status.ok()){
+                    std::cout << "getDevices succeeded." << std::endl;
+                }
+                else{
+                    std::cout << "getDevices failed" << std::endl;
+                }
+            // std::shared_ptr<ClientReaderWriter<Device, DeviceList> > stream(
+            //     stub_->getDevices(&context));
 
-                DeviceList device_list;
-                while(stream->Read(&device_list)){
-                     std::cout << "Received DeviceList:" << std::endl;
-                        for (const auto& device : device_list.alldevices()) {
-                            std::cout << "Device serial: " << device.serial() << ", IP: " << device.ip() << std::endl;
-            }
-                }
-                writer.join();
-                Status status = stream->Finish();
-                if(!status.ok()) {
-                    std::cout << "getDevice rpc failed." << std::endl;
-                }
-            }
+            // std::thread writer([stream] (){
+            //     std::vector<Device> device{MakeDevice("47WX", "192.68.275"),
+            //                                 MakeDevice("69T3", "192.68.275")};
+            //     for(const Device& device: device){
+            //         std::cout << "Sending serial " << device.serial() << " at " << device.ip() << std::endl;
+            //         stream->Write(device);
+            //     }
+            //     stream->WritesDone();
+
+            //     });
+
+            //     DeviceList device_list;
+            //     while(stream->Read(&device_list)){
+            //          std::cout << "Received DeviceList:" << std::endl;
+            //             for (const auto& device : device_list.alldevices()) {
+            //                 std::cout << "Device serial: " << device.serial() << ", IP: " << device.ip() << std::endl;
+            // }
+            //     }
+            //     writer.join();
+            //     Status status = stream->Finish();
+            //     if(!status.ok()) {
+            //         std::cout << "getDevice rpc failed." << std::endl;
+            //     }
+        }
 
     private:
     std::unique_ptr<findDevices::Stub> stub_;
