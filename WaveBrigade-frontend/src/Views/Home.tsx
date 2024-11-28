@@ -1,9 +1,7 @@
 import { HiUserAdd } from "react-icons/hi";
 import { HiAcademicCap } from "react-icons/hi";
-import { Card, CardHeader, CardBody, Divider } from "@nextui-org/react";
 import { useNavigate } from "react-router-dom";
 import CardComponent from "../Components/CardComponent.tsx";
-import NavigationBar from "../Components/NavigationBar.tsx";
 
 export default function Home() {
   const navigateTo = useNavigate();
@@ -24,12 +22,6 @@ export default function Home() {
     <div className="flex flex-col">
       <div className="justify-center text-white py-10">
         <h1 className="text-center text-2xl">Welcome to Wavebrigade!</h1>
-        <h2 className="text-center text-2xl">
-          Click the "Host" button to host an experiment
-        </h2>
-        <h2 className="text-center text-2xl">
-          Click on the "Join" Button to join an experiment!
-        </h2>
       </div>
       {/* body */}
       <div className="flex flex-col">
@@ -65,11 +57,10 @@ export default function Home() {
           </button>
           {/* replace google.com with the link to the next page on Figma */}
           {/* <p>Educator: <a href="create-lab">Create New Experiment</a></p> */}
-        </div>
 
-        <div className="flex justify-center items-center">
+        </div>
+        <div className="flex justify-center items-center text-white py-10">
           <button className="px-20" onClick={handleLabButtonClick}>
-        
             Create New Experiment
           </button>
         </div>

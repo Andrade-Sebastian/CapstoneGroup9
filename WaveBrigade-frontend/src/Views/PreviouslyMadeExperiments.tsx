@@ -1,41 +1,52 @@
-import React from "react";
-import { useNavigate, } from "react-router-dom";
 
-export default function PreviouslyMadeExperiments(){
-    const navigateTo = useNavigate()
+import { useNavigate } from "react-router-dom";
+import ImageCardComponent from "../Components/ImageCardComponent.tsx";
+export default function PreviouslyMadeExperiments() {
+  const navigateTo = useNavigate();
 
-
-    return(
+  return (
     <>
-        
-        <div>
-            <h1 style={{textAlign: "center"}}>View previously made experiments</h1>
+      <div className="flex justify-center items-center min-h-screen p-4">
+        <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-xl">
+          <h1 className="text-3xl font-semibold text-center mb-4 text-gray-800">
+            View previously made experiments
+          </h1>
+            <ImageCardComponent
+            headingTitle="Video Lab #3"
+            description="A sexy Mike Tyson with his cheeks out lab to monitor
+                  temperature and arousal."
+            source="https://i.dailymail.co.uk/1s/2024/11/16/04/92135043-0-image-a-1_1731729974205.jpg"
+            alt="Mike"
+            />
+            <ImageCardComponent
+            headingTitle="Picture Lab #1"
+            description="A picture of a cute owl."
+            source="https://lh3.googleusercontent.com/proxy/YngsuS8jQJysXxeucAgVBcSgIdwZlSQ-HvsNxGjHS0SrUKXI161bNKh6SOcMsNUGsnxoOrS3AYX--MT4T3S3SoCgSD1xKrtBwwItcgexaX_7W-qHo-VupmYgjjzWO-BuORLp9-pj8Kjr"
+            alt="Mike"
+            />
+            <ImageCardComponent
+            headingTitle="Gallery Lab #1"
+            description="Gallery of Obama"
+            source="https://obamawhitehouse.archives.gov/sites/whitehouse.gov/files/images/POTUS_header2.jpg"
+            alt="Mike"
+            />
+
+            <p className="text-center"> or...</p>
+          <div className="flex justify-center">
+            <button
+              type="submit"
+              className="mt-6 bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-6 rounded-md shadow-md transition duration-300 ease-in-out"
+              onClick={() =>
+                navigateTo("/create-lab/select-lab", {
+                  state: { userName: "defaultUser" },
+                })
+              }
+            >
+              Create Experiment
+            </button>
+          </div>
         </div>
-
-        <div style={{ backgroundColor: 'gray' }}>
-            <div> 
-                <p> Video Lab #3</p> 
-                <p>A sexy Mike Tyson with his cheeks out lab to monitor temperature and arousal.</p>
-            </div>
-
-            <div> 
-                <p>Picture Lab #3</p> 
-                <p>A gallery of your mom's pictures and videos being naughty.”</p>
-            </div>
-
-            <div>
-                <p>Gallery Lab #5</p>
-                <p>Exploring students' arousal level of your Mom.</p>
-            </div>
-            
-            <h2 style={{textAlign: "center"}}> Create an Experiment</h2>
-            <div style={{display: "flex", justifyContent: "center", }}>
-                <button style={{backgroundColor: "blue"}} onClick={() => navigateTo("/create-lab/select-lab", { state: { userName: "defaultUser" }})}>Create Experiment</button>
-            </div>
-        </div>
-
-
+      </div>
     </>
-    )
-    
+  );
 }

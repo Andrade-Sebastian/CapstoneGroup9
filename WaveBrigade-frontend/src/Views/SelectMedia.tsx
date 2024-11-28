@@ -62,15 +62,18 @@ export default function SelectMedia(){
     };
 
     return(
-        <div>
-            <p>Select Media Page</p>
-            <form onSubmit={handleSubmit}>
-                <label htmlFor="URL"> URL </label>
-                <input type="text" id="URL" onChange={(e) => setURL(e.target.value)}/> 
-            </form>
-            <button onClick={handleCreateLobbyButtonClick}>Create Lobby</button>
+        <div className="flex justify-center items-center min-h-screen p-4">
+            <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-xl">
+            <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+            <h1 className="text-3xl font-semibold text-center mb-4 text-gray-800">Select Media Page</h1>
 
+                <label htmlFor="URL" className="font-semibold text-gray-700"> URL </label>
+                <input type="text" id="URL" className="border border-gray-300 rounded-md p-3 text-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Enter URL" onChange={(e) => setURL(e.target.value)}/> 
+            <button type="submit" className="mt-6 bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-6 rounded-md shadow-md transition duration-300 ease-in-out" onClick={handleCreateLobbyButtonClick}>Create Lobby</button>
             {<p>Lobby Code: {code}</p>}
+            </form>
+
+            </div>
         </div>
     )
 }

@@ -6,6 +6,7 @@ import { LabContainer } from "../Components/LabContainer.tsx";
 import { useNavigate } from "react-router-dom";
 import { useLocation } from "react-router-dom";
 import axios from "axios";
+
 //added routing to /host/select-lab
 //8:49 -
 //created HostSelectlabPage
@@ -25,6 +26,9 @@ export default function HostSelectLabPage() {
     console.log("HOSTSELECTLAB userName: " + userName);
     const [experimentName, setExperimentName] = useState("");
     const [labDescription, setLabDescription] = useState("");
+    const [videoLabIsSelected, setVideoLabIsSelected] = useState(false);
+    const [pictureLabIsSelected, setPictureLabIsSelected] = useState(false);
+    const [galleryLabIsSelected, setGalleryLabIsSelected] = useState(false);
     const navigateTo = useNavigate();
 
     //const [labs, setLabs] = useState([]); //will hold the labs
@@ -38,78 +42,81 @@ export default function HostSelectLabPage() {
         console.log("Continue Button clicked");
         console.log("Navigating to Media");
     }
-
+    
+    // export default function ExperimentCreationForm({ handleSubmit, setExperimentName, setLabDescription, userName }) {
     return (
-        <div>
-            <form onSubmit={handleSubmit}>
-                <h1>Experiment Creation</h1>
-                <label htmlFor="experimentName">
-                    Enter Name of Experiment*
+          <div className="flex justify-center items-center min-h-screen p-4">
+            <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-xl">
+              <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+                <h1 className="text-3xl font-semibold text-center mb-4 text-gray-800">Experiment Creation</h1>
+      
+                <label htmlFor="experimentName" className="font-semibold text-gray-700">
+                  Enter Name of Experiment <span className="text-red-600">*</span>
                 </label>
                 <input
-                    type="text"
-                    id="experimentName"
-                    onChange={(e) => setExperimentName(e.target.value)}
+                  type="text"
+                  id="experimentName"
+                  className="border border-gray-300 rounded-md p-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  placeholder="Enter experiment name"
+                  onChange={(e) => setExperimentName(e.target.value)}
                 />
-
-                <label htmlFor="labDescription">Description*</label>
-                <input
-                    type="text"
-                    id="labDescription"
-                    onChange={(e) => setLabDescription(e.target.value)}
-                />
-            </form>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '15px' }}>
-      {/* Video Lab Checkbox and Description */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-        <Checkbox size="sm" color="primary" value="video-lab">
-          Video Lab
-        </Checkbox>
-        <p>
-          Create a video lab experiment. Insert your own video or include a link for the experiment.
-        </p>
-      </div>
-
-      {/* Picture Lab Checkbox and Description */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-        <Checkbox size="sm" color="primary" value="picture-lab">
-          Picture Lab
-        </Checkbox>
-        <p>
-          Create a picture lab experiment. Insert your own picture or include a gif for the experiment.
-        </p>
-      </div>
-
-      {/* Gallery Lab Checkbox and Description */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-        <Checkbox size="sm" color="primary" value="gallery-lab">
-          Gallery Lab
-        </Checkbox>
-        <p>
-          Create a gallery experiment. Insert pictures to create a gallery style lab.
-        </p>
-      </div>
-            {
-                /* <div className="flex flex-col gap-4">
-                <LabContainer>
-                    <label htmlFor="labList" >Choose a Lab</label>
-                    <Listbox variant="shadow" color="primary" onAction={(key) => console.log(key)}>
-                        <ListboxItem key="Lab 1">Lab 1</ListboxItem>
-                        <ListboxItem key="Lab 2">Lab 2</ListboxItem>
-                        <ListboxItem key="Lab 3">Lab 3</ListboxItem>
-                        <ListboxItem key="Lab 4">Lab 4</ListboxItem>
-                        <ListboxItem key="Lab 5">Lab 5</ListboxItem>
-                    </Listbox>
-                </LabContainer>
-            </div> */
-            }
-            <button
-                onClick={() =>
-                    navigateTo("/host/select-media", { state: { userName } })}
-            >
-                Continue
-            </button>
-        </div>
-        </div>
-    );
-}
+      
+                <label htmlFor="labDescription" className="font-semibold text-gray-700">
+                  Description <span className="text-red-600">*</span> {/* make this required*/}
+                </label>
+                <textarea
+                  id="labDescription"
+                  className="border border-gray-300 rounded-md p-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  placeholder="Provide a description of the experiment"
+                  onChange={(e) => setLabDescription(e.target.value)}
+                ></textarea>
+      
+                <div className="flex flex-col gap-6">
+                  {/* Video Lab Checkbox and Description */}
+                  <div className="flex items-start gap-4 border border-gray-300 rounded-md">
+                    <Checkbox size="lg" color="primary" value="video-lab" className="font-semibold" onValueChange={() => setVideoLabIsSelected(!videoLabIsSelected)}>
+                      Video Lab
+                    </Checkbox>
+                    {/* {videoLabIsSelected ? (
+                      setPictureLabIsSelected = false;
+                      setGalleryLabIsSelected = false;
+                    ) : null} */}
+                    <p className="text-gray-700 py-3">
+                      Create a video lab experiment. Insert your own video or include a link for the experiment.
+                    </p>
+                  </div>
+      
+                  {/* Picture Lab Checkbox and Description */}
+                  <div className="flex items-start gap-4 border border-gray-300 rounded-md">
+                    <Checkbox size="lg" color="primary" value="picture-lab" className="font-semibold" onValueChange={() => setPictureLabIsSelected(!pictureLabIsSelected)}>
+                      Picture Lab
+                    </Checkbox>
+                    <p className="text-gray-700 py-4">
+                      Create a picture lab experiment. Insert your own picture or include a gif for the experiment.
+                    </p>
+                  </div>
+      
+                  {/* Gallery Lab Checkbox and Description */}
+                  <div className="flex items-start gap-4 border border-gray-300 rounded-md">
+                    <Checkbox size="lg" color="primary" value="gallery-lab" className="font-semibold" onValueChange={() => setGalleryLabIsSelected(!galleryLabIsSelected)}>
+                      Gallery Lab
+                    </Checkbox>
+                    <p className="text-gray-700 py-4 ">
+                      Create a gallery experiment. Insert pictures to create a gallery style lab.
+                    </p>
+                  </div>
+                </div>
+      
+                <button
+                  type="submit"
+                  className="mt-6 bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-6 rounded-md shadow-md transition duration-300 ease-in-out"
+                  onClick={() => navigateTo("/host/select-media", { state: { userName } })}
+                >
+                  Continue
+                </button>
+              </form>
+            </div>
+          </div>
+        );
+      }
+      

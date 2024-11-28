@@ -12,7 +12,9 @@ export default function NavigationBar()
         <Navbar isBordered={true} position="static" className="bg-white text-purple-950 h-20 ">
             <NavbarBrand className="pl-10">
                 <RiPulseFill style={{fontSize: "24px"}} />
+                <Link to="/">
                 <p className="text-2xl hover:bg-neutral-200">WaveBrigade</p>
+                </Link>
                 <RiPulseFill style={{fontSize: "24px"}}/>
             </NavbarBrand>
 
