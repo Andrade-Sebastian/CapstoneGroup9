@@ -81,8 +81,9 @@ export default function WaitingRoom() {
     }, [location.state]); 
 
     return (
-        <div>
-            <h1>Waiting Room</h1>
+        <div className="flex flex-col items-center justify-center h-screen">
+            <div className="bg-white rounded-lg shadow-lg p-8 max-w-md w-full">
+            <h1 className="text-center text-3xl font-semibold mb-6 text-gray-800">Waiting Room</h1>
             <p>Room Code: {roomCode}</p>
             <p>Nickname: {nickName}</p>
             <h3> Users in the room:</h3>
@@ -90,6 +91,7 @@ export default function WaitingRoom() {
                 {/* Array is mapped over, supposed to update when new nicknames are added */}
                 {nickNameMapping}
             </ul>
+            </div>
         </div>
     );
 }

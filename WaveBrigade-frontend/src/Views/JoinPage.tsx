@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 
 import {Checkbox} from "@nextui-org/react";
 import socket from './socket.tsx';
-
+import axios from "axios";
 
 export default function JoinPage() {
     //states

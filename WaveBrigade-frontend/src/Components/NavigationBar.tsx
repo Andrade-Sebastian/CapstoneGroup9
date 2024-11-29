@@ -1,4 +1,4 @@
-import {Navbar, NavbarBrand, NavbarContent, NavbarItem, Button} from "@nextui-org/react";
+import {Navbar, NavbarBrand, NavbarContent, NavbarItem } from "@nextui-org/react";
 
 import { RiPulseFill } from "react-icons/ri";
 import { IoIosSettings } from "react-icons/io";
