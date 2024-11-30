@@ -11,13 +11,14 @@ export interface IUser {
     nickname: string | null;
     associatedDevice: IDevice | null;
 }
-interface ILab {
+export interface ILab {
     id: string;
     name: string;
     iconPath?: string;
 }
-interface IExperiment {
+export interface IExperiment {
     id: string;
+    description: string;
     labTemplate: ILab;
     experimentTemplate: unknown;
 }

@@ -1,16 +1,18 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import {Checkbox} from "@nextui-org/react";
+import {Checkbox, Input} from "@nextui-org/react";
 import socket from './socket.tsx';
 import axios from "axios";
+import React from "react";
 
 export default function JoinPage() {
     //states
     const [nickName, setNickName] = useState("");
     const [StudentInputRoomCode, setStudentInputRoomCode] = useState("");
     const [nickNameReceived, setNickNameReceived] = useState("");
-    const [isJoining, setIsJoining] = useState(false);
+    const [isJoining, setIsJoining] = useState(false); 
+    const [isSpectator, setIsSpectator] = useState(false)
     
     const [error, setError] = useState("");
     
@@ -19,7 +21,7 @@ export default function JoinPage() {
     // const useMemo(() => {
 
     // })
-
+    console.log("Nickanme" + nickName)
     useEffect(() => {
         socket.on("receive_names", (names) => {
             if (Array.isArray(names)) {
@@ -132,19 +134,35 @@ export default function JoinPage() {
         
         
         return (
-            <div>
-            <p>Join Page</p>
-            <form onSubmit={handleSubmit}>
-                <label htmlFor="nickName"> Enter your nickname </label>     
-                <input type="text" id="nickName" onChange={(e) => setNickName(e.target.value)} />
-                <label htmlFor="StudentInputRoomCode"> Room Code </label>
-                <input type="text" id="StudentInputRoomCode" onChange={(e) => setStudentInputRoomCode(e.target.value)} /> 
-                <div className="flex gap-4">
-                <Checkbox defaultSelected size="sm">Spectator</Checkbox>
+                <div className="flex flex-col items-center justify-center h-screen">
+                     <div className="bg-white rounded-lg shawdow-lg p-8 max-w-md w-full">
+                        <h1 className="text-center text-3xl font-semibold mb-6 text-gray-800">Join a Lobby</h1>
+
+                        <form onSubmit={handleSubmit}>
+                            <div className="mb-6">
+                                <label htmlFor="NickName" className="block text-sm font-medium text-gray-700 mb-2">Nickname<span className="text-red-500">*</span></label>  
+                                <input type="text" id="nickName" className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" onChange={(e) => setNickName(e.target.value)} />
+                    
+                                <label htmlFor="StudentInputRoomCode" className="block text-sm font-medium text-gray-700 mb-2">Room Code<span className="text-red-500">*</span></label>  
+                                <input type="text" id="StudentInputRoomCode" className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" onChange={(e) => setStudentInputRoomCode(e.target.value)} /> 
+                            </div>
+
+                            <div className="flex flex-col gap-4 mb-4">
+                            <div className="flex items-center gap-2 mb-4">
+                                <input type="checkbox" id="joinAsSpectator" className="h-4 w-4" checked={isSpectator} onChange={() => setIsSpectator(!isSpectator)}/>
+                                    <label htmlFor="joinAsSpectator" className="text-sm font-medium text-gray-700">Join As Spectator</label>
+                            </div>
+                                    <div className="flex gap-10 items-center justify-center">
+                                        <button onClick={joinRoom} disabled={isJoining} type="submit" className={`mt-6 font-semibold py-3 px-6 rounded-md shadow-md transition duration-300 ease-in-out ${
+                                            isJoining
+                                                ? "bg-purple-600 hover:bg-purple-700 text-white"
+                                                : "bg-gray-400 text-white cursor-not-allowed"
+                                            }`}>Join Lobby
+                                        </button>
+                                    </div>   
+                            </div>
+                        </form>
+                    </div>
                 </div>
-                <input onClick={joinRoom} disabled={isJoining} type="submit" value={"Join"} />
-            </form>
-            <p>{nickNameReceived}</p>
-        </div>
     );
 }

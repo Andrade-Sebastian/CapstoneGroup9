@@ -3,13 +3,12 @@ import express from "npm:express";
 import {ISession} from "./controllers/session_controller.ts";
 import hostRouter from "./routes/host_routes.ts";
 import {Server, type Socket} from "npm:socket.io@4.8.1";
-import {CLIENT_SOCKET_ASSIGNMENT} from "./events.ts";
+import { experimentRouter } from "./routes/experiment_routes.ts";
 
 const app = express();
 const server = http.createServer(app);
 
 import cors, {CorsOptions} from "cors";
-
 
 
 // //cors setup for Deno
@@ -22,7 +21,7 @@ import cors, {CorsOptions} from "cors";
 // CORS setup for Socket.IO
 const io = new Server(server, {
     cors: {
-        origin: "*" // This is for the frontend
+        origin: "http://localhost:5173" // This is for the frontend
          // This allows GET and POST to be used
     },
 });
@@ -32,7 +31,9 @@ const io = new Server(server, {
 
 const currentSessions: { [key: string]: ISession } = {}
 
+app.use(cors())
 app.use('/host', hostRouter)
+app.use('/experiments', experimentRouter)
 
 const sessionNamespace = io.of("/session");
 
