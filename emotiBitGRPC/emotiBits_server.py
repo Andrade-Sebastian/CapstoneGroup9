@@ -13,7 +13,20 @@ class FindDevices(emotiBits_pb2_grpc.findDevices):
             yield device_list
     
     def foundDevices(self, request, context):
-        return super().foundDevices(request, context)
+        print("FoundDevices Request Made: ")
+        print(request)
+        device_reply = emotiBits_pb2.DeviceList()
+        
+        device1 = emotiBits_pb2.Device()
+        device1.serial = "YTHZ"
+        device1.ip = "0.0.0.0"
+        device2 = emotiBits_pb2.Device()
+        device2.serial = "NJWK"
+        device2.ip = "0.0.0.0"
+        device_reply.allDevices.append(device1)
+        device_reply.allDevices.append(device2)
+        print(f"Returning {len(device_reply.allDevices)} devices")
+        return device_reply
     
 def serve():
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))

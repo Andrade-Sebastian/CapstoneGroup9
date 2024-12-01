@@ -54,32 +54,7 @@ class EmotiBitsClient{
                 else{
                     std::cout << "getDevices failed" << std::endl;
                 }
-            // std::shared_ptr<ClientReaderWriter<Device, DeviceList> > stream(
-            //     stub_->getDevices(&context));
-
-            // std::thread writer([stream] (){
-            //     std::vector<Device> device{MakeDevice("47WX", "192.68.275"),
-            //                                 MakeDevice("69T3", "192.68.275")};
-            //     for(const Device& device: device){
-            //         std::cout << "Sending serial " << device.serial() << " at " << device.ip() << std::endl;
-            //         stream->Write(device);
-            //     }
-            //     stream->WritesDone();
-
-            //     });
-
-            //     DeviceList device_list;
-            //     while(stream->Read(&device_list)){
-            //          std::cout << "Received DeviceList:" << std::endl;
-            //             for (const auto& device : device_list.alldevices()) {
-            //                 std::cout << "Device serial: " << device.serial() << ", IP: " << device.ip() << std::endl;
-            // }
-            //     }
-            //     writer.join();
-            //     Status status = stream->Finish();
-            //     if(!status.ok()) {
-            //         std::cout << "getDevice rpc failed." << std::endl;
-            //     }
+            
         }
 
     private:

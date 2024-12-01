@@ -39,10 +39,10 @@ class findDevicesStub(object):
                 request_serializer=emotiBits__pb2.DeviceList.SerializeToString,
                 response_deserializer=emotiBits__pb2.DeviceResponse.FromString,
                 _registered_method=True)
-        self.foundDevices = channel.unary_stream(
+        self.foundDevices = channel.unary_unary(
                 '/emotiBits.findDevices/foundDevices',
                 request_serializer=emotiBits__pb2.DeviceRequest.SerializeToString,
-                response_deserializer=emotiBits__pb2.Device.FromString,
+                response_deserializer=emotiBits__pb2.DeviceList.FromString,
                 _registered_method=True)
 
 
@@ -69,10 +69,10 @@ def add_findDevicesServicer_to_server(servicer, server):
                     request_deserializer=emotiBits__pb2.DeviceList.FromString,
                     response_serializer=emotiBits__pb2.DeviceResponse.SerializeToString,
             ),
-            'foundDevices': grpc.unary_stream_rpc_method_handler(
+            'foundDevices': grpc.unary_unary_rpc_method_handler(
                     servicer.foundDevices,
                     request_deserializer=emotiBits__pb2.DeviceRequest.FromString,
-                    response_serializer=emotiBits__pb2.Device.SerializeToString,
+                    response_serializer=emotiBits__pb2.DeviceList.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -123,12 +123,12 @@ class findDevices(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_stream(
+        return grpc.experimental.unary_unary(
             request,
             target,
             '/emotiBits.findDevices/foundDevices',
             emotiBits__pb2.DeviceRequest.SerializeToString,
-            emotiBits__pb2.Device.FromString,
+            emotiBits__pb2.DeviceList.FromString,
             options,
             channel_credentials,
             insecure,

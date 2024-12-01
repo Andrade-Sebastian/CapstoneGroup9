@@ -14,13 +14,19 @@ class Device(_message.Message):
     def __init__(self, serial: _Optional[str] = ..., ip: _Optional[str] = ...) -> None: ...
 
 class DeviceRequest(_message.Message):
-    __slots__ = ("sessionName",)
-    SESSIONNAME_FIELD_NUMBER: _ClassVar[int]
-    sessionName: str
-    def __init__(self, sessionName: _Optional[str] = ...) -> None: ...
+    __slots__ = ("sessionId",)
+    SESSIONID_FIELD_NUMBER: _ClassVar[int]
+    sessionId: str
+    def __init__(self, sessionId: _Optional[str] = ...) -> None: ...
 
 class DeviceList(_message.Message):
     __slots__ = ("allDevices",)
     ALLDEVICES_FIELD_NUMBER: _ClassVar[int]
     allDevices: _containers.RepeatedCompositeFieldContainer[Device]
     def __init__(self, allDevices: _Optional[_Iterable[_Union[Device, _Mapping]]] = ...) -> None: ...
+
+class DeviceResponse(_message.Message):
+    __slots__ = ("status",)
+    STATUS_FIELD_NUMBER: _ClassVar[int]
+    status: str
+    def __init__(self, status: _Optional[str] = ...) -> None: ...
