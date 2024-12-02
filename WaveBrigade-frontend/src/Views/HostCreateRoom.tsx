@@ -1,4 +1,4 @@
-import { useState } from "react";
+ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Checkbox } from "@nextui-org/react";
 import axios from "axios";
@@ -71,10 +71,12 @@ export default function HostCreateRoom() {
   console.log("Is the password selected? " + passwordIsSelected);
   console.log("Allow Spectators? " + allowSpectators);
   console.log("---------");
-
+  // <div className="flex justify-center items-center min-h-screen h-auto p-4 place-content-center ">
+  // <div className="bg-white rounded-xl p-8 shadow-lg w-4/5 min-h-[1000px] place-content-center">
+  //   <form onSubmit={handleSubmit} className="flex flex-col gap-14">
   return (
     <div className="flex flex-col items-center justify-center h-screen">
-      <div className="bg-white rounded-lg shawdow-lg p-8 max-w-md w-full">
+      <div className="bg-white shawdow-lg rounded-xl p-8 w-full max-w-xl">
         <h1 className="text-center text-3xl font-semibold mb-6 text-gray-800">
           Host a Lobby
         </h1>

@@ -33,9 +33,10 @@ const labs: Array<ILab> = [
 
 const experiments: Array<IExperiment> = [
     {
-        id: "0",
-        labTemplate: labs[0],
-        description: "Super cool lab of Your Mom.",
+        id: generateRandomCode(6), //function for creating id
+        name: "video lab",
+        labTemplate: labs[0], 
+        description: "A steaming hot lab comparing your mom's size to the size of Mike Tyson's oily cheeks", 
         experimentTemplate: {}
     }, 
 ]
@@ -45,4 +46,48 @@ export function getAllExperiments(page: number = 1, size: number = 10){
 
     return experiments;
 
+}
+
+export function generateRandomCode(length: number){
+    const numbers = '0123456789';
+    let lobbyCode = '';
+    for (let i = 0; i < length; i++){
+        lobbyCode += numbers.charAt(Math.floor(Math.random() * numbers.length));
+    }
+    return lobbyCode;
+}
+
+export function createExperiment(templateId: string, description: string, experimentTemplate: {}, name: string){
+    const newExperiment = {
+        id: generateRandomCode(6), //function for creating id
+        name: name,
+        labTemplate: template, 
+        description: description,
+        experimentTemplate: experimentTemplate
+    }
+    experiment.push(newExperiment)
+
+    return newExperiment;
+}
+
+export function updateExperiment (experimentId: string, newDescription: string, newTemplate: {}, newName: string) {
+    updatedExperiment = labs[int(experimentId)];
+    updatedExperiment.name = newName;
+    updatedExperiment.description = newDescription;
+    updatedExperiment.experimentTemplate = newTemplate;
+    return updatedExperiment
+}
+
+export function deleteExperiment(experimentId: string){
+    currentExperiment = labs[int(experimentId)];
+    delete currentExperiment
+}
+
+export function viewExperiment(experimentId: string){
+    if(labs[int(experimentId)] === undefined){
+        throw new Error("Experiment not found");
+    }
+    else{
+        return labs[int(experimentId)];
+    }
 }

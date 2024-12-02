@@ -1,5 +1,6 @@
 import {currentSessions} from "../server.ts";
 import { v4 as uuid} from "npm:uuid";
+import SessionManager from "../sessions_singleton.ts"
 
 export interface IDevice {
     serialNumber: string;
@@ -14,6 +15,7 @@ export interface IUser {
 export interface ILab {
     id: string;
     name: string;
+    description: string;
     iconPath?: string;
 }
 export interface IExperiment {
@@ -45,6 +47,7 @@ export interface ISession {
 export type TSessionState = Omit<ISession, "credentials">
 
 // =====
+const sessionManager = SessionManager.getInstance()
 
 function generateSessionId(): string {
     let isUnique = false;
@@ -53,25 +56,25 @@ function generateSessionId(): string {
     return sessionId;
 }
 
-function getExperiment(experimentId: string): IExperiment {
-    // Query database for an experimentId.
-    if (experimentId === "17") {
-        return {
-            experimentTemplate: undefined,
-            id: "17",
-            labTemplate: {
-                id: "20",
-                name: "Gallery Lab"
-            }
-        }
-    } else {
-        throw new Error("Experiment is not found within the database.").name = "EXPERIMENT_NOT_FOUND";
-    }
-}
+// function getExperiment(experimentId: string): IExperiment {
+//     // Query database for an experimentId.
+//     if (experimentId === "17") {
+//         return {
+//             experimentTemplate: undefined,
+//             id: "17",
+//             labTemplate: {
+//                 id: "20",
+//                 name: "Gallery Lab"
+//             }
+//         }
+//     } else {
+//         throw new Error("Experiment is not found within the database.").name = "EXPERIMENT_NOT_FOUND";
+//     }
+// }
 
 function getSessionState(sessionId: string): TSessionState {
 
-    const session = currentSessions[sessionId];
+    const session = sessionManager.getSession(sessionId)
 
     if (!session) throw new Error("Session is not found.").name = "SESSION_NOT_FOUND"
 
@@ -105,7 +108,7 @@ function createSession(initializationData: ISessionInitialization, socketId: str
           allowSpectators: false,
           maskEnabled: false,
           focusedUser: null,
-          experiment: getExperiment(initializationData.selectedExperimentId),
+          experiment: "dsdadf",
         },
         credentials: {
             passwordEnabled: initializationData.credentials.passwordEnabled,
@@ -114,17 +117,17 @@ function createSession(initializationData: ISessionInitialization, socketId: str
         discoveredDevices: []
     }
 
-    currentSessions[session.sessionId] = session;
+    sessionManager.addSession(session.sessionId, session);
 
-    return getSessionState(generatedSessionId)
+    return getSessionState(session.sessionId)
 }
 
-function addDiscoveredDevice(sessionId: string, discoveredDevice: IDevice) {
-    currentSessions[sessionId].discoveredDevices.push(discoveredDevice);
-}
+// function addDiscoveredDevice(sessionId: string, discoveredDevice: IDevice) {
+//     currentSessions[sessionId].discoveredDevices.push(discoveredDevice);
+// }
 
 export {
     createSession,
-    addDiscoveredDevice,
+    // addDiscoveredDevice,
     getSessionState
 }

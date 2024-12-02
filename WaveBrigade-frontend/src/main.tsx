@@ -15,6 +15,8 @@ import HostRoot from './Views/HostRoot.tsx';
 import WaitingRoom from './Views/WaitingRoom.tsx';
 import PreviouslyMadeExperiments from './Views/PreviouslyMadeExperiments.tsx';
 import ExperimentCreaterRoot from './Views/ExperimentCreaterRoot.tsx';
+import Carousel from 'react-bootstrap/Carousel';
+import ExampleCarouselImage from 'components/ExampleCarouselImage';
 
 
 const router = createBrowserRouter([

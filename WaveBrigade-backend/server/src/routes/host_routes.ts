@@ -1,6 +1,6 @@
-import express, { Request, Response } from "express";
+import express, { Request, Response } from "npm:express";
 import {addDiscoveredDevice, getSessionState, IDevice, createSession} from "../controllers/session_controller.ts";
-const app = express();
+
 const hostRouter = express.Router();
 hostRouter.use(express.json());
 
@@ -68,45 +68,45 @@ hostRouter.post("/session/create", (req: Request, res: Response) => {
 
 
 
-hostRouter.post("/session/:sessionId/device_registration", (req: Request, res: Response) => {
-    const session = req.params.sessionId;
-    const devices: Array<IDevice> = req.body.selectedDevices;
+// hostRouter.post("/session/:sessionId/device_registration", (req: Request, res: Response) => {
+//     const session = req.params.sessionId;
+//     const devices: Array<IDevice> = req.body.selectedDevices;
 
-    try {
-        devices.forEach((selectedDevice: IDevice) => {
-            addDiscoveredDevice(session, selectedDevice);
-        })
-        return res.status(200).send(getSessionState(session))
-    } catch (error) {
-        if (error instanceof Error) {
-            if (error.name === "SESSION_NOT_FOUND") {
-                return res.status(400).send({
-                    error: error.name,
-                    message: error.message
-                })
-            }
-        }
-    }
-})
-
-
+//     try {
+//         devices.forEach((selectedDevice: IDevice) => {
+//             addDiscoveredDevice(session, selectedDevice);
+//         })
+//         return res.status(200).send(getSessionState(session))
+//     } catch (error) {
+//         if (error instanceof Error) {
+//             if (error.name === "SESSION_NOT_FOUND") {
+//                 return res.status(400).send({
+//                     error: error.name,
+//                     message: error.message
+//                 })
+//             }
+//         }
+//     }
+// })
 
 
 
-hostRouter.get("/session/:sessionId", (req: Request, res: Response) => {
-    const session = req.params.sessionId;
-    try {
-        return res.status(200).send(getSessionState(session))
-    } catch (error) {
-        if (error instanceof Error) {
-            if (error.name === "SESSION_NOT_FOUND") {
-                return res.status(400).send({
-                    error: error.name,
-                    message: error.message
-                })
-            }
-        }
-    }
-})
+
+
+// hostRouter.get("/session/:sessionId", (req: Request, res: Response) => {
+//     const session = req.params.sessionId;
+//     try {
+//         return res.status(200).send(getSessionState(session))
+//     } catch (error) {
+//         if (error instanceof Error) {
+//             if (error.name === "SESSION_NOT_FOUND") {
+//                 return res.status(400).send({
+//                     error: error.name,
+//                     message: error.message
+//                 })
+//             }
+//         }
+//     }
+// })
 
 export default hostRouter;

@@ -1,16 +1,19 @@
-
 import { useNavigate } from "react-router-dom";
 import ImageCardComponent from "../Components/ImageCardComponent.tsx";
+import Carousel from "../Components/CarouselComponent.tsx";
 export default function PreviouslyMadeExperiments() {
   const navigateTo = useNavigate();
 
   return (
     <>
-      <div className="flex justify-center items-center min-h-screen p-4">
-        <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-xl">
+      <div className="flex justify-center items-center min-h-screen h-auto p-4 place-content-center ">
+        <div className="bg-white rounded-xl p-8 shadow-lg w-4/5 min-h-[1203px] place-content-center">
           <h1 className="text-3xl font-semibold text-center mb-4 text-gray-800">
             View previously made experiments
           </h1>
+           
+          <Carousel>
+
             <ImageCardComponent
             headingTitle="Video Lab #3"
             description="A sexy Mike Tyson with his cheeks out lab to monitor
@@ -18,7 +21,8 @@ export default function PreviouslyMadeExperiments() {
             source="https://i.dailymail.co.uk/1s/2024/11/16/04/92135043-0-image-a-1_1731729974205.jpg"
             alt="Mike"
             />
-            <ImageCardComponent
+          </Carousel>
+            {/* <ImageCardComponent
             headingTitle="Picture Lab #1"
             description="A picture of a cute owl."
             source="https://lh3.googleusercontent.com/proxy/YngsuS8jQJysXxeucAgVBcSgIdwZlSQ-HvsNxGjHS0SrUKXI161bNKh6SOcMsNUGsnxoOrS3AYX--MT4T3S3SoCgSD1xKrtBwwItcgexaX_7W-qHo-VupmYgjjzWO-BuORLp9-pj8Kjr"
@@ -29,7 +33,7 @@ export default function PreviouslyMadeExperiments() {
             description="Gallery of Obama"
             source="https://obamawhitehouse.archives.gov/sites/whitehouse.gov/files/images/POTUS_header2.jpg"
             alt="Mike"
-            />
+            /> */}
 
             <p className="text-center"> or...</p>
           <div className="flex justify-center">
