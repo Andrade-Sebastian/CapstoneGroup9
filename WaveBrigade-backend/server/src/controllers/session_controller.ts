@@ -1,6 +1,8 @@
 import {currentSessions} from "../server.ts";
 import { v4 as uuid} from "npm:uuid";
-import SessionManager from "../sessions_singleton.ts"
+import SessionManager from "../sessions_singleton.ts";
+import {client} from "../main.ts";
+let foundDevicesOnNetwork: IDevice[] = [];
 
 export interface IDevice {
     serialNumber: string;
@@ -95,31 +97,74 @@ interface ISessionInitialization {
     credentials: ISessionCredentials;
     allowSpectators: boolean;
 }
+
+function requestDevices(sessionId) {
+    return new Promise((resolve, reject) => {
+      const message = { sessionId: sessionId };
+      let foundDevicesOnNetwork = [];  // Store the found devices
+  
+      // Call the gRPC method
+      client.foundDevices({ sessionId: sessionId }, (error, devices) => {
+        if (error) {
+          // If there's an error, reject the Promise with the error
+          console.error("Error", error);
+          reject(error);
+          return;
+        }
+  
+        // Iterate over the devices and push to the array
+        devices.allDevices.forEach((device) => {
+          console.log("DEVICE", device);
+          foundDevicesOnNetwork.push({
+            serialNumber: device.serial,
+            ipAddress: device.ip,
+          });
+        });
+  
+        // Resolve the Promise with the found devices data
+        resolve(foundDevicesOnNetwork);
+      });
+    });
+  }
+
 function createSession(initializationData: ISessionInitialization, socketId: string) {
-    console.log("Entered: createSession routine")
+    console.log("Entered: createSession routine");
     const generatedSessionId = generateSessionId();
-    const session: ISession = {
-        sessionId: generatedSessionId,
-        sessionName: initializationData.sessionName,
-        hostSocketId: socketId,
-        users: [],
-        isInitialized: false,
-        configuration: {
-          allowSpectators: false,
-          maskEnabled: false,
-          focusedUser: null,
-          experiment: "dsdadf",
-        },
-        credentials: {
-            passwordEnabled: initializationData.credentials.passwordEnabled,
-            password: initializationData.credentials.password
-        },
-        discoveredDevices: []
-    }
+    let deviceList = []
+    return new Promise<ISession>((resolve, reject) => {
+        requestDevices(generatedSessionId)
+            .then(devices => {
+                const session: ISession = {
+                    sessionId: generatedSessionId,
+                    sessionName: initializationData.sessionName,
+                    hostSocketId: socketId,
+                    users: [],
+                    isInitialized: false,
+                    configuration: {
+                    allowSpectators: false,
+                    maskEnabled: false,
+                    focusedUser: null,
+                    experiment: "dsdadf",
+                    },
+                    credentials: {
+                        passwordEnabled: initializationData.credentials.passwordEnabled,
+                        password: initializationData.credentials.password
+                    },
+                    discoveredDevices: devices
+                }
+                console.log(session.discoveredDevices);
+                sessionManager.addSession(session.sessionId, session);
+                resolve(session);
+            })
+            .catch(error =>{
+                console.error("Error creating the session: ", error);
+                reject(error);
+            })
+    })
+    
+  
 
-    sessionManager.addSession(session.sessionId, session);
-
-    return getSessionState(session.sessionId)
+    //return getSessionState(session.sessionId)
 }
 
 // function addDiscoveredDevice(sessionId: string, discoveredDevice: IDevice) {
