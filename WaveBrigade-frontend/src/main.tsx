@@ -17,6 +17,7 @@ import PreviouslyMadeExperiments from './Views/PreviouslyMadeExperiments.tsx';
 import ExperimentCreaterRoot from './Views/ExperimentCreaterRoot.tsx';
 import Carousel from 'react-bootstrap/Carousel';
 import ExampleCarouselImage from 'components/ExampleCarouselImage';
+import ConnectEmotiBit from './Views/ConnectEmotiBit.tsx';
 
 
 const router = createBrowserRouter([
@@ -68,10 +69,13 @@ const router = createBrowserRouter([
         element: <JoinPage />
       },
       {
+        path: "connect-emotibit",
+        element: <ConnectEmotiBit />
+      },
+      {
         path: "waiting-room",
         element: <WaitingRoom />
       },
-    
   ]
       
   }

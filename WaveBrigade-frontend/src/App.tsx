@@ -10,14 +10,13 @@ import { Link, Outlet } from "react-router-dom";
 import NavigationBar from "./Components/NavigationBar";
 
 function App() {
-  useSocketManager();
+  //useSocketManager();
   return (
     <div className="flex flex-col h-screen max-h-screen overflow-auto bg-gradient-to-br from-purple-700 to-blue-500">
       <NavigationBar />
 
 
       <div className="flex flex-col grow h-full overflow-auto">
-
         <Outlet />
       </div>
     </div>

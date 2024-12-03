@@ -79,9 +79,19 @@ export function updateExperiment (experimentId: string, newDescription: string, 
 }
 
 export function deleteExperiment(experimentId: string){
-    currentExperiment = labs[int(experimentId)];
-    delete currentExperiment
+    const experimentIndex = experiments.findIndex(exp => exp.id === experimentId);
+
+    if(experimentIndex !== -1){
+        experiments.splice(experimentIndex, 1);
+    }
+    else{
+        throw new Error("Experiment not found.")
+    }
+    // currentExperiment = labs[int(experimentId)];
+    // delete currentExperiment
 }
+
+
 
 export function viewExperiment(experimentId: string){
     if(labs[int(experimentId)] === undefined){

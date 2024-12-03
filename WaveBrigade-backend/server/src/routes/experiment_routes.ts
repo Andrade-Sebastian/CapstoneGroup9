@@ -35,7 +35,7 @@ experimentRouter.post("/create", (req: Request, res: Response) => {
 });
 
 
-experimentRouter.update("/update/:id", (req: Request, res: Response) => {
+experimentRouter.put("/update/:id", (req: Request, res: Response) => {
     try{
         const {id} = req.params;
         const {description, experimentTemplate, name} = req.body;

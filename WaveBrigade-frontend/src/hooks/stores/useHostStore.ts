@@ -5,10 +5,6 @@ import {IUser} from "../../typings.ts"
 import {IDevice} from "../../typings.ts"
 import {ISession} from "../../typings.ts"
 
-sessionId: null;
-sessionName: string;
-hostSocketId: string;
-
 export interface IHostState extends Omit<ISession, "credentials" | "isInitialized">{
     pairedDevice: IDevice | null;
     sessionId: null | string;

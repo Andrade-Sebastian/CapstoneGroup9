@@ -6,23 +6,22 @@ export default function PreviouslyMadeExperiments() {
 
   return (
     <>
-      <div className="flex justify-center items-center min-h-screen h-auto p-4 place-content-center ">
-        <div className="bg-white rounded-xl p-8 shadow-lg w-4/5 min-h-[1203px] place-content-center">
-          <h1 className="text-3xl font-semibold text-center mb-4 text-gray-800">
-            View previously made experiments
-          </h1>
-           
+      <div className="flex flex-col justify-center items-center min-h-screen h-auto p-4 place-content-center ">
+        <div className="bg-white rounded-xl p-8 shadow-lg w-4/5 min-h-[1203px] flex flex-col place-content-center space-y-8">
+            <h1 className="text-3xl font-semibold text-center mb-4 text-gray-800">
+              View previously made experiments
+            </h1>
+    
           <Carousel>
-
             <ImageCardComponent
-            headingTitle="Video Lab #3"
-            description="A sexy Mike Tyson with his cheeks out lab to monitor
+              headingTitle="Video Lab #3"
+              description="A sexy Mike Tyson with his cheeks out lab to monitor
                   temperature and arousal."
-            source="https://i.dailymail.co.uk/1s/2024/11/16/04/92135043-0-image-a-1_1731729974205.jpg"
-            alt="Mike"
+              source="https://i.dailymail.co.uk/1s/2024/11/16/04/92135043-0-image-a-1_1731729974205.jpg"
+              alt="Mike"
             />
           </Carousel>
-            {/* <ImageCardComponent
+          {/* <ImageCardComponent
             headingTitle="Picture Lab #1"
             description="A picture of a cute owl."
             source="https://lh3.googleusercontent.com/proxy/YngsuS8jQJysXxeucAgVBcSgIdwZlSQ-HvsNxGjHS0SrUKXI161bNKh6SOcMsNUGsnxoOrS3AYX--MT4T3S3SoCgSD1xKrtBwwItcgexaX_7W-qHo-VupmYgjjzWO-BuORLp9-pj8Kjr"
@@ -35,7 +34,7 @@ export default function PreviouslyMadeExperiments() {
             alt="Mike"
             /> */}
 
-            <p className="text-center"> or...</p>
+          <p className="text-center"> or...</p>
           <div className="flex justify-center">
             <button
               type="submit"
