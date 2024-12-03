@@ -5,40 +5,41 @@ import {IUser} from "../../typings.ts"
 import {IDevice} from "../../typings.ts"
 import {ISession} from "../../typings.ts"
 
-userId: string;
-socketId: string;
-nickname: string | null;
-associatedDevice: IDevice | null;
 
-export interface IJoinerState extends Omit<IUser, "credentials" | "isInitialized">{
-    userId: string | null;
-    socketId: string | null;
-    nickname: string | null;
-    associatedDevice: IDevice | null;
+export interface IJoinerState {
+    user: IUser | null
+    sessions:{
+        users: Array<IUser>;
+        sessionId: string | null;
+        hostSocketId: string | null;
+    }
 }
 
 interface JoinerActions {
-    pairDevice: (device: IDevice) => void;
-    updateJoinerSocketId: (JoinerSocketId: string) => void
-    discoveredDevices: (discoveredDevices: Array<IDevice>) => void
+    pairDevice: (newDevice: IDevice) => void;
+    updateUser: (newUser: IUser) => void;
+    addSessionInfo: (newUsers: Array<IUser>, newSessionId: string, newHostSocketId: string) => void;
 }
-
-
 
 
 
 const useJoinerStore = create<IJoinerState & JoinerActions>()((set) => ({
-    userId: null,
-    socketId: null,
-    nickname: null,
-    associatedDevice: null,
+    user: null,
+    sessions: {
+        users: [],
+        sessionId: null,
+        hostSocketId: null,
+    },
     
-    pairDevice: (device: IDevice) => set((state) => ({ pairedDevice: device })),
-    addUser: (user: IUser) => set((state) => { users: [...state.users, user]}),
+    pairDevice: (newDevice: IDevice) => set((state) => (state.user ? {user: {...state.user, associatedDevice: newDevice}} : {user: null  } )),
+    addSessionInfo: (newUsers: Array<IUser>, newSessionId: string, newHostSocketId: string) => set(() => ({sessions: {users: newUsers, sessionId: newSessionId, hostSocketId: newHostSocketId}})),
+    updateUser: (newUser: IUser) => set(() => ({user: newUser})),
+}))
+
     
     
     //Example
     // bears: 0,
     // increase: (by) => set((state) => ({ bears: state.bears + by })),
-}))
+
 
