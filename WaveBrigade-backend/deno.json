@@ -12,6 +12,18 @@
     "express-session": "npm:express-session@^1.18.1",
     "socket.io": "npm:socket.io@^4.8.1",
     "socketio": "npm:socketio@^1.0.0",
-    "uuid": "npm:uuid@^11.0.3"
+    "uuid": "npm:uuid@^11.0.3",
+    "grpc": "npm:@grpc/grpc-js"
+  },
+  "compilerOptions": {
+    "target": "es2016",
+    "lib": [
+      "es2015",
+      "dom"
+    ],
+    "module": "commonjs",
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true
   }
 }

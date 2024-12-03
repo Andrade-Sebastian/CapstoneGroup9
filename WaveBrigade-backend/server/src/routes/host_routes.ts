@@ -35,20 +35,22 @@ What you receive:
 }*/
 
 
-hostRouter.post("/session/create", (req: Request, res: Response) => {
+hostRouter.post("/session/create", async (req: Request, res: Response) => {
     console.log("At /session/create | recieved: " + JSON.stringify(req.body));
     
     const hostSocketId: string = req.body.hostSocketId;
 
     try {
-        const session = createSession({
+        const session = await createSession({
             sessionName: req.body.sessionName,
             selectedExperimentId: req.body.selectedExperimentId,
             credentials: req.body.credentials,
             allowSpectators: req.body.allowSpectators,
         }, hostSocketId)
 
-        return res.status(200).send(session)
+        const sessionState = await getSessionState(session.sessionId);
+
+        return res.status(200).send(sessionState)
     } catch (error: unknown) {
         if (error instanceof Error) {
             if (error.name === "EXPERIMENT_NOT_FOUND")

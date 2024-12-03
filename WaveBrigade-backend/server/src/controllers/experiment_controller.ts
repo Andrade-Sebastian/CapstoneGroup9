@@ -65,13 +65,13 @@ export function createExperiment(templateId: string, description: string, experi
         description: description,
         experimentTemplate: experimentTemplate
     }
-    experiment.push(newExperiment)
+    experiments.push(newExperiment)
 
     return newExperiment;
 }
 
 export function updateExperiment (experimentId: string, newDescription: string, newTemplate: {}, newName: string) {
-    updatedExperiment = labs[int(experimentId)];
+    let updatedExperiment = labs[int(experimentId)];
     updatedExperiment.name = newName;
     updatedExperiment.description = newDescription;
     updatedExperiment.experimentTemplate = newTemplate;
@@ -79,7 +79,7 @@ export function updateExperiment (experimentId: string, newDescription: string, 
 }
 
 export function deleteExperiment(experimentId: string){
-    currentExperiment = labs[int(experimentId)];
+    let currentExperiment = experiments[int(experimentId)];
     delete currentExperiment
 }
 
