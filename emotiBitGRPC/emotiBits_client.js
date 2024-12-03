@@ -41,4 +41,4 @@ const options = {
   });
   }
 
-  requestDevices("candle");
+  requestDevices("MikeTyson");
