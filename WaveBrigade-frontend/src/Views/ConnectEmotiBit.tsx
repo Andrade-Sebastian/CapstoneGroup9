@@ -1,7 +1,10 @@
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 
 export default function ConnectEmotiBit() {
+  const location = useLocation();
+  const { nickName, roomCode } = location.state || {};
   const [serialNumber, setSerialNumber] = useState("");
   const navigateTo = useNavigate();
 
@@ -51,7 +54,7 @@ export default function ConnectEmotiBit() {
                   ? "bg-purple-600 hover:bg-purple-700 text-white"
                   : "bg-gray-400 text-white cursor-not-allowed"
               }`}
-              onClick={() => navigateTo("/waiting-room")}
+              onClick={() => navigateTo("/waiting-room", {state: { nickName, roomCode: roomCode }})}
             >
               Join Lobby
             </button>

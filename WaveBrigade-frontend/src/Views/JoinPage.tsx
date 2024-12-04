@@ -32,7 +32,7 @@ export default function JoinPage() {
     socket.on("receive_names", (names) => {
       console.log("Nicknames received:", names);
       setIsJoining(false);
-      navigateTo("/waiting-room", {
+      navigateTo("/connect-emotibit", {
         state: { nickName, roomCode: StudentInputRoomCode },
       });
     });
