@@ -1,5 +1,5 @@
 import { BoardIds, BoardShim, BrainFlowInputParams, BrainFlowPresets} from 'brainflow';
-import Papa from 'papaparse';
+import * as Papa from 'papaparse';
 import * as fs from 'fs';
 
 function sleep(ms: number)
@@ -25,23 +25,16 @@ AUXILIARY
  */
 
 //interfaces to specify what each column header represents
-interface ancData {
+
+interface bioData {
     package: number;
-    eda: number;
-    temperature: number;
-    thermistor: number;
+    data1: number;
+    data2: number;
+    data3: number;
     timestamp: number;
     unknown: number;
 }
 
-interface auxData {
-    package: number;
-    ppgR: number;
-    ppgI: number;
-    ppgG: number;
-    timestamp: number;
-    unknown: number;
-}
 //function to write headers that represent the data to the csv
 function writeHeaderstoCSV(FilePath: string, Headers: string[]){
     const headers = Headers.join('\t') + '\n'; //need to specify that the list is a string joined by tabs since that is the delimiter
@@ -64,25 +57,50 @@ const board_id = BoardIds.EMOTIBIT_BOARD;
 const ancCSV = fs.createReadStream(ancFilePath);
 const auxCSV = fs.createReadStream(auxFilePath);
 
+const currentDate = new Date('2024-12-3');
+const currentTime = currentDate.getTime();
+const passedDate = new Date();
+
 
 
 async function runExample (): Promise<void>
 {
+    try{
+        board.prepareSession();
+        const presets = BoardShim.getBoardPresets(board_id);
+        board.addStreamer("file://aux_from_streamer.csv:a", BrainFlowPresets.AUXILIARY_PRESET);
+        board.addStreamer("file://anc_from_streamer.csv:a", BrainFlowPresets.ANCILLARY_PRESET);
+        board.startStream();
     
-    board.prepareSession();
-    const presets = BoardShim.getBoardPresets(board_id);
+    while(true){
+        // const passedTime = passedDate.getTime();
+        // console.log("CURRENT: " + currentTime);
+        // console.log("PASSED: " + passedTime);
+        const data_current = board.getBoardData(100, BrainFlowPresets.ANCILLARY_PRESET);
+        if(data_current.length !== 0){ //doesn't log data if it is empty
+            console.log(data_current);
+        }
+        // if((passedTime - currentTime) > 5000){
+        //     break;
+        // }
+        
+        
+    }}
+    catch(error){
+        console.error(error);
+    }
+    finally{
+        await sleep (3000);
+        board.stopStream();
+        board.releaseSession();
+        parseData(ancCSV);
+    }
+}
     
-    board.addStreamer("file://aux_from_streamer.csv:a", BrainFlowPresets.AUXILIARY_PRESET);
-    board.addStreamer("file://anc_from_streamer.csv:a", BrainFlowPresets.ANCILLARY_PRESET);
-    board.startStream();
-    await sleep (3000);
-    board.stopStream();
-
-    const data_current = board.getBoardData(100, BrainFlowPresets.ANCILLARY_PRESET);
 
     //to find which channel each data is on
     //const channel_number = BoardShim.getPpgChannels(board_id, BrainFlowPresets.AUXILIARY_PRESET);
-    board.releaseSession();
+    
 
     //console.info(channel_number);
     //used to display info about the board and to see how the current data is stored
@@ -90,28 +108,14 @@ async function runExample (): Promise<void>
     console.info(BoardShim.getBoardDescr(BoardIds.EMOTIBIT_BOARD));
     console.info('Data');
     console.info(data_current);*/
-
-    Papa.parse<ancData>(ancCSV, {
+function parseData(file){
+    Papa.parse<bioData>(file, {
         header: true,
         delimiter: '\t',
         dynamicTyping: true,
           
         complete: () => {
-            console.log("Finished parsing ANC data");
-        },
-        step: (results) => {
-          console.log("Row data:", results.data);
-        },
-        }
-    );
-
-    Papa.parse<auxData>(auxCSV, {
-        header: true,
-        delimiter: '\t',
-        dynamicTyping: true,
-          
-        complete: () => {
-            console.log("Finished parsing AUX data");
+            console.log("Finished parsing data");
         },
         step: (results) => {
           console.log("Row data:", results.data);
