@@ -1,7 +1,5 @@
 {
   "tasks": {
-    "dev-server": "deno run --allow-all --watch server/src/server.ts", 
-    "dev-index": "deno run --allow-all --watch server/src/index.ts",
     "dev-main": "deno run --allow-all --watch server/src/main.ts"
   },
   "imports": {

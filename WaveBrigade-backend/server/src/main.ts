@@ -24,6 +24,7 @@ import cors from "npm:cors";
 import { Server } from "npm:socket.io@^4.8.1";
 import { createServer } from "node:http";
 import hostRouter from "./routes/host_routes.ts"
+import joinerRouter from "./routes/joiner_routes.ts"
 import session_handlers from "./handlers/session_handlers.ts";
 import experimentRouter from "./routes/experiment_routes.ts";
 
@@ -32,7 +33,8 @@ const server = createServer(app);
 
 app.use(cors());
 //app.use(cors({origin: ORIGIN}));
-app.use("/host", hostRouter);
+app.use("/host", hostRouter); 
+app.use("/joiner", joinerRouter); 
 //app.use("/experiment", experimentRouter);
 
 

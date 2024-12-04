@@ -4,6 +4,7 @@ import SessionManager from "../sessions_singleton.ts";
 import {client} from "../main.ts";
 let foundDevicesOnNetwork: IDevice[] = [];
 
+
 export interface IDevice {
     serialNumber: string;
     ipAddress: string;
@@ -144,7 +145,7 @@ function createSession(initializationData: ISessionInitialization, socketId: str
                     allowSpectators: false,
                     maskEnabled: false,
                     focusedUser: null,
-                    experiment: "dsdadf",
+                    experiment: "dsdadf", //hardcoded
                     },
                     credentials: {
                         passwordEnabled: initializationData.credentials.passwordEnabled,
@@ -161,11 +162,25 @@ function createSession(initializationData: ISessionInitialization, socketId: str
                 reject(error);
             })
     })
-    
-  
-
     //return getSessionState(session.sessionId)
 }
+
+//go through singleton session, find sessionid user requested, if it finds, add it to the session's users, return sessionState
+function joinSession(requestedSessionId: string, socketID: string){
+    console.log("Entered: joinSession routine");
+     if (SessionManager.getSession(requestedSessionId))//if the requested session exists
+     {
+        console.log("joined session -- session_controller.ts");
+        return getSessionState(socketID)
+     }
+     else{
+        throw new Error("Could not join session")
+     }
+            
+    }
+
+
+
 
 // function addDiscoveredDevice(sessionId: string, discoveredDevice: IDevice) {
 //     currentSessions[sessionId].discoveredDevices.push(discoveredDevice);

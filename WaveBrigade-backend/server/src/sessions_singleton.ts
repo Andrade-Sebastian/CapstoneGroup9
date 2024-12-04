@@ -32,6 +32,7 @@ class SessionManager {
 
     public getSession(sessionId: string): ISession | undefined {
         return this.currentSessions[sessionId];
+        
     }
 
     public removeSession(sessionId: string): void {
