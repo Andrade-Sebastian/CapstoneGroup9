@@ -1,7 +1,7 @@
 const PORT = 3000;
 const ORIGIN = "http://localhost:5173";
 import grpc from "npm:@grpc/grpc-js";
-const PROTO_PATH = "./grpc/protos/emotiBits.proto";
+const PROTO_PATH = "./server/src/grpc/protos/emotiBits.proto";
 import protoLoader from "npm:@grpc/proto-loader";
 
 const options = {
@@ -26,9 +26,6 @@ import { createServer } from "node:http";
 import hostRouter from "./routes/host_routes.ts"
 import session_handlers from "./handlers/session_handlers.ts";
 import experimentRouter from "./routes/experiment_routes.ts";
-
-const PORT = 3000;
-const ORIGIN = "http://localhost:5173";
 
 const app = express();
 const server = createServer(app);
