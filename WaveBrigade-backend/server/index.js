@@ -146,7 +146,7 @@ io.on("connection", (socket) => {
         console.log("-------------"+"In INDEX.JS -> join_waiting_room event."+"-------------")
         console.log("nickname: "+ nickName)
         console.log("All Rooms: " + JSON.stringify(rooms, null, 2))
-        console.log("StudentInputRoomCode: " + StudentInputRoomCode )
+        console.log("StudentInputRoomCode: " + StudentInputRoomCode + " index.js" )
         console.log("Valid room code? " +isValidRoomCode);
 
         

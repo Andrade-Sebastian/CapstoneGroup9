@@ -1,8 +1,10 @@
 from concurrent import futures
+print("START PASS")
 import grpc
 import emotiBits_pb2_grpc
 import emotiBits_pb2
-
+import sys
+print(sys.path)
 class FindDevices(emotiBits_pb2_grpc.findDevices):
     def getDevices(self, request, context):
         print("GetDevices Request Made:")

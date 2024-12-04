@@ -1,9 +1,8 @@
 
 import { create } from 'zustand'
-import {ISessionState} from "../../typings.ts"
 import {IUser} from "../../typings.ts"
 import {IDevice} from "../../typings.ts"
-import {ISession} from "../../typings.ts"
+
 
 
 export interface IJoinerState {
@@ -23,7 +22,7 @@ interface JoinerActions {
 
 
 
-const useJoinerStore = create<IJoinerState & JoinerActions>()((set) => ({
+export const useJoinerStore = create<IJoinerState & JoinerActions>()((set) => ({
     user: null,
     sessions: {
         users: [],

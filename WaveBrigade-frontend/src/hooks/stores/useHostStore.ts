@@ -1,16 +1,17 @@
 
 import { create } from 'zustand'
-import {ISessionState} from "../../typings.ts"
+import {ISessionCredentials} from "../../typings.ts"
+import {ISessionConfiguration} from "../../typings.ts"
 import {IUser} from "../../typings.ts"
 import {IDevice} from "../../typings.ts"
 import {ISession} from "../../typings.ts"
 
 export interface IHostState extends Omit<ISession, "credentials" | "isInitialized">{
     pairedDevice: IDevice | null;
-    sessionId: null | string;
-    sessionName: null | string;
-    hostSocketId: null | string;
-    configuration: null | ISessionConfiguration;
+    sessionId: string | null;
+    sessionName: string | null;
+    hostSocketId: string | null;
+    configuration: ISessionConfiguration | null;
     users: Array<IUser>;
 }
 
@@ -30,7 +31,7 @@ interface HostActions {
 
 
 
-const useHostStore = create<HostState & HostActions>()((set) => ({
+export const useHostStore = create<IHostState & HostActions>()((set) => ({
     pairedDevice: null,
     sessionId: null,
     sessionName: null,
@@ -42,8 +43,5 @@ const useHostStore = create<HostState & HostActions>()((set) => ({
     addUser: (user: IUser) => set((state) => { users: [...state.users, user]}),
     
     
-    //Example
-    bears: 0,
-    increase: (by) => set((state) => ({ bears: state.bears + by })),
 }))
 

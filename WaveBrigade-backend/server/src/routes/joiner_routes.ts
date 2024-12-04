@@ -1,5 +1,6 @@
 import express, { Request, Response } from "express";
-import {addDiscoveredDevice, getSessionState, IDevice, createSession} from "../controllers/session_controller.ts";
+import {addDiscoveredDevice, getSessionState, IDevice, createSession, joinSession} from "../controllers/session_controller.ts";
+import SessionManager from "../sessions_singleton.ts";
 const app = express();
 const joinerRouter = express.Router();
 joinerRouter.use(express.json());
@@ -24,7 +25,8 @@ joinerRouter.get("/session/:sessionId", (req: Request, res: Response) => {
 joinerRouter.post("/join-session/:requestedSessionId/:socketId", (req: Request, res: Response) => {
     const requestedSessionId = req.params.requestedSessionId;
     const socketId = req.params.socketId;
-    
+    console.log("URL PARAM:", requestedSessionId, socketId)
+    console.log("SESSIONS: " + JSON.stringify(SessionManager.getInstance().listSessions()))
     try{    
         res.status(200).send(joinSession(requestedSessionId, socketId))
     }
@@ -35,6 +37,12 @@ joinerRouter.post("/join-session/:requestedSessionId/:socketId", (req: Request, 
     
     }
 )
+
+joinerRouter.get("/debug", (req: Request, res: Response) => {
+    const sessions = SessionManager.getInstance().listSessions()
+    console.log(sessions)
+    res.status(500).send(sessions)
+})
 
 
 export default joinerRouter;

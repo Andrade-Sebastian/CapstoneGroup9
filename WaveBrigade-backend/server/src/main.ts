@@ -51,6 +51,10 @@ let isHost = true;
 
 
 io.on("connection", (socket) => {
+    console.log("User Connected " + socket.id)
+    socket.on("client-assignment", () => {
+        socket.emit("client-assignment", {socketId: socket.id});
+    }); // Send socket ID to the client
     session_handlers(io, socket, rooms, isHost);
 })
 

@@ -8,9 +8,20 @@ import { IoIosSettings } from "react-icons/io";
 import { useSocketManager } from "./hooks/useSocketManager.js"
 import { Link, Outlet } from "react-router-dom";
 import NavigationBar from "./Components/NavigationBar";
+import { useEffect } from "react";
+import socket from "./Views/socket.js"
 
 function App() {
   //useSocketManager();
+  useEffect(()=>{
+    socket.emit("client-assignment")
+    socket.on("client-assignment", (data) => {
+      sessionStorage.setItem("socketID", data.socketId)
+    })
+
+    return () => {socket.off("client-assignment")}
+  },[])
+
   return (
     <div className="flex flex-col h-screen max-h-screen overflow-auto bg-gradient-to-br from-purple-700 to-blue-500">
       <NavigationBar />

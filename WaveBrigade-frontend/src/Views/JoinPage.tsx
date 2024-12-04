@@ -1,10 +1,24 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-
+import { v4 as uuidv4 } from "uuid";
 import { Checkbox, Input } from "@nextui-org/react";
 import socket from "./socket.tsx";
 import axios from "axios";
 import React from "react";
+import {useJoinerStore} from "../hooks/stores/useJoinerStore.ts"
+//refactor to not use Host, but use the joiner instead. 
+import {useHostStore} from "../hooks/stores/useHostStore.ts"
+
+export interface IUserInfo{
+    userId: string;
+    socketId: string;
+    nickname: string;
+}
+
+export interface IDevice{
+  serialNumber:string;
+  ipAddress: string;
+}
 
 export default function JoinPage() {
   //states
@@ -13,16 +27,34 @@ export default function JoinPage() {
   const [nickNameReceived, setNickNameReceived] = useState("");
   const [isJoining, setIsJoining] = useState(false);
   const [isSpectator, setIsSpectator] = useState(false);
-
+  const [userId, setUserId] = useState("");
+  const socketId = sessionStorage.getItem("socketID")
+  const [sessionId, setSessionId] = useState("");
   const [error, setError] = useState("");
 
   const navigateTo = useNavigate();
+  /*****************/
+  const [userInfo, setUserInfo] = useState({
+    userId: "",
+    socketId: "",
+    nickname: "",
+  })
 
+  const updateUser = useJoinerStore(state => state.updateUser)
+  const sessionInfo = useJoinerStore(state => state.addSessionInfo)
+  const addUser = useHostStore(state => state.addUser)
+  const userObject = useJoinerStore(state => state.user)
+  
   // const useMemo(() => {
 
   // })
   console.log("Nickname" + nickName);
   useEffect(() => {
+    socket.on("socketID", (id) => {
+      console.log("Setting socket Id, ", id)
+      sessionStorage.setItem("SocketID", id);
+  });
+
     socket.on("receive_names", (names) => {
       if (Array.isArray(names)) {
         const lastNickName = names[names.length - 1];
@@ -42,6 +74,10 @@ export default function JoinPage() {
       socket.off("receive_names");
       socket.off("error");
     };
+  }, []);
+
+  useEffect(() => {
+    setUserId(uuidv4());
   }, []);
 
   useEffect(() => {
@@ -102,41 +138,44 @@ export default function JoinPage() {
     console.log("------------------------------");
   }
 
-  //error here
-  // useEffect(() => {
-  //     socket.on("receive_names", (names) => { //listens for receive_names from server, nickNameReceieved updates when it does
-  //         // console.log("names[names.length - 1]: " + names[names.length - 1])
-  //         // setNickNameToWaitingRoom(names[names.length - 1])
-  //         // console.log("The nickNameToWaitingRoom value is :"+nickNameToWaitingRoom)
-  //         // setNickName(names[names.length - 1])// set user's nickname to the most recently added nickname --- POTENTIAL FUTURE BUG
-  //         // console.log("-------------"+"IN JOIN PAGE, IN RECEIVE_NAMES: Received names: ", JSON.stringify(names) + "-------------")
-  //         if (Array.isArray(names)) { //array of nicknames of users in the room is sent
-  //             console.log("Dis shit do be an array")
-  //             setNickNameReceived(names.join(", "));
-  //             console.log("nickName: " + nickName + " nickNameRecieved: " + nickNameReceived)
-  //             console.log("sending to waiting room: ", names, " ", StudentInputRoomCode)
-  //             navigateTo("/waiting-room", { state: { nickName, StudentInputRoomCode } });
-  //         }
-  //     //     else if (names && names.users){
-  //     //         console.log("Hooooraaaaaay its hitting else if!")
-  //     //     }
-  //     //     else{
-  //     //         console.log("Dis shit aint an array")
-  //     //     }
-  //     //     console.log("-------------------------")
-  //     // });
 
-  //     return () => {
-  //         socket.off("receive_names");
-  //     };
-  // }, []);
 
-  //Check whether the room code exists in the backend
-  // function validateRoomCode(){
 
-  // }
 
+  
   function handleSubmit(e: { preventDefault: () => void }) {
+    //get the user's socket id , set its variable --- DONE
+    //give them a userId (Making it on frontend???? -> rand()?) -- DONE
+    //Figure out how to get the serial number and ipaddress on the frontend so that they are in this page
+    if(socketId !== null)
+    {
+      updateUser({
+        userId: userId,
+        socketId: socketId,
+        nickname: nickName,
+        associatedDevice: null,
+      })
+
+      sessionInfo({
+
+      })
+    }
+    else{
+      throw new Error ("Socket ID not initialized")
+    }
+    
+
+    console.log("MIKE TYSON " + JSON.stringify(userObject));
+    axios
+      .post(`http://localhost:3000/joiner/join-session/${StudentInputRoomCode}/${socketId}`, userInfo)
+
+      .then((response) => {
+        console.log(response.data);
+      })
+      .catch((error) => {
+        console.error("Error joining session:", error);
+      });
+
     //form submits so the events are triggered
     e.preventDefault();
     joinRoom();

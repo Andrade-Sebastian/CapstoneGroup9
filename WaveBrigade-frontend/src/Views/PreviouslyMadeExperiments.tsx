@@ -1,6 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import ImageCardComponent from "../Components/ImageCardComponent.tsx";
 import Carousel from "../Components/CarouselComponent.tsx";
+
+
 export default function PreviouslyMadeExperiments() {
   const navigateTo = useNavigate();
 

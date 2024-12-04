@@ -29,7 +29,7 @@ export default function session_handlers(_io: Server, _socket: Socket, rooms: { 
     });
 
     _socket.on("join_room", (data) => { //listens for join_room event from a Student ONLY, expects room code and nickName
-
+        console.log("LOOK AT ME" + JSON.stringify(data))
         const {nickName, StudentInputRoomCode} = data;
         var isValidRoomCode = StudentInputRoomCode in rooms;
         var nameIsDuplicate = isValidRoomCode && nickName in rooms[StudentInputRoomCode].users
@@ -95,7 +95,7 @@ export default function session_handlers(_io: Server, _socket: Socket, rooms: { 
         console.log("-------------"+"In INDEX.JS -> join_waiting_room event."+"-------------")
         console.log("nickname: "+ nickName)
         console.log("All Rooms: " + JSON.stringify(rooms, null, 2))
-        console.log("StudentInputRoomCode: " + StudentInputRoomCode )
+        console.log("StudentInputRoomCode: " + StudentInputRoomCode + " session_handlers.ts")
         console.log("Valid room code? " +isValidRoomCode);
 
         

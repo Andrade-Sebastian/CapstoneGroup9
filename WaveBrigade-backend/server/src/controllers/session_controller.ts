@@ -77,7 +77,9 @@ function generateSessionId(): string {
 
 function getSessionState(sessionId: string): TSessionState {
 
+    console.log("PASSED SESSION ID " + sessionId)
     const session = sessionManager.getSession(sessionId)
+    console.log("DUMB SESSION " + JSON.stringify(session))
 
     if (!session) throw new Error("Session is not found.").name = "SESSION_NOT_FOUND"
 
@@ -168,15 +170,18 @@ function createSession(initializationData: ISessionInitialization, socketId: str
 //go through singleton session, find sessionid user requested, if it finds, add it to the session's users, return sessionState
 function joinSession(requestedSessionId: string, socketID: string){
     console.log("Entered: joinSession routine");
-     if (SessionManager.getSession(requestedSessionId))//if the requested session exists
+    console.log("requestedSessionId", requestedSessionId)
+
+     if (sessionManager.getSession(requestedSessionId))//if the requested session exists
      {
         console.log("joined session -- session_controller.ts");
-        return getSessionState(socketID)
+        return getSessionState(requestedSessionId)
      }
      else{
         throw new Error("Could not join session")
      }
-            
+        //push the user to the users array 
+
     }
 
 
@@ -188,6 +193,7 @@ function joinSession(requestedSessionId: string, socketID: string){
 
 export {
     createSession,
+    joinSession,
     // addDiscoveredDevice,
     getSessionState
 }
