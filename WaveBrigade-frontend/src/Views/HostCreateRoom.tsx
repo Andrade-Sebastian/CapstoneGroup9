@@ -1,4 +1,4 @@
- import { useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Checkbox } from "@nextui-org/react";
 import axios from "axios";
