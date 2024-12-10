@@ -11,9 +11,14 @@ import JoinPage from './Views/JoinPage.tsx';
 import HostCreateRoom from './Views/HostCreateRoom.tsx';
 import HostSelectLabPage from './Views/HostSelectLabPage.tsx';
 import SelectMedia from './Views/SelectMedia.tsx';
-import HostWaitingRoom from './Views/HostWaitingRoom.tsx';
-import UserWaitingRoom from './Views/UserWaitingRoom.tsx';
 import HostRoot from './Views/HostRoot.tsx';
+import WaitingRoom from './Views/WaitingRoom.tsx';
+import PreviouslyMadeExperiments from './Views/PreviouslyMadeExperiments.tsx';
+import ExperimentCreaterRoot from './Views/ExperimentCreaterRoot.tsx';
+import Carousel from 'react-bootstrap/Carousel';
+import ExampleCarouselImage from 'components/ExampleCarouselImage';
+import ConnectEmotiBit from './Views/ConnectEmotiBit.tsx';
+
 
 const router = createBrowserRouter([
   {
@@ -24,6 +29,7 @@ const router = createBrowserRouter([
         index: true, 
         element: <Home />
       },
+      
       {
         path: "host",
         element: <HostRoot/>,
@@ -43,20 +49,35 @@ const router = createBrowserRouter([
           path: "select-media",
           element: <SelectMedia/>
         },
-        {
-          path: "host-waiting-room",
-          element: <HostWaitingRoom/>
-        },
     ]
+      },
+      {
+        path: "create-lab",
+        element: <ExperimentCreaterRoot />,
+        children: [{
+              path: "select-lab",
+              element: <HostSelectLabPage /> 
+        },
+        {
+          index: true,
+          element: <PreviouslyMadeExperiments />
+        }]
+          
       },
       {
         path: "join",
         element: <JoinPage />
       },
       {
-        path: "join/user-waiting-room",
-        element: <UserWaitingRoom />
-      },]
+        path: "connect-emotibit",
+        element: <ConnectEmotiBit />
+      },
+      {
+        path: "waiting-room",
+        element: <WaitingRoom />
+      },
+  ]
+      
   }
 ])
 

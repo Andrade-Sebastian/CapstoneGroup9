@@ -1,0 +1,3 @@
+/Users/haley/emotiBitGRPC/CMakeFiles/emotiBits_client.dir
+/Users/haley/emotiBitGRPC/CMakeFiles/edit_cache.dir
+/Users/haley/emotiBitGRPC/CMakeFiles/rebuild_cache.dir
