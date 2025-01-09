@@ -8,6 +8,7 @@ export interface ISession {
     credentials: ISessionCredentials;
     discoveredDevices: Array<IDevice>;
 }
+
 export type TSessionState = Omit<ISession, "credentials">;
 
 

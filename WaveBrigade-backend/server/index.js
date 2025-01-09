@@ -162,6 +162,19 @@ io.on("connection", (socket) => {
         
         console.log("------END OF JOIN_WAITING_ROOM EVENT-------")
     })
+
+    
+
+    // // Send data to the client every 100ms
+    // const interval = setInterval(() => {
+    //     console.log("in interval")
+    //     const data = {
+    //     timestamp: new Date().toISOString(),
+    //     randomValue: Math.random(),
+    //     };
+    //     socket.emit('update', data); // Emit an event called "data" with the payload
+    // }, 100);
+
 });
 
 //TODO: Disconnect feature, two users, if one user disconnects, their name should be gone from the other user's device

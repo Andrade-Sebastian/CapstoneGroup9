@@ -2,6 +2,7 @@ import Carousel from "react-bootstrap/Carousel";
 import ExampleCarouselImage from "./ExampleCarouselImage";
 import ExampleCarouselImage2 from "./ExampleCarouselImage2";
 import ExampleCarouselImage3 from "./ExampleCarouselImage3";
+
 export default function CarouselComponent() {
   return (
     <Carousel>

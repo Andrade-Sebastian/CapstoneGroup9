@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Checkbox } from "@nextui-org/react";
 import axios from "axios";
 
+
 // This is where the host will create the room
 
 export default function HostCreateRoom() {
@@ -12,6 +13,13 @@ export default function HostCreateRoom() {
   const [password, setPassword] = useState(""); //store this in backend!!
   const navigateTo = useNavigate();
   
+
+
+
+
+
+
+
   //hardcoded to test host/session/create
   const [sessionInfo, setSessionInfo] = useState({
     sessionName: "",

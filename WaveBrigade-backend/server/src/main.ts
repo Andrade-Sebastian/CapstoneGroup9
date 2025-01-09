@@ -51,11 +51,23 @@ let isHost = true;
 
 
 io.on("connection", (socket) => {
+    console.log("HIII")
     console.log("User Connected " + socket.id)
     socket.on("client-assignment", () => {
         socket.emit("client-assignment", {socketId: socket.id});
     }); // Send socket ID to the client
+
+    //recieve emotibit data
+    socket.on('update', (data) => {
+        console.log('Received data:', data);
+    });
+
     session_handlers(io, socket, rooms, isHost);
+
+    // Send data to the client every 100ms
+    
+    
+
 })
 
 server.listen(PORT, () => {

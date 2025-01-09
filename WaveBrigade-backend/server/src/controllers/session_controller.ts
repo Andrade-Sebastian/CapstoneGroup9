@@ -10,7 +10,7 @@ export interface IDevice {
     ipAddress: string;
 }
 export interface IUser {
-    userId: string;
+    userId: string | null;
     socketId: string;
     nickname: string | null;
     associatedDevice: IDevice | null;
@@ -167,6 +167,9 @@ function createSession(initializationData: ISessionInitialization, socketId: str
     //return getSessionState(session.sessionId)
 }
 
+
+
+
 //go through singleton session, find sessionid user requested, if it finds, add it to the session's users, return sessionState
 function joinSession(requestedSessionId: string, socketID: string){
     console.log("Entered: joinSession routine");
@@ -175,6 +178,14 @@ function joinSession(requestedSessionId: string, socketID: string){
      if (sessionManager.getSession(requestedSessionId))//if the requested session exists
      {
         console.log("joined session -- session_controller.ts");
+        console.log("Added Names")
+
+
+        getSessionState(requestedSessionId).users.concat(
+            {
+                userId: 
+            }
+        )
         return getSessionState(requestedSessionId)
      }
      else{
@@ -183,8 +194,46 @@ function joinSession(requestedSessionId: string, socketID: string){
         //push the user to the users array 
 
     }
+// userId: string;
+//     socketId: string;
+//     nickname: string | null;
+//     associatedDevice: IDevice | null;
 
 
+    function joinRoom(requestedSessionId: string, socketID: string, nickname: string, associatedDevice: IDevice | null){
+        console.log("Entered: joinSession routine");
+        console.log("requestedSessionId", requestedSessionId)
+    
+         if (sessionManager.getSession(requestedSessionId))//if the requested session exists
+         {
+            console.log("joined session -- session_controller.ts");
+            console.log("Added Names")
+    
+    
+            getSessionState(requestedSessionId).users.concat(
+                {
+                    userId: "1",
+                    socketId: socketID,
+                    nickname: nickname,
+                    associatedDevice: associatedDevice
+
+
+                }
+            )
+            return getSessionState(requestedSessionId)
+         }
+         else{
+            throw new Error("Could not join session")
+         }
+            //push the user to the users array 
+    
+        }
+
+
+// userId: string;
+//     socketId: string;
+//     nickname: string | null;
+//     associatedDevice: IDevice | null;
 
 
 // function addDiscoveredDevice(sessionId: string, discoveredDevice: IDevice) {
@@ -194,6 +243,7 @@ function joinSession(requestedSessionId: string, socketID: string){
 export {
     createSession,
     joinSession,
+    joinRoom,
     // addDiscoveredDevice,
     getSessionState
 }

@@ -3,8 +3,21 @@ import { HiAcademicCap } from "react-icons/hi";
 import { useNavigate } from "react-router-dom";
 import CardComponent from "../Components/CardComponent.tsx";
 
+
+import { io } from 'socket.io-client';
+const socket = io('http://localhost:3000');
+
+
 export default function Home() {
   const navigateTo = useNavigate();
+  
+
+    // // Listen for updates from the server
+    // socket.on('update', (data) => {
+    //   console.log('Received data:', data);
+
+    // });
+
 
   function handleJoinButtonClick() {
     navigateTo("join");

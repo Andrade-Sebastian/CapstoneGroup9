@@ -1,6 +1,8 @@
 import { BoardIds, BoardShim, BrainFlowInputParams, BrainFlowPresets} from 'brainflow';
-import Papa from 'papaparse';
+import * as Papa from 'papaparse';
 import * as fs from 'fs';
+import { io } from 'socket.io-client';
+const socket = io('http://localhost:3000');
 
 function sleep(ms: number)
 {
@@ -51,11 +53,11 @@ function writeHeaderstoCSV(FilePath: string, Headers: string[]){
 }
 
 const ancHeaders = ['Package', 'EDA', 'Temperature', 'Thermistor', 'Timestamp', 'Unknown']; //create a list of headers for the csv
-const ancFilePath = '/Users/haley/Capstone_2024/CapstoneGroup9/WaveBrigade-backend/anc_from_streamer.csv';
+const ancFilePath = './anc_from_streamer.csv';
 writeHeaderstoCSV(ancFilePath, ancHeaders);
 
 const auxHeaders = ['Package', 'PPG_Red', 'PPG_Infa_Red', 'PPG_Green', 'Timestamp', 'Unknown'];
-const auxFilePath = '/Users/haley/Capstone_2024/CapstoneGroup9/WaveBrigade-backend/aux_from_streamer.csv';
+const auxFilePath = './aux_from_streamer.csv';
 writeHeaderstoCSV(auxFilePath, auxHeaders);
 
 //const params = new BrainFlowInputParams();
@@ -68,6 +70,16 @@ const auxCSV = fs.createReadStream(auxFilePath);
 
 async function runExample (): Promise<void>
 {
+
+     // Send data to the client every 100ms
+     const interval = setInterval(() => {
+        console.log("in interval")
+        const data = {
+        timestamp: new Date().toISOString(),
+        randomValue: Math.random(),
+        };
+        socket.emit('update', data);
+    }, 100);
     
     board.prepareSession();
     const presets = BoardShim.getBoardPresets(board_id);

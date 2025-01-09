@@ -2,5 +2,8 @@
   "dependencies": {
     "@types/express": "^5.0.0",
     "deno-express": "^0.0.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.3"
   }
 }

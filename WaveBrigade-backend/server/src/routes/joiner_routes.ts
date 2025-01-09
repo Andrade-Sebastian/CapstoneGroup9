@@ -1,5 +1,5 @@
 import express, { Request, Response } from "express";
-import {addDiscoveredDevice, getSessionState, IDevice, createSession, joinSession} from "../controllers/session_controller.ts";
+import {addDiscoveredDevice, getSessionState, IDevice, createSession, joinSession, joinRoom} from "../controllers/session_controller.ts";
 import SessionManager from "../sessions_singleton.ts";
 const app = express();
 const joinerRouter = express.Router();
@@ -37,6 +37,43 @@ joinerRouter.post("/join-session/:requestedSessionId/:socketId", (req: Request, 
     
     }
 )
+
+joinerRouter.get("/room-users/:roomCode", (req: Request, res: Response) => {
+    const roomCode = req.params.roomCode;
+
+    try {
+        return res.status(200).send(getSessionState(roomCode).users)
+    } catch (error) {
+        if (error instanceof Error) {
+            if (error.name === "SESSION_NOT_FOUND") {
+                return res.status(400).send({
+                    error: error.name,
+                    message: error.message
+                })
+            }
+        }
+    }
+
+joinerRouter.post("/join-room", (req: Request, res: Response) => {
+    const {roomCode, socketId, nickname, associatedDevice} = req.body;
+
+    if(!roomCode || !socketId)
+    {
+        return res.status(400).json({ message: "Give me a nickname and a roomcode!"});
+    }
+    else 
+    {
+        joinRoom(roomCode, socketId, nickname, associatedDevice);
+    }
+
+}
+
+)
+    
+    
+
+
+})
 
 joinerRouter.get("/debug", (req: Request, res: Response) => {
     const sessions = SessionManager.getInstance().listSessions()

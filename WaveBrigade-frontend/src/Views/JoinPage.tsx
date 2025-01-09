@@ -67,6 +67,37 @@ export default function JoinPage() {
     }
   };
 
+  const joinRoom = async () => {
+    const socketId = sessionStorage.getItem("socketID");
+
+    try{
+      const response = await axios.post("http://localhost:3000/join-room",{
+        roomCode: StudentInputRoomCode,
+        socketId: socketId,
+        nickName: nickName,
+        associatedDevice: null
+      });
+
+      console.log("Names received:", response.data.names);
+      setNickNames(response.data.names);
+    }catch (error){
+      return { message: 'error joining room...', error }
+    }
+  };
+  
+
+  function getNicknames {
+    axios
+        .get("http://localhost:3000/session/:sessionId")
+        .then((response) => {
+          console.log(response.data.configuration);
+        })
+        .catch((error) => {
+          console.error("Error getting session:", error);
+        });
+
+  }
+
   return (
     <div className="flex flex-col items-center justify-center h-screen">
       <div className="bg-white rounded-lg shadow-lg p-8 max-w-xl w-full">
