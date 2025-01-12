@@ -29,6 +29,9 @@ export default function JoinPage() {
         console.error("Error fetching session ID:", error);
       }
     };
+    if (StudentInputRoomCode) {
+      getSessionID();  // Call it when room code is entered
+    }
     
   }, [StudentInputRoomCode]);  
 
