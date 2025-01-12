@@ -41,6 +41,8 @@ var Papa = require("papaparse");
 var fs = require("fs");
 var socket_io_client_1 = require("socket.io-client");
 var socket = (0, socket_io_client_1.io)('http://localhost:3000');
+//is initialized flag for socket id 
+//gets it from backend
 function sleep(ms) {
     return new Promise(function (resolve) {
         setTimeout(resolve, ms);
@@ -64,64 +66,77 @@ var board = new brainflow_1.BoardShim(brainflow_1.BoardIds.EMOTIBIT_BOARD, {});
 var board_id = brainflow_1.BoardIds.EMOTIBIT_BOARD;
 var ancCSV = fs.createReadStream(ancFilePath);
 var auxCSV = fs.createReadStream(auxFilePath);
+var currentDate = new Date('2024-12-3');
+var currentTime = currentDate.getTime();
+var passedDate = new Date();
 function runExample() {
     return __awaiter(this, void 0, void 0, function () {
-        var interval, presets, data_current;
+        var presets, data_current, data, error_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    interval = setInterval(function () {
-                        console.log("in interval");
-                        var data = {
-                            timestamp: new Date().toISOString(),
-                            randomValue: Math.random(),
-                        };
-                        socket.emit('update', data);
-                    }, 100);
+                    _a.trys.push([0, 5, 6, 8]);
                     board.prepareSession();
                     presets = brainflow_1.BoardShim.getBoardPresets(board_id);
                     board.addStreamer("file://aux_from_streamer.csv:a", brainflow_1.BrainFlowPresets.AUXILIARY_PRESET);
                     board.addStreamer("file://anc_from_streamer.csv:a", brainflow_1.BrainFlowPresets.ANCILLARY_PRESET);
                     board.startStream();
-                    return [4 /*yield*/, sleep(3000)];
+                    _a.label = 1;
                 case 1:
+                    if (!true) return [3 /*break*/, 4];
+                    data_current = board.getBoardData(500, brainflow_1.BrainFlowPresets.ANCILLARY_PRESET);
+                    if (!(data_current.length !== 0)) return [3 /*break*/, 3];
+                    data = {
+                        package: data_current[0][0],
+                        data1: data_current[1][0],
+                        data2: data_current[2][0],
+                        data3: data_current[3][0],
+                        timestamp: data_current[4][0],
+                        unknown: data_current[5][0],
+                    };
+                    console.log("DATA :" + data.data1);
+                    socket.emit('update', data);
+                    return [4 /*yield*/, sleep(1000)];
+                case 2:
+                    _a.sent();
+                    _a.label = 3;
+                case 3: return [3 /*break*/, 1];
+                case 4: return [3 /*break*/, 8];
+                case 5:
+                    error_1 = _a.sent();
+                    console.error(error_1);
+                    return [3 /*break*/, 8];
+                case 6: return [4 /*yield*/, sleep(3000)];
+                case 7:
                     _a.sent();
                     board.stopStream();
-                    data_current = board.getBoardData(100, brainflow_1.BrainFlowPresets.ANCILLARY_PRESET);
-                    //to find which channel each data is on
-                    //const channel_number = BoardShim.getPpgChannels(board_id, BrainFlowPresets.AUXILIARY_PRESET);
                     board.releaseSession();
-                    //console.info(channel_number);
-                    //used to display info about the board and to see how the current data is stored
-                    /*console.info("Description");
-                    console.info(BoardShim.getBoardDescr(BoardIds.EMOTIBIT_BOARD));
-                    console.info('Data');
-                    console.info(data_current);*/
-                    Papa.parse(ancCSV, {
-                        header: true,
-                        delimiter: '\t',
-                        dynamicTyping: true,
-                        complete: function () {
-                            console.log("Finished parsing ANC data");
-                        },
-                        step: function (results) {
-                            console.log("Row data:", results.data);
-                        },
-                    });
-                    Papa.parse(auxCSV, {
-                        header: true,
-                        delimiter: '\t',
-                        dynamicTyping: true,
-                        complete: function () {
-                            console.log("Finished parsing AUX data");
-                        },
-                        step: function (results) {
-                            console.log("Row data:", results.data);
-                        },
-                    });
-                    return [2 /*return*/];
+                    parseData(ancCSV);
+                    return [7 /*endfinally*/];
+                case 8: return [2 /*return*/];
             }
         });
+    });
+}
+//to find which channel each data is on
+//const channel_number = BoardShim.getPpgChannels(board_id, BrainFlowPresets.AUXILIARY_PRESET);
+//console.info(channel_number);
+//used to display info about the board and to see how the current data is stored
+/*console.info("Description");
+console.info(BoardShim.getBoardDescr(BoardIds.EMOTIBIT_BOARD));
+console.info('Data');
+console.info(data_current);*/
+function parseData(file) {
+    Papa.parse(file, {
+        header: true,
+        delimiter: '\t',
+        dynamicTyping: true,
+        complete: function () {
+            console.log("Finished parsing data");
+        },
+        step: function (results) {
+            console.log("Row data:", results.data);
+        },
     });
 }
 runExample();

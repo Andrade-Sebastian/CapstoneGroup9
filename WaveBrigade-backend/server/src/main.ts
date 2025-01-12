@@ -63,7 +63,11 @@ io.on("connection", (socket) => {
 
     session_handlers(io, socket, rooms, isHost);
 
-    // Send data to the client every 100ms
+    console.log("Running Script");
+    socket.on("update", (data) => {
+        console.log(data);
+        io.emit("update", data);
+    })
     
     
 

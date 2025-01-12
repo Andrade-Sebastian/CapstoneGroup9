@@ -8,6 +8,7 @@ let foundDevicesOnNetwork: IDevice[] = [];
 export interface IDevice {
     serialNumber: string;
     ipAddress: string;
+    socketID: string;
 }
 export interface IUser {
     userId: string | null;
