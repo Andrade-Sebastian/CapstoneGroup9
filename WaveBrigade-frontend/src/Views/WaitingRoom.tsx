@@ -7,6 +7,7 @@ export default function WaitingRoom() {
   const location = useLocation();
   const { nickName, roomCode } = location.state || {};
   const [nicknames, setNickNames] = useState<string[]>([]);
+  const [sessionID, setSessionID] = useState("")
 
   // useEffect(() => {
   //   // Emit join waiting room
@@ -29,20 +30,46 @@ export default function WaitingRoom() {
   //   };
   // }, [nickName, roomCode]);
 
-  //Express getting names of people in the room 
   useEffect(() => {
-    const fetchUsers = async () => {
-      try{
-        const response = await axios.get(`http://localhost:3000/room-users/${roomCode}`);
-        setNickNames(response.data.names);
-      }catch (error) {
-        return { message: 'error fetching users..', error }
+    const getSessionID = async () => {
+      const response = await axios.get(`http://localhost:3000/joiner/validateRoomCode/${roomCode}`);
+      if (response.status === 200) {
+        setSessionID(response.data.sessionID);
       }
     };
+
+    getSessionID();
+  }, []);
+
+
+  useEffect(() => {
+    if (!sessionID) return; 
+
+    const fetchUsers = async () => {
+      try {
+        console.log("Trying to get users from session " + sessionID)
+        const response = await axios.get(`http://localhost:3000/joiner/room-users/${sessionID}`);
+        const users = response.data.users; //Array of IUser objects
+
+        const nicknames = []; //holds only the nicknames of those IUser Objects
+
+        // initialize nicknames array
+        for (let i = 0; i < users.length; i++) {
+          nicknames.push(users[i].nickname);
+        }
+
+    setNickNames(nicknames);
+      } catch (error) {
+        console.error("Error fetching users:", error);
+      }
+    };
+
     fetchUsers();
-    const interval = setInterval(fetchUsers, 5000); 
-    return () => clearInterval(interval);
-  }, [roomCode]);
+    const interval = setInterval(fetchUsers, 5000); // Refresh users every 5 seconds
+
+    return () => clearInterval(interval); 
+  }, [sessionID]); //Don't fetch any data until sessionID is set
+
 
   
   return (

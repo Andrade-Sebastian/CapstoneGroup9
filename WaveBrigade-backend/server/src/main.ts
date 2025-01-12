@@ -1,8 +1,8 @@
 const PORT = 3000;
 const ORIGIN = "http://localhost:5173";
 import grpc from "npm:@grpc/grpc-js";
-const PROTO_PATH = "./server/src/grpc/protos/emotiBits.proto";
-import protoLoader from "npm:@grpc/proto-loader";
+const PROTO_PATH = "/Users/emanpelayo/Documents/real_docs/CS/Current_Classes/CS425/CapstoneGroup9/WaveBrigade-backend/server/src/grpc/protos/emotiBits.proto";
+import * as protoLoader from "npm:@grpc/proto-loader";
 
 const options = {
     keepCase: true,
@@ -10,7 +10,7 @@ const options = {
     enums: String,
     defaults: true,
     oneofs: true,
-  };
+};
   
 var packageDefinition = protoLoader.loadSync(PROTO_PATH, options);
   
@@ -51,15 +51,14 @@ let isHost = true;
 
 
 io.on("connection", (socket) => {
-    console.log("HIII")
-    console.log("User Connected " + socket.id)
+    console.log("User Connected | socketID: " + socket.id)
     socket.on("client-assignment", () => {
         socket.emit("client-assignment", {socketId: socket.id});
     }); // Send socket ID to the client
 
     //recieve emotibit data
     socket.on('update', (data) => {
-        console.log('Received data:', data);
+       // console.log('Received data:', data);
     });
 
     session_handlers(io, socket, rooms, isHost);
@@ -71,5 +70,5 @@ io.on("connection", (socket) => {
 })
 
 server.listen(PORT, () => {
-    console.log(`Server running at http://localhost:${PORT}`);
+    console.log(`(main.ts): Express & SocketIO Server running at http://localhost:${PORT}`);
 })

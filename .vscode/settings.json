@@ -1,3 +1,4 @@
 {
-    "deno.enable": true
+    "deno.enable": true,
+    "cmake.sourceDirectory": "/Users/emanpelayo/Documents/real_docs/CS/Current_Classes/CS425/CapstoneGroup9/emotiBitGRPC"
 }

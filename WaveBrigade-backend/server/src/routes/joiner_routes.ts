@@ -38,47 +38,76 @@ joinerRouter.post("/join-session/:requestedSessionId/:socketId", (req: Request, 
     }
 )
 
-joinerRouter.get("/room-users/:roomCode", (req: Request, res: Response) => {
-    const roomCode = req.params.roomCode;
+joinerRouter.get("/room-users/:sessionID", (req: Request, res: Response) => {
+    const sessionID = req.params.sessionID;
 
     try {
-        return res.status(200).send(getSessionState(roomCode).users)
+        const users = getSessionState(sessionID).users;
+        return res.status(200).send({
+            "users": users
+        });
     } catch (error) {
         if (error instanceof Error) {
             if (error.name === "SESSION_NOT_FOUND") {
                 return res.status(400).send({
                     error: error.name,
                     message: error.message
-                })
+                });
             }
         }
+
+        // Fallback error response
+        return res.status(500).send({
+            error: "INTERNAL_SERVER_ERROR",
+            message: "An unexpected error occurred."
+        });
     }
+});
+
+
+
 
 joinerRouter.post("/join-room", (req: Request, res: Response) => {
-    const {roomCode, socketId, nickname, associatedDevice} = req.body;
+    const {sessionID, socketID, nickname, associatedDevice} = req.body;
 
-    if(!roomCode || !socketId)
-    {
-        return res.status(400).json({ message: "Give me a nickname and a roomcode!"});
-    }
-    else 
-    {
-        joinRoom(roomCode, socketId, nickname, associatedDevice);
-    }
+    //console.log("(joiner_routes.ts): at '/join-room', received: " + JSON.stringify(req.body));
 
-}
-
-)
+    //join the room
+    joinRoom(sessionID, socketID, nickname, associatedDevice)
+    
+    return res.status(200).json({ message: "Successfully Joined session"});
     
     
-
 
 })
 
+joinerRouter.get("/validateRoomCode/:roomCode", (req: Request, res: Response) => {
+    const roomCode = req.params.roomCode;
+    const liveSessions = SessionManager.getInstance().listSessions()
+
+    for (const sessionId in liveSessions) {
+        if (liveSessions[sessionId].roomCode === roomCode) {
+            return res.status(200).json({ 
+                message: "Successfully Validated room code",
+                sessionID: liveSessions[sessionId].sessionId
+            });// Return the matching session
+        }
+    }
+    
+    return res.status(500).json({ message: "Room Code does not match up with an active session"});
+
+})
+
+
 joinerRouter.get("/debug", (req: Request, res: Response) => {
+    
     const sessions = SessionManager.getInstance().listSessions()
-    console.log(sessions)
-    res.status(500).send(sessions)
+    //console.log("Live sessions: " + JSON.stringify(sessions))
+
+    res.status(200).send({
+        message: "in joiner",
+        liveSessions: sessions
+    })
 })
 
 

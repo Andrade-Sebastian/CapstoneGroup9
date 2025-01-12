@@ -12,37 +12,29 @@ export default function JoinPage() {
   const [isSpectator, setIsSpectator] = useState("");
   const [userId, setUserId] = useState("");
   const navigateTo = useNavigate();
-
+  const [sessionID, setSessionID] = useState("")
   const updateUser = useJoinerStore((state) => state.updateUser);
+  const [users, setUsers] = useState<string[]>([]) //list of users to send to waiting room
 
+
+  // Get session ID when user types in a room code
   useEffect(() => {
-    setUserId(uuidv4());
-
-    socket.on("client-assignment", ({ socketId }) => {
-      console.log("Setting socket Id, ", socketId);
-      sessionStorage.setItem("socketID", socketId);
-    });
-
-    return () => {
-      socket.off("client-assignment");
+    const getSessionID = async () => {
+      try {
+        const response = await axios.get(`http://localhost:3000/joiner/validateRoomCode/${StudentInputRoomCode}`);
+        if (response.status === 200) {
+          setSessionID(response.data.sessionID);  
+        }
+      } catch (error) {
+        console.error("Error fetching session ID:", error);
+      }
     };
-  }, []);
+    
+  }, [StudentInputRoomCode]);  
 
-  useEffect(() => {
-    socket.on("receive_names", (names) => {
-      console.log("Nicknames received:", names);
-      setIsJoining(false);
-      navigateTo("/connect-emotibit", {
-        state: { nickName, roomCode: StudentInputRoomCode },
-      });
-    });
 
-    return () => {
-      socket.off("receive_names");
-    };
-  }, [navigateTo, nickName, StudentInputRoomCode]);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!StudentInputRoomCode || !nickName) {
@@ -50,53 +42,53 @@ export default function JoinPage() {
       return;
     }
 
-    const socketId = sessionStorage.getItem("socketID");
+    const isValidRoomCode = await validateRoomCode(StudentInputRoomCode);
+    if (isValidRoomCode) {
+      joinRoom();
 
-    if (socketId) {
-      updateUser({
-        userId: userId,
-        socketId: socketId,
-        nickname: nickName,
-        associatedDevice: null,
+      navigateTo("/waiting-room", {
+        state: {
+          nickName: nickName,
+          roomCode: StudentInputRoomCode,
+        }
       });
+    }
+  };
 
-      setIsJoining(true);
-      socket.emit("join_room", { nickName, StudentInputRoomCode });
-    } else {
-      console.error("Socket ID not initialized");
+  const validateRoomCode = async (StudentInputRoomCode) => {
+    try {
+      const response = await axios.get(`http://localhost:3000/joiner/validateRoomCode/${StudentInputRoomCode}`);
+      if (response.status === 200) {
+        console.log("Room code is valid!");
+        setSessionID(response.data.sessionID);  // Store sessionID when room code is valid
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error("Could not validate room code due to an API Error", error);
+      return false;
     }
   };
 
   const joinRoom = async () => {
     const socketId = sessionStorage.getItem("socketID");
+    console.log("Socket ID: " + socketId);
+    console.log("Session ID: " + sessionID);
 
-    try{
-      const response = await axios.post("http://localhost:3000/join-room",{
-        roomCode: StudentInputRoomCode,
+    try {
+      await axios.post("http://localhost:3000/joiner/join-room", {
+        sessionID: sessionID,
         socketId: socketId,
-        nickName: nickName,
+        nickname: nickName,
         associatedDevice: null
       });
 
-      console.log("Names received:", response.data.names);
-      setNickNames(response.data.names);
-    }catch (error){
-      return { message: 'error joining room...', error }
+    } catch (error) {
+      console.error("Error joining room:", error);
     }
   };
   
 
-  function getNicknames {
-    axios
-        .get("http://localhost:3000/session/:sessionId")
-        .then((response) => {
-          console.log(response.data.configuration);
-        })
-        .catch((error) => {
-          console.error("Error getting session:", error);
-        });
-
-  }
 
   return (
     <div className="flex flex-col items-center justify-center h-screen">

@@ -12,8 +12,10 @@ export default function HostCreateRoom() {
   const [allowSpectators, setAllowSpectators] = useState(false);
   const [password, setPassword] = useState(""); //store this in backend!!
   const navigateTo = useNavigate();
-  
+  const [usernames, setUsernames] = useState<string[]>([]);
+  const [sessionID, setSessionID] = useState("");
 
+  
 
 
 
@@ -31,39 +33,42 @@ export default function HostCreateRoom() {
     allowSpectators: true,
   });
 
+  //generate random code || Must send code to server || Note:  generate in backend, not here
+  function generateRandomCode(length: number){
+    const numbers = '0123456789';
+    let lobbyCode = '';
+    for (let i = 0; i < length; i++){
+        lobbyCode += numbers.charAt(Math.floor(Math.random() * numbers.length));
+    }
+    return lobbyCode;
+}
+
+      
+function handleSubmit(e: { preventDefault: () => void }) {
+  
+  e.preventDefault();
+  const roomCode = generateRandomCode(6)
+  console.log(roomCode)
+
   const testSessionInfo = {
     sessionName: "Awesome",
-    selectedExperimentId: "17",
-    allowSpectators: true,
-    credentials: {
-      passwordEnabled: false,
-      password: "",
-    },
-  };
-
-  function handleSubmit(e: { preventDefault: () => void }) {
-    e.preventDefault();
-    {
-      /* For now*/
-    }
-    //this is not setting the values
-    setSessionInfo({
-      sessionName: "Awesome", // FUTURE
-      selectedExperimentId: "17", // (ideally this would be undefined)
+      roomCode: roomCode,
+      selectedExperimentId: "17",
+      allowSpectators: true,
       credentials: {
-        passwordEnabled: passwordIsSelected,
-        password: passwordIsSelected? password: "", //if enabled, pass will be included
+        passwordEnabled: false,
+        password: "",
       },
-      allowSpectators: allowSpectators,
-    });
-
-    console.log("sessionInfo: " + JSON.stringify(sessionInfo));
+    };
 
     axios
-      .post("http://localhost:3000/host/session/create", sessionInfo)
+      .post("http://localhost:3000/host/session/create", testSessionInfo)
       .then((response) => {
         console.log(response.data.configuration);
-        navigateTo("/host/select-lab", { state: { userName } }); //for now
+        setSessionID(response.data.sessionID);
+        setUsernames(response.data.users);
+        const roomCode = response.data.roomCode;
+        navigateTo("/host/select-lab", { state: { userName, roomCode} }); //for now, send roomcode as well
       })
       .catch((error) => {
         console.error("Error creating session:", error);

@@ -1,8 +1,8 @@
 //Select Media Page (Page for importing media)
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom";
 import { useLocation } from "react-router-dom";
-
+import axios from "axios";
 import socket from './socket.tsx';
 
 export default function SelectMedia(){
@@ -12,22 +12,38 @@ export default function SelectMedia(){
     const location = useLocation()
     console.log("@SELECT MEDIA | location.state:", JSON.stringify(location.state));
 
-    const {userName} = location.state || {}
+    const {userName, roomCode} = location.state || {}
     console.log("SELECTMEDIA userName: "  + userName)
 
     const [URL, setURL] = useState("")
     const [code, setCode] = useState("")
     const navigateTo = useNavigate();
 
+    const [sessionID, setSessionID] = useState("")
+
+    useEffect(() => {
+        const getSessionID = async () => {
+        const response = await axios.get(`http://localhost:3000/joiner/validateRoomCode/${roomCode}`);
+        if (response.status === 200) {
+            setSessionID(response.data.sessionID);
+        }
+        };
+
+        getSessionID();
+    }, []);
+
     
 
     //Create Lobby Button || When button is clicked, lobby code is generated
     function handleCreateLobbyButtonClick()
-    {   const lobbyCode = generateRandomCode(6);
-        console.log("Generated Lobby Code: ", lobbyCode);
-        setCode(lobbyCode);
-        createRoom(lobbyCode);
-        //navigateTo("/waiting-room") //kept so lobby code can be seen
+    {   
+        navigateTo("/waiting-room", {
+            state:
+              {
+                nickName: userName,
+                roomCode: roomCode,
+              }
+          })
     }
 
     //URL Submission || Select Media Logic

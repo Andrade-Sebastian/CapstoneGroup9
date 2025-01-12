@@ -34,11 +34,23 @@ export default function HostSelectLabPage() {
     "@HOST SELECT LAB | location.state:",
     JSON.stringify(location.state)
   );
-  const { userName } = location.state;
+  const { userName, roomCode} = location.state;
   console.log("HOSTSELECTLAB userName: " + userName);
   const [experimentName, setExperimentName] = useState("");
   const [labDescription, setLabDescription] = useState("");
   const [selectedLab, setSelectedLab] = useState<ILab>();
+  const [sessionID, setSessionID] = useState("")
+
+  useEffect(() => {
+    const getSessionID = async () => {
+      const response = await axios.get(`http://localhost:3000/joiner/validateRoomCode/${roomCode}`);
+      if (response.status === 200) {
+        setSessionID(response.data.sessionID);
+      }
+    };
+
+    getSessionID();
+  }, []);
 
   const labs: Array<ILab> = [
     {
@@ -147,7 +159,7 @@ export default function HostSelectLabPage() {
             type="submit"
             className="mt-6 bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-6 rounded-md shadow-md transition duration-300 ease-in-out"
             onClick={() =>
-              navigateTo("/host/select-media", { state: { userName } })
+              navigateTo("/host/select-media", { state: { userName, roomCode } })
             }
           >
             Continue

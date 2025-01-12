@@ -39,6 +39,7 @@ export interface ISessionCredentials {
 }
 export interface ISession {
     sessionId: string;
+    roomCode: string;
     sessionName: string;
     hostSocketId: string;
     users: Array<IUser>;
@@ -77,14 +78,17 @@ function generateSessionId(): string {
 
 function getSessionState(sessionId: string): TSessionState {
 
-    console.log("PASSED SESSION ID " + sessionId)
+    //console.log("(session_controller.ts): at getSessionState()")
+    // console.log("PASSED SESSION ID " + sessionId)
     const session = sessionManager.getSession(sessionId)
-    console.log("DUMB SESSION " + JSON.stringify(session))
+    //console.log("SESSION" + JSON.stringify(session))
+    // console.log("DUMB SESSION " + JSON.stringify(session))
 
     if (!session) throw new Error("Session is not found.").name = "SESSION_NOT_FOUND"
 
     return {
         sessionId: session.sessionId,
+        roomCode: session.roomCode,
         sessionName: session.sessionName,
         hostSocketId: session.hostSocketId,
         configuration: session.configuration,
@@ -96,6 +100,7 @@ function getSessionState(sessionId: string): TSessionState {
 
 interface ISessionInitialization {
     sessionName: string;
+    roomCode: string;
     selectedExperimentId: string;
     credentials: ISessionCredentials;
     allowSpectators: boolean;
@@ -139,6 +144,7 @@ function createSession(initializationData: ISessionInitialization, socketId: str
             .then(devices => {
                 const session: ISession = {
                     sessionId: generatedSessionId,
+                    roomCode: initializationData.roomCode,
                     sessionName: initializationData.sessionName,
                     hostSocketId: socketId,
                     users: [],
@@ -156,6 +162,7 @@ function createSession(initializationData: ISessionInitialization, socketId: str
                     discoveredDevices: devices
                 }
                 console.log(session.discoveredDevices);
+                console.log("Adding session")
                 sessionManager.addSession(session.sessionId, session);
                 resolve(session);
             })
@@ -177,15 +184,9 @@ function joinSession(requestedSessionId: string, socketID: string){
 
      if (sessionManager.getSession(requestedSessionId))//if the requested session exists
      {
-        console.log("joined session -- session_controller.ts");
+        console.log("joined session -- session_controller.ts (joinsession)");
         console.log("Added Names")
 
-
-        getSessionState(requestedSessionId).users.concat(
-            {
-                userId: 
-            }
-        )
         return getSessionState(requestedSessionId)
      }
      else{
@@ -200,34 +201,55 @@ function joinSession(requestedSessionId: string, socketID: string){
 //     associatedDevice: IDevice | null;
 
 
-    function joinRoom(requestedSessionId: string, socketID: string, nickname: string, associatedDevice: IDevice | null){
-        console.log("Entered: joinSession routine");
-        console.log("requestedSessionId", requestedSessionId)
-    
-         if (sessionManager.getSession(requestedSessionId))//if the requested session exists
-         {
-            console.log("joined session -- session_controller.ts");
-            console.log("Added Names")
-    
-    
-            getSessionState(requestedSessionId).users.concat(
-                {
-                    userId: "1",
-                    socketId: socketID,
-                    nickname: nickname,
-                    associatedDevice: associatedDevice
+function joinRoom(requestedSessionId: string, socketID: string, nickname: string, associatedDevice: IDevice | null){
+    console.log("(session_controller.ts): at joinRoom()");
+    console.log("requestedSessionId:", requestedSessionId);
+    console.log("socketId:", socketID);
+    console.log("nickname:", nickname);
+    console.log("associatedDevice:", associatedDevice);
 
 
-                }
-            )
-            return getSessionState(requestedSessionId)
-         }
-         else{
-            throw new Error("Could not join session")
-         }
-            //push the user to the users array 
-    
+    if (sessionManager.getSession(requestedSessionId))//if the requested session exists
+    {
+        const newUser: IUser = {
+            userId: "17",
+            socketId: socketID,
+            nickname: nickname,
+            associatedDevice: associatedDevice
         }
+        
+        console.log("joined session -- session_controller.ts (joinRoom())");
+        console.log("Added Names")
+        
+
+
+        const sessionState = getSessionState(requestedSessionId);
+        console.log("sessionState before adding user: " + JSON.stringify(sessionState))
+        //is correctly initialized 
+        sessionState.users.push(newUser)
+
+        //for debugging
+        const sessionStateAfter = getSessionState(requestedSessionId);
+        console.log("sessionState AFTER adding user: " + JSON.stringify(sessionStateAfter))
+
+
+        // sessionState.users = sessionState.users.concat(
+        //     {
+        //         userId: "1",
+        //         socketId: socketID,
+        //         nickname: nickname,
+        //         associatedDevice: associatedDevice
+        //     }
+        // );
+        return getSessionState(requestedSessionId)
+    }
+    else{
+        throw new Error(`Could not join session ${requestedSessionId}`);
+
+    }
+    //push the user to the users array 
+
+}
 
 
 // userId: string;

@@ -1,5 +1,6 @@
 export interface ISession {
     sessionId: string;
+    roomCode: string;
     sessionName: string;
     hostSocketId: string;
     users: Array<IUser>;
@@ -13,6 +14,7 @@ export type TSessionState = Omit<ISession, "credentials">;
 
 
 class SessionManager {
+    
     private static instance: SessionManager;
     private currentSessions: { [key: string]: ISession } = {};
 
@@ -32,7 +34,17 @@ class SessionManager {
 
 
     public getSession(sessionId: string): ISession | undefined {
-        return this.currentSessions[sessionId];
+        //console.log("(sessions_singleton.ts): At getSession()")
+        //console.log("Current Sessions: " + JSON.stringify(this.currentSessions))
+
+        if (!this.currentSessions[sessionId])
+        {
+            console.log("Session " + sessionId + " not found.")
+        }
+        else
+        {
+            return this.currentSessions[sessionId];
+        }
         
     }
 
