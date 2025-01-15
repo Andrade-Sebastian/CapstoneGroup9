@@ -1,6 +1,8 @@
 import express, { Request, Response } from "express";
-import {addDiscoveredDevice, getSessionState, IDevice, createSession, joinSession, joinRoom} from "../controllers/session_controller.ts";
+import {addDiscoveredDevice, getSessionState, IDevice, createSession, joinSession, joinRoom, leaveRoom} from "../controllers/session_controller.ts";
 import SessionManager from "../sessions_singleton.ts";
+import { addSocketToSession, removeSocket, getSessionBySocket, socketSessionMap } from "../sessionMappings.ts";
+import axios from "axios";
 const app = express();
 const joinerRouter = express.Router();
 joinerRouter.use(express.json());
@@ -66,27 +68,31 @@ joinerRouter.get("/room-users/:sessionID", (req: Request, res: Response) => {
 
 
 
-
+// import socketSessionMap from "../sessionMappings.ts";
 joinerRouter.post("/join-room", (req: Request, res: Response) => {
     const {sessionID, socketID, nickname, associatedDevice} = req.body;
+    
+    
+    console.log("(joiner_routes.ts): at '/join-room', received: " + JSON.stringify(req.body));
+    addSocketToSession(socketID, sessionID)
 
-    //console.log("(joiner_routes.ts): at '/join-room', received: " + JSON.stringify(req.body));
-
+    console.log("socketMapping: " + JSON.stringify(socketSessionMap))
+    
     //join the room
     joinRoom(sessionID, socketID, nickname, associatedDevice)
     
     return res.status(200).json({ message: "Successfully Joined session"});
     
     
-
 })
 
 joinerRouter.get("/validateRoomCode/:roomCode", (req: Request, res: Response) => {
     const roomCode = req.params.roomCode;
     const liveSessions = SessionManager.getInstance().listSessions()
-
+    
     for (const sessionId in liveSessions) {
         if (liveSessions[sessionId].roomCode === roomCode) {
+            console.log("(validateRoomCode): " + JSON.stringify(liveSessions[sessionId].sessionId))
             return res.status(200).json({ 
                 message: "Successfully Validated room code",
                 sessionID: liveSessions[sessionId].sessionId
@@ -95,8 +101,52 @@ joinerRouter.get("/validateRoomCode/:roomCode", (req: Request, res: Response) =>
     }
     
     return res.status(500).json({ message: "Room Code does not match up with an active session"});
+    
+})
+
+//IN DEVELOOPMENT
+joinerRouter.post("/leave-room/:sessionID/:socketID", (req: Request, res: Response) => {
+    const sessionID = req.params.sessionID;
+    const socketID = req.params.socketID;
+    
+    // users: Array<IUser>;
+
+    
+    try {
+        const sessionInfo = getSessionState(sessionID);
+
+        
+        //console.log("Users: " + JSON.stringify(sessionInfo.users));
+        leaveRoom(sessionID, socketID)
+        
+        //sessionInfo.users.findIndex
+        //remove user from sessionInfo with the socketID provided in the params
+
+        //Free up EmotiBit if possible (do last)
+        return res.status(200).send({
+            "message": "in /remove-user",
+            "sessionID": sessionID,
+            "socketID": socketID
+        });
+    } catch (error) {
+        if (error instanceof Error) {
+            if (error.name === "SESSION_NOT_FOUND") {
+                return res.status(400).send({
+                    error: error.name,
+                    message: error.message
+                });
+            }
+        }
+
+        // Fallback error response
+        return res.status(500).send({
+            error: "INTERNAL_SERVER_ERROR",
+            message: "An unexpected error occurred."
+        });
+    }
 
 })
+
 
 
 joinerRouter.get("/debug", (req: Request, res: Response) => {

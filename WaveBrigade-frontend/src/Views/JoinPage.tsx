@@ -15,6 +15,7 @@ export default function JoinPage() {
   const [sessionID, setSessionID] = useState("")
   const updateUser = useJoinerStore((state) => state.updateUser);
   const [users, setUsers] = useState<string[]>([]) //list of users to send to waiting room
+  const [socketID, setSocketID] = useState("");
 
 
   // Get session ID when user types in a room code
@@ -23,7 +24,8 @@ export default function JoinPage() {
       try {
         const response = await axios.get(`http://localhost:3000/joiner/validateRoomCode/${StudentInputRoomCode}`);
         if (response.status === 200) {
-          setSessionID(response.data.sessionID);  
+          setSessionID(response.data.sessionID)
+          setSocketID(sessionStorage.getItem("socketID") || "");  
         }
       } catch (error) {
         console.error("Error fetching session ID:", error);
@@ -74,14 +76,14 @@ export default function JoinPage() {
   };
 
   const joinRoom = async () => {
-    const socketId = sessionStorage.getItem("socketID");
-    console.log("Socket ID: " + socketId);
+    
+    console.log("Socket ID: " + socketID);
     console.log("Session ID: " + sessionID);
 
     try {
       await axios.post("http://localhost:3000/joiner/join-room", {
         sessionID: sessionID,
-        socketId: socketId,
+        socketId: socketID,
         nickname: nickName,
         associatedDevice: null
       });

@@ -7,11 +7,27 @@ import CardComponent from "../Components/CardComponent.tsx";
 import { io } from 'socket.io-client';
 const socket = io('http://localhost:3000');
 
+import {useEffect} from 'react'
 
 export default function Home() {
   const navigateTo = useNavigate();
   
 
+  useEffect(() => {
+    socket.on("client-assignment", (data) => {
+      console.log("Adding socketID to session storage");
+      console.log("sessionStorage operation:", data.socketId);
+
+      sessionStorage.setItem("socketID", data.socketId);
+      console.log("Current session storage:", sessionStorage.getItem("socketID"));
+
+      // Update state to prevent re-assignment
+      //setIsSocketAssigned(true);
+    });
+    return () => {
+      
+    };
+  }, []);
     // // Listen for updates from the server
     // socket.on('update', (data) => {
     //   console.log('Received data:', data);
