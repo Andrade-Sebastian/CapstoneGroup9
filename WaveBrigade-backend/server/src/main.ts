@@ -1,6 +1,10 @@
 const PORT = 3000;
 const ORIGIN = "http://localhost:5173";
 import grpc from "npm:@grpc/grpc-js";
+import socketSessionMap, { getSessionBySocket, removeSocket } from "./sessionMappings.ts";
+import axios from "axios";
+
+//CHANGE TO RELATIVE PATH
 const PROTO_PATH = "/Users/emanpelayo/Documents/real_docs/CS/Current_Classes/CS425/CapstoneGroup9/WaveBrigade-backend/server/src/grpc/protos/emotiBits.proto";
 import * as protoLoader from "npm:@grpc/proto-loader";
 
@@ -51,8 +55,11 @@ let isHost = true;
 
 
 io.on("connection", (socket) => {
-    console.log("User Connected | socketID: " + socket.id)
+    console.log("(main.ts): User Connected | socketID: " + socket.id)
+    console.log(`(main.ts): Total connections: ${io.engine.clientsCount}`);
+
     socket.on("client-assignment", () => {
+        console.log("(main.ts): Emitting client-assignment with socketId:", socket.id);
         socket.emit("client-assignment", {socketId: socket.id});
     }); // Send socket ID to the client
 
@@ -63,15 +70,52 @@ io.on("connection", (socket) => {
 
     session_handlers(io, socket, rooms, isHost);
 
-    console.log("Running Script");
+    //console.log("Running Script");
     socket.on("update", (data) => {
         console.log(data);
         io.emit("update", data);
     })
     
-    
+    socket.on("disconnect", async (data) => {
+        console.log(`(main.ts): User Disconnected | socketID: ${socket.id}`);
+        console.log(`(main.ts): Total connections: ${io.engine.clientsCount}`);
 
-})
+
+        const sessionID = getSessionBySocket(socket.id);
+
+        if (sessionID) {
+            try {
+                const response = await axios.post(
+                    `http://localhost:3000/leave-room/${sessionID}/${socket.id}`
+                );
+
+                // Clean up the mapping
+                removeSocket(socket.id);
+                console.log(JSON.stringify(socketSessionMap))
+
+            } 
+            catch (error) 
+            {
+                if (axios.isAxiosError(error)) 
+                {
+                    console.error("Error removing user ", error.response?.data || error.message);
+                } 
+                else 
+                {
+                    console.error("Error removing user ", error);
+                }
+            }
+        } 
+        else 
+        {
+            console.log(`No session found for disconnected socket: ${socket.id}`);
+        }
+    });
+
+        socket.emit("clear-session");
+    });
+
+
 
 server.listen(PORT, () => {
     console.log(`(main.ts): Express & SocketIO Server running at http://localhost:${PORT}`);

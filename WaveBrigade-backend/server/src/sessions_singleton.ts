@@ -18,7 +18,8 @@ class SessionManager {
     private static instance: SessionManager;
     private currentSessions: { [key: string]: ISession } = {};
 
-    private constructor() {} 
+    private constructor() {
+    } 
 
 
     public static getInstance(): SessionManager {

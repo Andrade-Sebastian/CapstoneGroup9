@@ -61,6 +61,8 @@ function generateSessionId(): string {
     return sessionId;
 }
 
+
+
 // function getExperiment(experimentId: string): IExperiment {
 //     // Query database for an experimentId.
 //     if (experimentId === "17") {
@@ -139,6 +141,7 @@ function requestDevices(sessionId) {
 function createSession(initializationData: ISessionInitialization, socketId: string) {
     console.log("Entered: createSession routine");
     const generatedSessionId = generateSessionId();
+
     let deviceList = []
     return new Promise<ISession>((resolve, reject) => {
         requestDevices(generatedSessionId)
@@ -225,13 +228,13 @@ function joinRoom(requestedSessionId: string, socketID: string, nickname: string
 
 
         const sessionState = getSessionState(requestedSessionId);
-        console.log("sessionState before adding user: " + JSON.stringify(sessionState))
-        //is correctly initialized 
+        //console.log("sessionState before adding user: " + JSON.stringify(sessionState))
+        
         sessionState.users.push(newUser)
 
         //for debugging
         const sessionStateAfter = getSessionState(requestedSessionId);
-        console.log("sessionState AFTER adding user: " + JSON.stringify(sessionStateAfter))
+        //console.log("sessionState AFTER adding user: " + JSON.stringify(sessionStateAfter))
 
 
         // sessionState.users = sessionState.users.concat(
@@ -252,6 +255,50 @@ function joinRoom(requestedSessionId: string, socketID: string, nickname: string
 
 }
 
+//works 
+function removeUserBySocketID(users: Array<IUser>, socketID: string) {
+    const userToRemove = users.find(user => user.socketId === socketID);
+
+    if (userToRemove) {
+        console.log("Removing user:", userToRemove);
+    } else {
+        console.log(`User with socketID ${socketID} not found...`);
+    }
+
+    //returns a new array with everyone minus the deleted user
+    return users.filter(user => user.socketId !== socketID);
+}
+
+//works
+function leaveRoom(requestedSessionId: string, socketID: string) {
+    console.log("(session_controller.ts): at leaveRoom()");
+    console.log("requestedSessionId:", requestedSessionId);
+    console.log("socketId:", socketID);
+
+
+    if (sessionManager.getSession(requestedSessionId)) {
+        console.log(`session ${requestedSessionId} found`)
+
+        
+        // Get the users
+        const session = sessionManager.getSession(requestedSessionId);
+        if (session) {
+            console.log("Users array before removing user:", session.users);
+
+            // Remove the user with the given socket ID
+            session.users = removeUserBySocketID(session.users, socketID);
+
+            console.log("Users array AFTER removing user:", session.users);
+        }
+
+    } else {
+        throw new Error(
+            `Could not find session ${requestedSessionId}. Was the backend changed at all? That deletes all active sessions.`
+        );
+    }
+}
+
+
 
 // userId: string;
 //     socketId: string;
@@ -267,6 +314,7 @@ export {
     createSession,
     joinSession,
     joinRoom,
+    leaveRoom,
     // addDiscoveredDevice,
     getSessionState
 }
