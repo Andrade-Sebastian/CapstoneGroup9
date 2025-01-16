@@ -1,9 +1,10 @@
 import express, { Request, Response } from "express";
-import {addDiscoveredDevice, getSessionState, IDevice, createSession, joinSession, joinRoom, leaveRoom} from "../controllers/session_controller.ts";
+import {addDiscoveredDevice, getSessionState, IDevice, createSession, joinSession, joinRoom, leaveRoom, IUser, assignEmotibitToUser} from "../controllers/session_controller.ts";
 import SessionManager from "../sessions_singleton.ts";
-import { addSocketToSession, removeSocket, getSessionBySocket, socketSessionMap } from "../sessionMappings.ts";
+import { addSocketToSession, removeSocket, getSessionBySocket, socketSessionMap} from "../sessionMappings.ts";
 import axios from "axios";
 const app = express();
+
 const joinerRouter = express.Router();
 joinerRouter.use(express.json());
 
@@ -126,7 +127,7 @@ joinerRouter.post("/leave-room/:sessionID/:socketID", (req: Request, res: Respon
         return res.status(200).send({
             "message": "in /remove-user",
             "sessionID": sessionID,
-            "socketID": socketID
+            "socketID": socketID,
         });
     } catch (error) {
         if (error instanceof Error) {
@@ -145,6 +146,46 @@ joinerRouter.post("/leave-room/:sessionID/:socketID", (req: Request, res: Respon
         });
     }
 
+})
+
+
+joinerRouter.post("/assign-emotibit", (req: Request, res: Response) => {
+    const {sessionID, serialNumber, userSocketID, deviceIPAddress} = req.body;
+
+    console.log("(joiner_routes.ts): Received" + JSON.stringify(req.body))
+
+    const sessionInfo = getSessionState(sessionID);
+    console.log("(joiner_routes.ts): Discovered Devices: " + JSON.stringify(sessionInfo.discoveredDevices))
+
+
+    const emotibit: IDevice = {
+        serialNumber: serialNumber,
+        socketID: userSocketID,
+        ipAddress: deviceIPAddress
+    }
+
+    try
+    {
+        //push the emotibit to the session's state and to foundDevicesOnNetwork array
+        sessionInfo.discoveredDevices.push(emotibit);
+        console.log("(TEST 1: joiner_routes.ts | assign-emotibit): Devices after adding emotibit:" + JSON.stringify(sessionInfo.discoveredDevices))
+
+        assignEmotibitToUser(sessionInfo.users, userSocketID, emotibit)
+        console.log("(TEST 2: joiner_routes.ts | Users after adding emotibit: " + JSON.stringify(sessionInfo.users))
+        return res.status(200).send({
+            "message": "in /assign-emotibit",
+            "sessionID": sessionID,
+            "socketID": userSocketID,
+            "emotibits_in_session": sessionInfo.discoveredDevices
+        });
+    }
+    catch (error) 
+    {
+        return res.status(500).send({
+            error: "INTERNAL_SERVER_ERROR",
+            message: "An unexpected error occurred. Idk what the problem is either ask ChatGPT or smth.."
+        });
+    }
 })
 
 

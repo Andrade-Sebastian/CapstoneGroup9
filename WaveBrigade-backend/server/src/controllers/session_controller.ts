@@ -2,6 +2,9 @@ import {currentSessions} from "../server.ts";
 import { v4 as uuid} from "npm:uuid";
 import SessionManager from "../sessions_singleton.ts";
 import {client} from "../main.ts";
+
+
+
 let foundDevicesOnNetwork: IDevice[] = [];
 
 
@@ -298,6 +301,34 @@ function leaveRoom(requestedSessionId: string, socketID: string) {
     }
 }
 
+function addEmotiBitToSession(sessionID: string, serialNumber: string, userSocketID: string, deviceIPAddress: string )
+{
+    const emotibit: IDevice = {
+        serialNumber: serialNumber,
+        socketID: userSocketID,
+        ipAddress: deviceIPAddress
+    }
+    foundDevicesOnNetwork.push(emotibit)
+}
+
+function assignEmotibitToUser(users: Array<IUser>, socketID: string, emotiBit: IDevice): Array<IUser> {
+    // Find the user by socketID
+    const userToAssignDeviceTo = users.find(user => user.socketId === socketID);
+
+
+    if (userToAssignDeviceTo) 
+    {
+      console.log(`Assigning EmotiBit to user with socketID: ${userToAssignDeviceTo.socketId}`);
+      userToAssignDeviceTo.associatedDevice = emotiBit;
+    } 
+    else 
+    {
+      console.log(`User with socketID ${socketID} not found...`);
+    }
+  
+    // Return the updated users array
+    return users;
+  }
 
 
 // userId: string;
@@ -315,6 +346,7 @@ export {
     joinSession,
     joinRoom,
     leaveRoom,
+    assignEmotibitToUser,
     // addDiscoveredDevice,
     getSessionState
 }
