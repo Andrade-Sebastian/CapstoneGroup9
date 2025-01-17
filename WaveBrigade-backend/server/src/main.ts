@@ -5,7 +5,7 @@ import socketSessionMap, { getSessionBySocket, removeSocket } from "./sessionMap
 import axios from "axios";
 
 //CHANGE TO RELATIVE PATH
-const PROTO_PATH = "/Users/emanpelayo/Documents/real_docs/CS/Current_Classes/CS425/CapstoneGroup9/WaveBrigade-backend/server/src/grpc/protos/emotiBits.proto";
+const PROTO_PATH = "./server/src/grpc/protos/emotiBits.proto";
 import * as protoLoader from "npm:@grpc/proto-loader";
 
 const options = {
