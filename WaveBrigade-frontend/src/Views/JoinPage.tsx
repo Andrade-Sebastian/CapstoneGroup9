@@ -1,9 +1,12 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import SideComponent from "../Components/SideComponent.tsx";
 import { v4 as uuidv4 } from "uuid";
 import socket from "./socket.tsx";
 import axios from "axios";
 import { useJoinerStore } from "../hooks/stores/useJoinerStore.ts";
+import { PiPlanetLight } from "react-icons/pi";
+import toast, { Toaster } from "react-hot-toast";
 
 export default function JoinPage() {
   const [nickName, setNickName] = useState("");
@@ -42,21 +45,34 @@ export default function JoinPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    const loadingToastId = toast.loading("Verifying Room Code...");
+  
     if (!StudentInputRoomCode || !nickName) {
       console.error("Please enter both a nickname and a room code...");
       return;
     }
 
-    const isValidRoomCode = await validateRoomCode(StudentInputRoomCode);
-    if (isValidRoomCode) {
-      joinRoom();
+    try{
+      const isValidRoomCode = await validateRoomCode(StudentInputRoomCode);
+      if (isValidRoomCode) {
+        toast.success("Connection Successful! Please standby", {id: loadingToastId});
+        setTimeout(() => {
+          joinRoom();
+          navigateTo("/connect-emotibit", {
+            state: {
+              nickName: nickName,
+              roomCode: StudentInputRoomCode,
+            }
+          });
 
-      navigateTo("/waiting-room", {
-        state: {
-          nickName: nickName,
-          roomCode: StudentInputRoomCode,
-        }
-      });
+        })
+    }
+    else{
+      toast.error("Connection failed. Looks like we couldn't get you connected. Please check your room code and try again.", {id: loadingToastId});
+    }
+    }catch(error){
+      console.error("Error verifying code:", error);
+      toast.error("Connection failed. Looks like we couldn't get you connected. Please check your room code and try again.", {id: loadingToastId})
     }
   };
 
@@ -94,19 +110,21 @@ export default function JoinPage() {
   };
   
 
-
   return (
-    <div className="flex flex-col items-center justify-center h-screen">
-      <div className="bg-white rounded-lg shadow-lg p-8 max-w-xl w-full">
-        <h1 className="text-center text-3xl font-semibold mb-6 text-gray-800">
-          Join a Lobby
-        </h1>
-
-        <form onSubmit={handleSubmit}>
+    <div className="flex h-screen">
+      <div className="flex flex-col items-center justify-center w-2/5">
+      <SideComponent
+        icon={<PiPlanetLight style={{ fontSize: "200px" }} />}  
+        headingTitle="Enter Your Nickname and Room Code"
+        description="We need to know who you are! Enter your name and the room code to get started"
+      />
+      </div>
+      <div className="flex flex-col items-center justify-center w-2/5">
+        <form onSubmit={handleSubmit} className="w-full max-w-md">
           <div className="mb-6">
             <div>
               <label htmlFor="nickName" className="block text-sm font-medium text-gray-700 mb-2">
-                Nickname<span className="text-red-500">*</span>
+                Enter Your Name<span className="text-purple-500"> *</span>
               </label>
               <input
                 type="text"
@@ -121,7 +139,7 @@ export default function JoinPage() {
                 htmlFor="StudentInputRoomCode"
                 className="block text-sm font-medium text-gray-700 mb-2"
               >
-                Room Code<span className="text-red-500">*</span>
+                Enter Room Code<span className="text-purple-500"> *</span>
               </label>
               <input
                 type="text"
@@ -137,7 +155,7 @@ export default function JoinPage() {
             <button
               disabled={!nickName.trim() || !StudentInputRoomCode.trim()}
               type="submit"
-              className={`mt-6 font-semibold py-3 px-6 rounded-md shadow-md transition duration-300 ease-in-out ${
+              className={`mt-8 font-semibold py-3 px-6 rounded-md shadow-md transition duration-300 ease-in-out ${
                 nickName.trim() && StudentInputRoomCode.trim()
                   ? "bg-purple-600 hover:bg-purple-700 text-white"
                   : "bg-gray-400 text-white cursor-not-allowed"
@@ -147,7 +165,7 @@ export default function JoinPage() {
             </button>
           </div>
         </form>
+        </div>
       </div>
-    </div>
   );
 }

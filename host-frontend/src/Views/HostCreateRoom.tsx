@@ -2,6 +2,8 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Checkbox } from "@nextui-org/react";
 import axios from "axios";
+import SideComponent from "../components/Components/SideComponent.tsx";
+import { IoEarthOutline } from "react-icons/io5";
 
 
 // This is where the host will create the room
@@ -13,9 +15,6 @@ export default function HostCreateRoom() {
   const [password, setPassword] = useState(""); //store this in backend!!
   const navigateTo = useNavigate();
   
-
-
-
 
 
 
@@ -41,7 +40,7 @@ export default function HostCreateRoom() {
     },
   };
 
-  function handleSubmit(e: { preventDefault: () => void }) {
+  function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     {
       /* For now*/
@@ -83,18 +82,23 @@ export default function HostCreateRoom() {
   // <div className="bg-white rounded-xl p-8 shadow-lg w-4/5 min-h-[1000px] place-content-center">
   //   <form onSubmit={handleSubmit} className="flex flex-col gap-14">
   return (
-    <div className="flex flex-col items-center justify-center h-screen">
-      <div className="bg-white shawdow-lg rounded-xl p-8 w-full max-w-xl">
-        <h1 className="text-center text-3xl font-semibold mb-6 text-gray-800">
-          Host a Lobby
-        </h1>
-        <form onSubmit={handleSubmit}>
+    <div className="flex h-screen">
+      <div className="flex flex-col items-center justify-center w-2/5">
+      <SideComponent
+      icon={<IoEarthOutline style={{ fontSize: "200px"}}/>}
+      headingTitle="Start an Experiment"
+      description="Provide your name, check the box if you want to set a password and/or have spectators"
+      />
+      </div>
+        <div className="flex flex-col items-center justify-center w-2/5">
+        <form onSubmit={handleSubmit} className="w-full max-w-md">
           <div className="mb-6">
+            <div>
             <label
               htmlFor="userName"
               className="block text-sm font-medium text-gray-700 mb-2"
             >
-              Enter your name <span className="text-red-500">*</span>
+              Enter your name <span className="text-purple-500">*</span>
             </label>
             <input
               type="text"
@@ -103,11 +107,10 @@ export default function HostCreateRoom() {
               //   focus:outline-none focus:ring-2 focus:ring-indigo-500
               onChange={(e) => setUserName(e.target.value)}
               value={userName}
-            ></input>
+            />
           </div>
-
           <div className="flex flex-col gap-4 mb-4">
-            <div className="flex items-center gap-2 mb-4">
+            <div className="flex items-center gap-2 mb-4 mt-4">
               <input
                 type="checkbox"
                 id="usePassword"
@@ -128,14 +131,15 @@ export default function HostCreateRoom() {
                   htmlFor="Password"
                   className="block text-sm font-medium text-gray-700 mb-2"
                 >
-                  Password
+                  Password <span className="text-purple-500">*</span>
                 </label>
                 <input
                   id="Password"
                   type="text"
                   className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   onChange={(e) => setPassword(e.target.value)}
-                ></input>
+                  value={password}
+                />
               </div>
             )}
           </div>
@@ -156,6 +160,7 @@ export default function HostCreateRoom() {
               </label>
             </div>
           </div>
+          </div>
           <div className="flex gap-10 items-center justify-center">
             <button
               type="submit"
@@ -172,6 +177,6 @@ export default function HostCreateRoom() {
           </div>
         </form>
       </div>
-    </div>
+      </div>
   );
 }

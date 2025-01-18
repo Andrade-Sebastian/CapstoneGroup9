@@ -49,7 +49,7 @@ export default function Home() {
 
   return (
     <div className="flex flex-col">
-      <div className="justify-center text-white py-10">
+      <div className="justify-center text-white py-10 ">
         <h1 className="text-center text-2xl">Welcome to Wavebrigade!</h1>
       </div>
       {/* body */}

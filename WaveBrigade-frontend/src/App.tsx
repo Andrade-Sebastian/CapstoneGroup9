@@ -54,7 +54,7 @@ function App() {
 
 
   return (
-    <div className="flex flex-col h-screen max-h-screen overflow-auto bg-gradient-to-br from-purple-700 to-blue-500">
+    <div className="flex flex-col h-screen max-h-screen overflow-auto bg-white">
       <NavigationBar />
 
 

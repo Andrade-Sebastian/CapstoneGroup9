@@ -9,7 +9,7 @@ export default function NavigationBar()
 {
     return (
     <div>
-        <Navbar isBordered={true} position="static" className="bg-white text-purple-950 h-20">
+        <Navbar isBordered={true} position="static" className="bg-gradient-to-br from-purple-700 to-violet-400 text-white h-20">
             <NavbarBrand className="pl-10">
                 <RiPulseFill style={{fontSize: "24px"}} />
                 <Link to="/">
