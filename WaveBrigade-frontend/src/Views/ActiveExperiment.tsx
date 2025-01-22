@@ -10,7 +10,7 @@ export default function ActiveExperiment() {
         console.log("Running active experiment");
 
         socket.on("update", (data) => {
-            if (Array.isArray(data)) {
+            if (data != null) {
                 console.log("Data received:", data);
                 setRecievedData(data);
               } else {
