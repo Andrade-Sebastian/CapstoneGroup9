@@ -32,40 +32,6 @@ const router = createBrowserRouter([
       },
       
       {
-        path: "host",
-        element: <HostRoot/>,
-        children:[{
-          path: "create",
-          element: <HostCreateRoom/>
-        },
-        {
-          path: "select-lab",
-          element: <HostSelectLabPage/>
-        },
-        {
-          path: ":room",
-          element: <HostView />
-        },
-        {
-          path: "select-media",
-          element: <SelectMedia/>
-        },
-    ]
-      },
-      {
-        path: "create-lab",
-        element: <ExperimentCreaterRoot />,
-        children: [{
-              path: "select-lab",
-              element: <HostSelectLabPage /> 
-        },
-        {
-          index: true,
-          element: <PreviouslyMadeExperiments />
-        }]
-          
-      },
-      {
         path: "join",
         element: <JoinPage />
       },

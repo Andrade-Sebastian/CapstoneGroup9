@@ -1,10 +1,12 @@
-import UpdateElectron from '@/components/update'
+import UpdateElectron from '@/components/update';
+import { useNavigate } from 'react-router-dom';
 import React from 'react';
-import { Outlet } from "react-router-dom"
+import { Outlet } from "react-router-dom";
 import NavigationBar from "./components/Components/NavigationBar.tsx";
 
 
 function App() {
+  const navigate = useNavigate();
   return (
     <div className="flex flex-col h-screen max-h-screen overflow-auto bg-white">
       <NavigationBar />

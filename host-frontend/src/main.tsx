@@ -12,6 +12,9 @@ import HostSelectLabPage from './Views/HostSelectLabPage.tsx';
 import HostRoot from './Views/HostRoot.tsx';
 import ExperimentCreaterRoot from './Views/ExperimentCreaterRoot.tsx';
 import PreviouslyMadeExperiments from './Views/PreviouslyMadeExperiments.tsx';
+import PhotoLab from './Views/PhotoLab';
+import VideoLab from './Views/VideoLab';
+import GalleryLab from './Views/GalleryLab';
 
 // import { StrictMode } from 'react'
 // import { createRoot } from 'react-dom/client'
@@ -63,6 +66,18 @@ const router = createBrowserRouter([
           path: "select-media",
           element: <SelectMedia/>,
         },
+        {
+          path: "photo-lab",
+          element: <PhotoLab/>,
+        },
+        {
+          path: "video-lab",
+          element: <VideoLab/>,
+        },
+        {
+          path: "gallery-lab",
+          element: <GalleryLab/>
+        }
       ]
   },
   {

@@ -112,7 +112,7 @@ export default function JoinPage() {
 
   return (
     <div className="flex h-screen">
-      <div className="flex flex-col items-center justify-center w-2/5">
+      <div className="flex flex-col max-sm:hidden items-center justify-center w-2/5">
       <SideComponent
         icon={<PiPlanetLight style={{ fontSize: "200px" }} />}  
         headingTitle="Enter Your Nickname and Room Code"
