@@ -8,10 +8,11 @@ import axios from "axios";
 import { IoVideocam } from "react-icons/io5";
 import { TfiGallery } from "react-icons/tfi";
 import { TiCamera } from "react-icons/ti";
-
+import { LiaSatelliteSolid } from "react-icons/lia";
 import { HiAcademicCap } from "react-icons/hi";
 import LabTemplatesCard from "../components/Components/LabTemplatesCard";
 import CardComponentRadio from "../components/Components/CardComponentRadio";
+import SideComponent from "@/components/Components/SideComponent";
 //added routing to /host/select-lab
 //8:49 -
 //created HostSelectlabPage
@@ -53,21 +54,21 @@ export default function HostSelectLabPage() {
       name: "Video Lab 2",
       description:
         "Create a video lab experiment. Insert your own video or include a link for the experiment.",
-      iconPath: <IoVideocam className="size-8"/>,
+      iconPath: <IoVideocam className="size-8" />,
     },
     {
       id: "2",
       name: "Picture Lab",
       description:
         "Create a picture lab experiment. Insert your own picture or include a gif for the experiment.",
-      iconPath: <TiCamera className="size-8"/>,
+      iconPath: <TiCamera className="size-8" />,
     },
     {
       id: "3",
       name: "GalleryLab",
       description:
         "Create a gallery experiment. Insert pictures to create a gallery style lab.",
-      iconPath: <TfiGallery className="size-8"/>,
+      iconPath: <TfiGallery className="size-8" />,
     },
   ];
   const navigateTo = useNavigate();
@@ -76,8 +77,20 @@ export default function HostSelectLabPage() {
 
   function handleSubmit(e: { preventDefault: () => void }) {
     e.preventDefault();
-    {
-      /* For now*/
+    if(selectedLab){
+      if (selectedLab.id === "1"){
+        navigateTo("/host/video-lab", {state:{userName}});
+      }
+      else if (selectedLab.id === "2"){
+        navigateTo("/host/photo-lab", {state: {userName}});
+      }
+      else if (selectedLab.id === "3"){
+        navigateTo("/host/gallery-lab", {state: { userName}});
+      }
+      else{
+        alert("Please select a lab template to continue.") 
+        //toast
+      }
     }
 
     console.log("Lab Name: " + experimentName);
@@ -87,13 +100,20 @@ export default function HostSelectLabPage() {
   }
 
   useEffect(() => {
-    console.log(selectedLab)
-  }, [selectedLab])
+    console.log(selectedLab);
+  }, [selectedLab]);
 
   // export default function ExperimentCreationForm({ handleSubmit, setExperimentName, setLabDescription, userName }) {
   return (
-    <div className="flex justify-center items-center min-h-screen h-auto p-4 place-content-center ">
-      <div className="bg-white rounded-xl p-8 shadow-lg w-4/5 overflow-auto place-content-center">
+    <div className="flex h-screen">
+      <div className="flex flec-col max-sm:hidden items-center justify-center w-2/5">
+        <SideComponent
+          icon={<LiaSatelliteSolid style={{ fontSize: "200px" }} />}
+          headingTitle="Create an Experiment"
+          description="Please fill out the name of the experiment, provide a description, and choose a template."
+        />
+      </div>
+      <div className="flex flex-col items-center justify-center w-2/5">
         <form onSubmit={handleSubmit} className="flex flex-col gap-14">
           <h1 className="text-3xl font-semibold text-center mb-4 text-gray-800">
             Experiment Creation
@@ -103,7 +123,7 @@ export default function HostSelectLabPage() {
             htmlFor="experimentName"
             className="font-semibold text-gray-700"
           >
-            Enter Name of Experiment <span className="text-red-600">*</span>
+            Enter Name of Experiment <span className="text-purple-500">*</span>
           </label>
           <input
             type="text"
@@ -117,7 +137,7 @@ export default function HostSelectLabPage() {
             htmlFor="labDescription"
             className="font-semibold text-gray-700"
           >
-            Description <span className="text-red-600">*</span>{" "}
+            Description  <span className="text-purple-500">*</span>
             {/* make this required*/}
           </label>
           <textarea
@@ -128,7 +148,7 @@ export default function HostSelectLabPage() {
           ></textarea>
 
           <h2>
-            <strong>Lab Templates</strong>
+            <strong>Lab Templates</strong> <span className="text-purple-500">*</span>
           </h2>
 
           {/* LAB TEMPLATES */}
@@ -136,19 +156,26 @@ export default function HostSelectLabPage() {
             {/* Video Lab Checkbox and Description */}
 
             {/*A Single lab */}
-              {labs.map((lab) => (
-                <CardComponentRadio key={lab.id} selectedLab={selectedLab} handler = {() => setSelectedLab(lab)} value={lab} headingTitle={lab.name} icon={lab.iconPath || <IoVideocam/>} description={lab.description} />
-                
-              ))}
-         
+            {labs.map((lab) => (
+              <CardComponentRadio
+                key={lab.id}
+                selectedLab={selectedLab}
+                handler={() => setSelectedLab(lab)}
+                value={lab}
+                headingTitle={lab.name}
+                icon={lab.iconPath || <IoVideocam />}
+                description={lab.description}
+              />
+            ))}
           </div>
+          {/* const labId = "1"; // Example ID to search for
+const lab = labs.find((lab) => lab.id === labId);
+
+ */}
 
           <button
             type="submit"
             className="mt-6 bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-6 rounded-md shadow-md transition duration-300 ease-in-out"
-            onClick={() =>
-              navigateTo("/host/select-media", { state: { userName } })
-            }
           >
             Continue
           </button>

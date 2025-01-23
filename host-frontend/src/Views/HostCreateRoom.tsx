@@ -83,7 +83,7 @@ export default function HostCreateRoom() {
   //   <form onSubmit={handleSubmit} className="flex flex-col gap-14">
   return (
     <div className="flex h-screen">
-      <div className="flex flex-col items-center justify-center w-2/5">
+      <div className="flex flex-col max-sm:hidden items-center justify-center w-2/5">
       <SideComponent
       icon={<IoEarthOutline style={{ fontSize: "200px"}}/>}
       headingTitle="Start an Experiment"
