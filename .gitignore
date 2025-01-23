@@ -1,2 +1,5 @@
 /WaveBrigade-backend\node_modules\
 node_modules
+node_modules
+WaveBrigade-backend/server/node_modules
+emotiBitGRPC/env
