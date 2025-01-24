@@ -92,7 +92,7 @@ joinerRouter.get("/validateRoomCode/:roomCode", (req: Request, res: Response) =>
     
     for (const sessionId in liveSessions) {
         if (liveSessions[sessionId].roomCode === roomCode) {
-            console.log("(validateRoomCode): " + JSON.stringify(liveSessions[sessionId].sessionId))
+            console.log("(validateRoomCode): SessionID " + JSON.stringify(liveSessions[sessionId].sessionId))
             return res.status(200).json({ 
                 message: "Successfully Validated room code",
                 sessionID: liveSessions[sessionId].sessionId
