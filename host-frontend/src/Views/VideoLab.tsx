@@ -103,6 +103,28 @@ export default function VideoLab() {
           </div>
         </form>
       </div>
+      <ModalComponent
+      onAction={()=> console.log("a")}
+      isOpen={true}
+      onCancel={()=>console.log("c")}
+      modalTitle='Lab Confirmed'
+      >
+        <div className="mb-6">
+            <label
+              htmlFor="experimentTitle"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
+              
+              <span className="text-purple-500">*</span>
+            </label>
+            <input
+              type="text"
+              id="experimentTitle"
+              className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              disabled
+            />
+          </div>
+        </ModalComponent>
     </div>
   );
 }

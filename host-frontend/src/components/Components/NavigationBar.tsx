@@ -19,7 +19,6 @@ import {
 export default function NavigationBar() {
   const {isOpen, onOpen, onOpenChange} = useDisclosure();
   return (
-    <div>
       <Navbar
         isBordered={true}
         position="static"
@@ -84,6 +83,5 @@ export default function NavigationBar() {
           </NavbarItem>
         </NavbarContent>
       </Navbar>
-    </div>
   );
 }
