@@ -110,47 +110,11 @@ export default function HostSelectLabPage() {
         <SideComponent
           icon={<LiaSatelliteSolid style={{ fontSize: "200px" }} />}
           headingTitle="Create an Experiment"
-          description="Please fill out the name of the experiment, provide a description, and choose a template."
+          description="Time to choose a lab template! Pick between a video, image, or image gallery lab"
         />
       </div>
       <div className="flex flex-col items-center justify-center w-2/5">
         <form onSubmit={handleSubmit} className="flex flex-col gap-14">
-          <h1 className="text-3xl font-semibold text-center mb-4 text-gray-800">
-            Experiment Creation
-          </h1>
-
-          <label
-            htmlFor="experimentName"
-            className="font-semibold text-gray-700"
-          >
-            Enter Name of Experiment <span className="text-purple-500">*</span>
-          </label>
-          <input
-            type="text"
-            id="experimentName"
-            className="border border-gray-300 rounded-md p-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-purple-500"
-            placeholder="Enter experiment name"
-            onChange={(e) => setExperimentName(e.target.value)}
-          />
-
-          <label
-            htmlFor="labDescription"
-            className="font-semibold text-gray-700"
-          >
-            Description  <span className="text-purple-500">*</span>
-            {/* make this required*/}
-          </label>
-          <textarea
-            id="labDescription"
-            className="border border-gray-300 rounded-md p-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-purple-500"
-            placeholder="Provide a description of the experiment"
-            onChange={(e) => setLabDescription(e.target.value)}
-          ></textarea>
-
-          <h2>
-            <strong>Lab Templates</strong> <span className="text-purple-500">*</span>
-          </h2>
-
           {/* LAB TEMPLATES */}
           <div className="grid grid-cols-2 grid-rows-2 gap-20 items-center overflow-auto">
             {/* Video Lab Checkbox and Description */}
@@ -168,14 +132,14 @@ export default function HostSelectLabPage() {
               />
             ))}
           </div>
-          {/* const labId = "1"; // Example ID to search for
-const lab = labs.find((lab) => lab.id === labId);
-
- */}
-
           <button
             type="submit"
-            className="mt-6 bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-6 rounded-md shadow-md transition duration-300 ease-in-out"
+            disabled={!selectedLab}
+            className={`mt-6 font-semibold py-3 px-6 rounded-md shadow-md transition duration-300 ease-in-out ${
+              selectedLab
+                ? "bg-purple-600 hover:bg-purple-700 text-white"
+                : "bg-gray-400 text-white cursor-not-allowed"
+            }`}
           >
             Continue
           </button>

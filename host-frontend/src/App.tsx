@@ -2,7 +2,7 @@ import UpdateElectron from '@/components/update';
 import { useNavigate } from 'react-router-dom';
 import React from 'react';
 import { Outlet } from "react-router-dom";
-import NavigationBar from "./components/Components/NavigationBar.tsx";
+import NavigationBar from "./components/Components/NavigationBar";
 
 
 function App() {

@@ -12,11 +12,6 @@ import { Link } from "react-router-dom";
 import { CiCircleInfo } from "react-icons/ci";
 
 import {
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
   Button,
   useDisclosure
 } from "@heroui/react";
@@ -60,7 +55,7 @@ export default function NavigationBar() {
                 />
               </button> */}
             </div>
-            {/* Modal for Settings */}
+            {/* Modal for Settings
             <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
             <ModalContent>
                 <ModalHeader className="flex flex-col gap-1">Settings</ModalHeader>
@@ -73,7 +68,7 @@ export default function NavigationBar() {
                   </Button>
                 </ModalFooter>
               </ModalContent>
-            </Modal>
+            </Modal> */}
           </NavbarItem>
           <NavbarItem>
             <div className="flex gap-10 items-center justify-center">

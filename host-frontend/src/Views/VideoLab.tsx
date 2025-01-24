@@ -1,24 +1,29 @@
 import { TbUfo } from "react-icons/tb";
-import SideComponent from "../components/Components/SideComponent.tsx";
-import React, { useState } from 'react';
+import SideComponent from "../components/Components/SideComponent";
+import React, { useState } from "react";
+import VideoInput from "../components/Components/VideoInput.js";
+import toast, { Toaster } from "react-hot-toast";
+import ModalComponent from "../components/Components/ModalComponent.js";
 import {
-    Modal,
-    ModalContent,
-    ModalHeader,
-    ModalBody,
-    ModalFooter,
-    Button,
-    useDisclosure
-  } from "@heroui/react";
-  
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  Button,
+  useDisclosure,
+} from "@heroui/react";
+
 export default function VideoLab() {
-  function handleSubmit() {}
+  const {isOpen, onOpen, onOpenChange} = useDisclosure();
+  function handleSubmit() {
+    //ADD TOASTS AND MODAL CONFIRMATION
+  }
   const [experimentTitle, setExperimentTitle] = useState("");
   const [experimentDesc, setExperimentDesc] = useState("");
-  const [file, setFile] = useState();
-  const [caption, setCaption] = useState();
+  const [isFileSelected, setIsFileSelected] = useState(false);
 
-  function handleChange(e){
+  function handleChange(e) {
     console.log(e.target.files);
     setFile(URL.createObjectURL(e.target.files[0]));
   }
@@ -57,51 +62,37 @@ export default function VideoLab() {
               className="block text-sm font-medium text-gray-700 mb-2"
             >
               Enter Description for Experiment{" "}
-              <span className="text-purple-500">*</span>
             </label>
-            <input
-              type="text"
+            <textarea
               id="experimentDesc"
               className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
               //   focus:outline-none focus:ring-2 focus:ring-indigo-500
               onChange={(e) => setExperimentDesc(e.target.value)}
               value={experimentDesc}
-            />
+              placeholder="Provide a description for your experiment"
+            ></textarea>
           </div>
-          <div className="mb-6">
-          <label
-              htmlFor="addImage"
-              className="block text-sm font-medium text-gray-700 mb-2"
-            >
-              Add Image
-              <span className="text-purple-500">*</span>
-            </label>
-            <input type="file" onChange={handleChange}/>
-            <img src={file}/>
-          </div>
+
           <div className="mb-6">
             <label
-              htmlFor="caption"
-              className="block text-sm font-medium text-gray-700 mb-2"
+              htmlFor="experimentVideo"
+              className="block text-md font-medium text-gray-700 mb-2"
             >
-              Enter a Caption
-              <span className="text-purple-500">*</span>
+              Add a Video
+              <span className="text-purple-500"> *</span>
             </label>
-            <input
-              type="text"
-              id="caption"
-              className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              //   focus:outline-none focus:ring-2 focus:ring-indigo-500
-              onChange={(e) => setCaption(e.target.value)}
-              value={caption}
+            <VideoInput
+              width={250}
+              height={500}
+              onFileSelected={setIsFileSelected}
             />
           </div>
           <div className="flex gap-10 items-center justify-center">
             <button
-              type="submit"
-              disabled={!experimentTitle.trim()}
+              type="button"
+              disabled={!experimentTitle.trim() || !isFileSelected}
               className={`mt-6 font-semibold py-3 px-6 rounded-md shadow-md transition duration-300 ease-in-out ${
-                experimentTitle.trim()
+                experimentTitle.trim() && isFileSelected
                   ? "bg-purple-600 hover:bg-purple-700 text-white"
                   : "bg-gray-400 text-white cursor-not-allowed"
               }`}

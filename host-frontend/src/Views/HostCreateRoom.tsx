@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Checkbox } from "@nextui-org/react";
 import axios from "axios";
 import SideComponent from "../components/Components/SideComponent.tsx";
 import { IoEarthOutline } from "react-icons/io5";
-
+import { Icon } from "react-icons-kit";
+import { eyeOff } from "react-icons-kit/feather/eyeOff";
+import { eye } from "react-icons-kit/feather/eye";
 
 // This is where the host will create the room
 
@@ -13,11 +14,20 @@ export default function HostCreateRoom() {
   const [passwordIsSelected, setPasswordIsSelected] = useState(false);
   const [allowSpectators, setAllowSpectators] = useState(false);
   const [password, setPassword] = useState(""); //store this in backend!!
+  const [type, setType] = useState("password");
+  const [icon, setIcon] = useState(eyeOff);
   const navigateTo = useNavigate();
-  
 
-
-
+  function handleToggle() {
+    //have eye open if text is censored, if not then eye closed
+    if (type === "password") {
+      setIcon(eye);
+      setType("text");
+    } else {
+      setIcon(eyeOff);
+      setType("password");
+    }
+  }
 
   //hardcoded to test host/session/create
   const [sessionInfo, setSessionInfo] = useState({
@@ -51,7 +61,7 @@ export default function HostCreateRoom() {
       selectedExperimentId: "17", // (ideally this would be undefined)
       credentials: {
         passwordEnabled: passwordIsSelected,
-        password: passwordIsSelected? password: "", //if enabled, pass will be included
+        password: passwordIsSelected ? password : "", //if enabled, pass will be included
       },
       allowSpectators: allowSpectators,
     });
@@ -67,12 +77,10 @@ export default function HostCreateRoom() {
       .catch((error) => {
         console.error("Error creating session:", error);
       });
-    
 
     console.log("Username: " + userName);
     console.log("Continue Button clicked");
     console.log("Navigating to Media");
-
   }
 
   console.log("Is the password selected? " + passwordIsSelected);
@@ -84,82 +92,100 @@ export default function HostCreateRoom() {
   return (
     <div className="flex h-screen">
       <div className="flex flex-col max-sm:hidden items-center justify-center w-2/5">
-      <SideComponent
-      icon={<IoEarthOutline style={{ fontSize: "200px"}}/>}
-      headingTitle="Start an Experiment"
-      description="Provide your name, check the box if you want to set a password and/or have spectators"
-      />
+        <SideComponent
+          icon={<IoEarthOutline style={{ fontSize: "200px" }} />}
+          headingTitle="Start an Experiment"
+          description="Provide your name, check the box if you want to set a password and/or have spectators"
+        />
       </div>
-        <div className="flex flex-col items-center justify-center w-2/5">
+      <div className="flex flex-col items-center justify-center w-2/5">
         <form onSubmit={handleSubmit} className="w-full max-w-md">
           <div className="mb-6">
             <div>
-            <label
-              htmlFor="userName"
-              className="block text-sm font-medium text-gray-700 mb-2"
-            >
-              Enter your name <span className="text-purple-500">*</span>
-            </label>
-            <input
-              type="text"
-              id="userName"
-              className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              //   focus:outline-none focus:ring-2 focus:ring-indigo-500
-              onChange={(e) => setUserName(e.target.value)}
-              value={userName}
-            />
-          </div>
-          <div className="flex flex-col gap-4 mb-4">
-            <div className="flex items-center gap-2 mb-4 mt-4">
-              <input
-                type="checkbox"
-                id="usePassword"
-                className="h-4 w-4"
-                checked={passwordIsSelected}
-                onChange={() => setPasswordIsSelected(!passwordIsSelected)}
-              />
               <label
-                htmlFor="usePassword"
-                className="text-sm font-medium text-gray-700"
+                htmlFor="userName"
+                className="block text-sm font-medium text-gray-700 mb-2"
               >
-                Use Password
+                Enter your name <span className="text-purple-500">*</span>
               </label>
+              <input
+                type="text"
+                id="userName"
+                className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                //   focus:outline-none focus:ring-2 focus:ring-indigo-500
+                onChange={(e) => setUserName(e.target.value)}
+                value={userName}
+              />
             </div>
-            {passwordIsSelected && (
-              <div className="mt-2">
-                <label
-                  htmlFor="Password"
-                  className="block text-sm font-medium text-gray-700 mb-2"
-                >
-                  Password <span className="text-purple-500">*</span>
-                </label>
+            <div className="flex flex-col gap-4 mb-4">
+              <div className="flex items-center gap-2 mb-4 mt-4">
                 <input
-                  id="Password"
-                  type="text"
-                  className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  onChange={(e) => setPassword(e.target.value)}
-                  value={password}
+                  type="checkbox"
+                  id="usePassword"
+                  className="h-4 w-4"
+                  checked={passwordIsSelected}
+                  onChange={() => setPasswordIsSelected(!passwordIsSelected)}
                 />
+                <label
+                  htmlFor="usePassword"
+                  className="text-sm font-medium text-gray-700"
+                >
+                  Use Password
+                </label>
               </div>
-            )}
-          </div>
-          <div className="flex flex-col gap-4 mb-4">
-            <div className="flex items-center gap-2 mb-4">
-              <input
-                type="checkbox"
-                id="allowSpectators"
-                className="h-4 w-4"
-                checked={allowSpectators}
-                onChange={() => setAllowSpectators(!allowSpectators)}
-              />
-              <label
-                htmlFor="allowSpectators"
-                className="text-sm font-medium text-gray-700"
-              >
-                Allow Spectators
-              </label>
+              {passwordIsSelected && (
+                <div>
+                  <label
+                    htmlFor="Password"
+                    className="block text-sm font-medium text-gray-700 mb-2"
+                  >
+                    Password <span className="text-purple-500">*</span>
+                  </label>
+                  <div>
+                    <div>
+                      <div className="mb-4 flex">
+                        <input
+                          name="password"
+                          placeholder="Password"
+                          id="Password"
+                          type={type}
+                          className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                          onChange={(e) => setPassword(e.target.value)}
+                          value={password}
+                        />
+                        <span
+                          className="flex justify-around items-center"
+                          onClick={handleToggle}
+                        >
+                          <Icon
+                            className="absolute mr-10"
+                            icon={icon}
+                            size={25}
+                          />
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
-          </div>
+            <div className="flex flex-col gap-4 mb-4">
+              <div className="flex items-center gap-2 mb-4">
+                <input
+                  type="checkbox"
+                  id="allowSpectators"
+                  className="h-4 w-4"
+                  checked={allowSpectators}
+                  onChange={() => setAllowSpectators(!allowSpectators)}
+                />
+                <label
+                  htmlFor="allowSpectators"
+                  className="text-sm font-medium text-gray-700"
+                >
+                  Allow Spectators
+                </label>
+              </div>
+            </div>
           </div>
           <div className="flex gap-10 items-center justify-center">
             <button
@@ -177,6 +203,6 @@ export default function HostCreateRoom() {
           </div>
         </form>
       </div>
-      </div>
+    </div>
   );
 }

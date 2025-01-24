@@ -3,15 +3,15 @@ import ReactDOM from 'react-dom/client';
 import { RouterProvider } from 'react-router-dom';
 import { StrictMode } from 'react';
 import './index.css';
-import App from "./App.tsx";
+import App from "./App";
 import { createBrowserRouter } from "react-router-dom";
-import HostView from "./Views/HostView.tsx";
-import HostCreateRoom from "./Views/HostCreateRoom.tsx";
-import SelectMedia from "./Views/SelectMedia.tsx";
-import HostSelectLabPage from './Views/HostSelectLabPage.tsx';
-import HostRoot from './Views/HostRoot.tsx';
-import ExperimentCreaterRoot from './Views/ExperimentCreaterRoot.tsx';
-import PreviouslyMadeExperiments from './Views/PreviouslyMadeExperiments.tsx';
+import HostView from "./Views/HostView";
+import HostCreateRoom from "./Views/HostCreateRoom";
+import SelectMedia from "./Views/SelectMedia";
+import HostSelectLabPage from './Views/HostSelectLabPage';
+import HostRoot from './Views/HostRoot';
+import ExperimentCreaterRoot from './Views/ExperimentCreaterRoot';
+import PreviouslyMadeExperiments from './Views/PreviouslyMadeExperiments';
 import PhotoLab from './Views/PhotoLab';
 import VideoLab from './Views/VideoLab';
 import GalleryLab from './Views/GalleryLab';
@@ -43,43 +43,77 @@ const router = createBrowserRouter([
         index: true, 
         element: <HostCreateRoom/> //Example/Placeholder
       },
+      {
+        path: "host",
+          element: <HostRoot/>,
+          children: [
+            {
+              path: "create",
+              element: <HostCreateRoom/>,
+            },
+            {
+              path: "select-lab",
+              element: <HostSelectLabPage/>,
+            },
+            {
+              path: ":room",
+              element: <HostView/>,
+            },
+            {
+              path: "select-media",
+              element: <SelectMedia/>,
+            },
+            {
+              path: "photo-lab",
+              element: <PhotoLab/>,
+            },
+            {
+              path: "video-lab",
+              element: <VideoLab/>,
+            },
+            {
+              path: "gallery-lab",
+              element: <GalleryLab/>
+            }
+          ]
+      },
     ]
 
   },
-  {
-    path: "host",
-      element: <HostRoot/>,
-      children: [
-        {
-          path: "create",
-          element: <HostCreateRoom/>,
-        },
-        {
-          path: "select-lab",
-          element: <HostSelectLabPage/>,
-        },
-        {
-          path: ":room",
-          element: <HostView/>,
-        },
-        {
-          path: "select-media",
-          element: <SelectMedia/>,
-        },
-        {
-          path: "photo-lab",
-          element: <PhotoLab/>,
-        },
-        {
-          path: "video-lab",
-          element: <VideoLab/>,
-        },
-        {
-          path: "gallery-lab",
-          element: <GalleryLab/>
-        }
-      ]
-  },
+  // {
+  //   path: "host",
+  //     element: <HostRoot/>,
+  //     children: [
+  //       {
+  //         path: "create",
+  //         element: <HostCreateRoom/>,
+  //       },
+  //       {
+  //         path: "select-lab",
+  //         element: <HostSelectLabPage/>,
+  //       },
+  //       {
+  //         path: ":room",
+  //         element: <HostView/>,
+  //       },
+  //       {
+  //         path: "select-media",
+  //         element: <SelectMedia/>,
+  //       },
+  //       {
+  //         path: "photo-lab",
+  //         element: <PhotoLab/>,
+  //       },
+  //       {
+  //         path: "video-lab",
+  //         element: <VideoLab/>,
+  //       },
+  //       {
+  //         path: "gallery-lab",
+  //         element: <GalleryLab/>
+  //       }
+  //     ]
+  // },
   {
           path: "create-lab",
           element: <ExperimentCreaterRoot/>,

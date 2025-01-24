@@ -1,24 +1,27 @@
 import { PiShootingStarThin } from "react-icons/pi";
 import SideComponent from "../components/Components/SideComponent.tsx";
-import React, { useState } from 'react';
+import React, { useState } from "react";
+import PhotoInput from "@/components/Components/PhotoInput.js";
 import {
-    Modal,
-    ModalContent,
-    ModalHeader,
-    ModalBody,
-    ModalFooter,
-    Button,
-    useDisclosure
-  } from "@heroui/react";
-  
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  Button,
+  useDisclosure,
+} from "@heroui/react";
+
 export default function PhotoLab() {
-  function handleSubmit() {}
+  function handleSubmit() {
+    //ADD TOASTS AND MODAL CONFIRMATION
+  }
   const [experimentTitle, setExperimentTitle] = useState("");
   const [experimentDesc, setExperimentDesc] = useState("");
-  const [file, setFile] = useState();
   const [caption, setCaption] = useState();
+  const [isFileSelected, setIsFileSelected] = useState(false); 
 
-  function handleChange(e){
+  function handleChange(e) {
     console.log(e.target.files);
     setFile(URL.createObjectURL(e.target.files[0]));
   }
@@ -49,6 +52,7 @@ export default function PhotoLab() {
               //   focus:outline-none focus:ring-2 focus:ring-indigo-500
               onChange={(e) => setExperimentTitle(e.target.value)}
               value={experimentTitle}
+              placeholder="Provide a title for your experiment"
             />
           </div>
           <div className="mb-6">
@@ -57,28 +61,32 @@ export default function PhotoLab() {
               className="block text-sm font-medium text-gray-700 mb-2"
             >
               Enter Description for Experiment{" "}
-              <span className="text-purple-500">*</span>
             </label>
-            <input
-              type="text"
+            <textarea
               id="experimentDesc"
               className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
               //   focus:outline-none focus:ring-2 focus:ring-indigo-500
               onChange={(e) => setExperimentDesc(e.target.value)}
               value={experimentDesc}
-            />
+              placeholder="Provide a description for your experiment"
+            ></textarea>
           </div>
           <div className="mb-6">
-          <label
+            <label
               htmlFor="addImage"
               className="block text-sm font-medium text-gray-700 mb-2"
             >
               Add Image
-              <span className="text-purple-500">*</span>
+              <span className="text-purple-500"> *</span>
             </label>
-            <input type="file" onChange={handleChange}/>
-            <img src={file}/>
+
+          <PhotoInput
+            width={500}
+            height={250}
+            onFileSelected={setIsFileSelected}
+          />
           </div>
+
           <div className="mb-6">
             <label
               htmlFor="caption"
@@ -99,9 +107,9 @@ export default function PhotoLab() {
           <div className="flex gap-10 items-center justify-center">
             <button
               type="submit"
-              disabled={!experimentTitle.trim()}
+              disabled={!experimentTitle.trim() || !isFileSelected}
               className={`mt-6 font-semibold py-3 px-6 rounded-md shadow-md transition duration-300 ease-in-out ${
-                experimentTitle.trim()
+                experimentTitle.trim() && isFileSelected
                   ? "bg-purple-600 hover:bg-purple-700 text-white"
                   : "bg-gray-400 text-white cursor-not-allowed"
               }`}

@@ -12,11 +12,6 @@ import {
   import { CiCircleInfo } from "react-icons/ci";
   
   import {
-    Modal,
-    ModalContent,
-    ModalHeader,
-    ModalBody,
-    ModalFooter,
     Button,
     useDisclosure
   } from "@heroui/react";
@@ -60,7 +55,7 @@ import {
                   />
                 </button> */}
               </div>
-              {/* Modal for Settings */}
+              {/* Modal for Settings
               <Modal isOpen={false} onOpenChange={onOpenChange}>
               <ModalContent>
                 {() => (
@@ -83,7 +78,7 @@ import {
                   </>
                 )}
               </ModalContent>
-              </Modal>
+              </Modal> */}
             </NavbarItem>
             <NavbarItem>
               <div className="flex gap-10 items-center justify-center">
