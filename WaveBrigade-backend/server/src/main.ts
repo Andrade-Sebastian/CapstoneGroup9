@@ -2,7 +2,7 @@ const PORT = 3000;
 const ORIGIN = "http://localhost:5173";
 import grpc from "npm:@grpc/grpc-js";
 import socketSessionMap, { getSessionBySocket, removeSocket } from "./sessionMappings.ts";
-import axios from "axios";
+import axios from "npm:axios";
 
 //CHANGE TO RELATIVE PATH
 const PROTO_PATH = "./server/src/grpc/protos/emotiBits.proto";
