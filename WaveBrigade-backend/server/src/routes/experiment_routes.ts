@@ -26,8 +26,8 @@ experimentRouter.get("/", (req: Request, res: Response) => {
 //create experiment
 experimentRouter.post("/create", (req: Request, res: Response) => {
     try{
-        const{templateId, description, experimentTemplate, name} = req.body;
-        const newExperiment = createExperiment(templateId, description, experimentTemplate, name);
+        const{name, description} = req.body;
+        const newExperiment = createExperiment(name, description);
         res.status(201).send(newExperiment);
     } catch(error){
         res.status(500).send({error: error.message});

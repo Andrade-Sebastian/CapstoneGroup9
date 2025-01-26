@@ -51,9 +51,9 @@ hostRouter.post("/session/create", async (req: Request, res: Response) => {
             allowSpectators: req.body.allowSpectators,
         }, hostSocketId)
 
-        const sessionState = getSessionState(session.sessionId);
+        //const sessionState = getSessionState(session.sessionId);
 
-        return res.status(200).send(sessionState)
+       // return res.status(200).send(sessionState)
         
     } catch (error: unknown) {
         if (error instanceof Error) {

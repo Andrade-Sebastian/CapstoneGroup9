@@ -1,5 +1,7 @@
 import {ILab, IExperiment} from "../controllers/session_controller.ts";
 import experimentRouter from "../routes/experiment_routes.ts";
+//import { createExperiment as createExperimentOther } from "../database.ts";
+import { dbClient as dbClient} from "../database.ts";
 
 
 
@@ -57,17 +59,18 @@ export function generateRandomCode(length: number){
     return lobbyCode;
 }
 
-export function createExperiment(templateId: string, description: string, experimentTemplate: {}, name: string){
-    const newExperiment = {
-        id: generateRandomCode(6), //function for creating id
-        name: name,
-        labTemplate: template, 
-        description: description,
-        experimentTemplate: experimentTemplate
-    }
-    experiments.push(newExperiment)
-
-    return newExperiment;
+export async function createExperiment(name: string, description: string){
+            try {
+                // Create the table
+                await dbClient.connect();
+                console.log("Connected to DB" + dbClient);
+                const result = await dbClient.queryObject(`INSERT INTO experiment(name,description) VALUES($1,$2)`,
+                  [name,description]);
+                console.log(result);
+              } finally {
+                // Release the connection back into the pool
+                await dbClient.end();
+              }
 }
 
 export function updateExperiment (experimentId: string, newDescription: string, newTemplate: {}, newName: string) {

@@ -2,6 +2,7 @@ import {currentSessions} from "../server.ts";
 import { v4 as uuid} from "npm:uuid";
 import SessionManager from "../sessions_singleton.ts";
 import {client} from "../main.ts";
+import { dbClient as dbClient} from "../database.ts";
 let foundDevicesOnNetwork: IDevice[] = [];
 
 
@@ -138,43 +139,62 @@ function requestDevices(sessionId) {
     });
   }
 
-function createSession(initializationData: ISessionInitialization, socketId: string) {
+async function createSession(initializationData: ISessionInitialization, socketId: string) {
     console.log("Entered: createSession routine");
-    const generatedSessionId = generateSessionId();
+   // const generatedSessionId = generateSessionId();
+    try {
+        // Create the table
+        await dbClient.connect();
+        console.log("Connected to DB" + dbClient);
+        const experimentID = dbClient.queryObject(`SELECT experimentid FROM experiment`);
+        const result = await dbClient.queryObject(`INSERT INTO session(experimentid,besessionid,roomcode,hostsocketid,users,isinitialized,configuration,credentials,discovereddevices)
+            VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9)`,
+            [experimentID,Math.random(),initializationData.roomCode,socketId,{},false,{"allowSpectators":"false","maskEnabled":"false","focusedUser":"null"},{"passwordEnabled":"initializationData.credentials.passwordEnabled","password":"initializationData.credentials.password"},{}]);
+        console.log("DB EXPERIMENT ID: " + experimentID);
+        // const result = await dbClient.queryObject(`INSERT INTO experiment(name,description) VALUES($1,$2)`,
+        // [name,description]);
+        console.log(result);
+    } finally {
+        // Release the connection back into the pool
+        await dbClient.end();
+        //sessionManager.addSession(result.sessionId, session);
+        //resolve(session);
+    }
 
-    let deviceList = []
-    return new Promise<ISession>((resolve, reject) => {
-        requestDevices(generatedSessionId)
-            .then(devices => {
-                const session: ISession = {
-                    sessionId: generatedSessionId,
-                    roomCode: initializationData.roomCode,
-                    sessionName: initializationData.sessionName,
-                    hostSocketId: socketId,
-                    users: [],
-                    isInitialized: false,
-                    configuration: {
-                    allowSpectators: false,
-                    maskEnabled: false,
-                    focusedUser: null,
-                    experiment: "dsdadf", //hardcoded
-                    },
-                    credentials: {
-                        passwordEnabled: initializationData.credentials.passwordEnabled,
-                        password: initializationData.credentials.password
-                    },
-                    discoveredDevices: devices
-                }
-                console.log(session.discoveredDevices);
-                console.log("Adding session")
-                sessionManager.addSession(session.sessionId, session);
-                resolve(session);
-            })
-            .catch(error =>{
-                console.error("Error creating the session: ", error);
-                reject(error);
-            })
-    })
+
+    // let deviceList = []
+    // return new Promise<ISession>((resolve, reject) => {
+    //     requestDevices(generatedSessionId)
+    //         .then(devices => {
+    //             const session: ISession = {
+    //                 sessionId: generatedSessionId,
+    //                 roomCode: initializationData.roomCode,
+    //                 sessionName: initializationData.sessionName,
+    //                 hostSocketId: socketId,
+    //                 users: [],
+    //                 isInitialized: false,
+    //                 configuration: {
+    //                 allowSpectators: false,
+    //                 maskEnabled: false,
+    //                 focusedUser: null,
+    //                 experiment: "dsdadf", //hardcoded
+    //                 },
+    //                 credentials: {
+    //                     passwordEnabled: initializationData.credentials.passwordEnabled,
+    //                     password: initializationData.credentials.password
+    //                 },
+    //                 discoveredDevices: devices
+    //             }
+    //             console.log(session.discoveredDevices);
+    //             console.log("Adding session")
+    //             sessionManager.addSession(session.sessionId, session);
+    //             resolve(session);
+    //         })
+    //         .catch(error =>{
+    //             console.error("Error creating the session: ", error);
+    //             reject(error);
+    //         })
+    // })
     //return getSessionState(session.sessionId)
 }
 
