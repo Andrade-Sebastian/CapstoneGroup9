@@ -80,7 +80,6 @@ async function createWindow() {
   // Auto update
   update(win)
 }
-
 app.whenReady().then(createWindow)
 
 app.on('window-all-closed', () => {

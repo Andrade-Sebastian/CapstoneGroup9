@@ -60,20 +60,22 @@ export function generateRandomCode(length: number){
 }
 
 export async function createExperiment(name: string, description: string){
-            try {
-                // Create the table
-                await dbClient.connect();
-                console.log("Connected to DB" + dbClient);
-                const result = await dbClient.queryObject(`INSERT INTO experiment(name,description) VALUES($1,$2)`,
-                  [name,description]);
-                console.log(result);
-              } finally {
-                // Release the connection back into the pool
-                await dbClient.end();
-              }
+    try {
+        console.log("(experiment_controller.ts): createExperiment()");
+        // Create the table
+        await dbClient.connect();
+        console.log("(experiment_controller.ts): Connected to DB" + dbClient);
+        const result = await dbClient.queryObject(`INSERT INTO experiment(name,description) VALUES($1,$2)`,
+            [name,description]);
+        console.log("result:" , result);
+        } finally {
+        // Release the connection back into the pool
+        await dbClient.end();
+        }
 }
 
 export function updateExperiment (experimentId: string, newDescription: string, newTemplate: {}, newName: string) {
+    console.log("(experiment_controller.ts): updateExperiment()");
     let updatedExperiment = labs[int(experimentId)];
     updatedExperiment.name = newName;
     updatedExperiment.description = newDescription;

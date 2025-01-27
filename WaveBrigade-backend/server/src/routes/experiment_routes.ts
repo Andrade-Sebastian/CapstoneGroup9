@@ -19,6 +19,11 @@ experimentRouter.get("/", (req: Request, res: Response) => {
     res.status(500).send({error: error.message})
 }})
 
+experimentRouter.get("/debug", (req: Request, res: Response) => {    
+    console.log("(experiment_routes.ts): at /debug")
+    res.status(200).send("Experiment route is working")
+})
+
 //unravel the body message sent from frontend
 //frontend has to send a body message so that we can update experiments
 //The functions within these routes need parameters
