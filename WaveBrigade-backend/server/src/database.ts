@@ -1,6 +1,6 @@
 import { Client } from "https://deno.land/x/postgres@v0.17.0/mod.ts";
 import { IUser } from "./controllers/session_controller.ts";
-import { ISessionConfiguration, ISessionCredentials, IDevice } from "/Users/emanpelayo/Documents/real_docs/CS/Current_Classes/CS425/CapstoneGroup9/WaveBrigade-frontend/src/typings.ts";
+import { ISessionConfiguration, ISessionCredentials, IDevice } from "../../../WaveBrigade-frontend/src/typings.ts";
 
 const dbClient = new Client({
   user: "postgres",
@@ -16,7 +16,7 @@ export async function createExperiment(experimentName: string, description: stri
     try {
         // Create the table
         await dbClient.connect();
-        console.log("(database.ts): createExperiment - Connected to Database");
+        console.log("(database.ts): createExperiment() - Connected to Database");
         const result = await dbClient.queryObject(`INSERT INTO experiment(name,description) VALUES($1,$2)`,
           [experimentName,description]);
         console.log("(database.ts): Result: ", result);
@@ -59,7 +59,7 @@ export async function createSessionInDatabase(initializationInfo: ISessionDataba
 	try 
 	{
 		await dbClient.connect();// Connect to the database 
-		console.log("(database.ts): createSessionInDatabase - Connected to Database");
+		console.log("(database.ts): createSessionInDatabase() - Connected to Database");
 		const result = await dbClient.queryObject(
 			`INSERT INTO session(
 				sessionid, 
@@ -83,7 +83,7 @@ export async function createSessionInDatabase(initializationInfo: ISessionDataba
 					isInitialized,            // $7 -> isinitialized
 					configuration,            // $8 -> configuration (should be JSON)
 					credentials,              // $9 -> credentials (should be JSON)
-					discoveredDevices         // $10 -> discovereddevices (should be JSON or array)
+					discoveredDevices         // $10 -> discovereddevices (should be JSON or array -- JSON for now)
 				]);
 				console.log("(database.ts): Session created successfully", result);
 	}
