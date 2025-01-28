@@ -2,9 +2,11 @@ import {currentSessions} from "../server.ts";
 import { v4 as uuid} from "npm:uuid";
 import SessionManager from "../sessions_singleton.ts";
 import {client} from "../main.ts";
-import { dbClient as dbClient} from "../database.ts";
-let foundDevicesOnNetwork: IDevice[] = [];
+import { dbClient as dbClient, createSessionInDatabase} from "../database.ts";
+import { randomInt } from "node:crypto";
 
+
+let foundDevicesOnNetwork: IDevice[] = [];
 
 export interface IDevice {
     serialNumber: string;
@@ -59,6 +61,7 @@ function generateSessionId(): string {
     let isUnique = false;
     let sessionId: string = uuid().split("-")[0];
 
+    console.log("Generated session ID: " + sessionId);  
     return sessionId;
 }
 
@@ -110,10 +113,11 @@ interface ISessionInitialization {
     allowSpectators: boolean;
 }
 
+
 function requestDevices(sessionId) {
     return new Promise((resolve, reject) => {
       const message = { sessionId: sessionId };
-      let foundDevicesOnNetwork = [];  // Store the found devices
+      foundDevicesOnNetwork = [];  // Store the found devices
   
       // Call the gRPC method
       client.foundDevices({ sessionId: sessionId }, (error, devices) => {
@@ -130,6 +134,7 @@ function requestDevices(sessionId) {
           foundDevicesOnNetwork.push({
             serialNumber: device.serial,
             ipAddress: device.ip,
+            socketID: device.socketID,
           });
         });
   
@@ -138,28 +143,85 @@ function requestDevices(sessionId) {
       });
     });
   }
-
-async function createSession(initializationData: ISessionInitialization, socketId: string) {
+  function createSession(initializationData: ISessionInitialization, socketId: string) {
     console.log("Entered: createSession routine");
-   // const generatedSessionId = generateSessionId();
-    try {
-        // Create the table
-        await dbClient.connect();
-        console.log("Connected to DB" + dbClient);
-        const experimentID = dbClient.queryObject(`SELECT experimentid FROM experiment`);
-        const result = await dbClient.queryObject(`INSERT INTO session(experimentid,besessionid,roomcode,hostsocketid,users,isinitialized,configuration,credentials,discovereddevices)
-            VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9)`,
-            [experimentID,Math.random(),initializationData.roomCode,socketId,{},false,{"allowSpectators":"false","maskEnabled":"false","focusedUser":"null"},{"passwordEnabled":"initializationData.credentials.passwordEnabled","password":"initializationData.credentials.password"},{}]);
-        console.log("DB EXPERIMENT ID: " + experimentID);
-        // const result = await dbClient.queryObject(`INSERT INTO experiment(name,description) VALUES($1,$2)`,
-        // [name,description]);
-        console.log(result);
-    } finally {
-        // Release the connection back into the pool
-        await dbClient.end();
-        //sessionManager.addSession(result.sessionId, session);
-        //resolve(session);
-    }
+    const generatedSessionId = generateSessionId();
+
+    let deviceList = []
+    return new Promise<ISession>((resolve, reject) => {
+        requestDevices(generatedSessionId)
+            .then(devices => {
+                const session: ISession = {
+                    sessionId: generatedSessionId,
+                    roomCode: initializationData.roomCode,
+                    hostSocketId: socketId,
+                    users: [],
+                    isInitialized: false,
+                    configuration: {
+                        allowSpectators: false,
+                        maskEnabled: false,
+                        focusedUser: null,
+                        experiment: "dsdadf", //hardcoded
+                    },
+                    credentials: {
+                        passwordEnabled: initializationData.credentials.passwordEnabled,
+                        password: initializationData.credentials.password
+                    },
+                    discoveredDevices: devices
+                    //sessionName: initializationData.sessionName,
+                }
+                console.log("(session_controller.ts): added session to backend");
+
+                const infoForDatabase = {
+                    sessionID: randomInt(1, 100), //hardcoded, needs to be a serial on the database
+                    experimentID: 6, //hardcoded
+                    backendSessionID: generatedSessionId,
+                    roomCode: session.roomCode,
+                    hostSocketID: session.hostSocketId,
+                    users: session.users,
+                    isInitialized: session.isInitialized,
+                    configuration: session.configuration,
+                    credentials: session.credentials,
+                    discoveredDevices: session.discoveredDevices,
+                }
+                console.log("(session_controller.ts): Trying to add session to database...");
+                createSessionInDatabase(infoForDatabase);
+                console.log("(session_controller.ts): Added session to database");
+                console.log(session.discoveredDevices);
+                console.log("Adding session")
+                sessionManager.addSession(session.sessionId, session);
+                resolve(session);
+            })
+            .catch(error =>{
+                console.error("Error creating the session: ", error);
+                reject(error);
+            })
+    })
+    //return getSessionState(session.sessionId)
+}
+
+
+// async function createSession(initializationData: ISessionInitialization, socketId: string) {
+//     console.log("(session_controller.ts): Entered createSession()");
+//    // const generatedSessionId = generateSessionId();
+//     try {
+//         // Create the table
+//         await dbClient.connect();
+//         console.log("(session_controller.ts): Connected to DB" + dbClient);
+//         const experimentID = dbClient.queryObject(`SELECT experimentid FROM experiment`);
+//         const result = await dbClient.queryObject(`INSERT INTO session(experimentid,besessionid,roomcode,hostsocketid,users,isinitialized,configuration,credentials,discovereddevices)
+//             VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9)`,
+//             [experimentID,Math.random(),initializationData.roomCode,socketId,{},false,{"allowSpectators":"false","maskEnabled":"false","focusedUser":"null"},{"passwordEnabled":"initializationData.credentials.passwordEnabled","password":"initializationData.credentials.password"},{}]);
+//         console.log("DB EXPERIMENT ID: " + experimentID);
+//         // const result = await dbClient.queryObject(`INSERT INTO experiment(name,description) VALUES($1,$2)`,
+//         // [name,description]);
+//         console.log(result);
+//     } finally {
+//         // Release the connection back into the pool
+//         await dbClient.end();
+//         //sessionManager.addSession(result.sessionId, session);
+//         //resolve(session);
+//     }
 
 
     // let deviceList = []
@@ -196,7 +258,7 @@ async function createSession(initializationData: ISessionInitialization, socketI
     //         })
     // })
     //return getSessionState(session.sessionId)
-}
+
 
 
 

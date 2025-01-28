@@ -38,11 +38,12 @@ What you receive:
 
 
 hostRouter.post("/session/create", async (req: Request, res: Response) => {
-    console.log("At /session/create | recieved: " + JSON.stringify(req.body));
+    console.log("(host_routes.ts): At /session/create | recieved: " + JSON.stringify(req.body));
     
     const hostSocketId: string = req.body.hostSocketId;
 
     try {
+        //create session in database and rest api
         const session = await createSession({
             sessionName: req.body.sessionName,
             roomCode: req.body.roomCode,
@@ -51,9 +52,9 @@ hostRouter.post("/session/create", async (req: Request, res: Response) => {
             allowSpectators: req.body.allowSpectators,
         }, hostSocketId)
 
-        //const sessionState = getSessionState(session.sessionId);
+        const sessionState = getSessionState(session.sessionId);
 
-       // return res.status(200).send(sessionState)
+       return res.status(200).send(sessionState)
         
     } catch (error: unknown) {
         if (error instanceof Error) {
