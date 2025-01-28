@@ -1,0 +1,1 @@
+docker build --build-arg EMOTIBIT_IP_ADDRESS=192.168.1.255 -t brainflow .

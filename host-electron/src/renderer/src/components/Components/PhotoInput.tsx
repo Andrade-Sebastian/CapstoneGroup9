@@ -4,6 +4,7 @@ interface IPhotoInput {
   width: number;
   height: number;
   onFileSelected: (isFileSelected: boolean) => void;
+  onSourceChange: (source: string | null) => void;
 }
 
 export default function PhotoInput(props: IPhotoInput) {
@@ -41,7 +42,7 @@ export default function PhotoInput(props: IPhotoInput) {
         className="flex flex-col justify-center items-center border"
         type="file"
         onChange={handleFileChange}
-        accept=".jpeg,.png" //restricts just these image files
+        accept=".jpg,.jpeg,.png" //restricts just these image files
       />
 
       {error && <p className="text-red-500 text-sm mt-2"> {error}</p>}

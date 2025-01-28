@@ -4,6 +4,7 @@ interface IVideoInput {
   width: number;
   height: number;
   onFileSelected: (isFileSelected: boolean) => void;
+  onSourceChange: (source: string | null) => void;
 }
 
 export default function VideoInput(props: IVideoInput) {
@@ -17,18 +18,21 @@ export default function VideoInput(props: IVideoInput) {
     if (!file){
         setError("No file selected.");
         props.onFileSelected(false); //no file is selected. setting to false so that host cannot continue without selecting a video
+        props.onSourceChange(null);
         return;
     }
 
     if (!file.type.startsWith("video/")) { //makes sure that the file is a video
       setError("Please upload a valid video file.");
       props.onFileSelected(false); //no file selected. set to false so host cannot continue without selecting a video
+      props.onSourceChange(null);
       return;
     }
     setError(null);
     const url = URL.createObjectURL(file); //a temp url is generated for the selected file which is stored in the source state for previewing the video
     setSource(url);
     props.onFileSelected(true); //file is selected, host can now continue
+    props.onSourceChange(url)
   };
   const handleChoose = () => {
     inputRef.current?.click();

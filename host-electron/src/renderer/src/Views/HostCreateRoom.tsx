@@ -115,6 +115,7 @@ export default function HostCreateRoom() {
                 //   focus:outline-none focus:ring-2 focus:ring-indigo-500
                 onChange={(e) => setUserName(e.target.value)}
                 value={userName}
+                placeholder="Name"
               />
             </div>
             <div className="flex flex-col gap-4 mb-4">
@@ -193,7 +194,7 @@ export default function HostCreateRoom() {
               disabled={!userName.trim()}
               className={`mt-6 font-semibold py-3 px-6 rounded-md shadow-md transition duration-300 ease-in-out ${
                 userName.trim()
-                  ? "bg-purple-600 hover:bg-purple-700 text-white"
+                  ? "bg-[#7F56D9] hover:bg-violet-500 text-white"
                   : "bg-gray-400 text-white cursor-not-allowed"
               }`}
             >

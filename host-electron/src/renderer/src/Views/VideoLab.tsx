@@ -4,6 +4,9 @@ import React, { useState } from "react";
 import VideoInput from "../components/Components/VideoInput.js";
 import toast, { Toaster } from "react-hot-toast";
 import ModalComponent from "../components/Components/ModalComponent.js";
+import { useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import socket from './socket';
 import {
   Modal,
   ModalContent,
@@ -22,6 +25,22 @@ export default function VideoLab() {
   const [experimentTitle, setExperimentTitle] = useState("");
   const [experimentDesc, setExperimentDesc] = useState("");
   const [isFileSelected, setIsFileSelected] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [videoSource, setVideoSource] = useState<string | null> (null);
+  const location = useLocation();
+  const { nickName, roomCode } = location.state || {};
+  const navigateTo = useNavigate();
+  //modal
+  const handleOpenModal = () => setIsModalOpen(true);
+  const handleCloseModal = () => setIsModalOpen(false);
+  const handleAction = () => {
+    console.log("Creating lobby...");
+    navigateTo("/waiting-room", {state: {nickName, roomCode}});
+    handleCloseModal();
+  };
+  const handleFileSelected = (isFileSelected: boolean) => {
+    console.log("File selected:", isFileSelected);
+  }
 
   function handleChange(e) {
     console.log(e.target.files);
@@ -54,6 +73,7 @@ export default function VideoLab() {
               //   focus:outline-none focus:ring-2 focus:ring-indigo-500
               onChange={(e) => setExperimentTitle(e.target.value)}
               value={experimentTitle}
+              placeholder="Provide a title for your experiment"
             />
           </div>
           <div className="mb-6">
@@ -85,15 +105,17 @@ export default function VideoLab() {
               width={250}
               height={500}
               onFileSelected={setIsFileSelected}
+              onSourceChange = { setVideoSource}
             />
           </div>
           <div className="flex gap-10 items-center justify-center">
             <button
               type="button"
+              onClick={handleOpenModal}
               disabled={!experimentTitle.trim() || !isFileSelected}
               className={`mt-6 font-semibold py-3 px-6 rounded-md shadow-md transition duration-300 ease-in-out ${
                 experimentTitle.trim() && isFileSelected
-                  ? "bg-purple-600 hover:bg-purple-700 text-white"
+                  ? "bg-[#7F56D9] hover:bg-violet-500 text-white"
                   : "bg-gray-400 text-white cursor-not-allowed"
               }`}
             >
@@ -104,25 +126,59 @@ export default function VideoLab() {
         </form>
       </div>
       <ModalComponent
-      onAction={()=> console.log("a")}
-      isOpen={true}
-      onCancel={()=>console.log("c")}
-      modalTitle='Lab Confirmed'
+      onAction={handleAction}
+      isOpen={isModalOpen}
+      onCancel={handleCloseModal}
+      modalTitle='LAB CONFIRMATION'
       >
         <div className="mb-6">
             <label
               htmlFor="experimentTitle"
               className="block text-sm font-medium text-gray-700 mb-2"
             >
-              
-              <span className="text-purple-500">*</span>
+              Title of Experiment
             </label>
             <input
               type="text"
               id="experimentTitle"
               className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
               disabled
+              value={experimentTitle}
+              onChange={(e) => setExperimentTitle(e.target.value)}
             />
+          </div>
+          <div className="mb-6">
+            <label
+              htmlFor="experimentDesc"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
+              Description of Experiment{" "}
+            </label>
+            <textarea
+              id="experimentDesc"
+              className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              //   focus:outline-none focus:ring-2 focus:ring-indigo-500
+              onChange={(e) => setExperimentDesc(e.target.value)}
+              value={experimentDesc}
+              disabled
+            ></textarea>
+          </div>
+          <div className="mb-6">
+            <label
+              htmlFor="experimentVideo"
+              className="block text-md font-medium text-gray-700 mb-2"
+            >
+              File Upload
+            </label>
+            <input
+              type="text"
+              id="experimentVideo"
+              className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              disabled
+              value={videoSource}
+              onChange={(e) => setVideoSource(e.target.value)}
+            />
+           
           </div>
         </ModalComponent>
     </div>

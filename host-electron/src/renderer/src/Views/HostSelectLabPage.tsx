@@ -1,7 +1,7 @@
 import React, { ReactElement, useEffect, useState } from "react";
 import { Listbox, ListboxItem } from "@nextui-org/listbox";
 import { Card, CardBody, Checkbox, CheckboxGroup } from "@nextui-org/react";
-import { LabContainer } from "../components/Components/LabContainer";
+import { LabContainer } from "../components/Components/LabContainer.tsx";
 import { useNavigate } from "react-router-dom";
 import { useLocation } from "react-router-dom";
 import axios from "axios";
@@ -10,9 +10,9 @@ import { TfiGallery } from "react-icons/tfi";
 import { TiCamera } from "react-icons/ti";
 import { LiaSatelliteSolid } from "react-icons/lia";
 import { HiAcademicCap } from "react-icons/hi";
-import LabTemplatesCard from "../components/Components/LabTemplatesCard";
-import CardComponentRadio from "../components/Components/CardComponentRadio";
-import SideComponent from "../components/Components/SideComponent";
+import LabTemplatesCard from "../components/Components/LabTemplatesCard.tsx";
+import CardComponentRadio from "../components/Components/CardComponentRadio.tsx";
+import SideComponent from "../components/Components/SideComponent.tsx";
 //added routing to /host/select-lab
 //8:49 -
 //created HostSelectlabPage
@@ -137,7 +137,7 @@ export default function HostSelectLabPage() {
             disabled={!selectedLab}
             className={`mt-6 font-semibold py-3 px-6 rounded-md shadow-md transition duration-300 ease-in-out ${
               selectedLab
-                ? "bg-purple-600 hover:bg-purple-700 text-white"
+                ? "bg-[#7F56D9] hover:bg-violet-500 text-white"
                 : "bg-gray-400 text-white cursor-not-allowed"
             }`}
           >

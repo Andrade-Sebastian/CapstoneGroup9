@@ -26,7 +26,7 @@ export default function PreviouslyMadeExperiments() {
           <div className="flex justify-center">
             <button
               type="submit"
-              className="mt-6 bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-6 rounded-md shadow-md transition duration-300 ease-in-out"
+              className="mt-6 bg-[#7F56D9] hover:bg-violet-500 text-white font-semibold py-3 px-6 rounded-md shadow-md transition duration-300 ease-in-out"
               onClick={() =>
                 navigateTo("/create-lab/select-lab", {
                   state: { userName: "defaultUser" },
