@@ -157,7 +157,7 @@ export default function JoinPage() {
               type="submit"
               className={`mt-8 font-semibold py-3 px-6 rounded-md shadow-md transition duration-300 ease-in-out ${
                 nickName.trim() && StudentInputRoomCode.trim()
-                  ? "bg-purple-600 hover:bg-purple-700 text-white"
+                  ? "bg-[#7F56D9] hover:bg-violet-500 text-white"
                   : "bg-gray-400 text-white cursor-not-allowed"
               }`}
             >

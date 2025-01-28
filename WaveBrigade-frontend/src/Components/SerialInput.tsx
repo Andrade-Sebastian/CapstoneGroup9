@@ -59,7 +59,7 @@ const SerialCodeInput: React.FC<SerialCodeInputProps> = ({
             onChange={(e) => handleChange(e.target.value, index)}
             onKeyDown={(e) => handleKeyDown(e, index)}
             ref={(el) => (inputsRef.current[index] = el)}
-            className="w-20 h-20 border border-gray-300 rounded text-center text-[25px] focus:outline-none focus:ring-2 focus:ring-purple-600"
+            className="w-20 h-20 border border-gray-300 rounded text-center text-[25px] focus:outline-none focus:ring-2 focus:ring-[#7F56D9]"
           />
         ))}
     </div>
