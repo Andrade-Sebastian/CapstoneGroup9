@@ -41,8 +41,10 @@ var Papa = require("papaparse");
 var fs = require("fs");
 var socket_io_client_1 = require("socket.io-client");
 var socket = (0, socket_io_client_1.io)('http://localhost:3000');
-//is initialized flag for socket id 
-//gets it from backend
+var deviceIP = process.argv[2];
+var deviceSerial = process.argv[3];
+// const backendIP = process.argv[4];
+// const hostSessionID = process.argv[5];
 function sleep(ms) {
     return new Promise(function (resolve) {
         setTimeout(resolve, ms);
@@ -61,31 +63,36 @@ writeHeaderstoCSV(ancFilePath, ancHeaders);
 var auxHeaders = ['Package', 'PPG_Red', 'PPG_Infa_Red', 'PPG_Green', 'Timestamp', 'Unknown'];
 var auxFilePath = './aux_from_streamer.csv';
 writeHeaderstoCSV(auxFilePath, auxHeaders);
-//const params = new BrainFlowInputParams();
-var board = new brainflow_1.BoardShim(brainflow_1.BoardIds.EMOTIBIT_BOARD, {});
-var board_id = brainflow_1.BoardIds.EMOTIBIT_BOARD;
 var ancCSV = fs.createReadStream(ancFilePath);
 var auxCSV = fs.createReadStream(auxFilePath);
-var currentDate = new Date('2024-12-3');
-var currentTime = currentDate.getTime();
-var passedDate = new Date();
-function runExample() {
+// const currentDate = new Date('2024-12-3');
+// const currentTime = currentDate.getTime();
+// const passedDate = new Date();
+console.log(process.argv);
+function runBrainflow(deviceIPAddress, serialNumber) {
     return __awaiter(this, void 0, void 0, function () {
-        var presets, data_current, data, error_1;
+        var board, board_id, presets, data_current, data, error_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    _a.trys.push([0, 5, 6, 8]);
+                    //const params = new BrainFlowInputParams({ipAddress: deviceIPAddress, serialNumber: serialNumber});
+                    console.log("COMMAND LINE ARGUMENTS PASSED IN:" + deviceIPAddress + serialNumber);
+                    board = new brainflow_1.BoardShim(brainflow_1.BoardIds.EMOTIBIT_BOARD, { ipAddress: deviceIPAddress, serialNumber: serialNumber });
+                    board_id = brainflow_1.BoardIds.EMOTIBIT_BOARD;
+                    _a.label = 1;
+                case 1:
+                    _a.trys.push([1, 6, 7, 9]);
                     board.prepareSession();
                     presets = brainflow_1.BoardShim.getBoardPresets(board_id);
+                    console.log();
                     board.addStreamer("file://aux_from_streamer.csv:a", brainflow_1.BrainFlowPresets.AUXILIARY_PRESET);
                     board.addStreamer("file://anc_from_streamer.csv:a", brainflow_1.BrainFlowPresets.ANCILLARY_PRESET);
                     board.startStream();
-                    _a.label = 1;
-                case 1:
-                    if (!true) return [3 /*break*/, 4];
+                    _a.label = 2;
+                case 2:
+                    if (!true) return [3 /*break*/, 5];
                     data_current = board.getBoardData(500, brainflow_1.BrainFlowPresets.ANCILLARY_PRESET);
-                    if (!(data_current.length !== 0)) return [3 /*break*/, 3];
+                    if (!(data_current.length !== 0)) return [3 /*break*/, 4];
                     data = {
                         package: data_current[0][0],
                         data1: data_current[1][0],
@@ -97,23 +104,23 @@ function runExample() {
                     console.log("DATA :" + data.data1);
                     socket.emit('update', data);
                     return [4 /*yield*/, sleep(1000)];
-                case 2:
+                case 3:
                     _a.sent();
-                    _a.label = 3;
-                case 3: return [3 /*break*/, 1];
-                case 4: return [3 /*break*/, 8];
-                case 5:
+                    _a.label = 4;
+                case 4: return [3 /*break*/, 2];
+                case 5: return [3 /*break*/, 9];
+                case 6:
                     error_1 = _a.sent();
                     console.error(error_1);
-                    return [3 /*break*/, 8];
-                case 6: return [4 /*yield*/, sleep(3000)];
-                case 7:
+                    return [3 /*break*/, 9];
+                case 7: return [4 /*yield*/, sleep(3000)];
+                case 8:
                     _a.sent();
                     board.stopStream();
                     board.releaseSession();
                     parseData(ancCSV);
                     return [7 /*endfinally*/];
-                case 8: return [2 /*return*/];
+                case 9: return [2 /*return*/];
             }
         });
     });
@@ -139,4 +146,4 @@ function parseData(file) {
         },
     });
 }
-runExample();
+runBrainflow(deviceIP, deviceSerial);

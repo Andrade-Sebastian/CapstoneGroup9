@@ -4,8 +4,10 @@ import * as fs from 'fs';
 import { io } from 'socket.io-client';
 const socket = io('http://localhost:3000');
 
-//is initialized flag for socket id 
-//gets it from backend
+const deviceIP = process.argv[2];
+const deviceSerial = process.argv[3];
+// const backendIP = process.argv[4];
+// const hostSessionID = process.argv[5];
 
 function sleep(ms: number)
 {
@@ -29,8 +31,7 @@ AUXILIARY
 [4] Timestamp
  */
 
-//interfaces to specify what each column header represents
-
+//interface to specify what each column header represents
 interface bioData {
     package: number;
     data1: number;
@@ -56,23 +57,27 @@ const auxHeaders = ['Package', 'PPG_Red', 'PPG_Infa_Red', 'PPG_Green', 'Timestam
 const auxFilePath = './aux_from_streamer.csv';
 writeHeaderstoCSV(auxFilePath, auxHeaders);
 
-//const params = new BrainFlowInputParams();
-const board = new BoardShim(BoardIds.EMOTIBIT_BOARD, {});
-const board_id = BoardIds.EMOTIBIT_BOARD;
 const ancCSV = fs.createReadStream(ancFilePath);
 const auxCSV = fs.createReadStream(auxFilePath);
 
-const currentDate = new Date('2024-12-3');
-const currentTime = currentDate.getTime();
-const passedDate = new Date();
+// const currentDate = new Date('2024-12-3');
+// const currentTime = currentDate.getTime();
+// const passedDate = new Date();
+console.log(process.argv);
 
-
-
-async function runExample (): Promise<void>
+async function runBrainflow(deviceIPAddress:string, serialNumber:string): Promise<void>
 {
+    const params = new BrainFlowInputParams({});
+    
+    console.log("COMMAND LINE ARGUMENTS PASSED IN:" + deviceIPAddress + serialNumber);
+    const board = new BoardShim(BoardIds.EMOTIBIT_BOARD, {ipAddress: deviceIPAddress});
+    // const board = new BoardShim(BoardIds.EMOTIBIT_BOARD, {});
+    const board_id = BoardIds.EMOTIBIT_BOARD;
+
     try{
         board.prepareSession();
         const presets = BoardShim.getBoardPresets(board_id);
+        console.log();
         board.addStreamer("file://aux_from_streamer.csv:a", BrainFlowPresets.AUXILIARY_PRESET);
         board.addStreamer("file://anc_from_streamer.csv:a", BrainFlowPresets.ANCILLARY_PRESET);
         board.startStream();
@@ -97,15 +102,6 @@ async function runExample (): Promise<void>
             console.log("DATA :" + data.data1);
             socket.emit('update', data);
             await sleep(1000);
-            // console.log(data_current[0][2]);
-            // const interval = setInterval(() => {
-            //     console.log("in interval")
-            //     const data = {
-            //     timestamp: data_current[0][1],
-            //     randomValue: Math.random(),
-            //     };
-            //     socket.emit('update', data);
-            // }, 100);
         }
        
     }}
@@ -147,4 +143,4 @@ function parseData(file){
     );
 }
 
-runExample();
+runBrainflow(deviceIP, deviceSerial);
