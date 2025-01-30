@@ -8,9 +8,10 @@ let foundDevicesOnNetwork: IDevice[] = [];
 export interface IDevice {
     serialNumber: string;
     ipAddress: string;
+    socketID: string;
 }
 export interface IUser {
-    userId: string;
+    userId: string | null;
     socketId: string;
     nickname: string | null;
     associatedDevice: IDevice | null;
@@ -39,6 +40,7 @@ export interface ISessionCredentials {
 }
 export interface ISession {
     sessionId: string;
+    roomCode: string;
     sessionName: string;
     hostSocketId: string;
     users: Array<IUser>;
@@ -59,6 +61,8 @@ function generateSessionId(): string {
     return sessionId;
 }
 
+
+
 // function getExperiment(experimentId: string): IExperiment {
 //     // Query database for an experimentId.
 //     if (experimentId === "17") {
@@ -77,14 +81,17 @@ function generateSessionId(): string {
 
 function getSessionState(sessionId: string): TSessionState {
 
-    console.log("PASSED SESSION ID " + sessionId)
+    //console.log("(session_controller.ts): at getSessionState()")
+    // console.log("PASSED SESSION ID " + sessionId)
     const session = sessionManager.getSession(sessionId)
-    console.log("DUMB SESSION " + JSON.stringify(session))
+    //console.log("SESSION" + JSON.stringify(session))
+    // console.log("DUMB SESSION " + JSON.stringify(session))
 
     if (!session) throw new Error("Session is not found.").name = "SESSION_NOT_FOUND"
 
     return {
         sessionId: session.sessionId,
+        roomCode: session.roomCode,
         sessionName: session.sessionName,
         hostSocketId: session.hostSocketId,
         configuration: session.configuration,
@@ -96,6 +103,7 @@ function getSessionState(sessionId: string): TSessionState {
 
 interface ISessionInitialization {
     sessionName: string;
+    roomCode: string;
     selectedExperimentId: string;
     credentials: ISessionCredentials;
     allowSpectators: boolean;
@@ -133,12 +141,14 @@ function requestDevices(sessionId) {
 function createSession(initializationData: ISessionInitialization, socketId: string) {
     console.log("Entered: createSession routine");
     const generatedSessionId = generateSessionId();
+
     let deviceList = []
     return new Promise<ISession>((resolve, reject) => {
         requestDevices(generatedSessionId)
             .then(devices => {
                 const session: ISession = {
                     sessionId: generatedSessionId,
+                    roomCode: initializationData.roomCode,
                     sessionName: initializationData.sessionName,
                     hostSocketId: socketId,
                     users: [],
@@ -156,6 +166,7 @@ function createSession(initializationData: ISessionInitialization, socketId: str
                     discoveredDevices: devices
                 }
                 console.log(session.discoveredDevices);
+                console.log("Adding session")
                 sessionManager.addSession(session.sessionId, session);
                 resolve(session);
             })
@@ -167,6 +178,9 @@ function createSession(initializationData: ISessionInitialization, socketId: str
     //return getSessionState(session.sessionId)
 }
 
+
+
+
 //go through singleton session, find sessionid user requested, if it finds, add it to the session's users, return sessionState
 function joinSession(requestedSessionId: string, socketID: string){
     console.log("Entered: joinSession routine");
@@ -174,7 +188,9 @@ function joinSession(requestedSessionId: string, socketID: string){
 
      if (sessionManager.getSession(requestedSessionId))//if the requested session exists
      {
-        console.log("joined session -- session_controller.ts");
+        console.log("joined session -- session_controller.ts (joinsession)");
+        console.log("Added Names")
+
         return getSessionState(requestedSessionId)
      }
      else{
@@ -183,8 +199,111 @@ function joinSession(requestedSessionId: string, socketID: string){
         //push the user to the users array 
 
     }
+// userId: string;
+//     socketId: string;
+//     nickname: string | null;
+//     associatedDevice: IDevice | null;
 
 
+function joinRoom(requestedSessionId: string, socketID: string, nickname: string, associatedDevice: IDevice | null){
+    console.log("(session_controller.ts): at joinRoom()");
+    console.log("requestedSessionId:", requestedSessionId);
+    console.log("socketId:", socketID);
+    console.log("nickname:", nickname);
+    console.log("associatedDevice:", associatedDevice);
+
+
+    if (sessionManager.getSession(requestedSessionId))//if the requested session exists
+    {
+        const newUser: IUser = {
+            userId: "17",
+            socketId: socketID,
+            nickname: nickname,
+            associatedDevice: associatedDevice
+        }
+        
+        console.log("joined session -- session_controller.ts (joinRoom())");
+        console.log("Added Names")
+        
+
+
+        const sessionState = getSessionState(requestedSessionId);
+        //console.log("sessionState before adding user: " + JSON.stringify(sessionState))
+        
+        sessionState.users.push(newUser)
+
+        //for debugging
+        const sessionStateAfter = getSessionState(requestedSessionId);
+        //console.log("sessionState AFTER adding user: " + JSON.stringify(sessionStateAfter))
+
+
+        // sessionState.users = sessionState.users.concat(
+        //     {
+        //         userId: "1",
+        //         socketId: socketID,
+        //         nickname: nickname,
+        //         associatedDevice: associatedDevice
+        //     }
+        // );
+        return getSessionState(requestedSessionId)
+    }
+    else{
+        throw new Error(`Could not join session ${requestedSessionId}`);
+
+    }
+    //push the user to the users array 
+
+}
+
+//works 
+function removeUserBySocketID(users: Array<IUser>, socketID: string) {
+    const userToRemove = users.find(user => user.socketId === socketID);
+
+    if (userToRemove) {
+        console.log("Removing user:", userToRemove);
+    } else {
+        console.log(`User with socketID ${socketID} not found...`);
+    }
+
+    //returns a new array with everyone minus the deleted user
+    return users.filter(user => user.socketId !== socketID);
+}
+
+//works
+function leaveRoom(requestedSessionId: string, socketID: string) {
+    console.log("(session_controller.ts): at leaveRoom()");
+    console.log("requestedSessionId:", requestedSessionId);
+    console.log("socketId:", socketID);
+
+
+    if (sessionManager.getSession(requestedSessionId)) {
+        console.log(`session ${requestedSessionId} found`)
+
+        
+        // Get the users
+        const session = sessionManager.getSession(requestedSessionId);
+        if (session) {
+            console.log("Users array before removing user:", session.users);
+
+            // Remove the user with the given socket ID
+            session.users = removeUserBySocketID(session.users, socketID);
+
+            console.log("Users array AFTER removing user:", session.users);
+        }
+
+    } else {
+        throw new Error(
+            `Could not find session ${requestedSessionId}. Was the backend changed at all? That deletes all active sessions.`
+        );
+    }
+}
+
+
+
+// userId: string;
+//     socketId: string;
+//     nickname: string | null;
+//     associatedDevice: IDevice | null;
 
 
 // function addDiscoveredDevice(sessionId: string, discoveredDevice: IDevice) {
@@ -194,6 +313,8 @@ function joinSession(requestedSessionId: string, socketID: string){
 export {
     createSession,
     joinSession,
+    joinRoom,
+    leaveRoom,
     // addDiscoveredDevice,
     getSessionState
 }

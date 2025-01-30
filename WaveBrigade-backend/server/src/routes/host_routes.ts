@@ -4,6 +4,8 @@ import {addDiscoveredDevice, getSessionState, IDevice, createSession} from "../c
 const hostRouter = express.Router();
 hostRouter.use(express.json());
 
+
+
 /*
 What will be sent:
 {
@@ -43,14 +45,16 @@ hostRouter.post("/session/create", async (req: Request, res: Response) => {
     try {
         const session = await createSession({
             sessionName: req.body.sessionName,
+            roomCode: req.body.roomCode,
             selectedExperimentId: req.body.selectedExperimentId,
             credentials: req.body.credentials,
             allowSpectators: req.body.allowSpectators,
         }, hostSocketId)
 
-        const sessionState = await getSessionState(session.sessionId);
+        const sessionState = getSessionState(session.sessionId);
 
         return res.status(200).send(sessionState)
+        
     } catch (error: unknown) {
         if (error instanceof Error) {
             if (error.name === "EXPERIMENT_NOT_FOUND")
@@ -67,7 +71,14 @@ hostRouter.post("/session/create", async (req: Request, res: Response) => {
     }
 })
 
+hostRouter.get("/debug", async (req: Request, res: Response) => {
+    console.log("At debug | recieved: " + JSON.stringify(req.body));
+    
+    return res.status(200).send({
+        message: "Connected to express server"})
+})
 
+export default hostRouter;
 
 
 // hostRouter.post("/session/:sessionId/device_registration", (req: Request, res: Response) => {
@@ -111,4 +122,3 @@ hostRouter.post("/session/create", async (req: Request, res: Response) => {
 //     }
 // })
 
-export default hostRouter;

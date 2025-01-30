@@ -18,6 +18,8 @@ import ExperimentCreaterRoot from './Views/ExperimentCreaterRoot.tsx';
 import Carousel from 'react-bootstrap/Carousel';
 import ExampleCarouselImage from 'components/ExampleCarouselImage';
 import ConnectEmotiBit from './Views/ConnectEmotiBit.tsx';
+import ActiveExperiment from './Views/ActiveExperiment.tsx';
+import About from './Views/About.tsx';
 
 
 const router = createBrowserRouter([
@@ -29,40 +31,9 @@ const router = createBrowserRouter([
         index: true, 
         element: <Home />
       },
-      
       {
-        path: "host",
-        element: <HostRoot/>,
-        children:[{
-          path: "create",
-          element: <HostCreateRoom/>
-        },
-        {
-          path: "select-lab",
-          element: <HostSelectLabPage/>
-        },
-        {
-          path: ":room",
-          element: <HostView />
-        },
-        {
-          path: "select-media",
-          element: <SelectMedia/>
-        },
-    ]
-      },
-      {
-        path: "create-lab",
-        element: <ExperimentCreaterRoot />,
-        children: [{
-              path: "select-lab",
-              element: <HostSelectLabPage /> 
-        },
-        {
-          index: true,
-          element: <PreviouslyMadeExperiments />
-        }]
-          
+        path: "about",
+        element: <About />
       },
       {
         path: "join",
@@ -75,6 +46,10 @@ const router = createBrowserRouter([
       {
         path: "waiting-room",
         element: <WaitingRoom />
+      },
+      {
+        path:"active-experiment",
+        element: <ActiveExperiment />
       },
   ]
       

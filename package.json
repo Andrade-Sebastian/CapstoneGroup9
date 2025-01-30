@@ -1,6 +1,0 @@
-{
-  "dependencies": {
-    "@types/express": "^5.0.0",
-    "deno-express": "^0.0.1"
-  }
-}

@@ -2,6 +2,7 @@ import http from "node:http"
 import express from "npm:express";
 import {ISession} from "./controllers/session_controller.ts";
 import hostRouter from "./routes/host_routes.ts";
+import joinerRouter from "./routes/joiner_routes.ts";
 import {Server, type Socket} from "npm:socket.io@4.8.1";
 import { experimentRouter } from "./routes/experiment_routes.ts";
 
@@ -33,6 +34,7 @@ const currentSessions: { [key: string]: ISession } = {}
 
 app.use(cors())
 app.use('/host', hostRouter)
+app.use('/joiner', joinerRouter)
 app.use('/experiments', experimentRouter)
 
 const sessionNamespace = io.of("/session");
