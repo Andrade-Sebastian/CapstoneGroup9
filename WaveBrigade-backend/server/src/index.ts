@@ -48,7 +48,7 @@ app.use(cors());
 //cors setup
 const io = new Server(server, {
     cors: {
-        origin: "http://localhost:5173", //this is for frontend
+        origin: "http://localhost:4500", //this is for frontend
         methods: ["GET", "POST"], //this allows get and post to be used
     },
 });

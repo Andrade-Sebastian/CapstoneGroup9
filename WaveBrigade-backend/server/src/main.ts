@@ -1,5 +1,7 @@
 const PORT = 3000;
-const ORIGIN = "http://localhost:5173";
+const ORIGIN_JOINER = "http://localhost:4500";
+const ORIGIN_HOST = "http://localhost:5173";
+
 import grpc from "npm:@grpc/grpc-js";
 import socketSessionMap, { getSessionBySocket, removeSocket } from "./sessionMappings.ts";
 import axios from "npm:axios";
@@ -44,7 +46,7 @@ app.use("/joiner", joinerRouter);
 
 export const io = new Server(server, {
     cors: {
-        origin: ORIGIN,
+        origin: [ORIGIN_HOST, ORIGIN_JOINER]
     },
 });
 

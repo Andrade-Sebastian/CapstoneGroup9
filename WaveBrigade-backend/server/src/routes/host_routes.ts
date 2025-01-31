@@ -41,15 +41,16 @@ hostRouter.post("/session/create", async (req: Request, res: Response) => {
     console.log("At /session/create | recieved: " + JSON.stringify(req.body));
     
     const hostSocketId: string = req.body.hostSocketId;
-
+    console.log("----in /session/create ----");
     try {
-        const session = await createSession({
-            sessionName: req.body.sessionName,
-            roomCode: req.body.roomCode,
-            selectedExperimentId: req.body.selectedExperimentId,
-            credentials: req.body.credentials,
-            allowSpectators: req.body.allowSpectators,
-        }, hostSocketId)
+        const session = await createSession(
+            {
+                sessionName: req.body.sessionName,
+                roomCode: req.body.roomCode,
+                selectedExperimentId: req.body.selectedExperimentId,
+                credentials: req.body.credentials,
+                allowSpectators: req.body.allowSpectators,
+            }, hostSocketId)
 
         const sessionState = getSessionState(session.sessionId);
 
@@ -57,13 +58,15 @@ hostRouter.post("/session/create", async (req: Request, res: Response) => {
         
     } catch (error: unknown) {
         if (error instanceof Error) {
-            if (error.name === "EXPERIMENT_NOT_FOUND")
+            if (error.name === "EXPERIMENT_NOT_FOUND"){
+                console.log("Experiment not found")
                 return res.status(400).send({
                     error: error.name,
                     message: error.message
-                });
+                });}
             else {
                 return res.status(400).send({
+
                     message: error.message
                 })
             }

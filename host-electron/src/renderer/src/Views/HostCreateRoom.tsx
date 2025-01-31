@@ -56,20 +56,34 @@ export default function HostCreateRoom() {
       /* For now*/
     }
     //this is not setting the values
-    setSessionInfo({
-      sessionName: "Awesome", // FUTURE
-      selectedExperimentId: "17", // (ideally this would be undefined)
-      credentials: {
-        passwordEnabled: passwordIsSelected,
-        password: passwordIsSelected ? password : "", //if enabled, pass will be included
-      },
-      allowSpectators: allowSpectators,
-    });
+
+    
+    // setSessionInfo({
+    //     "sessionName": "Awesome",
+    //     "roomCode": "123456",
+    //     "selectedExperimentId": "17",
+    //     "credentials": {
+    //         "passwordEnabled": false,
+    //         "password": ""
+    //     },
+    //     "allowSpectators": true,
+    //     "hostSocketId": "abcd1234" // Example socket ID
+    // });
 
     console.log("sessionInfo: " + JSON.stringify(sessionInfo));
 
     axios
-      .post("http://localhost:3000/host/session/create", sessionInfo)
+      .post("http://localhost:3000/host/session/create", {
+        "sessionName": "Awesome",
+        "roomCode": "123456",
+        "selectedExperimentId": "17",
+        "credentials": {
+            "passwordEnabled": false,
+            "password": ""
+        },
+        "allowSpectators": true,
+        "hostSocketId": "abcd1234" // Example socket ID
+    })
       .then((response) => {
         console.log(response.data.configuration);
         navigateTo("/host/select-lab", { state: { userName } }); //for now

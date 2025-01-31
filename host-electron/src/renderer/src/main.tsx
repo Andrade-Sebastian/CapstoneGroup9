@@ -85,15 +85,15 @@ const router = createBrowserRouter([
 
     
   },
-  {
-    path:"/activity",
-    element: <ActivityRoot/>,
-    children: [
-      {
+  // {
+  //   path:"/activity",
+  //   element: <ActivityRoot/>,
+  //   children: [
+  //     {
 
-      }]
+  //     }]
 
-  }
+  // }
   // {
   //   path: "host",
   //     element: <HostRoot/>,
@@ -139,8 +139,10 @@ const router = createBrowserRouter([
             {
               index: true,
               element: <PreviouslyMadeExperiments/>,
-            },
-]}])
+            }]
+    }])
+
+
 //  {
 //       path: "/",
 //       element: <HostCreateRoom/>,
