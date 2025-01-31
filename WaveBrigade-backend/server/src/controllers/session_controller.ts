@@ -115,6 +115,7 @@ function requestDevices(sessionId) {
       let foundDevicesOnNetwork = [];  // Store the found devices
   
       // Call the gRPC method
+
       client.foundDevices({ sessionId: sessionId }, (error, devices) => {
         if (error) {
           // If there's an error, reject the Promise with the error

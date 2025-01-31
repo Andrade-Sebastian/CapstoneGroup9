@@ -1,4 +1,5 @@
 const PORT = 3000;
+const HOST = "0.0.0.0"
 const ORIGIN_JOINER = "http://localhost:4500";
 const ORIGIN_HOST = "http://localhost:5173";
 
@@ -23,7 +24,8 @@ var packageDefinition = protoLoader.loadSync(PROTO_PATH, options);
 const protoDescriptor = grpc.loadPackageDefinition(packageDefinition);
 const emotiBits = protoDescriptor.emotiBits.findDevices;
 
-export const client = new emotiBits("localhost:50051", grpc.credentials.createInsecure());
+export const client = new emotiBits("wb-backend-grpc:50051", grpc.credentials.createInsecure());
+console.log(client)
 
 import express from "npm:express@^4.17.1";
 import cors from "npm:cors";
@@ -119,6 +121,6 @@ io.on("connection", (socket) => {
 
 
 
-server.listen(PORT, () => {
+server.listen(PORT, HOST, () => {
     console.log(`(main.ts): Express & SocketIO Server running at http://localhost:${PORT}`);
 })

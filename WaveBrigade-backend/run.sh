@@ -1,1 +1,1 @@
-docker run -p 3000:3000 -t backend
+docker run --rm --name wb-backend-express -p 3000:3000 -t wb-express

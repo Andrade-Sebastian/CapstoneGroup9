@@ -1,0 +1,1 @@
+docker run --rm --name wb-backend-grpc -p 7000:7000 -t wb-grpc 

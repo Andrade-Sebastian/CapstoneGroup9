@@ -1,0 +1,29 @@
+services:
+  database:
+    build:
+      context: ./database
+      dockerfile: Dockerfile
+    container_name: wb-backend-database
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=WB_Database
+  backend-express:
+    build: 
+      context: ./WaveBrigade-backend
+      dockerfile: Dockerfile
+    container_name: wb-backend-express
+    ports:
+      - "3000:3000"
+    depends_on:
+      - database
+      - backend-grpc
+  backend-grpc:
+    build:
+      context: ./grpc
+      dockerfile: Dockerfile
+    container_name: wb-backend-grpc
+    ports:
+      - "50051:50051"

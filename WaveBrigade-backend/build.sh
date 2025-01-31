@@ -1,2 +1,2 @@
-docker build --tag backend .
+docker build --tag wb-express .
 

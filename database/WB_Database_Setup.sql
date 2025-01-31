@@ -2,7 +2,7 @@ CREATE TABLE IF NOT EXISTS Experiment
 (
     ExperimentID serial PRIMARY KEY,
     Name varchar(25) NOT NULL,
-    Description varchar(255) NOT NULL,
+    Description varchar(255) NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS PhotoLab
@@ -42,7 +42,7 @@ CREATE TABLE IF NOT EXISTS AssociatedDevice
     IPAddress varchar(25) NOT NULL,
     SerialNumber varchar(25) NOT NULL,
     SocketDeviceID varchar(25) NOT NULL,
-    SamplingFrequency int NOT NULL DEFAULT 50,
+    SamplingFrequency int NOT NULL DEFAULT 50
 );
 
 CREATE TABLE IF NOT EXISTS AncilliaryDataFrame
@@ -51,7 +51,7 @@ CREATE TABLE IF NOT EXISTS AncilliaryDataFrame
     Package int,
     EDA numeric,
     Temperature numeric,
-    Thermistor numeric,
+    Thermistor numeric
 );
 
 CREATE TABLE IF NOT EXISTS AuxilliaryDataFrame
@@ -60,7 +60,7 @@ CREATE TABLE IF NOT EXISTS AuxilliaryDataFrame
     Package int,
     PPG_Red numeric,
     PPG_InfaRed numeric,
-    PPG_Green numeric,
+    PPG_Green numeric
 );
 
 CREATE TABLE IF NOT EXISTS Recording
@@ -75,4 +75,4 @@ CREATE TABLE IF NOT EXISTS IntersectionTable
     AuxDataFrameID integer REFERENCES AuxilliaryDataFrame(AuxDataFrameID),
     RecordingID int REFERENCES Recording(RecordingID),
     Timestamp int NOT NULL
-)
+);
