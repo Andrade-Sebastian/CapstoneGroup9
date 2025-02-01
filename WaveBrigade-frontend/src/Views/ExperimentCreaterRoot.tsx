@@ -3,7 +3,7 @@ import {useEffect, useState} from "react"
 
 export default function ExperimentCreaterRoot(){
 //Future: put this in the CreateLab Page
-    const EXPERIMENT_LIBRARY_URL = "http://localhost:3000/experiments/";
+    const EXPERIMENT_LIBRARY_URL = "http://wb-backend-express:3000/experiments/";
     const [experiments, setExperiments] = useState([])
     
     useEffect(() =>{

@@ -27,3 +27,12 @@ services:
     container_name: wb-backend-grpc
     ports:
       - "50051:50051"
+  joiner-frontend:
+    build:
+      context: ./WaveBrigade-frontend
+      dockerfile: Dockerfile
+    container_name: wb-joiner-frontend
+    ports:
+      - "4500:4500"
+    volumes:
+      - ./WaveBrigade-frontend/src:/app/joiner/frontend/src

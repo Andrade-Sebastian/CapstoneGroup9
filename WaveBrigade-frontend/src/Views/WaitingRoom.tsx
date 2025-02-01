@@ -35,7 +35,7 @@ export default function WaitingRoom() {
   useEffect(() => {
     const getSessionID = async () => {
       const response = await axios.get(
-        `http://localhost:3000/joiner/validateRoomCode/${roomCode}`
+        `http://wb-backend-express:3000/joiner/validateRoomCode/${roomCode}`
       );
       if (response.status === 200) {
         setSessionID(response.data.sessionID);
@@ -52,7 +52,7 @@ export default function WaitingRoom() {
       try {
         console.log("Trying to get users from session " + sessionID);
         const response = await axios.get(
-          `http://localhost:3000/joiner/room-users/${sessionID}`
+          `http://wb-backend-express:3000/joiner/room-users/${sessionID}`
         );
         const users = response.data.users; //Array of IUser objects
 

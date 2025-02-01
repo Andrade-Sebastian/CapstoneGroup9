@@ -4,13 +4,12 @@ RUN mkdir -p /app/joiner/frontend
 
 WORKDIR /app/joiner/frontend
 
-COPY ./package.json .
+COPY ./package*.json .
 
-RUN ["npm", "install", "--save-dev", "@rollup/rollup-linux-x64-gnu"]
-# RUN ["npm", "install"]
+RUN ["npm", "install"]
 
 COPY . .
 
 EXPOSE 4500
 
-CMD [ "npm", "run", "dev", "--host"]
+CMD [ "npm", "run", "dev", "--", "--host"]

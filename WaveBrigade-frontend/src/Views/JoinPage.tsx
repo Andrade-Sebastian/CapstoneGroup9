@@ -25,7 +25,7 @@ export default function JoinPage() {
   useEffect(() => {
     const getSessionID = async () => {
       try {
-        const response = await axios.get(`http://localhost:3000/joiner/validateRoomCode/${StudentInputRoomCode}`);
+        const response = await axios.get(`http://wb-backend-express:3000/joiner/validateRoomCode/${StudentInputRoomCode}`);
         if (response.status === 200) {
           setSessionID(response.data.sessionID)
           setSocketID(sessionStorage.getItem("socketID") || "");  
@@ -78,7 +78,7 @@ export default function JoinPage() {
 
   const validateRoomCode = async (StudentInputRoomCode) => {
     try {
-      const response = await axios.get(`http://localhost:3000/joiner/validateRoomCode/${StudentInputRoomCode}`);
+      const response = await axios.get(`http://wb-backend-express:3000/joiner/validateRoomCode/${StudentInputRoomCode}`);
       if (response.status === 200) {
         console.log("Room code is valid!");
         setSessionID(response.data.sessionID);  // Store sessionID when room code is valid
@@ -97,7 +97,7 @@ export default function JoinPage() {
     console.log("Session ID: " + sessionID);
 
     try {
-      await axios.post("http://localhost:3000/joiner/join-room", {
+      await axios.post("http://wb-backend-express:3000/joiner/join-room", {
         sessionID: sessionID,
         socketId: socketID,
         nickname: nickName,
