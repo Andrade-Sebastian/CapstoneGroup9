@@ -8,6 +8,8 @@ WORKDIR /app/backend
 
 COPY . .
 
+COPY ../WaveBrigade-frontend/src/typings.ts .
+
 EXPOSE 3000
 
 run ["deno", "install"]

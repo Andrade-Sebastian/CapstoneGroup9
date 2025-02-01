@@ -77,6 +77,10 @@ const router = createBrowserRouter([
             }
           ]
       },
+      {
+        path:"activity/:sessionId/:userId",
+        element: <div>"Hello World"</div>
+      }
    
 
 

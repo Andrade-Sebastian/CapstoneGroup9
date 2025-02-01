@@ -2,6 +2,7 @@ import {currentSessions} from "../server.ts";
 import { v4 as uuid} from "npm:uuid";
 import SessionManager from "../sessions_singleton.ts";
 import {client} from "../main.ts";
+import {createSessionInDatabase} from "./database.ts";
 let foundDevicesOnNetwork: IDevice[] = [];
 
 
@@ -147,29 +148,37 @@ function createSession(initializationData: ISessionInitialization, socketId: str
     return new Promise<ISession>((resolve, reject) => {
         requestDevices(generatedSessionId)
             .then(devices => {
-                const session: ISession = {
+                const sessionInfo = {
                     sessionId: generatedSessionId,
+                    experimentId: initializationData.selectedExperimentId,
                     roomCode: initializationData.roomCode,
-                    sessionName: initializationData.sessionName,
                     hostSocketId: socketId,
                     users: [],
                     isInitialized: false,
                     configuration: {
-                    allowSpectators: false,
-                    maskEnabled: false,
-                    focusedUser: null,
-                    experiment: "dsdadf", //hardcoded
-                    },
-                    credentials: {
-                        passwordEnabled: initializationData.credentials.passwordEnabled,
-                        password: initializationData.credentials.password
-                    },
-                    discoveredDevices: devices
+                        allowSpectators: initializationData.allowSpectators,
+                        maskEnabled: false,
+                        focusedUser: null,
+                        experiment: {
+                            id: "17",
+                            description: "This is a test experiment",
+                            labTemplate: {
+                                id: "20",
+                                name: "Gallery Lab"
+                            },
+                            experimentTemplate: undefined
+                        }
+                    },  
+                    
                 }
-                console.log(session.discoveredDevices);
-                console.log("Adding session")
-                sessionManager.addSession(session.sessionId, session);
-                resolve(session);
+                //add to DB
+                console.log("Adding Session to Database")
+                createSessionInDatabase(sessionInfo)
+                console.log("Session added to Database")
+                //console.log(session.discoveredDevices);
+                //console.log("Adding session")
+                //sessionManager.addSession(session.sessionId, session);
+                //resolve(session);
             })
             .catch(error =>{
                 console.error("Error creating the session: ", error);
