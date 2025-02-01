@@ -69,7 +69,7 @@ export default function HostCreateRoom() {
     console.log("sessionInfo: " + JSON.stringify(sessionInfo));
 
     axios
-      .post("http://localhost:3000/host/session/create", sessionInfo)
+      .post("http://wb-backend-express:3000/host/session/create", sessionInfo)
       .then((response) => {
         console.log(response.data.configuration);
         navigateTo("/host/select-lab", { state: { userName } }); //for now
