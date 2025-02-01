@@ -1,6 +1,7 @@
 import { app, BrowserWindow } from 'electron'
 import { electronApp, optimizer } from '@electron-toolkit/utils'
 import createMainWindow from './main_window.ts'
+import createProcessWindow from './activity_window.js'
 // import createProcessWindow from './process_window'
 
 // This method will be called when Electron has finished
@@ -18,6 +19,7 @@ app.whenReady().then(() => {
   })
 
   createMainWindow('/')
+  createProcessWindow("1234", "69")
   // 4343 is the argument that will be passed to the process window
   // createProcessWindow('/process/', '4343')
 
