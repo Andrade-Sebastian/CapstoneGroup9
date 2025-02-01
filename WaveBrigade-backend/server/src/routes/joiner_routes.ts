@@ -162,6 +162,7 @@ joinerRouter.post("/verify-code", (req: Request, res: Response) => {
 
 joinerRouter.get("/debug", (req: Request, res: Response) => {
     console.log("in /debug")
+
     const sessions = SessionManager.getInstance().listSessions()
     //console.log("Live sessions: " + JSON.stringify(sessions))
 

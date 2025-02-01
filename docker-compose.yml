@@ -20,6 +20,8 @@ services:
     depends_on:
       - database
       - backend-grpc
+    volumes:
+      - ./WaveBrigade-backend/server:/app/backend/server
   backend-grpc:
     build:
       context: ./grpc
@@ -36,3 +38,7 @@ services:
       - "4500:4500"
     volumes:
       - ./WaveBrigade-frontend/src:/app/joiner/frontend/src
+    depends_on:
+      - database 
+      - backend-express
+      - backend-grpc

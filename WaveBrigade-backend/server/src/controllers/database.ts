@@ -1,12 +1,12 @@
 import { Client } from "https://deno.land/x/postgres@v0.17.0/mod.ts";
-import { IUser } from "../WaveBrigade-backend/server/src/controllers/session_controller.ts";
-import { ISessionConfiguration, ISessionCredentials, IDevice } from "../WaveBrigade-frontend/src/typings.ts";
+import { IUser } from "./session_controller.ts";
+import { ISessionConfiguration, ISessionCredentials, IDevice } from "../typings.ts";
 
 const dbClient = new Client({
   user: "postgres",
   database: "postgres",
   password: "postgres",
-  hostname: "localhost",
+  hostname: "wb-backend-database",
   port: 5432,
 });
 
@@ -41,6 +41,9 @@ interface ISessionDatabaseInfo {
 	discoveredDevices: Array<IDevice> | JSON		
 }
 
+
+// Author: Emanuelle Pelayo
+// Purpose: Adds a session to the database
 export async function createSessionInDatabase(initializationInfo: ISessionDatabaseInfo): Promise<void> {
 	const {
 		sessionID, 
@@ -58,7 +61,7 @@ export async function createSessionInDatabase(initializationInfo: ISessionDataba
 
 	try 
 	{
-		await dbClient.connect();// Connect to the database 
+		await dbClient.connect(); // Connect to the database 
 		console.log("(database.ts): createSessionInDatabase() - Connected to Database");
 		const result = await dbClient.queryObject(
 			`INSERT INTO session(

@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS Session
     DiscoveredDevices JSON ARRAY
 );
 
-CREATE TABLE IF NOT EXISTS User
+CREATE TABLE IF NOT EXISTS "User"
 (
     UserID serial PRIMARY KEY,
     Name varchar(25) NOT NULL,

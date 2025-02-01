@@ -25,7 +25,7 @@ const protoDescriptor = grpc.loadPackageDefinition(packageDefinition);
 const emotiBits = protoDescriptor.emotiBits.findDevices;
 
 export const client = new emotiBits("wb-backend-grpc:50051", grpc.credentials.createInsecure());
-console.log(client)
+
 
 import express from "npm:express@^4.17.1";
 import cors from "npm:cors";
