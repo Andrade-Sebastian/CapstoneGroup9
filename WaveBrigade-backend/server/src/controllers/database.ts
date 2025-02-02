@@ -1,16 +1,31 @@
 import { Client } from "https://deno.land/x/postgres@v0.17.0/mod.ts";
-import { IUser } from "./session_controller.ts";
+import { IUser, ISessionDatabaseInfo } from "./session_controller.ts";
+import { QueryObjectResult } from "https://deno.land/x/postgres@v0.17.0/query/query.ts";
 import { ISessionConfiguration, ISessionCredentials, IDevice } from "../typings.ts";
 
 const dbClient = new Client({
   user: "postgres",
-  database: "postgres",
+  database: "WB_Database",
   password: "postgres",
   hostname: "wb-backend-database",
   port: 5432,
 });
-
+interface sessionID{
+	sessionid: number
+}
 export { dbClient }
+function isolateSessionIDs(sessions) 
+{
+	console.log("(isolateSessionIDs): recieved" + JSON.stringify(sessions))
+    let sessionIDs = []
+    
+	for (let i = 0; i < sessions.length; i++)
+    {
+        sessionIDs.push(sessions[i].sessionid)
+    }
+
+    return sessionIDs
+}
 
 export async function createExperiment(experimentName: string, description: string){
     try {
@@ -27,19 +42,38 @@ export async function createExperiment(experimentName: string, description: stri
     
 }
 
+export async function getAllSessionIDsFromDB()
+{
+	let sessionIDsInDatabase: Array<number> = []
+	console.log("(database.ts): Getting all session IDs from Database")
 
-interface ISessionDatabaseInfo {
-	sessionID: number,
-	experimentID: number,
-	backendSessionID: string,
-	roomCode: string,
-	hostSocketId: string,
-	users: Array<IUser>,
-	isInitialized: boolean,
-	configuration: ISessionConfiguration,
-	credentials: ISessionCredentials,
-	discoveredDevices: Array<IDevice> | JSON		
+    try {
+		await dbClient.connect();
+		const result = await dbClient.queryObject(`SELECT sessionid FROM session;`)
+		console.log("(database.ts): result", result)
+		sessionIDsInDatabase = isolateSessionIDs(result.rows)
+	} finally {
+		// Release the connection back into the pool
+        await dbClient.end();
+	}
+	console.log("(database.ts): sessions in the database: ", sessionIDsInDatabase, "END")
+	return sessionIDsInDatabase;
 }
+//getAllSessionIDsFromDB()
+
+
+// interface ISessionDatabaseInfo {
+// 	sessionID: number,
+// 	experimentID: number,
+// 	backendSessionID: string,
+// 	roomCode: string,
+// 	hostSocketId: string,
+// 	users: Array<IUser>,
+// 	isInitialized: boolean,
+// 	configuration: ISessionConfiguration,
+// 	credentials: ISessionCredentials,
+// 	discoveredDevices: Array<IDevice> | JSON		
+// }
 
 
 // Author: Emanuelle Pelayo
@@ -57,6 +91,9 @@ export async function createSessionInDatabase(initializationInfo: ISessionDataba
 		credentials, 
 		discoveredDevices
 	} = initializationInfo;
+
+	//const initializationInfoToPrint = JSON.stringify(initializationInfo);
+	//console.log("(database.ts): Receieved initialization Info: "+ initializationInfoToPrint)
 
 
 	try 
@@ -88,7 +125,7 @@ export async function createSessionInDatabase(initializationInfo: ISessionDataba
 					credentials,              // $9 -> credentials (should be JSON)
 					discoveredDevices         // $10 -> discovereddevices (should be JSON or array -- JSON for now)
 				]);
-				console.log("(database.ts): Session created successfully", result);
+				console.log("(database.ts): Session created successfully");
 	}
 	catch (error) 
 	{
@@ -96,6 +133,8 @@ export async function createSessionInDatabase(initializationInfo: ISessionDataba
 	}
 	finally 
 	{
+		console.log("(Database.ts): ending database connection")
 		await dbClient.end();
+		console.log("(Database.ts): finished ending database connection")
 	}
 }

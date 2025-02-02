@@ -41,20 +41,27 @@ hostRouter.post("/session/create", async (req: Request, res: Response) => {
     console.log("At /session/create | recieved: " + JSON.stringify(req.body));
     
     const hostSocketId: string = req.body.hostSocketId;
-    console.log("----in /session/create ----");
+    console.log("(host_routes.ts): Creating session");
+
     try {
         const session = await createSession(
-            {
-                sessionName: req.body.sessionName,
-                roomCode: req.body.roomCode,
-                selectedExperimentId: req.body.selectedExperimentId,
-                credentials: req.body.credentials,
-                allowSpectators: req.body.allowSpectators,
-            }, hostSocketId)
+        {
+            sessionName: req.body.sessionName,
+            roomCode: req.body.roomCode,
+            selectedExperimentId: req.body.selectedExperimentId,
+            credentials: req.body.credentials,
+            allowSpectators: req.body.allowSpectators,
+        }, hostSocketId)
+        console.log("(host_routes.ts): Finished creating session")
 
-        const sessionState = getSessionState(session.sessionId);
 
-        return res.status(200).send(sessionState)
+        console.log("(host_routes.ts): Getting session state")
+        //const sessionState = getSessionState(session.sessionId); Commented while migrating to database
+        console.log("(host_routes.ts): Finished getting session state")
+
+        return res.status(200).send({
+            "Message": "Added session to database"
+        })
         
     } catch (error: unknown) {
         if (error instanceof Error) {
@@ -66,7 +73,6 @@ hostRouter.post("/session/create", async (req: Request, res: Response) => {
                 });}
             else {
                 return res.status(400).send({
-
                     message: error.message
                 })
             }

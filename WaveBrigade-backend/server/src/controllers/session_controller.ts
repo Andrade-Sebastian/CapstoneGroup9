@@ -2,7 +2,8 @@ import {currentSessions} from "../server.ts";
 import { v4 as uuid} from "npm:uuid";
 import SessionManager from "../sessions_singleton.ts";
 import {client} from "../main.ts";
-import {createSessionInDatabase} from "./database.ts";
+import {createSessionInDatabase, getAllSessionIDsFromDB} from "./database.ts";
+
 let foundDevicesOnNetwork: IDevice[] = [];
 
 
@@ -50,6 +51,19 @@ export interface ISession {
     credentials: ISessionCredentials;
     discoveredDevices: Array<IDevice>;
 }
+export interface ISessionDatabaseInfo {
+    sessionID: number,
+    experimentID: number,
+    backendSessionID: string,
+    roomCode: string,
+    hostSocketId: string,
+    users: Array<IUser>,
+    isInitialized: boolean,
+    configuration: ISessionConfiguration,
+    credentials: ISessionCredentials,
+    discoveredDevices: Array<IDevice> | JSON		
+}
+
 export type TSessionState = Omit<ISession, "credentials">
 
 // =====
@@ -138,47 +152,95 @@ function requestDevices(sessionId) {
         resolve(foundDevicesOnNetwork);
       });
     });
-  }
+}
 
-function createSession(initializationData: ISessionInitialization, socketId: string) {
+async function createSession(initializationData: ISessionInitialization, socketId: string) {
+    const {
+        sessionName,
+        roomCode,
+        selectedExperimentId,
+        credentials,
+        allowSpectators
+    } = initializationData;
+
+    const sessionIDsInDatabase = await getAllSessionIDsFromDB();
+
+    let databaseSessionID = 0;
+
+    if (sessionIDsInDatabase.length == 0)//if sessionIDsInDatabase is empty
+    {
+        databaseSessionID = 1
+    }
+    else //if sessionIDsInDatabase is not empty
+    {
+        //find the max sessionID in the array
+        const max = Math.max(...sessionIDsInDatabase);
+        databaseSessionID = max + 1;
+    }
+
+
     console.log("Entered: createSession routine");
     const generatedSessionId = generateSessionId();
+    console.log("(session_controller.ts): created sessionID: " + generatedSessionId)
 
     let deviceList = []
-    return new Promise<ISession>((resolve, reject) => {
+    return new Promise<ISessionDatabaseInfo>((resolve, reject) => {
         requestDevices(generatedSessionId)
-            .then(devices => {
-                const sessionInfo = {
-                    sessionId: generatedSessionId,
-                    experimentId: initializationData.selectedExperimentId,
-                    roomCode: initializationData.roomCode,
-                    hostSocketId: socketId,
-                    users: [],
+            .then(async devices => {
+                const sessionInfo: ISessionDatabaseInfo = {
+                    sessionID: databaseSessionID,
+                    experimentID: 6,
+                    backendSessionID: generatedSessionId,
+                    roomCode: roomCode,
+                    hostSocketId: "abc123",
+                    users: [
+                        {
+                        userId: "1",
+                        socketId: "abc123",
+                        nickname: "test-user",
+                        associatedDevice: {
+                            serialNumber: "1234",
+                            ipAddress: "1.2.3.4",
+                            socketID: "test-socketid"
+                        }
+                    }
+                    ],
                     isInitialized: false,
                     configuration: {
-                        allowSpectators: initializationData.allowSpectators,
-                        maskEnabled: false,
+                        allowSpectators: false,
+                        maskEnabled: false, //what does this do??
                         focusedUser: null,
-                        experiment: {
-                            id: "17",
-                            description: "This is a test experiment",
+                        experiment:{
+                            id: "6",
+                            description: "test",
                             labTemplate: {
-                                id: "20",
-                                name: "Gallery Lab"
+                                id: "test",
+                                name: "test",
+                                description: "test",
+                                iconPath: "test-icon"
                             },
-                            experimentTemplate: undefined
+                            experimentTemplate: "this type isnt defined"
                         }
-                    },  
-                    
+                    },
+                    credentials: {
+                        passwordEnabled: false,
+                        password: "" // why use a pw when password is not enabled??
+                    },
+                    discoveredDevices: [{
+                        serialNumber: "1234",
+                        ipAddress: "1.2.3.4",
+                        socketID: "abc123"
+                    }]
                 }
                 //add to DB
-                console.log("Adding Session to Database")
-                createSessionInDatabase(sessionInfo)
-                console.log("Session added to Database")
+                console.log("(session_controller.ts): Adding Session to Database")
+                //console.log ("(session_controller.ts): To DB: " + JSON.stringify(sessionInfo))
+                await createSessionInDatabase(sessionInfo)
+                console.log("(session_controller.ts): Session added to Database")
                 //console.log(session.discoveredDevices);
                 //console.log("Adding session")
                 //sessionManager.addSession(session.sessionId, session);
-                //resolve(session);
+                resolve(sessionInfo); //uncomment if route stays tyriung to connect
             })
             .catch(error =>{
                 console.error("Error creating the session: ", error);
@@ -261,9 +323,9 @@ function joinRoom(requestedSessionId: string, socketID: string, nickname: string
         throw new Error(`Could not join session ${requestedSessionId}`);
 
     }
-    //push the user to the users array 
 
 }
+
 
 //works 
 function removeUserBySocketID(users: Array<IUser>, socketID: string) {
