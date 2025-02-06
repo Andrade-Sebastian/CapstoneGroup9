@@ -6,7 +6,13 @@ import axios from "axios";
 const app = express();
 const joinerRouter = express.Router();
 joinerRouter.use(express.json());
-
+/*
+ .  .  .    .    .  .   .
+.  .   .    .   .      .
+"When a joiner joins.."
+.   .  .   .  . .    .  . 
+ . . . .  . .  .   .  . . 
+*/
 
 joinerRouter.get("/session/:sessionId", (req: Request, res: Response) => {
     const session = req.params.sessionId;

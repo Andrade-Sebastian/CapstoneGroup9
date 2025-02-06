@@ -35,15 +35,25 @@ import hostRouter from "./routes/host_routes.ts"
 import joinerRouter from "./routes/joiner_routes.ts"
 import session_handlers from "./handlers/session_handlers.ts";
 import experimentRouter from "./routes/experiment_routes.ts";
-
+import databaseRouter from "./routes/database_routes.ts"
 const app = express();
+// app.get('/get-ip', (req, res) => {
+//     const ipAddress = req.headers['x-forwarded-for'] || req.ip;
+//     res.send({
+//         "message": `Your IP address is: ${ipAddress}`
+//     });
+// });
+
 const server = createServer(app);
 
 app.use(cors());
 //app.use(cors({origin: ORIGIN}));
 app.use("/host", hostRouter); 
 app.use("/joiner", joinerRouter); 
+app.use("/database", databaseRouter)
 //app.use("/experiment", experimentRouter);
+
+import { Request, Response } from "express";
 
 
 export const io = new Server(server, {
@@ -56,6 +66,17 @@ const rooms: { [key: string]: any} = {};
 const currentSessions: { [key: string]: ISession } = {};
 const sessionNamespace = io.of("/session");
 let isHost = true;
+
+
+app.get("/ip", (req: Request, res: Response) => {
+    console.log("(joiner_routes.ts): in /ip")
+    const ipAddress = (req.headers['x-forwarded-for'] as string) || req.ip;
+    res.status(200).send(
+        {
+        "message": `Your IP address is: ${ipAddress}`
+        }
+    );
+});
 
 
 io.on("connection", (socket) => {

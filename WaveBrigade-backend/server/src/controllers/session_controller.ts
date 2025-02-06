@@ -6,7 +6,6 @@ import {createSessionInDatabase, getAllSessionIDsFromDB} from "./database.ts";
 
 let foundDevicesOnNetwork: IDevice[] = [];
 
-
 export interface IDevice {
     serialNumber: string;
     ipAddress: string;
