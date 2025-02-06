@@ -1,3 +1,8 @@
+/*
+Author:
+Data:
+Description:
+ */
 const PORT = 3000;
 const HOST = "0.0.0.0"
 const ORIGIN_JOINER = "http://localhost:4500";
@@ -57,6 +62,8 @@ const currentSessions: { [key: string]: ISession } = {};
 const sessionNamespace = io.of("/session");
 let isHost = true;
 
+let frontEndSocketId = null;
+
 
 app.get('/get-brainflow-info', (req, res) => {
     console.log("Getting Express IP")
@@ -76,14 +83,19 @@ io.on("connection", (socket) => {
         socket.emit("client-assignment", {socketId: socket.id});
     }); // Send socket ID to the client
 
+    //send socket Id to brainflow
     socket.on("brainflow-assignment", () => {
         console.log("(main.ts): Emitting brainflow-assignment with socketId:", socket.id);
         socket.emit("brainflow-assignment", {socketId: socket.id});
     })
 
     //recieve emotibit data
-    socket.on('update', (data) => {
-       console.log('Update Event: Received data:', JSON.stringify(data));
+    socket.on('update', (payload) => {
+        const {data, ipAddress, serialNumber, backendIp, hostSessionId, userId, frontEndSocketId, assignSocketId} = payload;
+        console.log('Update Event: Received data:', JSON.stringify(data));
+        if(userId){
+            io.to(frontEndSocketId).emit(payload);
+        }
     });
 
     session_handlers(io, socket, rooms, isHost);

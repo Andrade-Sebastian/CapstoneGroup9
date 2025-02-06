@@ -1,7 +1,7 @@
 /*
 Author: Haley Marquez
-Date: 
-Description:
+Description: Connects to the EmotiBit and collects data utilizing Brainflow's library 
+Sends collected data to the backend for manipulation
 
 */
 
