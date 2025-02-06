@@ -58,6 +58,15 @@ const sessionNamespace = io.of("/session");
 let isHost = true;
 
 
+app.get('/get-brainflow-info', (req, res) => {
+    console.log("Getting Express IP")
+    const ipAddress = req.ip;
+    res.send({
+        "ip": ipAddress
+        //"port": PORT
+    })
+});
+
 io.on("connection", (socket) => {
     console.log("(main.ts): User Connected | socketID: " + socket.id)
     console.log(`(main.ts): Total connections: ${io.engine.clientsCount}`);
@@ -67,18 +76,23 @@ io.on("connection", (socket) => {
         socket.emit("client-assignment", {socketId: socket.id});
     }); // Send socket ID to the client
 
+    socket.on("brainflow-assignment", () => {
+        console.log("(main.ts): Emitting brainflow-assignment with socketId:", socket.id);
+        socket.emit("brainflow-assignment", {socketId: socket.id});
+    })
+
     //recieve emotibit data
     socket.on('update', (data) => {
-       // console.log('Received data:', data);
+       console.log('Update Event: Received data:', JSON.stringify(data));
     });
 
     session_handlers(io, socket, rooms, isHost);
 
     //console.log("Running Script");
-    socket.on("update", (data) => {
-        console.log(data);
-        io.emit("update", data);
-    })
+    // socket.on("update", (data) => {
+    //     console.log(data);
+    //     io.emit("update", data);
+    // })
     
     socket.on("disconnect", async (data) => {
         console.log(`(main.ts): User Disconnected | socketID: ${socket.id}`);

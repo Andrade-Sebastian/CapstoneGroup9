@@ -1,11 +1,40 @@
+/*
+Author: Haley Marquez
+Date: 
+Description:
+
+*/
+
 import { BoardIds, BoardShim, BrainFlowInputParams, BrainFlowPresets} from 'brainflow';
 import * as Papa from 'papaparse';
 import * as fs from 'fs';
-import { io } from 'socket.io-client';
-const socket = io('http://localhost:3000');
+import { io, Socket } from 'socket.io-client';
+import { dbClient } from '../WaveBrigade-backend/server/src/controllers/database.ts'
 
-//is initialized flag for socket id 
-//gets it from backend
+
+//passed in from electron
+const operationParameters = {
+    ipAddress: process.argv[2],
+    serialNumber: process.argv[3],
+    backendIp: 'http://localhost:3000',
+    hostSessionId: process.argv[5],
+    userId: 1,
+    assignSocketId: null,
+}
+
+const ancHeaders = ['Package', 'EDA', 'Temperature', 'Thermistor', 'Timestamp', 'Unknown']; //create a list of headers for the csv
+const ancFilePath = './anc_from_streamer.csv';
+const auxHeaders = ['Package', 'PPG_Red', 'PPG_Infa_Red', 'PPG_Green', 'Timestamp', 'Unknown'];
+const auxFilePath = './aux_from_streamer.csv';
+//const params = new BrainFlowInputParams();
+const board = new BoardShim(BoardIds.EMOTIBIT_BOARD, {});
+const board_id = BoardIds.EMOTIBIT_BOARD;
+const ancCSV = fs.createReadStream(ancFilePath);
+const auxCSV = fs.createReadStream(auxFilePath);
+
+const currentDate = new Date('2024-12-3');
+const currentTime = currentDate.getTime();
+const passedDate = new Date();
 
 function sleep(ms: number)
 {
@@ -48,25 +77,75 @@ function writeHeaderstoCSV(FilePath: string, Headers: string[]){
     writeStream.end();
 }
 
-const ancHeaders = ['Package', 'EDA', 'Temperature', 'Thermistor', 'Timestamp', 'Unknown']; //create a list of headers for the csv
-const ancFilePath = './anc_from_streamer.csv';
-writeHeaderstoCSV(ancFilePath, ancHeaders);
+function requestSocketID(socket: Socket): Promise<string> 
+{
+    //avoids race condition with socketId
+    return new Promise((resolve, reject) => 
+        {
+            socket.emit('brainflow-assignment');
+            console.log("Emitting brainflow-assignment");
+            socket.on('brainflow-assignment', (messageObject) => {
+                operationParameters.assignSocketId = messageObject.socketId;
+                console.log("Message object ", JSON.stringify(messageObject));
+            });
+            setTimeout(() => {
+                //console.log("In timeout")
+                resolve(JSON.stringify(operationParameters.assignSocketId))
+                }, 2000);    
+        })
+}
 
-const auxHeaders = ['Package', 'PPG_Red', 'PPG_Infa_Red', 'PPG_Green', 'Timestamp', 'Unknown'];
-const auxFilePath = './aux_from_streamer.csv';
-writeHeaderstoCSV(auxFilePath, auxHeaders);
+async function retrieveUserSocketID(userId: string){
+    let id = parseInt(userId);
+    try{
+        await dbClient.connect();
+        const result = dbClient.queryObject(`SELECT sessionid FROM "Users" WHERE userid = ${id}`);
+        console.log(result);
+    }
+    finally {
+    // Release the connection back into the pool
+        await dbClient.end();
+    }
 
-//const params = new BrainFlowInputParams();
-const board = new BoardShim(BoardIds.EMOTIBIT_BOARD, {});
-const board_id = BoardIds.EMOTIBIT_BOARD;
-const ancCSV = fs.createReadStream(ancFilePath);
-const auxCSV = fs.createReadStream(auxFilePath);
+}
 
-const currentDate = new Date('2024-12-3');
-const currentTime = currentDate.getTime();
-const passedDate = new Date();
+function parseData(file){
+    Papa.parse<bioData>(file, {
+        header: true,
+        delimiter: '\t',
+        dynamicTyping: true,
+          
+        complete: () => {
+            console.log("Finished parsing data");
+        },
+        step: (results) => {
+          console.log("Row data:", results.data);
+        },
+        }
+    );
+}
 
 
+async function main(): Promise<string>{
+    let connectionSuccessful = false;
+    const socket = io(`${operationParameters.backendIp}`);
+    try{
+        await requestSocketID(socket);
+        console.log("Stored SocketID:", operationParameters.assignSocketId);
+        connectionSuccessful = true;
+    } 
+    catch (error){
+        console.error("Error fetching SocketID: ", error);
+    }
+
+    if(connectionSuccessful){
+        retrieveUserSocketID(operationParameters.userId);
+        writeHeaderstoCSV(ancFilePath, ancHeaders);
+        writeHeaderstoCSV(auxFilePath, auxHeaders);
+    }
+
+    return "0"; 
+}
 
 async function runExample (): Promise<void>
 {
@@ -97,17 +176,7 @@ async function runExample (): Promise<void>
             console.log("DATA :" + data.data1);
             socket.emit('update', data);
             await sleep(1000);
-            // console.log(data_current[0][2]);
-            // const interval = setInterval(() => {
-            //     console.log("in interval")
-            //     const data = {
-            //     timestamp: data_current[0][1],
-            //     randomValue: Math.random(),
-            //     };
-            //     socket.emit('update', data);
-            // }, 100);
         }
-       
     }}
     catch(error){
         console.error(error);
@@ -131,20 +200,5 @@ async function runExample (): Promise<void>
     console.info(BoardShim.getBoardDescr(BoardIds.EMOTIBIT_BOARD));
     console.info('Data');
     console.info(data_current);*/
-function parseData(file){
-    Papa.parse<bioData>(file, {
-        header: true,
-        delimiter: '\t',
-        dynamicTyping: true,
-          
-        complete: () => {
-            console.log("Finished parsing data");
-        },
-        step: (results) => {
-          console.log("Row data:", results.data);
-        },
-        }
-    );
-}
 
-runExample();
+main();

@@ -1,4 +1,10 @@
 "use strict";
+/*
+Author: Haley Marquez
+Date:
+Description:
+
+*/
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -40,9 +46,28 @@ var brainflow_1 = require("brainflow");
 var Papa = require("papaparse");
 var fs = require("fs");
 var socket_io_client_1 = require("socket.io-client");
-var socket = (0, socket_io_client_1.io)('http://localhost:3000');
-//is initialized flag for socket id 
-//gets it from backend
+var database_ts_1 = require("../WaveBrigade-backend/server/src/controllers/database.ts");
+//passed in from electron
+var operationParameters = {
+    ipAddress: process.argv[2],
+    serialNumber: process.argv[3],
+    backendIp: 'http://localhost:3000',
+    hostSessionId: process.argv[5],
+    userId: 1,
+    assignSocketId: null,
+};
+var ancHeaders = ['Package', 'EDA', 'Temperature', 'Thermistor', 'Timestamp', 'Unknown']; //create a list of headers for the csv
+var ancFilePath = './anc_from_streamer.csv';
+var auxHeaders = ['Package', 'PPG_Red', 'PPG_Infa_Red', 'PPG_Green', 'Timestamp', 'Unknown'];
+var auxFilePath = './aux_from_streamer.csv';
+//const params = new BrainFlowInputParams();
+var board = new brainflow_1.BoardShim(brainflow_1.BoardIds.EMOTIBIT_BOARD, {});
+var board_id = brainflow_1.BoardIds.EMOTIBIT_BOARD;
+var ancCSV = fs.createReadStream(ancFilePath);
+var auxCSV = fs.createReadStream(auxFilePath);
+var currentDate = new Date('2024-12-3');
+var currentTime = currentDate.getTime();
+var passedDate = new Date();
 function sleep(ms) {
     return new Promise(function (resolve) {
         setTimeout(resolve, ms);
@@ -55,23 +80,97 @@ function writeHeaderstoCSV(FilePath, Headers) {
     writeStream.write(headers);
     writeStream.end();
 }
-var ancHeaders = ['Package', 'EDA', 'Temperature', 'Thermistor', 'Timestamp', 'Unknown']; //create a list of headers for the csv
-var ancFilePath = './anc_from_streamer.csv';
-writeHeaderstoCSV(ancFilePath, ancHeaders);
-var auxHeaders = ['Package', 'PPG_Red', 'PPG_Infa_Red', 'PPG_Green', 'Timestamp', 'Unknown'];
-var auxFilePath = './aux_from_streamer.csv';
-writeHeaderstoCSV(auxFilePath, auxHeaders);
-//const params = new BrainFlowInputParams();
-var board = new brainflow_1.BoardShim(brainflow_1.BoardIds.EMOTIBIT_BOARD, {});
-var board_id = brainflow_1.BoardIds.EMOTIBIT_BOARD;
-var ancCSV = fs.createReadStream(ancFilePath);
-var auxCSV = fs.createReadStream(auxFilePath);
-var currentDate = new Date('2024-12-3');
-var currentTime = currentDate.getTime();
-var passedDate = new Date();
+function requestSocketID(socket) {
+    //avoids race condition with socketId
+    return new Promise(function (resolve, reject) {
+        socket.emit('brainflow-assignment');
+        console.log("Emitting brainflow-assignment");
+        socket.on('brainflow-assignment', function (messageObject) {
+            operationParameters.assignSocketId = messageObject.socketId;
+            console.log("Message object ", JSON.stringify(messageObject));
+        });
+        setTimeout(function () {
+            //console.log("In timeout")
+            resolve(JSON.stringify(operationParameters.assignSocketId));
+        }, 2000);
+    });
+}
+function retrieveUserSocketID(userId) {
+    return __awaiter(this, void 0, void 0, function () {
+        var id, result;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    id = parseInt(userId);
+                    _a.label = 1;
+                case 1:
+                    _a.trys.push([1, , 3, 5]);
+                    return [4 /*yield*/, database_ts_1.dbClient.connect()];
+                case 2:
+                    _a.sent();
+                    result = database_ts_1.dbClient.queryObject("SELECT sessionid FROM \"Users\" WHERE userid = ".concat(id));
+                    console.log(result);
+                    return [3 /*break*/, 5];
+                case 3: 
+                // Release the connection back into the pool
+                return [4 /*yield*/, database_ts_1.dbClient.end()];
+                case 4:
+                    // Release the connection back into the pool
+                    _a.sent();
+                    return [7 /*endfinally*/];
+                case 5: return [2 /*return*/];
+            }
+        });
+    });
+}
+function parseData(file) {
+    Papa.parse(file, {
+        header: true,
+        delimiter: '\t',
+        dynamicTyping: true,
+        complete: function () {
+            console.log("Finished parsing data");
+        },
+        step: function (results) {
+            console.log("Row data:", results.data);
+        },
+    });
+}
+function main() {
+    return __awaiter(this, void 0, void 0, function () {
+        var connectionSuccessful, socket, error_1;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    connectionSuccessful = false;
+                    socket = (0, socket_io_client_1.io)("".concat(operationParameters.backendIp));
+                    _a.label = 1;
+                case 1:
+                    _a.trys.push([1, 3, , 4]);
+                    return [4 /*yield*/, requestSocketID(socket)];
+                case 2:
+                    _a.sent();
+                    console.log("Stored SocketID:", operationParameters.assignSocketId);
+                    connectionSuccessful = true;
+                    return [3 /*break*/, 4];
+                case 3:
+                    error_1 = _a.sent();
+                    console.error("Error fetching SocketID: ", error_1);
+                    return [3 /*break*/, 4];
+                case 4:
+                    if (connectionSuccessful) {
+                        retrieveUserSocketID(operationParameters.userId);
+                        writeHeaderstoCSV(ancFilePath, ancHeaders);
+                        writeHeaderstoCSV(auxFilePath, auxHeaders);
+                    }
+                    return [2 /*return*/, "0"];
+            }
+        });
+    });
+}
 function runExample() {
     return __awaiter(this, void 0, void 0, function () {
-        var presets, data_current, data, error_1;
+        var presets, data_current, data, error_2;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -103,8 +202,8 @@ function runExample() {
                 case 3: return [3 /*break*/, 1];
                 case 4: return [3 /*break*/, 8];
                 case 5:
-                    error_1 = _a.sent();
-                    console.error(error_1);
+                    error_2 = _a.sent();
+                    console.error(error_2);
                     return [3 /*break*/, 8];
                 case 6: return [4 /*yield*/, sleep(3000)];
                 case 7:
@@ -126,17 +225,4 @@ function runExample() {
 console.info(BoardShim.getBoardDescr(BoardIds.EMOTIBIT_BOARD));
 console.info('Data');
 console.info(data_current);*/
-function parseData(file) {
-    Papa.parse(file, {
-        header: true,
-        delimiter: '\t',
-        dynamicTyping: true,
-        complete: function () {
-            console.log("Finished parsing data");
-        },
-        step: function (results) {
-            console.log("Row data:", results.data);
-        },
-    });
-}
-runExample();
+main();
