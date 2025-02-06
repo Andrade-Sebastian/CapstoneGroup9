@@ -78,14 +78,15 @@ export default function HostSelectLabPage() {
   function handleSubmit(e: { preventDefault: () => void }) {
     e.preventDefault();
     if(selectedLab){
+      const labID = selectedLab.id;
       if (selectedLab.id === "1"){
-        navigateTo("/host/video-lab", {state:{userName}});
+        navigateTo("/host/video-lab", {state:{userName, labID}});
       }
       else if (selectedLab.id === "2"){
-        navigateTo("/host/photo-lab", {state: {userName}});
+        navigateTo("/host/photo-lab", {state: {userName, labID}});
       }
       else if (selectedLab.id === "3"){
-        navigateTo("/host/gallery-lab", {state: { userName}});
+        navigateTo("/host/gallery-lab", {state: { userName, labID}});
       }
       else{
         alert("Please select a lab template to continue.") 

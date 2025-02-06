@@ -5,20 +5,11 @@ import PhotoInput from "../components/Components/PhotoInput.tsx";
 import ModalComponent from "../components/Components/ModalComponent.tsx";
 import { useLocation } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
-import {
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-  Button,
-  useDisclosure,
-} from "@heroui/react";
-
+import toast, { Toaster } from "react-hot-toast";
+import axios from "axios";
 export default function PhotoLab() {
-  function handleSubmit() {
-    //ADD TOASTS AND MODAL CONFIRMATION
-  }
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [experimentTitle, setExperimentTitle] = useState("");
   const [experimentDesc, setExperimentDesc] = useState("");
   const [caption, setCaption] = useState();
@@ -26,16 +17,58 @@ export default function PhotoLab() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [imageSource, setImageSource] = useState<string | null> (null);
   const location = useLocation();
-  const { nickName, roomCode } = location.state || {};
+  const { nickName, labID } = location.state || {};
+  //
+  console.log("*photolab*", JSON.stringify(location.state))
   const navigateTo = useNavigate();
-
+  
   const handleOpenModal = () => setIsModalOpen(true);
   const handleCloseModal = () => setIsModalOpen(false);
   const handleAction = () => {
     console.log("Creating lobby...");
-    navigateTo("/waiting-room", {state: {nickName, roomCode}});
+    handleSubmit();
+    //navigateTo("/waiting-room", {state: {nickName, roomCode}});
     handleCloseModal();
   };
+
+
+  async function handleSubmit() {
+    //ADD TOASTS AND MODAL CONFIRMATION
+    //add to database using /database/photo-lab
+    const loadingToastId = toast.loading("Creating Lab...");
+    if (isSubmitting) return;
+    
+    setIsSubmitting(true);
+    
+    try{
+      //logic for sending code to backend
+      //Create the experiment before doing this 
+      const response = await axios.post("http://localhost:3000/database/photo-lab",{
+        experimentID: labID,
+        path: imageSource, //null
+        captions: caption 
+      });
+
+      if(response.data.success){
+        toast.success("Lab was created successfully", {id: loadingToastId});
+        setTimeout(() => {
+          //-----HARDCODED FOR TESTING-------
+          navigateTo("/waiting-room", {state: {nickName, roomCode:"12345"}});
+        }, 2000);
+      }
+      else{
+        //Lab creation fails
+        toast.error("Could not create lab, try again", {id: loadingToastId});
+      }
+    } catch(error){
+      console.error("Could not create lab, try again", error);
+      toast.error("Could not create lab, try again", {id: loadingToastId});
+    } finally{
+      setIsSubmitting(false);
+    }
+  };
+
+
   function handleChange(e) {
     console.log(e.target.files);
     setFile(URL.createObjectURL(e.target.files[0]));
