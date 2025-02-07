@@ -5,6 +5,7 @@ interface IModalComponent {
   isOpen: boolean;
   onCancel: () => void;
   modalTitle: string;
+  button: string;
   children: ReactElement | Array<ReactElement>;
 }
 function onCancel(){
@@ -31,7 +32,7 @@ export default function ModalComponent(props: IModalComponent) {
             className="mt-6 font-semibold py-3 px-6 rounded-md shadow-md transition duration-300 ease-in-out bg-[#7F56D9] hover:bg-violet-500 text-white"
             onClick={props.onAction}
           >
-            Create Lobby
+            {props.button}
           </button>
           <button
             type="button"

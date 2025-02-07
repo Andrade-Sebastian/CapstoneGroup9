@@ -1,37 +1,60 @@
-import { PiRocketLaunchThin } from "react-icons/pi";
-import SideComponent from "../components/Components/SideComponent.tsx";
-import React, { useState } from 'react';
-import {
-    Modal,
-    ModalContent,
-    ModalHeader,
-    ModalBody,
-    ModalFooter,
-    Button,
-    useDisclosure
-  } from "@heroui/react";
-  
-export default function GalleryLab() {
-  function handleSubmit() {}
-  const [experimentTitle, setExperimentTitle] = useState("");
-  const [experimentDesc, setExperimentDesc] = useState("");
-  const [file, setFile] = useState();
-  const [caption, setCaption] = useState();
+import { PiRocketLaunchThin } from 'react-icons/pi'
+import SideComponent from '../components/Components/SideComponent.tsx'
+import React, { useState } from 'react'
+import GalleryInput from '../components/Components/GalleryInput'
+import ModalComponent from '../components/Components/ModalComponent.tsx'
+import { useLocation } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
+import toast, { Toaster } from 'react-hot-toast'
+import axios from 'axios'
 
-  function handleChange(e){
-    console.log(e.target.files);
-    setFile(URL.createObjectURL(e.target.files[0]));
+export default function GalleryLab() {
+  const [experimentTitle, setExperimentTitle] = useState('')
+  const [experimentDesc, setExperimentDesc] = useState('')
+  const [file, setFile] = useState()
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [caption, setCaption] = useState()
+  const [isFileSelected, setIsFileSelected] = useState(false)
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isModalOpenPhoto, setIsModalOpenPhoto] = useState(false)
+  const [imageSource, setImageSource] = useState<string | null>(null)
+  const location = useLocation()
+  const { nickName, labID } = location.state || {}
+  //
+  console.log('*photolab*', JSON.stringify(location.state))
+  const navigateTo = useNavigate()
+  
+  const handleOpenModal = () => setIsModalOpen(true)
+  const handleCloseModal = () => setIsModalOpen(false)
+  const handleAction = () => {
+    console.log('Creating lobby...')
+    handleSubmit()
+    //navigateTo("/waiting-room", {state: {nickName, roomCode}});
+    handleCloseModal()
+  }
+  const handleOpenModalPhoto = () => setIsModalOpenPhoto(true)
+  const handleCloseModalPhoto = () => setIsModalOpen(false)
+  const handleActionPhoto = () => {
+    console.log('Opening Modal for Gallery')
+    handleCloseModal()
+  }
+  
+  function handleSubmit() {}
+  function handleChange(e) {
+    console.log(e.target.files)
+    setFile(URL.createObjectURL(e.target.files[0]))
   }
 
   return (
-    <div className="flex h-screen">
-      <div className="flex flex-col max-sm:hidden items-center justify-center w-2/5">
+    <div className="flex h-screen px-8">
+      <div className="flex flex-col max-sm:hidden items-center justify-center w-1/2">
         <SideComponent
-          icon={<PiRocketLaunchThin style={{ fontSize: "200px" }} />}
-          headingTitle="Create a Photo Lab"
-          description="Start creating your experiment with pictures. Choose a title, write a description, and select a photo to get started"
+          icon={<PiRocketLaunchThin style={{ fontSize: '200px' }} />}
+          headingTitle="Create a Gallery Lab"
+          description="Start creating your experiment with pictures. Choose a title, write a description, and select multiple photos to get started"
         />
       </div>
+      {/* Middle */}
       <div className="flex flex-col items-center justify-center w-2/5">
         <form onSubmit={handleSubmit} className="w-full max-w-md">
           <div className="mb-6">
@@ -39,8 +62,7 @@ export default function GalleryLab() {
               htmlFor="experimentTitle"
               className="block text-sm font-medium text-gray-700 mb-2"
             >
-              Enter Title for Experiment{" "}
-              <span className="text-purple-500">*</span>
+              Enter Title for Experiment <span className="text-purple-500">*</span>
             </label>
             <input
               type="text"
@@ -49,69 +71,142 @@ export default function GalleryLab() {
               //   focus:outline-none focus:ring-2 focus:ring-indigo-500
               onChange={(e) => setExperimentTitle(e.target.value)}
               value={experimentTitle}
+              placeholder="Provide a title for your experiment"
             />
           </div>
+          
           <div className="mb-6">
             <label
               htmlFor="experimentDesc"
               className="block text-sm font-medium text-gray-700 mb-2"
             >
-              Enter Description for Experiment{" "}
-              <span className="text-purple-500">*</span>
+              Enter Description for Experiment <span className="text-purple-500">*</span>
             </label>
-            <input
-              type="text"
+            <textarea
               id="experimentDesc"
               className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
               //   focus:outline-none focus:ring-2 focus:ring-indigo-500
               onChange={(e) => setExperimentDesc(e.target.value)}
               value={experimentDesc}
+              placeholder="Provide a description for your experiment"
             />
           </div>
-          <div className="mb-6">
-          <label
-              htmlFor="addImage"
-              className="block text-sm font-medium text-gray-700 mb-2"
-            >
-              Add Image
-              <span className="text-purple-500">*</span>
-            </label>
-            <input type="file" onChange={handleChange}/>
-            <img src={file}/>
-          </div>
-          <div className="mb-6">
-            <label
-              htmlFor="caption"
-              className="block text-sm font-medium text-gray-700 mb-2"
-            >
-              Enter a Caption
-              <span className="text-purple-500">*</span>
-            </label>
-            <input
-              type="text"
-              id="caption"
-              className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              //   focus:outline-none focus:ring-2 focus:ring-indigo-500
-              onChange={(e) => setCaption(e.target.value)}
-              value={caption}
-            />
-          </div>
-          <div className="flex gap-10 items-center justify-center">
+    <div className="flex gap-10 items-center justify-center">
             <button
-              type="submit"
-              disabled={!experimentTitle.trim()}
+              type="button"
+              onClick={handleOpenModal}
+              disabled={!experimentTitle.trim() || !isFileSelected}
               className={`mt-6 font-semibold py-3 px-6 rounded-md shadow-md transition duration-300 ease-in-out ${
-                experimentTitle.trim()
-                  ? "bg-[#7F56D9] hover:bg-violet-500 text-white"
-                  : "bg-gray-400 text-white cursor-not-allowed"
+                experimentTitle.trim() && isFileSelected
+                  ? 'bg-[#7F56D9] hover:bg-violet-500 text-white'
+                  : 'bg-gray-400 text-white cursor-not-allowed'
               }`}
             >
               Confirm
             </button>
             {/*This will redirect to Media Page */}
           </div>
-        </form>
-      </div>
+          </form>
+          </div>
+      <div className="w-1/2 flex justify-center items-center">
+      <GalleryInput
+        onFileSelected={setIsFileSelected}
+        onSourceChange={setImageSource}
+      />
     </div>
-  );
+      <ModalComponent
+        onAction={handleAction}
+        isOpen={isModalOpen}
+        onCancel={handleCloseModal}
+        modalTitle="LAB CONFIRMATION"
+      >
+        <div className="mb-6">
+          <label htmlFor="experimentTitle" className="block text-sm font-medium text-gray-700 mb-2">
+            Title of Experiment
+          </label>
+          <input
+            type="text"
+            id="experimentTitle"
+            className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            disabled
+            value={experimentTitle}
+            onChange={(e) => setExperimentTitle(e.target.value)}
+          />
+        </div>
+        <div className="mb-6">
+          <label htmlFor="experimentDesc" className="block text-sm font-medium text-gray-700 mb-2">
+            Description of Experiment{' '}
+          </label>
+          <textarea
+            id="experimentDesc"
+            className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            //   focus:outline-none focus:ring-2 focus:ring-indigo-500
+            onChange={(e) => setExperimentDesc(e.target.value)}
+            value={experimentDesc}
+            disabled
+          ></textarea>
+        </div>
+        <div className="mb-6">
+          <label htmlFor="experimentImage" className="block text-md font-medium text-gray-700 mb-2">
+            File Upload
+          </label>
+          <input
+            type="text"
+            id="experimentImage"
+            className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            disabled
+            value={imageSource}
+            onChange={(e) => setImageSource(e.target.value)}
+          />
+        </div>
+        <div className="mb-6">
+          <label htmlFor="caption" className="block text-md font-medium text-gray-700 mb-2">
+            Caption
+          </label>
+          <input
+            type="text"
+            id="caption"
+            className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            disabled
+            value={caption}
+            onChange={(e) => setCaption(e.target.value)}
+          />
+        </div>
+      </ModalComponent>
+      <ModalComponent
+        onAction={handleActionPhoto}
+        isOpen={isModalOpenPhoto}
+        onCancel={handleCloseModalPhoto}
+        modalTitle="Add an Image"
+        button='Confirm'
+      >
+        <div className="mb-6">
+          <label htmlFor="experimentImage" className="block text-md font-medium text-gray-700 mb-2">
+            File Upload
+          </label>
+          <input
+            type="text"
+            id="experimentImage"
+            className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            disabled
+            value={imageSource}
+            onChange={(e) => setImageSource(e.target.value)}
+          />
+        </div>
+        <div className="mb-6">
+          <label htmlFor="caption" className="block text-md font-medium text-gray-700 mb-2">
+            Caption
+          </label>
+          <input
+            type="text"
+            id="caption"
+            className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            disabled
+            value={caption}
+            onChange={(e) => setCaption(e.target.value)}
+          />
+        </div>
+      </ModalComponent>
+    </div>
+  )
 }

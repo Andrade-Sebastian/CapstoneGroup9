@@ -18,18 +18,21 @@ export default function PhotoInput(props: IPhotoInput) {
     if (!file){
         setError("No file selected.");
         props.onFileSelected(false); //no file is selected. setting to false so that host cannot continue without selecting an image
+        props.onSourceChange(null);
         return;
     }
 
     if (!file.type.startsWith("image/")) { //makes sure that the file is an image
       setError("Please upload a valid image file.");
       props.onFileSelected(false); //no file selected. set to false so host cannot continue without selecting an image
+      props.onSourceChange(null);
       return;
     }
     setError(null);
     const url = URL.createObjectURL(file); //a temp url is generated for the selected file which is stored in the source state for previewing the image
     setSource(url);
     props.onFileSelected(true); //file is selected, host can now continue
+    props.onSourceChange(url);
   };
   const handleChoose = () => {
     inputRef.current?.click();
@@ -42,7 +45,7 @@ export default function PhotoInput(props: IPhotoInput) {
         className="flex flex-col justify-center items-center border"
         type="file"
         onChange={handleFileChange}
-        accept=".jpg,.jpeg,.png" //restricts just these image files
+        accept="image/jpg, image/jpeg, image/png" //restricts just these image files
       />
 
       {error && <p className="text-red-500 text-sm mt-2"> {error}</p>}

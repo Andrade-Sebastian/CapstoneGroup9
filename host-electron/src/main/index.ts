@@ -1,4 +1,4 @@
-import { app, BrowserWindow } from 'electron'
+import { app, BrowserWindow, session } from 'electron'
 import { electronApp, optimizer } from '@electron-toolkit/utils'
 import createMainWindow from './main_window.ts'
 import createProcessWindow from './activity_window.js'
@@ -23,6 +23,16 @@ app.whenReady().then(() => {
   // 4343 is the argument that will be passed to the process window
   // createProcessWindow('/process/', '4343')
 
+  session.defaultSession.webRequest.onHeadersReceieved((details,callback) => {
+    callback({
+      responseHeaders: {
+        ...details.responseHeaders,
+        'Content-Security-Policy': [
+          "default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:filesystem:;"
+        ]
+      }
+    })
+  })
   app.on('activate', function () {
     // On macOS it's common to re-create a window in the app when the
     // dock icon is clicked and there are no other windows open.
