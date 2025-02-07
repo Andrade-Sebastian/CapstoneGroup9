@@ -76,16 +76,20 @@ joinerRouter.get("/room-users/:sessionID", (req: Request, res: Response) => {
 
 // import socketSessionMap from "../sessionMappings.ts";
 joinerRouter.post("/join-room", (req: Request, res: Response) => {
-    const {sessionID, socketID, nickname, associatedDevice} = req.body;
+//-----OLD SOCKETIO Code--
+    // const {sessionID, socketID, nickname, associatedDevice} = req.body;
     
     
-    console.log("(joiner_routes.ts): at '/join-room', received: " + JSON.stringify(req.body));
-    addSocketToSession(socketID, sessionID)
+    // console.log("(joiner_routes.ts): at '/join-room', received: " + JSON.stringify(req.body));
+    // addSocketToSession(socketID, sessionID)
 
-    console.log("socketMapping: " + JSON.stringify(socketSessionMap))
+    // console.log("socketMapping: " + JSON.stringify(socketSessionMap))
     
-    //join the room
-    joinRoom(sessionID, socketID, nickname, associatedDevice)
+    // //join the room
+    // joinRoom(sessionID, socketID, nickname, associatedDevice)
+//-----OLD SOCKETIO Code--
+
+
     
     return res.status(200).json({ message: "Successfully Joined session"});
     

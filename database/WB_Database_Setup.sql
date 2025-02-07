@@ -17,14 +17,15 @@ CREATE TABLE IF NOT EXISTS Session
 (
     SessionID serial PRIMARY KEY,
     ExperimentID int REFERENCES Experiment(ExperimentID),
-    BESessionID varchar(25) NOT NULL,
+    SessionCode varchar(25) NOT NULL,
     RoomCode varchar(10) NOT NULL,
     HostSocketID varchar(25) NOT NULL,
     Users JSON ARRAY,
     isInitialized BOOLEAN NOT NULL,
     Configuration JSON NOT NULL,
     Credentials JSON,
-    DiscoveredDevices JSON ARRAY
+    DiscoveredDevices JSON ARRAY,
+    SessionAvailable BOOLEAN NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS "User"
@@ -42,7 +43,9 @@ CREATE TABLE IF NOT EXISTS AssociatedDevice
     IPAddress varchar(25) NOT NULL,
     SerialNumber varchar(25) NOT NULL,
     SocketDeviceID varchar(25) NOT NULL,
-    SamplingFrequency int NOT NULL DEFAULT 50
+    SamplingFrequency int NOT NULL DEFAULT 50,
+    FrontEndSocketID varchar(25) NOT NULL,
+    IsAvailable BOOLEAN NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS AncilliaryDataFrame

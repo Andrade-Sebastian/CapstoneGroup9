@@ -1,5 +1,6 @@
 import express, { Request, Response } from "express";
-import { createPhotoLabInDatabase, IPhotoLabDatabaseInfo } from "../controllers/database.ts";
+import { createPhotoLabInDatabase, addUserToSession, IUserDatabaseInfo} from "../controllers/database.ts";
+import { IUser } from "../typings.ts";
 
 const databaseRouter = express.Router();
 databaseRouter.use(express.json());
@@ -36,4 +37,39 @@ databaseRouter.post("/photo-lab", (req: Request, res: Response) => {
         "message": "In Photo-lab"
     })
 })
+
+
+databaseRouter.post("/add-user-to-session", (req: Request, res: Response) => {
+    const {
+        userId,  //string
+        socketID,
+        nickname, 
+        roomCode
+    } = req.body
+
+    const infoForDatabase: IUserDatabaseInfo = {
+        userId: userId,
+        socketId: socketID,
+        nickname: nickname,
+        associatedDevice: null,
+        roomCode: roomCode
+    }
+
+    try{
+        addUserToSession(infoForDatabase)
+    }
+    catch (error) {
+        res.status(500).send({
+            "message": "Could not add user to session in the datab",
+            "error": error
+        });
+    }
+
+    res.status(200).send({
+        "message": "In /add-user-to-session"
+    })
+
+
+})
+
 export default databaseRouter;

@@ -27,7 +27,7 @@ export default function JoinPage() {
       try {
         const response = await axios.get(`http://wb-backend-express:3000/joiner/validateRoomCode/${StudentInputRoomCode}`);
         if (response.status === 200) {
-          setSessionID(response.data.sessionID)
+          setSessionID(response.data.sessionID)//socketIO session ID -- old
           setSocketID(sessionStorage.getItem("socketID") || "");  
         }
       } catch (error) {
@@ -35,7 +35,7 @@ export default function JoinPage() {
       }
     };
     if (StudentInputRoomCode) {
-      getSessionID();  // Call it when room code is entered
+      getSessionID();  // Call it when room code is entered --change to when submitted
     }
     
   }, [StudentInputRoomCode]);  
