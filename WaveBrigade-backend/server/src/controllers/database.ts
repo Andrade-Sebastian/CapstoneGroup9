@@ -1,5 +1,5 @@
 import { Client } from "https://deno.land/x/postgres@v0.17.0/mod.ts";
-import { ISessionDatabaseInfo } from "./session_controller.ts";
+import { IDevice, ISessionDatabaseInfo, IUser } from "./session_controller.ts";
 
 
 export const dbClient = new Client({
@@ -161,7 +161,6 @@ export interface IPhotoLabDatabaseInfo {
 
 export async function createPhotoLabInDatabase(initializationInfo: IPhotoLabDatabaseInfo): Promise<void>{
 	const {
-
 		experimentID,
 		path, 
 		captions
@@ -194,5 +193,62 @@ export async function createPhotoLabInDatabase(initializationInfo: IPhotoLabData
 	}
 	catch(error){
 		console.log("Error adding photo lab to the database: " + error)
+	}
+}
+
+export interface IUserDatabaseInfo {
+	userId: string | null;
+	socketId: string;
+	nickname: string | null;
+	associatedDevice: IDevice | null;
+	roomCode: string | null;
+}
+
+
+export async function addUserToSession(initializationinfo: IUserDatabaseInfo): Promise<void>{
+
+	const {
+		userId,
+		socketId,
+		nickname, 
+		associatedDevice,
+		roomCode
+	} = initializationinfo;
+
+	const newUser: IUser = {
+		userId: userId,
+		socketId: socketId,
+		nickname: nickname,
+		associatedDevice: associatedDevice
+	}
+
+
+	//console.log("(database.ts): AddUser, recieved", JSON.stringify(initializationinfo))
+
+	try{
+
+		await dbClient.connect();
+
+		const query = await dbClient.queryObject(`SELECT sessionid, users FROM session WHERE roomcode = '${roomCode}'`) //Get all primary keys with roomcode inputted by the user. 
+		console.log(roomCode)
+		const sessionID: number = query.rows[0].sessionid;
+		const usersArray: Array<IUser> = query.rows[0].users;
+		
+		console.log(`(database.ts): ${usersArray.length} Users array before adding: ` + JSON.stringify(usersArray));
+
+		//push the user to the array 
+		usersArray.push(newUser)
+		console.log(`(database.ts): ${usersArray.length} -- Users array after adding: ` + JSON.stringify(usersArray));
+
+		const updateQuery = await dbClient.queryObject(
+			`UPDATE session SET users = ARRAY(SELECT jsonb_array_elements($1::jsonb)) WHERE sessionid = $2;`,
+			[JSON.stringify(usersArray), sessionID]
+		  );
+		console.log(updateQuery);
+		console.log("(database.ts): User Successfully Added To Session")
+	}
+	catch(error)
+	{
+		console.log("Unable to add user ", error)
 	}
 }
