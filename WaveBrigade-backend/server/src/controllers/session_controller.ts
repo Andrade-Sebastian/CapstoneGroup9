@@ -50,6 +50,8 @@ export interface ISession {
     credentials: ISessionCredentials;
     discoveredDevices: Array<IDevice>;
 }
+
+
 export interface ISessionDatabaseInfo {
     sessionID: number,
     experimentID: number,

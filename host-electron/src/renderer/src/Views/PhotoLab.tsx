@@ -18,7 +18,7 @@ export default function PhotoLab() {
   const location = useLocation()
   const { nickName, labID } = location.state || {}
   //
-  console.log('*photolab*', JSON.stringify(location.state))
+  //console.log('*photolab*', JSON.stringify(location.state))
   const navigateTo = useNavigate()
 
   const handleOpenModal = () => setIsModalOpen(true)
