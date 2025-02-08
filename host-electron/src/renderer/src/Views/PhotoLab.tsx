@@ -1,33 +1,33 @@
 import { PiShootingStarThin } from 'react-icons/pi'
 import SideComponent from '../components/Components/SideComponent.tsx'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import PhotoInput from '../components/Components/PhotoInput.tsx'
 import ModalComponent from '../components/Components/ModalComponent.tsx'
 import { useLocation } from 'react-router-dom'
 import { useNavigate } from 'react-router-dom'
 import toast, { Toaster } from 'react-hot-toast'
 import axios from 'axios'
+
 export default function PhotoLab() {
+  const location = useLocation()
+  const navigateTo = useNavigate()
+  const { nickName, labID, name, description, imageUrl } = location.state || {};
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [experimentTitle, setExperimentTitle] = useState('')
-  const [experimentDesc, setExperimentDesc] = useState('')
-  const [caption, setCaption] = useState()
+  const [experimentTitle, setExperimentTitle] = useState(name || '')
+  const [experimentDesc, setExperimentDesc] = useState(description || '')
+  const [caption, setCaption] = useState('')
   const [isFileSelected, setIsFileSelected] = useState(false)
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [imageSource, setImageSource] = useState<string | null>(null)
-  const location = useLocation()
-  const { nickName, labID } = location.state || {}
+  const [imageSource, setImageSource] = useState<string | null>(imageUrl || null)
   //
   console.log('*photolab*', JSON.stringify(location.state))
-  const navigateTo = useNavigate()
 
   const handleOpenModal = () => setIsModalOpen(true)
   const handleCloseModal = () => setIsModalOpen(false)
   const handleAction = () => {
-    console.log('Creating lobby...')
-    handleSubmit()
-    //navigateTo("/waiting-room", {state: {nickName, roomCode}});
-    handleCloseModal()
+    console.log('Creating lobby...');
+    handleSubmit();
+    handleCloseModal();
   }
 
   async function handleSubmit() {
@@ -51,13 +51,21 @@ export default function PhotoLab() {
         toast.success('Lab was created successfully', { id: loadingToastId })
         setTimeout(() => {
           //-----HARDCODED FOR TESTING-------
-          navigateTo('/waiting-room', { state: { nickName, roomCode: '12345' } })
+          navigateTo('/waiting-room', { state: { nickName, roomCode: '12345', labID, name, description, imageUrl } })
         }, 2000)
       } else {
         //Lab creation fails
+        setTimeout(() => {
+          //-----HARDCODED FOR TESTING-------
+          navigateTo('/waiting-room', { state: { nickName, roomCode: '12345', labID, name, description, imageUrl } })
+        }, 2000)
         toast.error('Could not create lab, try again', { id: loadingToastId })
       }
     } catch (error) {
+      setTimeout(() => {
+        //-----HARDCODED FOR TESTING-------
+        navigateTo('/waiting-room', { state: { nickName, roomCode: '12345', labID, name, description, imageUrl } })
+      }, 2000)
       console.error('Could not create lab, try again', error)
       toast.error('Could not create lab, try again', { id: loadingToastId })
     } finally {
@@ -70,6 +78,11 @@ export default function PhotoLab() {
     setFile(URL.createObjectURL(e.target.files[0]))
   }
 
+  useEffect(() => {
+    if(imageSource){
+      setIsFileSelected(true);
+    }
+  }, [imageSource]);
   return (
     <div className="flex h-screen">
       <Toaster position="top-right" />
@@ -126,6 +139,7 @@ export default function PhotoLab() {
               height={250}
               onFileSelected={setIsFileSelected}
               onSourceChange={setImageSource}
+              imageSource={imageSource}
             />
           </div>
 

@@ -18,7 +18,7 @@ export default function WaitingRoomCardComponent(
           <div className="text-sm">{props.icon}</div>
           <p className="ml-2 text-sm font-medium">{props.labType}</p>
         </div>
-        <h1 className="text-lg font-bold"> {props.labTitle} </h1>
+        <h1 className="text-lg font-bold"> {props.labTitle}</h1>
       </CardHeader>
       <Divider />
       <CardBody className="p-4">

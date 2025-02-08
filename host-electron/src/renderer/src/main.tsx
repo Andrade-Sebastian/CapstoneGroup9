@@ -15,6 +15,7 @@ import PreviouslyMadeExperiments from './Views/PreviouslyMadeExperiments';
 import PhotoLab from './Views/PhotoLab';
 import VideoLab from './Views/VideoLab';
 import GalleryLab from './Views/GalleryLab';
+import WaitingRoom from './Views/WaitingRoom';
 
 // import { StrictMode } from 'react'
 // import { createRoot } from 'react-dom/client'
@@ -74,8 +75,17 @@ const router = createBrowserRouter([
             {
               path: "gallery-lab",
               element: <GalleryLab/>
+            },
+            {
+              path:"past-experiments",
+              element: <PreviouslyMadeExperiments/>
             }
+
           ]
+      },
+      {
+        path:"waiting-room",
+        element: <WaitingRoom/>
       },
       {
         path:"activity/:sessionId/:userId",

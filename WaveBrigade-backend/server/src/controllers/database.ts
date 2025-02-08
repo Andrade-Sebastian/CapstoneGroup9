@@ -59,6 +59,7 @@ export async function getAllSessionIDsFromDB()
 
 export async function getMaxPhotoLabIDsFromDB()
 {
+	let sessionIDsInDatabase: Array<number> = []
 	console.log("(database.ts): Getting all photo lab IDs from Database")
 
     try {
@@ -158,6 +159,15 @@ export interface IPhotoLabDatabaseInfo {
 	path: string, //Image path
 	captions: string 
 }
+export interface IVideoLabDatabaseInfo {
+	experimentID: number,
+	path: string, //Image path
+}
+export interface IGalleryLabDatabaseInfo {
+	experimentID: number,
+	path: string, //Image path
+	captions: string 
+}
 
 export async function createPhotoLabInDatabase(initializationInfo: IPhotoLabDatabaseInfo): Promise<void>{
 	const {
@@ -193,6 +203,76 @@ export async function createPhotoLabInDatabase(initializationInfo: IPhotoLabData
 	}
 	catch(error){
 		console.log("Error adding photo lab to the database: " + error)
+	}
+}
+export async function createVideoLabInDatabase(initializationInfo: IVideoLabDatabaseInfo): Promise<void>{
+	const {
+		experimentID,
+		path, 
+	} = initializationInfo;
+
+	try{
+		await dbClient.connect();
+		const pkQuery = await dbClient.queryObject(`SELECT 
+			MAX(videolabid) FROM videolab;
+			`)
+
+		const primaryKey: number = pkQuery.rows[0].max + 1//max primary key currently in the database
+
+		const query = await dbClient.queryObject(`
+			INSERT INTO videolab (
+			videolabid, 
+			experimentid,
+			path, 
+			captions
+			) 
+			VALUES ($1, $2, $3, $4);
+			`, [
+				primaryKey,
+				experimentID,
+				path,
+			]);
+
+		console.log("(database.ts): Video Lab Successfully Added")
+	}
+	catch(error){
+		console.log("Error adding video lab to the database: " + error)
+	}
+}
+export async function createGalleryLabInDatabase(initializationInfo: IGalleryLabDatabaseInfo): Promise<void>{
+	const {
+		experimentID,
+		path, 
+		captions
+	} = initializationInfo;
+
+	try{
+		await dbClient.connect();
+		const pkQuery = await dbClient.queryObject(`SELECT 
+			MAX(gallerylabid) FROM gallerylab;
+			`)
+
+		const primaryKey: number = pkQuery.rows[0].max + 1//max primary key currently in the database
+
+		const query = await dbClient.queryObject(`
+			INSERT INTO gallerylab (
+			gallerylabid, 
+			experimentid,
+			path, 
+			captions
+			) 
+			VALUES ($1, $2, $3, $4);
+			`, [
+				primaryKey,
+				experimentID,
+				path,
+				captions
+			]);
+
+		console.log("(database.ts): gallery Lab Successfully Added")
+	}
+	catch(error){
+		console.log("Error adding gallery lab to the database: " + error)
 	}
 }
 

@@ -5,6 +5,8 @@ interface IPhotoInput {
   height: number;
   onFileSelected: (isFileSelected: boolean) => void;
   onSourceChange: (source: string | null) => void;
+  imageSource: string | undefined;
+
 }
 
 export default function PhotoInput(props: IPhotoInput) {
@@ -50,12 +52,12 @@ export default function PhotoInput(props: IPhotoInput) {
 
       {error && <p className="text-red-500 text-sm mt-2"> {error}</p>}
       {/* image Preview */}
-      {source && (
+      {props.imageSource && (
         <div className="mt-4">
           <img
             width={props.width}
             height={props.height}
-            src={source}
+            src={props.imageSource}
             alt="Selected"
             className="rounded-md shadow-md"
           />

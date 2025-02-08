@@ -9,7 +9,20 @@ CREATE TABLE IF NOT EXISTS PhotoLab
 (
     PhotoLabID serial PRIMARY KEY,
     ExperimentID int REFERENCES Experiment(ExperimentID),
-    Path varchar(25) NOT NULL,
+    Path varchar(100) NOT NULL,
+    Captions varchar(100) NOT NULL
+);
+CREATE TABLE IF NOT EXISTS VideoLab
+(
+    VideoLabID serial PRIMARY KEY,
+    ExperimentID int REFERENCES Experiment(ExperimentID),
+    Path varchar(100) NOT NULL,
+);
+CREATE TABLE IF NOT EXISTS GalleryLab
+(
+    GalleryLabID serial PRIMARY KEY,
+    ExperimentID int REFERENCES Experiment(ExperimentID),
+    Path varchar(100) NOT NULL,
     Captions varchar(100) NOT NULL
 );
 
