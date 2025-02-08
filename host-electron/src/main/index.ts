@@ -1,7 +1,10 @@
-import { app, BrowserWindow, session } from 'electron'
+import { app, BrowserWindow, ipcMain, session } from 'electron'
 import { electronApp, optimizer } from '@electron-toolkit/utils'
 import createMainWindow from './main_window.ts'
 import createProcessWindow from './activity_window.js'
+import ActivitySingleton, { IActivityInstance } from './activitySingleton'
+import { ActivityEvents, BRAINFLOW_LAUNCH } from '../preload/index.js'
+
 // import createProcessWindow from './process_window'
 
 // This method will be called when Electron has finished
@@ -9,6 +12,8 @@ import createProcessWindow from './activity_window.js'
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
   // Set app user model id for windows
+  const activitySingleton = ActivitySingleton.getInstance();
+
   electronApp.setAppUserModelId('com.electron')
 
   // Default open or close DevTools by F12 in development
@@ -18,12 +23,12 @@ app.whenReady().then(() => {
     optimizer.watchWindowShortcuts(window)
   })
 
-  createMainWindow('/')
-  createProcessWindow("1234", "69")
+  createMainWindow()
+  // createProcessWindow("1234", "69")
   // 4343 is the argument that will be passed to the process window
   // createProcessWindow('/process/', '4343')
 
-  session.defaultSession.webRequest.onHeadersReceieved((details,callback) => {
+  session.defaultSession.webRequest.onHeadersReceived((details,callback) => {
     callback({
       responseHeaders: {
         ...details.responseHeaders,
@@ -49,5 +54,13 @@ app.on('window-all-closed', () => {
   }
 })
 
+function spawnBrainFlow(emotibitIpAddress: string, serialNumber: string, backendIp: string, userId: string, frontEndSocketId: string )
+{
+  
+}
 // In this file you can include the rest of your app"s specific main process
 // code. You can also put them in separate files and require them here.
+ipcMain.on(BRAINFLOW_LAUNCH, (event: Electron.IpcMainEvent, emotibitIpAddress: string, serialNumber: string, backendIp: string, userId: string, frontEndSocketId: string) => {
+  const activitySingleton = ActivitySingleton.getInstance();
+
+})

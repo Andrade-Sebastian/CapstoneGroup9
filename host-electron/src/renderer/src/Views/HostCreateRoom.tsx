@@ -73,7 +73,7 @@ export default function HostCreateRoom() {
     console.log("sessionInfo: " + JSON.stringify(sessionInfo));
 
     axios
-      .post("http://localhost:3000/host/session/create", {
+      .post(`${import.meta.env.VITE_BACKEND_PATH}/host/session/create`, {
         "sessionName": "Awesome",
         "roomCode": "123456",
         "selectedExperimentId": "17",
