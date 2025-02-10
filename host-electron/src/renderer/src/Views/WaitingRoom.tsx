@@ -1,26 +1,56 @@
 import { useLocation } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import { CiPlay1 } from 'react-icons/ci'
-import { TfiGallery } from "react-icons/tfi";
-import { TiCamera } from "react-icons/ti";
-import { IoVideocam } from "react-icons/io5";
+import { TfiGallery } from 'react-icons/tfi'
+import { TiCamera } from 'react-icons/ti'
+import { IoVideocam } from 'react-icons/io5'
 import socket from './socket'
 import axios from 'axios'
 import { Divider } from '@heroui/divider'
 import WaitingRoomCardComponent from '../components/Components/WaitingRoomCardComponent'
+import { IUser } from '@renderer/hooks/useSessionState'
 import EmotiBitList from '../components/Components/EmotiBitList'
-import { CiCircleCheck } from "react-icons/ci";
+import { CiCircleCheck } from 'react-icons/ci'
 import { error } from 'console'
 export default function WaitingRoom() {
   const location = useLocation()
   const { nickName, roomCode, labID, name, description, imageUrl } = location.state || {}
   const [nicknames, setNickNames] = useState<string[]>([])
   const [sessionID, setSessionID] = useState('')
-  const [experimentTitle, setExperimentTitle] = useState(name || '');
-  const [experimentDesc, setExperimentDesc] = useState(description || '');
+  const [experimentTitle, setExperimentTitle] = useState(name || '')
+  const [experimentDesc, setExperimentDesc] = useState(description || '')
   const [experimentType, setExperimentType] = useState<string>('')
-  const [experimentIcon, setExperimentIcon] = useState<JSX.Element>(<CiPlay1 style={{fontSize: '20px'}} />)
+  const [experimentIcon, setExperimentIcon] = useState<JSX.Element>(
+    <CiPlay1 style={{ fontSize: '20px' }} />
+  )
+  const [emotiBits, setEmotiBits] = useState([
+    {
+      userId: 'user1',
+      socketId: 'socket123',
+      nickname: 'Alice',
+      associatedDevice: {
+        serialNumber: 'SN001',
+        ipAddress: '192.168.1.10'
+      }
+    },
+    {
+      userId: 'user2',
+      socketId: 'socket456',
+      nickname: 'Bob',
+      associatedDevice: {
+        serialNumber: 'SN002',
+        ipAddress: '192.168.1.11'
+      }
+    },
+    {
+      userId: 'user3',
+      socketId: 'socket789',
+      nickname: null,
+      associatedDevice: null
+    }
+  ])
 
+  // const userElements = emotiBits.map((user: IUser) => {<EmotiBitList user={user} key={Number(user.userId)} isConnected={false}/>})
 
   // useEffect(() => {
   //   // Emit join waiting room
@@ -81,23 +111,20 @@ export default function WaitingRoom() {
 
     return () => clearInterval(interval)
   }, [sessionID]) //Don't fetch any data until sessionID is set
-useEffect(() => {
-  if(labID === '1'){
-    setExperimentType('VideoLab')
-    setExperimentIcon(<IoVideocam style={{fontSize: '20px'}} />)
-  }
-  else if(labID === '2'){
-    setExperimentType ('PhotoLab')
-    setExperimentIcon(<TiCamera style={{fontSize: '20px'}} />)
-  }
-  else if(labID=== '3'){
-    setExperimentType('GalleryLab')
-    setExperimentIcon(<TfiGallery style={{fontSize: '20px'}} />)
-  }
-  else{
-    toast.error("Invalid labID received:", labID)
-  }
-}, [labID])
+  useEffect(() => {
+    if (labID === '1') {
+      setExperimentType('VideoLab')
+      setExperimentIcon(<IoVideocam style={{ fontSize: '20px' }} />)
+    } else if (labID === '2') {
+      setExperimentType('PhotoLab')
+      setExperimentIcon(<TiCamera style={{ fontSize: '20px' }} />)
+    } else if (labID === '3') {
+      setExperimentType('GalleryLab')
+      setExperimentIcon(<TfiGallery style={{ fontSize: '20px' }} />)
+    } else {
+      toast.error('Invalid labID received:', labID)
+    }
+  }, [labID])
   return (
     <div className="flex flex-col items-center justify-center h-1/2 mx-8">
       <div className="flex flex-col md:flex-row items-start justify-between gap-72">
@@ -128,7 +155,14 @@ useEffect(() => {
             description={experimentDesc}
           ></WaitingRoomCardComponent>
         </div>
-        <EmotiBitList icon={<CiCircleCheck style={{fontSize: '20px'}}/>} joiner="" serial="AS8FD90G9DD0GD9F" ip="123.456.78"></EmotiBitList>
+        <div className="w-full flex flex-col ">
+          <EmotiBitList
+            icon={<CiCircleCheck style={{ fontSize: '20px' }} />}
+            joiner="Joanna"
+            serial="AS8FD90G9DD0GD9F"
+            ip="123.456.78"
+          ></EmotiBitList>
+        </div>
       </div>
       <Divider className="my-6" />
       <div className="flex justify-center space-x-8 text-lg font-medium text-gray-800">
