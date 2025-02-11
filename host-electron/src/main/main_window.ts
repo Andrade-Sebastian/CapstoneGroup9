@@ -7,6 +7,7 @@
  
  function createMainWindow(): void {
    const mainWindow = new BrowserWindow({
+     
      width: 900,
      height: 670,
      show: false,
@@ -20,7 +21,9 @@
    })
  
    mainWindow.on('ready-to-show', () => {
+    
      mainWindow.show()
+     mainWindow.webContents.openDevTools();
    })
  
    mainWindow.webContents.setWindowOpenHandler((details) => {

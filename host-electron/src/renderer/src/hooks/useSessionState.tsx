@@ -109,3 +109,4 @@ const useSessionStore = create<IAppState & Actions>((set) => ({
 
     }))
 }));
+export default useSessionStore

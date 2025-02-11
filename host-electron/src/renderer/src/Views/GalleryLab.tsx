@@ -1,31 +1,35 @@
 import { PiRocketLaunchThin } from 'react-icons/pi'
 import SideComponent from '../components/Components/SideComponent.tsx'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import GalleryInput from '../components/Components/GalleryInput'
 import ModalComponent from '../components/Components/ModalComponent.tsx'
 import { useLocation } from 'react-router-dom'
 import { useNavigate } from 'react-router-dom'
-import toast, { Toaster } from 'react-hot-toast'
 import axios from 'axios'
+import toast, { Toaster } from 'react-hot-toast'
 
 export default function GalleryLab() {
-  const [experimentTitle, setExperimentTitle] = useState('')
-  const [experimentDesc, setExperimentDesc] = useState('')
+  const location = useLocation()
+  const { nickName, labID, name, description, imageUrl } = location.state || {};
+  const [experimentTitle, setExperimentTitle] = useState(name || '')
+  const [experimentDesc, setExperimentDesc] = useState(description || '')
   const [file, setFile] = useState()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [caption, setCaption] = useState()
   const [isFileSelected, setIsFileSelected] = useState(false)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isModalOpenPhoto, setIsModalOpenPhoto] = useState(false)
-  const [imageSource, setImageSource] = useState<string | null>(null)
-  const location = useLocation()
-  const { nickName, labID } = location.state || {}
+  const [imageSource, setImageSource] = useState<string | null>(imageUrl || null)
+  const [tempImage, setTempImage] = useState<string | null>(null)
+  const [imageList, setImageList] = useState<{url: string; caption: string} []>([])
   //
   console.log('*photolab*', JSON.stringify(location.state))
   const navigateTo = useNavigate()
   
   const handleOpenModal = () => setIsModalOpen(true)
-  const handleCloseModal = () => setIsModalOpen(false)
+  const handleCloseModal = () => {
+    setTempImage(null)
+    setIsModalOpen(false)}
   const handleAction = () => {
     console.log('Creating lobby...')
     handleSubmit()
@@ -33,21 +37,76 @@ export default function GalleryLab() {
     handleCloseModal()
   }
   const handleOpenModalPhoto = () => setIsModalOpenPhoto(true)
-  const handleCloseModalPhoto = () => setIsModalOpen(false)
-  const handleActionPhoto = () => {
-    console.log('Opening Modal for Gallery')
-    handleCloseModal()
+  const handleCloseModalPhoto = () => setIsModalOpenPhoto(false)
+  const handleConfirmImage = () =>{
+    setImageSource(tempImage)
+    setIsFileSelected(!!tempImage)
+    setIsModalOpenPhoto(false)
   }
+
+  const handleAddImage =(image: {url: string; caption; string}) => {
+    setImageList((prev) => [...prev, image])
+  }
+
+  const handleRemoveImage = (index: number) =>{
+    setImageList((prev) => prev.filter((_, i) => i !== index))
+  }
+
+
+
+  // const handleActionPhoto = () => {
+  //   console.log('Opening Modal for Gallery')
+  //   handleCloseModalPhoto()
+  // }
   
-  function handleSubmit() {}
+  async function handleSubmit() {
+    //ADD TOASTS AND MODAL CONFIRMATION
+    //add to database using /database/photo-lab
+    const loadingToastId = toast.loading('Creating Lab...')
+    if (isSubmitting) return
+
+    setIsSubmitting(true)
+
+    try {
+      //logic for sending code to backend
+      //Create the experiment before doing this
+      const response = await axios.post('http://localhost:3000/database/gallery-lab', {
+        experimentID: labID,
+        path: imageSource, //null
+        captions: caption
+      })
+
+      if (response.data.success) {
+        toast.success('Lab was created successfully', { id: loadingToastId })
+        setTimeout(() => {
+          //-----HARDCODED FOR TESTING-------
+          navigateTo('/waiting-room', { state: { nickName, roomCode: '12345', labID, name, description, imageUrl } })
+        }, 2000)
+      } else {
+        //Lab creation fails
+        toast.error('Could not create lab, try again', { id: loadingToastId })
+      }
+    } catch (error) {
+      console.error('Could not create lab, try again', error)
+      toast.error('Could not create lab, try again', { id: loadingToastId })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
   function handleChange(e) {
     console.log(e.target.files)
     setFile(URL.createObjectURL(e.target.files[0]))
   }
 
+  useEffect(() => {
+    if(imageSource){
+      setIsFileSelected(true);
+    }
+  }, [imageSource]);
   return (
     <div className="flex h-screen px-8">
       <div className="flex flex-col max-sm:hidden items-center justify-center w-1/2">
+      <Toaster position="top-right" />
         <SideComponent
           icon={<PiRocketLaunchThin style={{ fontSize: '200px' }} />}
           headingTitle="Create a Gallery Lab"
@@ -110,8 +169,15 @@ export default function GalleryLab() {
           </div>
       <div className="w-1/2 flex justify-center items-center">
       <GalleryInput
+        imageList={imageList}
+        onAddImage={handleAddImage}
+        onRemoveImage={handleRemoveImage}
         onFileSelected={setIsFileSelected}
         onSourceChange={setImageSource}
+        onOpenModalPhoto={handleOpenModalPhoto}
+        imageSource={imageSource}
+        caption={caption}
+        onCaptionChange={setCaption}
       />
     </div>
       <ModalComponent
@@ -119,6 +185,7 @@ export default function GalleryLab() {
         isOpen={isModalOpen}
         onCancel={handleCloseModal}
         modalTitle="LAB CONFIRMATION"
+        button='Create Lobby'
       >
         <div className="mb-6">
           <label htmlFor="experimentTitle" className="block text-sm font-medium text-gray-700 mb-2">
@@ -174,7 +241,7 @@ export default function GalleryLab() {
         </div>
       </ModalComponent>
       <ModalComponent
-        onAction={handleActionPhoto}
+        onAction={handleConfirmImage}
         isOpen={isModalOpenPhoto}
         onCancel={handleCloseModalPhoto}
         modalTitle="Add an Image"
@@ -185,14 +252,24 @@ export default function GalleryLab() {
             File Upload
           </label>
           <input
-            type="text"
-            id="experimentImage"
+            type="file"
+            id="uploadImage"
             className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            disabled
-            value={imageSource}
-            onChange={(e) => setImageSource(e.target.value)}
+            accept="image/png, image/jpeg, image/jpg"
+            onChange={(e) => {
+              const file = e.target.files?.[0]
+              if(file){
+                const url = URL.createObjectURL(file)
+                setTempImage(url)
+              }
+            }}
           />
         </div>
+        {tempImage && (
+          <div className="mb-6 flex justify-center">
+            <img src={tempImage} alt="Preview" className="max-w-xs rounded-md shadow-md"/>
+          </div>
+        )}
         <div className="mb-6">
           <label htmlFor="caption" className="block text-md font-medium text-gray-700 mb-2">
             Caption
@@ -201,7 +278,6 @@ export default function GalleryLab() {
             type="text"
             id="caption"
             className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            disabled
             value={caption}
             onChange={(e) => setCaption(e.target.value)}
           />

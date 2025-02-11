@@ -1,41 +1,72 @@
 import { TbUfo } from "react-icons/tb";
 import SideComponent from "../components/Components/SideComponent";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import VideoInput from "../components/Components/VideoInput.js";
-import toast, { Toaster } from "react-hot-toast";
 import ModalComponent from "../components/Components/ModalComponent.js";
 import { useLocation } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
+import toast, { Toaster } from 'react-hot-toast'
 import socket from './socket';
-import {
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-  Button,
-  useDisclosure,
-} from "@heroui/react";
+import axios from 'axios'
 
 export default function VideoLab() {
-  const {isOpen, onOpen, onOpenChange} = useDisclosure();
-  function handleSubmit() {
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  async function handleSubmit() {
     //ADD TOASTS AND MODAL CONFIRMATION
+    //add to database using /database/photo-lab
+    const loadingToastId = toast.loading('Creating Lab...')
+    if (isSubmitting) return
+
+    setIsSubmitting(true)
+
+    try {
+      //logic for sending code to backend
+      //Create the experiment before doing this
+      const response = await axios.post('http://localhost:3000/database/video-lab', {
+        experimentID: labID,
+        path: videoSource, //null
+      })
+
+      if (response.data.success) {
+        toast.success('Lab was created successfully', { id: loadingToastId })
+        setTimeout(() => {
+          //-----HARDCODED FOR TESTING-------
+          navigateTo('/waiting-room', { state: { nickName, roomCode: '12345', labID, name, description, imageUrl } })
+        }, 2000)
+      } else {
+        //Lab creation fails
+        toast.error('Could not create lab, try again', { id: loadingToastId })
+        setTimeout(() => {
+          //-----HARDCODED FOR TESTING-------
+          navigateTo('/waiting-room', { state: { nickName, roomCode: '12345', labID, name, description, imageUrl } })
+        }, 2000)
+      }
+    } catch (error) {
+      console.error('Could not create lab, try again', error)
+      toast.error('Could not create lab, try again', { id: loadingToastId })
+      setTimeout(() => {
+        //-----HARDCODED FOR TESTING-------
+        navigateTo('/waiting-room', { state: { nickName, roomCode: '12345', labID, name, description, imageUrl } })
+      }, 2000)
+    } finally {
+      setIsSubmitting(false)
+    }
   }
-  const [experimentTitle, setExperimentTitle] = useState("");
-  const [experimentDesc, setExperimentDesc] = useState("");
+  const location = useLocation();
+  const { nickName, labID, name, description, imageUrl, videoUrl } = location.state || {};
+  const [experimentTitle, setExperimentTitle] = useState(name || '');
+  const [experimentDesc, setExperimentDesc] = useState(description || '');
   const [isFileSelected, setIsFileSelected] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [videoSource, setVideoSource] = useState<string | null> (null);
-  const location = useLocation();
-  const { nickName, roomCode } = location.state || {};
+  const [thumbnail, setThumbnail] = useState<string | null>(imageUrl || null);
+  const [videoSource, setVideoSource] = useState<string | undefined>(videoUrl || null);
   const navigateTo = useNavigate();
   //modal
   const handleOpenModal = () => setIsModalOpen(true);
   const handleCloseModal = () => setIsModalOpen(false);
   const handleAction = () => {
     console.log("Creating lobby...");
-    navigateTo("/waiting-room", {state: {nickName, roomCode}});
+    handleSubmit();
     handleCloseModal();
   };
   const handleFileSelected = (isFileSelected: boolean) => {
@@ -46,10 +77,15 @@ export default function VideoLab() {
     console.log(e.target.files);
     setFile(URL.createObjectURL(e.target.files[0]));
   }
-
+  useEffect(() => {
+    if(videoSource){
+      setIsFileSelected(true);
+    }
+  }, [videoSource]);
   return (
     <div className="flex h-screen">
       <div className="flex flex-col max-sm:hidden items-center justify-center w-2/5">
+      <Toaster position="top-right" />
         <SideComponent
           icon={<TbUfo style={{ fontSize: "200px" }} />}
           headingTitle="Create a Video Lab"
@@ -106,6 +142,8 @@ export default function VideoLab() {
               height={500}
               onFileSelected={setIsFileSelected}
               onSourceChange = { setVideoSource}
+              videoSource={videoSource}
+              imageSource= {imageUrl}
             />
           </div>
           <div className="flex gap-10 items-center justify-center">
@@ -130,6 +168,7 @@ export default function VideoLab() {
       isOpen={isModalOpen}
       onCancel={handleCloseModal}
       modalTitle='LAB CONFIRMATION'
+      button="Create Lobby"
       >
         <div className="mb-6">
             <label

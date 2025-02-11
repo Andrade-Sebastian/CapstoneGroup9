@@ -36,7 +36,7 @@ export default function ModalComponent(props: IModalComponent) {
           </button>
           <button
             type="button"
-            className="mt-6 font-semibold py-3 px-6 rounded-md shadow-md transition duration-300 ease-in-out border bg-white text-black"
+            className="mt-6 font-semibold py-3 px-6 rounded-md shadow-md transition duration-300 ease-in-out border bg-white hover:bg-gray-100 text-black"
             onClick={props.onCancel}
           >
             Cancel

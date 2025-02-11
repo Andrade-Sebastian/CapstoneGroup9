@@ -107,8 +107,6 @@ CREATE TABLE IF NOT EXISTS VideoLab
     Path VARCHAR(25)
 );
 
-
---Done Refactoring
 CREATE TABLE IF NOT EXISTS GalleryLab
 (
     GalleryLabID INTEGER PRIMARY KEY,
@@ -119,4 +117,3 @@ CREATE TABLE IF NOT EXISTS GalleryLab
     TimeShown INTEGER,
     ImageOrder INTEGER
 );
-
