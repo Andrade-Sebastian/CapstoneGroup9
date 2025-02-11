@@ -60,7 +60,7 @@ export function generateRandomCode(length: number){
 
 export function createExperiment(templateId: string, description: string, experimentTemplate: {}, name: string){
     const newExperiment = {
-        id: generateRandomCode(6), //function for creating id
+        id: "6", //function for creating id
         name: name,
         labTemplate: template, 
         description: description,

@@ -56,7 +56,7 @@ app.use(cors());
 app.use("/host", hostRouter); 
 app.use("/joiner", joinerRouter); 
 app.use("/database", databaseRouter)
-//app.use("/experiment", experimentRouter);
+app.use("/experiment", experimentRouter);
 
 import { Request, Response } from "express";
 

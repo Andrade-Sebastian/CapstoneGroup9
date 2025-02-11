@@ -1,6 +1,7 @@
 import express, {Request, Response} from 'express';
 import {ILab, IExperiment} from "../controllers/session_controller.ts";
-import { getAllExperiments, createExperiment, updateExperiment, deleteExperiment, viewExperiment } from "../controllers/experiment_controller.ts";
+import { createExperiment } from "../controllers/database.ts";
+import { getAllExperiments, updateExperiment, deleteExperiment, viewExperiment } from "../controllers/experiment_controller.ts";
 
 
 export const experimentRouter = express.Router();
@@ -25,11 +26,13 @@ experimentRouter.get("/", (req: Request, res: Response) => {
 
 //create experiment
 experimentRouter.post("/create", (req: Request, res: Response) => {
+    console.log("in /create experiiment")
     try{
         const{templateId, description, experimentTemplate, name} = req.body;
-        const newExperiment = createExperiment(templateId, description, experimentTemplate, name);
+        const newExperiment = createExperiment(name, description);
         res.status(201).send(newExperiment);
     } catch(error){
+        console.log("error in create experiment")
         res.status(500).send({error: error.message});
     }
 });

@@ -29,8 +29,8 @@ export async function createExperiment(experimentName: string, description: stri
         // Create the table
         await dbClient.connect();
         console.log("(database.ts): createExperiment() - Connected to Database");
-        const result = await dbClient.queryObject(`INSERT INTO experiment(name,description) VALUES($1,$2)`,
-          [experimentName,description]);
+        const result = await dbClient.queryObject(`INSERT INTO experiment(experimentid, name,description) VALUES($1,$2,$3)`,
+          [6, experimentName,description]);
         console.log("(database.ts): Result: ", result);
       } finally {
         // Release the connection back into the pool
@@ -118,15 +118,16 @@ export async function createSessionInDatabase(initializationInfo: ISessionDataba
 			`INSERT INTO session(
 				sessionid, 
 				experimentid, 
-				besessionid, 
+				sessioncode, 
 				roomcode, 
 				hostsocketid, 
 				users,
 				isinitialized,
 				configuration, 
 				credentials,
-				discovereddevices)
-			VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`, 
+				discovereddevices,
+				sessionavailable)
+			VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`, 
 				[
 					sessionID,                // $1 -> sessionid
 					experimentID,             // $2 -> experimentid
@@ -137,7 +138,8 @@ export async function createSessionInDatabase(initializationInfo: ISessionDataba
 					isInitialized,            // $7 -> isinitialized
 					configuration,            // $8 -> configuration (should be JSON)
 					credentials,              // $9 -> credentials (should be JSON)
-					discoveredDevices         // $10 -> discovereddevices (should be JSON or array -- JSON for now)
+					discoveredDevices,         // $10 -> discovereddevices (should be JSON or array -- JSON for now)
+					true
 				]);
 				console.log("(database.ts): Session created successfully");
 	}
