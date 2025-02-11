@@ -16,8 +16,26 @@ CREATE TABLE IF NOT EXISTS PhotoLab
 (
     PhotoLabID serial PRIMARY KEY,
     ExperimentID int REFERENCES Experiment(ExperimentID),
+<<<<<<< HEAD
     Path varchar(25) NOT NULL,
     Captions varchar(100) --Nullable
+=======
+    Path varchar(100) NOT NULL,
+    Captions varchar(100) NOT NULL
+);
+CREATE TABLE IF NOT EXISTS VideoLab
+(
+    VideoLabID serial PRIMARY KEY,
+    ExperimentID int REFERENCES Experiment(ExperimentID),
+    Path varchar(100) NOT NULL,
+);
+CREATE TABLE IF NOT EXISTS GalleryLab
+(
+    GalleryLabID serial PRIMARY KEY,
+    ExperimentID int REFERENCES Experiment(ExperimentID),
+    Path varchar(100) NOT NULL,
+    Captions varchar(100) NOT NULL
+>>>>>>> 929415e603e9073c673b61c4ce898e4131ec3a18
 );
 
 --Done Refactoring
