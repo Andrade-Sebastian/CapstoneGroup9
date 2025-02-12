@@ -16,6 +16,7 @@
     "@nextui-org/react": "^2.4.8",
     "axios": "^1.7.7",
     "bootstrap": "^5.3.3",
+    "chart.css": "^0.1.1",
     "react": "^18.3.1",
     "react-bootstrap": "^2.10.6",
     "react-dom": "^18.3.1",

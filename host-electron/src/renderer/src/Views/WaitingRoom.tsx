@@ -10,8 +10,11 @@ import { Divider } from '@heroui/divider'
 import WaitingRoomCardComponent from '../components/Components/WaitingRoomCardComponent'
 import { IUser } from '@renderer/hooks/useSessionState'
 import EmotiBitList from '../components/Components/EmotiBitList'
+import ModalComponent from '../components/Components/ModalComponent.js'
 import { CiCircleCheck } from 'react-icons/ci'
 import { error } from 'console'
+import { useNavigate } from "react-router-dom";
+
 export default function WaitingRoom() {
   const location = useLocation()
   const { nickName, roomCode, labID, name, description, imageUrl } = location.state || {}
@@ -20,9 +23,11 @@ export default function WaitingRoom() {
   const [experimentTitle, setExperimentTitle] = useState(name || '')
   const [experimentDesc, setExperimentDesc] = useState(description || '')
   const [experimentType, setExperimentType] = useState<string>('')
+  const [isModalOpen, setIsModalOpen] = useState(false)
   const [experimentIcon, setExperimentIcon] = useState<JSX.Element>(
     <CiPlay1 style={{ fontSize: '20px' }} />
   )
+  const navigateTo = useNavigate()
   const [emotiBits, setEmotiBits] = useState([
     {
       userId: 'user1',
@@ -49,8 +54,35 @@ export default function WaitingRoom() {
       associatedDevice: null
     }
   ])
+  const handleBackButton = () => {
+    navigateTo('/host/select-lab', { state: { nickName, roomCode: '12345', labID, name, description, imageUrl } })
+  }
+  const handleOpenModal = () => setIsModalOpen(true)
+  const handleCloseModal = () => setIsModalOpen(false)
+  const handleAction = () => {
+    console.log('Creating lobby...')
+    handleSubmit()
+    handleCloseModal()
+  }
+  function handleSubmit() {
+    console.log('in handle submit')
+      //-----HARDCODED FOR TESTING-------
+      navigateTo('/activity-room', { state: { nickName, roomCode: '12345', labID, name, description, imageUrl } })
 
-  // const userElements = emotiBits.map((user: IUser) => {<EmotiBitList user={user} key={Number(user.userId)} isConnected={false}/>})
+  }
+
+  const addEmotiBit = () => {
+    const newEmotiBit: IUser = {
+      userId: uuidv4(),
+      socketId: uuidv4(),
+      nickname: `Joiner ${emotiBits.length + 1}`,
+      associatedDevice: {
+        serialNumber: `SN${Math.floor(Math.random() * 10000)}`,
+        ipAddress: `192.168.1.${Math.floor(Math.random() * 255)}`
+      }
+    }
+    setEmotiBits([...emotiBits, newEmotiBit])
+  }
 
   // useEffect(() => {
   //   // Emit join waiting room
@@ -126,11 +158,11 @@ export default function WaitingRoom() {
     }
   }, [labID])
   return (
-    <div className="flex flex-col items-center justify-center h-1/2 mx-8">
+    <div className="flex flex-col items-center justify-center mx-8">
       <div className="flex flex-col md:flex-row items-start justify-between gap-72">
         {/* left section */}
         <div className="md:w-1/2 space-y-4">
-          <h1 className="text-3xl text-3xl font-semibold text-gray-800">Welcome to Session</h1>
+          <h1 className="text-3xl text-3xl font-semibold text-gray-800">Welcome to Session In waiting room</h1>
           <p className="text-6xl font-bold text-[#894DD6]">{roomCode}</p>
           <div className="space-y-2">
             <p className="text-lg">
@@ -156,12 +188,24 @@ export default function WaitingRoom() {
           ></WaitingRoomCardComponent>
         </div>
         <div className="w-full flex flex-col ">
-          <EmotiBitList
+          <h2 className="text-2xl font-semibold text-gray-800 mb-4"> Connected EmotiBits</h2>
+          <div className="flex flex-col gap-4 overflow-y-auto max-h-96 p-4 border rounded-md shadow-md">
+            {emotiBits.map((user) => (
+              <EmotiBitList key={user.userId} user={user} isConnected={true} />
+            ))}
+          </div>
+          <button
+            onClick={addEmotiBit}
+            className="mt-4 bg-[#7F56D9] hover:bg-violet-500 text-white font-semibold py-3 px-6 rounded-md shadow-md transition duration-300 ease-in-out"
+          >
+            Add EmotiBit
+          </button>
+          {/* <EmotiBitList
             icon={<CiCircleCheck style={{ fontSize: '20px' }} />}
             joiner="Joanna"
             serial="AS8FD90G9DD0GD9F"
             ip="123.456.78"
-          ></EmotiBitList>
+          ></EmotiBitList> */}
         </div>
       </div>
       <Divider className="my-6" />
@@ -170,6 +214,37 @@ export default function WaitingRoom() {
           <p key={index}>{name}</p>
         ))}
       </div>
+      <div className="flex gap-10 items-center justify-center">
+        <button
+          type="button"
+          onClick={handleBackButton}
+          className="mt-6 font-semibold py-3 px-6 rounded-md shadow-md transition duration-300 ease-in-out bg-gray-500 hover:bg-gray-400 text-white"
+        >
+          Back
+        </button>
+        <button
+          type="button"
+          onClick={handleOpenModal}
+          className="mt-6 font-semibold py-3 px-6 rounded-md shadow-md transition duration-300 ease-in-out bg-[#7F56D9] hover:bg-violet-500 text-white"
+        >
+          Begin
+        </button>
+        {/*This will redirect to Media Page */}
+      </div>
+      <ModalComponent
+        onAction={handleAction}
+        isOpen={isModalOpen}
+        onCancel={handleCloseModal}
+        modalTitle="Begin Experiment"
+        button="Begin"
+      >
+        <div className="mb-6">
+          <h1 className="text-md text-gray-700 mb-2">
+            Are you sure you want to begin the experiment?
+          </h1>
+        </div>
+        
+      </ModalComponent>
     </div>
   )
 }
