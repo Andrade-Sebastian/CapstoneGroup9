@@ -16,6 +16,8 @@ import PhotoLab from './Views/PhotoLab';
 import VideoLab from './Views/VideoLab';
 import GalleryLab from './Views/GalleryLab';
 import WaitingRoom from './Views/WaitingRoom';
+import ActivityRoom from './Views/ActivityHost';
+import Summary from './Views/Summary';
 
 // import { StrictMode } from 'react'
 // import { createRoot } from 'react-dom/client'
@@ -61,10 +63,6 @@ const router = createBrowserRouter([
               element: <HostView/>,
             },
             {
-              path: "select-media",
-              element: <SelectMedia/>,
-            },
-            {
               path: "photo-lab",
               element: <PhotoLab/>,
             },
@@ -86,6 +84,14 @@ const router = createBrowserRouter([
       {
         path:"waiting-room",
         element: <WaitingRoom/>
+      },
+      {
+        path:"activity-room",
+        element: <ActivityRoom/>
+      },
+      {
+        path:"summary",
+        element: <Summary/>
       },
       {
         path:"activity/:sessionId/:userId",

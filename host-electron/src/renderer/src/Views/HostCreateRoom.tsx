@@ -90,6 +90,7 @@ export default function HostCreateRoom() {
       })
       .catch((error) => {
         console.error("Error creating session:", error);
+        navigateTo("/host/select-lab", { state: { userName } }); //for now
       });
 
     console.log("Username: " + userName);

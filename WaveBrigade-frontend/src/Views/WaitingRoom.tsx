@@ -115,6 +115,7 @@ export default function WaitingRoom() {
           <p key={index}>{name}</p>
         ))}
       </div>
+      
     </div>
   );
 }

@@ -60,7 +60,7 @@ function spawnBrainFlow(emotibitIpAddress: string, serialNumber: string, backend
 }
 // In this file you can include the rest of your app"s specific main process
 // code. You can also put them in separate files and require them here.
-ipcMain.on(BRAINFLOW_LAUNCH, (event: Electron.IpcMainEvent, emotibitIpAddress: string, serialNumber: string, backendIp: string, userId: string, frontEndSocketId: string) => {
+ipcMain.on("brainflow:launch", (event: Electron.IpcMainEvent, emotibitIpAddress: string, serialNumber: string, backendIp: string, userId: string, frontEndSocketId: string) => {
   const activitySingleton = ActivitySingleton.getInstance();
 
 })
