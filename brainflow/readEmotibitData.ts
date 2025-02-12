@@ -9,6 +9,7 @@ import { BoardIds, BoardShim, BrainFlowInputParams, BrainFlowPresets} from 'brai
 import * as Papa from 'papaparse';
 import * as fs from 'fs';
 import { io, Socket } from 'socket.io-client';
+import {exit} from "node:process";
 
 
 //passed in from electron
@@ -23,17 +24,17 @@ const operationParameters = {
 }
 
 const ancHeaders = ['Package', 'EDA', 'Temperature', 'Thermistor', 'Timestamp', 'Unknown']; //create a list of headers for the csv
-const ancFilePath = './anc_from_streamer.csv';
-const auxHeaders = ['Package', 'PPG_Red', 'PPG_Infa_Red', 'PPG_Green', 'Timestamp', 'Unknown'];
-const auxFilePath = './aux_from_streamer.csv';
+// const ancFilePath = './anc_from_streamer.csv';
+// const auxHeaders = ['Package', 'PPG_Red', 'PPG_Infa_Red', 'PPG_Green', 'Timestamp', 'Unknown'];
+// const auxFilePath = './aux_from_streamer.csv';
 
 //initializes the board 
 const board = new BoardShim(BoardIds.EMOTIBIT_BOARD, {});
 const board_id = BoardIds.EMOTIBIT_BOARD;
 
 //prepares files to be written to
-const ancCSV = fs.createReadStream(ancFilePath);
-const auxCSV = fs.createReadStream(auxFilePath);
+// const ancCSV = fs.createReadStream(ancFilePath);
+// const auxCSV = fs.createReadStream(auxFilePath);
 
 // const currentDate = new Date('2024-12-3');
 // const currentTime = currentDate.getTime();
@@ -73,12 +74,12 @@ function sleep(ms: number)
 }
 
 //function to write headers that represent the data to the csv
-function writeHeaderstoCSV(FilePath: string, Headers: string[]){
-    const headers = Headers.join('\t') + '\n'; //need to specify that the list is a string joined by tabs since that is the delimiter
-    const writeStream = fs.createWriteStream(FilePath);
-    writeStream.write(headers);
-    writeStream.end();
-}
+// function writeHeaderstoCSV(FilePath: string, Headers: string[]){
+//     const headers = Headers.join('\t') + '\n'; //need to specify that the list is a string joined by tabs since that is the delimiter
+//     const writeStream = fs.createWriteStream(FilePath);
+//     writeStream.write(headers);
+//     writeStream.end();
+// }
 
 //request the socket id in order to emit back to backend
 function requestSocketID(socket: Socket): Promise<string> 
@@ -103,26 +104,26 @@ function requestSocketID(socket: Socket): Promise<string>
 function prepareBoard(){
     board.prepareSession();
     const presets = BoardShim.getBoardPresets(board_id);
-    board.addStreamer("file://aux_from_streamer.csv:a", BrainFlowPresets.AUXILIARY_PRESET);
-    board.addStreamer("file://anc_from_streamer.csv:a", BrainFlowPresets.ANCILLARY_PRESET);
+    // board.addStreamer("file://aux_from_streamer.csv:a", BrainFlowPresets.AUXILIARY_PRESET);
+    // board.addStreamer("file://anc_from_streamer.csv:a", BrainFlowPresets.ANCILLARY_PRESET);
 }
 
 //parses data for the csv files
-function parseData(file){
-    Papa.parse<bioData>(file, {
-        header: true,
-        delimiter: '\t',
-        dynamicTyping: true,
+// function parseData(file){
+//     Papa.parse<bioData>(file, {
+//         header: true,
+//         delimiter: '\t',
+//         dynamicTyping: true,
           
-        complete: () => {
-            console.log("Finished parsing data");
-        },
-        step: (results) => {
-          console.log("Row data:", results.data);
-        },
-        }
-    );
-}
+//         complete: () => {
+//             console.log("Finished parsing data");
+//         },
+//         step: (results) => {
+//           console.log("Row data:", results.data);
+//         },
+//         }
+//     );
+// }
 
 //given the back end socket, emit data from emotibit
 //sends data and operation parameters to backend socket
@@ -160,7 +161,7 @@ async function sendData(socket: Socket): Promise<void>
         await sleep (3000);
         board.stopStream();
         board.releaseSession();
-        parseData(ancCSV);
+        // parseData(ancCSV);
     }
 }
 
@@ -177,8 +178,8 @@ async function main(): Promise<string>{
 
     //ensures only a valid socket connection before attempting to connect to emotibit
     if(connectionSuccessful){
-        writeHeaderstoCSV(ancFilePath, ancHeaders);
-        writeHeaderstoCSV(auxFilePath, auxHeaders);
+        // writeHeaderstoCSV(ancFilePath, ancHeaders);
+        // writeHeaderstoCSV(auxFilePath, auxHeaders);
         prepareBoard();
         sendData(operationParameters.assignSocketId);
     }

@@ -11,6 +11,7 @@ export type ActivityEvents =
   //each one of these is called a "channel"
   TYPE_BRAINFLOW_LAUNCH | //launches brainflow
   BRAINFLOW_DESTROY | //closes brainflow
+  "brainflow:launched"|
   "activity:viewUser"| //host selects student to view
   "brainflow:launchError"| 
   "brainflow:connectingEmotibit"|
