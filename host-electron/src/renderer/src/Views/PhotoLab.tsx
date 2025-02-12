@@ -1,12 +1,15 @@
-import { PiShootingStarThin } from 'react-icons/pi'
-import SideComponent from '../components/Components/SideComponent.tsx'
-import React, { useEffect, useState } from 'react'
-import PhotoInput from '../components/Components/PhotoInput.tsx'
-import ModalComponent from '../components/Components/ModalComponent.tsx'
-import { useLocation } from 'react-router-dom'
-import { useNavigate } from 'react-router-dom'
-import toast, { Toaster } from 'react-hot-toast'
-import axios from 'axios'
+import { PiShootingStarThin } from 'react-icons/pi';
+import SideComponent from '../components/Components/SideComponent.tsx';
+import React, { useEffect, useState } from 'react';
+import PhotoInput from '../components/Components/PhotoInput.tsx';
+import ModalComponent from '../components/Components/ModalComponent.tsx';
+import { useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import toast, { Toaster } from 'react-hot-toast';
+import axios from 'axios';
+import createSessionInDatabase from "../../../../../WaveBrigade-backend/server/src/controllers/database.ts"
+import { IUser } from '../hooks/useSessionState.tsx';
+
 
 export default function PhotoLab() {
   const location = useLocation()
@@ -48,8 +51,28 @@ export default function PhotoLab() {
         captions: caption
       })
 
+
+    //  interface ISessionInitialization {
+    //      sessionName: string;
+    //      roomCode: string;
+    //      selectedExperimentId: string;
+    //      credentials: ISessionCredentials;
+    //      allowSpectators: boolean;
+    //  }
+
+      const array: Array<IUser> = [];
       if (response.data.success) {
         toast.success('Lab was created successfully', { id: loadingToastId })
+        createSessionInDatabase({
+          name, 
+          roomCode: "12345", 
+          selectedExperimentId: 2,
+          credentials: {
+            "passwordEnabled": false,
+            "password": ""
+          },
+          allowSpectators: false
+        });
         setTimeout(() => {
           //-----HARDCODED FOR TESTING-------
           navigateTo('/waiting-room', { state: { nickName, roomCode: '12345', labID, name, description, imageUrl } })

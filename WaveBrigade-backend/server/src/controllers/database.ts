@@ -10,6 +10,16 @@ export const dbClient = new Client({
   port: 5432,
 });
 
+interface ISessionInitialization {
+	sessionName: string;
+	roomCode: string;
+	selectedExperimentId: string;
+	credentials: ISessionCredentials;
+	allowSpectators: boolean;
+}
+
+
+
 
 function isolateSessionIDs(sessions) 
 {
@@ -29,8 +39,13 @@ export async function createExperiment(experimentName: string, description: stri
         // Create the table
         await dbClient.connect();
         console.log("(database.ts): createExperiment() - Connected to Database");
-        const result = await dbClient.queryObject(`INSERT INTO experiment(experimentid, name,description) VALUES($1,$2,$3)`,
-          [6, experimentName,description]);
+		const pkQuery = await dbClient.queryObject(`SELECT 
+			MAX(experimentid) FROM experiment;
+			`)
+		const primaryKey: number = pkQuery.rows[0].max + 1//max primary key currently in the database
+
+        const result = await dbClient.queryObject(`INSERT INTO experiment(experimentid, name,description) VALUES($1, $2,$3)`,
+          [primaryKey, experimentName, description]);
         console.log("(database.ts): Result: ", result);
       } finally {
         // Release the connection back into the pool
@@ -89,6 +104,31 @@ export async function getMaxPhotoLabIDsFromDB()
 // 	discoveredDevices: Array<IDevice> | JSON		
 // }
 
+
+export async function validateRoomCode(roomCode:string): Promise<boolean>
+{
+	try{
+		await dbClient.connect();
+		const query = await dbClient.queryObject(`SELECT 
+			roomcode FROM session WHERE roomcode='${roomCode}';
+			`)
+		console.log(query)
+
+		if (query.rows.length > 0){//result is valid
+			console.log("(database.ts): Validated room code")
+			return true;
+		}
+
+		console.log("returning false")
+		return false;
+		
+	}
+	catch(error){
+		console.log("(database.ts): No valid room code: " + error)
+		return false;
+		
+	}
+}
 
 // Author: Emanuelle Pelayo
 // Purpose: Adds a session to the database

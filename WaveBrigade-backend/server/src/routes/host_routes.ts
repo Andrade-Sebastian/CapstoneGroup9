@@ -52,8 +52,8 @@ hostRouter.post("/session/create", async (req: Request, res: Response) => {
             roomCode: req.body.roomCode,
             selectedExperimentId: req.body.selectedExperimentId,
             credentials: req.body.credentials,
-            allowSpectators: req.body.allowSpectators,
-        }, hostSocketId)
+            allowSpectators: req.body.allowSpectators
+        });
         console.log("(host_routes.ts): Finished creating session")
 
 

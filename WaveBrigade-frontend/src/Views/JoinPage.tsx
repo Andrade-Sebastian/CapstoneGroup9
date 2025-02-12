@@ -97,13 +97,13 @@ export default function JoinPage() {
     console.log("Session ID: " + sessionID);
 
     try {
-      await axios.post("http://wb-backend-express:3000/joiner/join-room", {
-        sessionID: sessionID,
-        socketId: socketID,
+      await axios.post("http://wb-backend-express:3000/database/add-user-to-session", {
+        userId: userId,
+        socketId: socketId,
         nickname: nickName,
-        associatedDevice: null
+        associatedDevice: null,
+        roomCode: roomCode
       });
-
     } catch (error) {
       console.error("Error joining room:", error);
     }

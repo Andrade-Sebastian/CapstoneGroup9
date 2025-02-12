@@ -95,6 +95,8 @@ function generateSessionId(): string {
 //     }
 // }
 
+
+//chicken
 function getSessionState(sessionId: string): TSessionState {
 
     //console.log("(session_controller.ts): at getSessionState()")
@@ -125,6 +127,7 @@ interface ISessionInitialization {
     allowSpectators: boolean;
 }
 
+//chicken
 function requestDevices(sessionId) {
     return new Promise((resolve, reject) => {
       const message = { sessionId: sessionId };
@@ -155,7 +158,9 @@ function requestDevices(sessionId) {
     });
 }
 
-async function createSession(initializationData: ISessionInitialization, socketId: string) {
+
+
+async function createSession(initializationData: ISessionInitialization) {
     const {
         sessionName,
         roomCode,
@@ -254,6 +259,7 @@ async function createSession(initializationData: ISessionInitialization, socketI
 
 
 
+//CHICKEN
 //go through singleton session, find sessionid user requested, if it finds, add it to the session's users, return sessionState
 function joinSession(requestedSessionId: string, socketID: string){
     console.log("Entered: joinSession routine");
@@ -278,6 +284,8 @@ function joinSession(requestedSessionId: string, socketID: string){
 //     associatedDevice: IDevice | null;
 
 
+
+//chicken
 function joinRoom(requestedSessionId: string, socketID: string, nickname: string, associatedDevice: IDevice | null){
     console.log("(session_controller.ts): at joinRoom()");
     console.log("requestedSessionId:", requestedSessionId);
@@ -328,7 +336,7 @@ function joinRoom(requestedSessionId: string, socketID: string, nickname: string
 }
 
 
-//works 
+//chicken
 function removeUserBySocketID(users: Array<IUser>, socketID: string) {
     const userToRemove = users.find(user => user.socketId === socketID);
 
@@ -342,19 +350,19 @@ function removeUserBySocketID(users: Array<IUser>, socketID: string) {
     return users.filter(user => user.socketId !== socketID);
 }
 
-//works
+//chicken
 function leaveRoom(requestedSessionId: string, socketID: string) {
     console.log("(session_controller.ts): at leaveRoom()");
     console.log("requestedSessionId:", requestedSessionId);
     console.log("socketId:", socketID);
 
 
-    if (sessionManager.getSession(requestedSessionId)) {
+    if (sessionManager.getSession(requestedSessionId)) { //chicken
         console.log(`session ${requestedSessionId} found`)
 
         
         // Get the users
-        const session = sessionManager.getSession(requestedSessionId);
+        const session = sessionManager.getSession(requestedSessionId); //chicken
         if (session) {
             console.log("Users array before removing user:", session.users);
 

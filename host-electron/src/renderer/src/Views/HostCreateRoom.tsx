@@ -52,23 +52,8 @@ export default function HostCreateRoom() {
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    {
-      /* For now*/
-    }
-    //this is not setting the values
-
     
-    // setSessionInfo({
-    //     "sessionName": "Awesome",
-    //     "roomCode": "123456",
-    //     "selectedExperimentId": "17",
-    //     "credentials": {
-    //         "passwordEnabled": false,
-    //         "password": ""
-    //     },
-    //     "allowSpectators": true,
-    //     "hostSocketId": "abcd1234" // Example socket ID
-    // });
+
 
     console.log("sessionInfo: " + JSON.stringify(sessionInfo));
 

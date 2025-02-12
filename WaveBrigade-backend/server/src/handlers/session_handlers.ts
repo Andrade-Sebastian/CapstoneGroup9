@@ -3,6 +3,7 @@ import SessionManager, { ISession } from "../sessions_singleton.ts";
 
 const sessionManager = SessionManager.getInstance();
 
+//CHICKEN
 export default function session_handlers(_io: Server, _socket: Socket) {
   _socket.on("create_room", (data) => {
     const { roomCode } = data;
@@ -11,7 +12,7 @@ export default function session_handlers(_io: Server, _socket: Socket) {
     console.log("Data received from client: ", data);
     console.log("Room code received: ", roomCode);
 
-    if (!sessionManager.getSession(roomCode)) {
+    if (!sessionManager.getSession(roomCode)) { //CHICKEN
       const newSession: ISession = {
         sessionId: roomCode,
         sessionName: roomCode,
@@ -23,7 +24,7 @@ export default function session_handlers(_io: Server, _socket: Socket) {
         discoveredDevices: [],
       };
 
-      sessionManager.addSession(roomCode, newSession);
+      sessionManager.addSession(roomCode, newSession); //CHICKEN
       _socket.join(roomCode);
       _socket.emit("room_created", { roomCode });
     } else {
@@ -33,15 +34,14 @@ export default function session_handlers(_io: Server, _socket: Socket) {
   });
 
   _socket.on("join_room", (data) => {
-    const { nickName, StudentInputRoomCode } = data;
-    const session = sessionManager.getSession(StudentInputRoomCode);
+    const { nickName, StudentInputRoomCode } = data; //CHICKEN
 
     if (session) {
       const userExists = session.users.find((user) => user.nickname === nickName);
 
       if (!userExists) {
         session.users.push({ userId: _socket.id, socketId: _socket.id, nickname: nickName });
-        sessionManager.addSession(StudentInputRoomCode, session);
+        sessionManager.addSession(StudentInputRoomCode, session); //CHICKEN
 
         _socket.join(StudentInputRoomCode);
         _io.to(StudentInputRoomCode).emit("receive_names", session.users.map((user) => user.nickname));
@@ -60,7 +60,7 @@ export default function session_handlers(_io: Server, _socket: Socket) {
 
   _socket.on("join_waiting_room", (data) => {
     const { nickName, StudentInputRoomCode } = data;
-    const session = sessionManager.getSession(StudentInputRoomCode);
+    const session = sessionManager.getSession(StudentInputRoomCode); //CHICKEN
 
     if (session) {
       _io.to(StudentInputRoomCode).emit("receive_names", session.users.map((user) => user.nickname));
@@ -79,7 +79,7 @@ export default function session_handlers(_io: Server, _socket: Socket) {
     for (const roomCode in sessions) {
       const session = sessions[roomCode];
       const userIndex = session.users.findIndex((user) => user.socketId === _socket.id);
-
+      //CHICKEN
       if (userIndex !== -1) {
         session.users.splice(userIndex, 1);
         sessionManager.addSession(roomCode, session);

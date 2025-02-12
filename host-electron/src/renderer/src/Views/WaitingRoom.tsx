@@ -84,26 +84,7 @@ export default function WaitingRoom() {
     setEmotiBits([...emotiBits, newEmotiBit])
   }
 
-  // useEffect(() => {
-  //   // Emit join waiting room
-  //   const userInformation = { nickName, roomCode };
-  //   socket.emit("join_waiting_room", userInformation);
-  //   console.log("Emitting join_waiting_room event with:", JSON.stringify(userInformation));
 
-  //   // Listen for updates to the room's nicknames
-  //   socket.on("receive_names", (names) => {
-  //     if (Array.isArray(names)) {
-  //       console.log("Nicknames received:", names);
-  //       setNickNames(names);
-  //     } else {
-  //       console.error("Did not receive an array of names, received:", names);
-  //     }
-  //   });
-
-  //   return () => {
-  //     socket.off("receive_names");
-  //   };
-  // }, [nickName, roomCode]);
 
   useEffect(() => {
     const getSessionID = async () => {
