@@ -1,7 +1,6 @@
 import Plot from 'react-plotly.js';
-import "./Chart.css"
 import React, {useState, useEffect} from 'react';
-import { socket } from '../socket.tsx';
+import { socket } from './Views/socket.tsx';
 
 export default function ChartComponent() {
 
@@ -113,7 +112,7 @@ export default function ChartComponent() {
     }, [addTempDataPoint, addEdaDataPoint, timeState]);
 
     return(
-        <div>
+        <div className='h-auto w-auto'>
             <h1>EmotiBit Data Plot</h1>
             <div id="chart">
                 <Plot
