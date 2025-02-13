@@ -14,7 +14,7 @@ databaseRouter.use(express.json());
  . . . .  . .  .   .  . . 
 */
 
-databaseRouter.post("/photo-lab", (req: Request, res: Response) => {
+databaseRouter.post("/photo-lab", async(req: Request, res: Response) => {
     //check to see if the type matches
     const photoLabInfo = req.body;
     // const {
@@ -25,7 +25,7 @@ databaseRouter.post("/photo-lab", (req: Request, res: Response) => {
 
     try{
         console.log("(database_routes.ts: In PhotoLab, recieved : ", JSON.stringify(photoLabInfo))
-        createPhotoLabInDatabase(photoLabInfo)
+        await createPhotoLabInDatabase(photoLabInfo)
         console.log("(database_routes.ts): !!Photo Lab to database :D-=")
     } catch (error) {
         res.status(500).send({

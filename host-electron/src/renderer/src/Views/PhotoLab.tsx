@@ -7,14 +7,14 @@ import { useLocation } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import toast, { Toaster } from 'react-hot-toast';
 import axios from 'axios';
-import createSessionInDatabase from "../../../../../WaveBrigade-backend/server/src/controllers/database.ts"
+//import createSessionInDatabase from "../../../../../WaveBrigade-backend/server/src/controllers/database.ts"
 import { IUser } from '../hooks/useSessionState.tsx';
 
 
 export default function PhotoLab() {
   const location = useLocation()
   const navigateTo = useNavigate()
-  const { nickName, labID, name, description, imageUrl } = location.state || {};
+  const { userName, labID, name, newExperiment, description, imageUrl} = location.state || {};
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [experimentTitle, setExperimentTitle] = useState(name || '')
   const [experimentDesc, setExperimentDesc] = useState(description || '')
@@ -35,67 +35,56 @@ export default function PhotoLab() {
   }
 
   async function handleSubmit() {
-    //ADD TOASTS AND MODAL CONFIRMATION
-    //add to database using /database/photo-lab
-    const loadingToastId = toast.loading('Creating Lab...')
-    if (isSubmitting) return
+  //ADD TOASTS AND MODAL CONFIRMATION
+  //add to database using /database/photo-lab
+  const loadingToastId = toast.loading('Creating Lab...')
+  if (isSubmitting) return
 
-    setIsSubmitting(true)
+  setIsSubmitting(true)
 
-    try {
-      //logic for sending code to backend
-      //Create the experiment before doing this
-      const response = await axios.post('http://localhost:3000/database/photo-lab', {
-        experimentID: labID,
-        path: imageSource, //null
-        captions: caption
-      })
+  try {
+    //logic for sending code to backend
+    //Create the experiment before doing this
+    console.log("EXPERIMENT ID: ", newExperiment.experimentid);
 
-
-    //  interface ISessionInitialization {
-    //      sessionName: string;
-    //      roomCode: string;
-    //      selectedExperimentId: string;
-    //      credentials: ISessionCredentials;
-    //      allowSpectators: boolean;
-    //  }
-
-      const array: Array<IUser> = [];
-      if (response.data.success) {
-        toast.success('Lab was created successfully', { id: loadingToastId })
-        createSessionInDatabase({
-          name, 
-          roomCode: "12345", 
-          selectedExperimentId: 2,
-          credentials: {
-            "passwordEnabled": false,
-            "password": ""
-          },
-          allowSpectators: false
+    const response = await axios.post('http://localhost:3000/database/photo-lab', {
+      experimentID: newExperiment.experimentid,
+      path: imageSource, //null
+      captions: caption
+    });
+    
+      if (response.status === 200) {
+        
+        console.log("!!!creating a session");
+        toast.success('Lab was created successfully', { id: loadingToastId });
+        const sessionResponse = await axios.post("http://localhost:3000/host/session/create", {
+          selectedExperimentId: newExperiment.experimentid,
+          roomCode: "12345",
+          hostSocketId: "abcd123",
+          startTimeStamp: null,
+          isPasswordProtected: false,
+          password: "",
+          isSpectatorsAllowed: true,
+          endTimeStamp: null
         });
-        setTimeout(() => {
+        console.log("done creating session")
+        const roomCode = sessionResponse.data.roomcode;
+        console.log("navigating to waiting room", roomCode);
           //-----HARDCODED FOR TESTING-------
-          navigateTo('/waiting-room', { state: { nickName, roomCode: '12345', labID, name, description, imageUrl } })
-        }, 2000)
+          console.log(userName, roomCode, labID, name, description, imageUrl);
+          navigateTo('/waiting-room', { state: { userName, roomCode, labID, name, description, imageUrl } })
       } else {
         //Lab creation fails
-        setTimeout(() => {
-          //-----HARDCODED FOR TESTING-------
-          navigateTo('/waiting-room', { state: { nickName, roomCode: '12345', labID, name, description, imageUrl } })
-        }, 2000)
         toast.error('Could not create lab, try again', { id: loadingToastId })
       }
     } catch (error) {
-      setTimeout(() => {
-        //-----HARDCODED FOR TESTING-------
-        navigateTo('/waiting-room', { state: { nickName, roomCode: '12345', labID, name, description, imageUrl } })
-      }, 2000)
-      console.error('Could not create lab, try again', error)
-      toast.error('Could not create lab, try again', { id: loadingToastId })
-    } finally {
-      setIsSubmitting(false)
-    }
+    console.error('Could not create lab, try again', error)
+    toast.error('Could not create lab, try again', { id: loadingToastId })
+  } finally {
+    setIsSubmitting(false)
   }
+}
+
 
   function handleChange(e) {
     console.log(e.target.files)

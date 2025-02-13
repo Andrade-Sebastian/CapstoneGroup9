@@ -39,14 +39,11 @@ export async function createExperiment(experimentName: string, description: stri
         // Create the table
         await dbClient.connect();
         console.log("(database.ts): createExperiment() - Connected to Database");
-		const pkQuery = await dbClient.queryObject(`SELECT 
-			MAX(experimentid) FROM experiment;
-			`)
-		const primaryKey: number = pkQuery.rows[0].max + 1//max primary key currently in the database
 
-        const result = await dbClient.queryObject(`INSERT INTO experiment(experimentid, name,description) VALUES($1, $2,$3)`,
-          [primaryKey, experimentName, description]);
+        const result = await dbClient.queryObject(`INSERT INTO experiment(name,description) VALUES($1,$2) RETURNING experimentid, name, description`,
+          [experimentName, description]);
         console.log("(database.ts): Result: ", result);
+		return result.rows[0];
       } finally {
         // Release the connection back into the pool
         await dbClient.end();
@@ -130,25 +127,22 @@ export async function validateRoomCode(roomCode:string): Promise<boolean>
 	}
 }
 
-// Author: Emanuelle Pelayo
+// Author: Emanuelle Pelayo & Haley Marquez
 // Purpose: Adds a session to the database
-export async function createSessionInDatabase(initializationInfo: ISessionDatabaseInfo): Promise<void> {
+export async function createSessionInDatabase(initializationInfo: ISessionDatabaseInfo): Promise<string> {
 	const {
-		sessionID, 
-		experimentID, 
-		backendSessionID,
-		roomCode, 
-		hostSocketId, 
-		users, 
-		isInitialized, 
-		configuration, 
-		credentials, 
-		discoveredDevices
+		experimentID,
+		roomCode,
+		hostSocketID,
+		startTimeStamp,
+		isPasswordProtected,
+		password,
+		isSpectatorsAllowed, 
+		endTimeStamp 
 	} = initializationInfo;
 
 	//const initializationInfoToPrint = JSON.stringify(initializationInfo);
 	//console.log("(database.ts): Receieved initialization Info: "+ initializationInfoToPrint)
-
 
 	try 
 	{
@@ -156,32 +150,29 @@ export async function createSessionInDatabase(initializationInfo: ISessionDataba
 		console.log("(database.ts): createSessionInDatabase() - Connected to Database");
 		const result = await dbClient.queryObject(
 			`INSERT INTO session(
-				sessionid, 
 				experimentid, 
-				sessioncode, 
 				roomcode, 
 				hostsocketid, 
-				users,
-				isinitialized,
-				configuration, 
-				credentials,
-				discovereddevices,
-				sessionavailable)
-			VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`, 
+				starttimestamp,
+				ispasswordprotected,
+				password, 
+				isspectatorsallowed,
+				endtimestamp)
+			VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING roomcode`, 
 				[
-					sessionID,                // $1 -> sessionid
-					experimentID,             // $2 -> experimentid
-					backendSessionID,         // $3 -> besessionid
+					experimentID,             // $1 -> experimentid
 					roomCode,                 // $4 -> roomcode
-					hostSocketId,             // $5 -> hostsocketid
-					users,                    // $6 -> users (should be JSON array)
-					isInitialized,            // $7 -> isinitialized
-					configuration,            // $8 -> configuration (should be JSON)
-					credentials,              // $9 -> credentials (should be JSON)
-					discoveredDevices,         // $10 -> discovereddevices (should be JSON or array -- JSON for now)
-					true
+					hostSocketID,             // $5 -> hostsocketid
+					startTimeStamp,
+					isPasswordProtected,
+					password,
+					isSpectatorsAllowed,
+					endTimeStamp
 				]);
-				console.log("(database.ts): Session created successfully");
+		console.log("(database.ts): ", result)
+		console.log("(database.ts): Session created successfully");
+		return result.rows[0];
+
 	}
 	catch (error) 
 	{
@@ -220,22 +211,15 @@ export async function createPhotoLabInDatabase(initializationInfo: IPhotoLabData
 
 	try{
 		await dbClient.connect();
-		const pkQuery = await dbClient.queryObject(`SELECT 
-			MAX(photolabid) FROM photolab;
-			`)
-
-		const primaryKey: number = pkQuery.rows[0].max + 1//max primary key currently in the database
 
 		const query = await dbClient.queryObject(`
-			INSERT INTO photolab (
-			photolabid, 
+			INSERT INTO photolab ( 
 			experimentid,
 			path, 
 			captions
 			) 
-			VALUES ($1, $2, $3, $4);
+			VALUES ($1, $2, $3);
 			`, [
-				primaryKey,
 				experimentID,
 				path,
 				captions

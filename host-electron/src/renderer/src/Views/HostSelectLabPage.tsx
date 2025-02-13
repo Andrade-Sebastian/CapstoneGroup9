@@ -28,8 +28,9 @@ export interface ILab {
 export default function HostSelectLabPage() {
   const location = useLocation()
   console.log('@HOST SELECT LAB | location.state:', JSON.stringify(location.state))
-  const { userName } = location.state
-  console.log('HOSTSELECTLAB userName: ' + userName)
+  const { userName, newExperiment} = location.state
+  console.log('HOSTSELECTLAB userName: ',userName);
+  console.log('HOSTSELECTLAB newExperiment: ', newExperiment);
   const [experimentName, setExperimentName] = useState('')
   const [labDescription, setLabDescription] = useState('')
   const [selectedLab, setSelectedLab] = useState<ILab>()
@@ -72,11 +73,11 @@ export default function HostSelectLabPage() {
     if (selectedLab) {
       const labID = selectedLab.id
       if (selectedLab.id === '1') {
-        navigateTo('/host/video-lab', { state: { userName, labID } })
+        navigateTo('/host/video-lab', { state: { userName, labID, newExperiment } })
       } else if (selectedLab.id === '2') {
-        navigateTo('/host/photo-lab', { state: { userName, labID } })
+        navigateTo('/host/photo-lab', { state: { userName, labID, newExperiment} })
       } else if (selectedLab.id === '3') {
-        navigateTo('/host/gallery-lab', { state: { userName, labID } })
+        navigateTo('/host/gallery-lab', { state: { userName, labID, newExperiment } })
       } else {
         toast.error("Error, select another option.")
         //toast
@@ -88,13 +89,17 @@ export default function HostSelectLabPage() {
     console.log('Continue Button clicked')
     console.log('Navigating to Media')
   }
+
+  useEffect(()=> {
+    console.log("In select lab page");
+  })
   function handlePreviousExperiments(e: { preventDefault: () => void }) {
     e.preventDefault()
     navigateTo('/host/past-experiments')
   }
 
   useEffect(() => {
-    console.log(selectedLab)
+    console.log("Selected Lab: ", selectedLab)
   }, [selectedLab])
 
   // export default function ExperimentCreationForm({ handleSubmit, setExperimentName, setLabDescription, userName }) {

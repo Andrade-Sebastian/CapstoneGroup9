@@ -53,16 +53,14 @@ export interface ISession {
 
 
 export interface ISessionDatabaseInfo {
-    sessionID: number,
     experimentID: number,
-    backendSessionID: string,
     roomCode: string,
-    hostSocketId: string,
-    users: Array<IUser>,
-    isInitialized: boolean,
-    configuration: ISessionConfiguration,
-    credentials: ISessionCredentials,
-    discoveredDevices: Array<IDevice> | JSON		
+    hostSocketID: string,
+    startTimeStamp: string,
+    isPasswordProtected: boolean,
+    password: string,
+    isSpectatorsAllowed: boolean,
+    endTimeStamp: string	
 }
 
 export type TSessionState = Omit<ISession, "credentials">

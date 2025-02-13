@@ -7,7 +7,7 @@
 CREATE TABLE IF NOT EXISTS Experiment
 (
     ExperimentID serial PRIMARY KEY,
-    Name varchar(25) NOT NULL,
+    Name varchar(100) NOT NULL,
     Description varchar(255) --Nullable
 );
 
@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS PhotoLab
 (
     PhotoLabID serial PRIMARY KEY,
     ExperimentID int REFERENCES Experiment(ExperimentID),
-    Path varchar(25) NOT NULL,
+    Path varchar(100) NOT NULL,
     Captions varchar(100) --Nullable
 );
 
@@ -25,11 +25,11 @@ CREATE TABLE IF NOT EXISTS Session
 (
     SessionID serial PRIMARY KEY,
     ExperimentID int REFERENCES Experiment(ExperimentID),
-    RoomCode varchar(10) NOT NULL,
-    HostSocketID varchar(25) NOT NULL,
+    RoomCode varchar(100) NOT NULL,
+    HostSocketID varchar(100) NOT NULL,
     StartTimestamp TIMESTAMP, --Nullable
     isPasswordProtected BOOLEAN,
-    Password VARCHAR(25), --Nullable
+    Password VARCHAR(100), --Nullable
     isSpectatorsAllowed BOOLEAN,
     EndTimestamp TIMESTAMP --Nullable
 );
@@ -38,9 +38,9 @@ CREATE TABLE IF NOT EXISTS Session
 CREATE TABLE IF NOT EXISTS Device
 (
     DeviceID serial PRIMARY KEY,
-    IPAddress varchar(25) NOT NULL,
-    SerialNumber varchar(25) NOT NULL,
-    DeviceSocketID varchar(25) NOT NULL,
+    IPAddress varchar(100) NOT NULL,
+    SerialNumber varchar(100) NOT NULL,
+    DeviceSocketID varchar(100) NOT NULL,
     SamplingFrequency int NOT NULL DEFAULT 50, --Change if needed
     IsAvailable BOOLEAN NOT NULL,
     IsConnected BOOLEAN --nullable
@@ -50,14 +50,14 @@ CREATE TABLE IF NOT EXISTS Device
 CREATE TABLE IF NOT EXISTS "User"
 (
     UserID serial PRIMARY KEY,
-    Nickname varchar(25) NOT NULL,
+    Nickname varchar(100) NOT NULL,
     Device int REFERENCES Device(DeviceID), --nullable
     SessionID int REFERENCES Session(SessionID),
     isMasked BOOLEAN,
-    FrontendSocketID VARCHAR(25),
+    FrontendSocketID VARCHAR(100),
     LeftSession TIMESTAMP, --nullable
-    UserRole VARCHAR(25),
-    Secret VARCHAR(25)
+    UserRole VARCHAR(100),
+    Secret VARCHAR(100)
 );
 
 --Done Refactoring
@@ -104,7 +104,7 @@ CREATE TABLE IF NOT EXISTS VideoLab
 (
     VideoLabID SERIAL PRIMARY KEY,
     ExperimentID SERIAL REFERENCES Experiment(ExperimentID),
-    Path VARCHAR(25)
+    Path VARCHAR(100)
 );
 
 CREATE TABLE IF NOT EXISTS GalleryLab

@@ -17,7 +17,7 @@ import { useNavigate } from "react-router-dom";
 
 export default function WaitingRoom() {
   const location = useLocation()
-  const { nickName, roomCode, labID, name, description, imageUrl } = location.state || {}
+  const {userName, roomCode, labID, name, description, imageUrl } = location.state || {}
   const [nicknames, setNickNames] = useState<string[]>([])
   const [sessionID, setSessionID] = useState('')
   const [experimentTitle, setExperimentTitle] = useState(name || '')
@@ -55,7 +55,7 @@ export default function WaitingRoom() {
     }
   ])
   const handleBackButton = () => {
-    navigateTo('/host/select-lab', { state: { nickName, roomCode: '12345', labID, name, description, imageUrl } })
+    navigateTo('/host/select-lab', { state: { userName, roomCode, labID, name, description, imageUrl } })
   }
   const handleOpenModal = () => setIsModalOpen(true)
   const handleCloseModal = () => setIsModalOpen(false)
@@ -64,10 +64,11 @@ export default function WaitingRoom() {
     handleSubmit()
     handleCloseModal()
   }
+
   function handleSubmit() {
     console.log('in handle submit')
       //-----HARDCODED FOR TESTING-------
-      navigateTo('/activity-room', { state: { nickName, roomCode: '12345', labID, name, description, imageUrl } })
+      navigateTo('/activity-room', { state: { userName, roomCode, labID, name, description, imageUrl } })
 
   }
 
@@ -86,16 +87,16 @@ export default function WaitingRoom() {
 
 
 
-  useEffect(() => {
-    const getSessionID = async () => {
-      const response = await axios.get(`http://localhost:3000/joiner/validateRoomCode/${roomCode}`)
-      if (response.status === 200) {
-        setSessionID(response.data.sessionID)
-      }
-    }
+  // useEffect(() => {
+  //   const getSessionID = async () => {
+  //     const response = await axios.get(`http://localhost:3000/joiner/validateRoomCode/${roomCode}`)
+  //     if (response.status === 200) {
+  //       setSessionID(response.data.sessionID)
+  //     }
+  //   }
 
-    getSessionID()
-  }, [])
+  //   getSessionID()
+  // }, [])
 
   useEffect(() => {
     if (!sessionID) return
@@ -124,6 +125,8 @@ export default function WaitingRoom() {
 
     return () => clearInterval(interval)
   }, [sessionID]) //Don't fetch any data until sessionID is set
+
+  
   useEffect(() => {
     if (labID === '1') {
       setExperimentType('VideoLab')
@@ -138,16 +141,21 @@ export default function WaitingRoom() {
       toast.error('Invalid labID received:', labID)
     }
   }, [labID])
+
+  useEffect(() => {
+    console.log("in waiting room")
+  }, [])
+
   return (
     <div className="flex flex-col items-center justify-center mx-8">
       <div className="flex flex-col md:flex-row items-start justify-between gap-72">
         {/* left section */}
         <div className="md:w-1/2 space-y-4">
-          <h1 className="text-3xl text-3xl font-semibold text-gray-800">Welcome to Session In waiting room</h1>
+          <h1 className="text-3xl text-3xl font-semibold text-gray-800">Welcome to Session</h1>
           <p className="text-6xl font-bold text-[#894DD6]">{roomCode}</p>
           <div className="space-y-2">
             <p className="text-lg">
-              <span className="font-semibold"> NICKNAME:</span> {nickName}
+              <span className="font-semibold"> NICKNAME:</span> {userName}
             </p>
             <p className="text-lg">
               <span className="font-semibold">SENSOR SERIAL NUMBER:</span> A93KFN2/SJPP2RK401

@@ -32,9 +32,9 @@ app.whenReady().then(() => {
     callback({
       responseHeaders: {
         ...details.responseHeaders,
-        'Content-Security-Policy': [
-          "default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:filesystem:; connect-src 'self' localhost ws://localhost:3000 http://localhost:3000 http://127.0.0.1:3000;"
-        ]
+        // 'Content-Security-Policy': [
+        //   "default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:filesystem:; connect-src 'self' localhost ws://localhost:3000 http://localhost:3000 http://127.0.0.1:3000;"
+        // ]
       }
     })
   })

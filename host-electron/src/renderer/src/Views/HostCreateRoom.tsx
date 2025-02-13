@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import SideComponent from "../components/Components/SideComponent.tsx";
@@ -18,6 +18,10 @@ export default function HostCreateRoom() {
   const [icon, setIcon] = useState(eyeOff);
   const navigateTo = useNavigate();
 
+  useEffect(() => 
+  {
+    console.log("in host create room")
+  })
   function handleToggle() {
     //have eye open if text is censored, if not then eye closed
     if (type === "password") {
@@ -52,30 +56,22 @@ export default function HostCreateRoom() {
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    
+  
+    console.log("creating an experiment");
 
-
-    console.log("sessionInfo: " + JSON.stringify(sessionInfo));
-
-    axios
-      .post(`${import.meta.env.VITE_BACKEND_PATH}/host/session/create`, {
-        "sessionName": "Awesome",
-        "roomCode": "123456",
-        "selectedExperimentId": "17",
-        "credentials": {
-            "passwordEnabled": false,
-            "password": ""
-        },
-        "allowSpectators": true,
-        "hostSocketId": "abcd1234" // Example socket ID
+    axios.post("http://localhost:3000/experiment/create", {
+      "description": "Sexy ass mike tyson with a gyyaat",
+      "name": "Mike Tyson Lab"
     })
       .then((response) => {
-        console.log(response.data.configuration);
-        navigateTo("/host/select-lab", { state: { userName } }); //for now
+        console.log("Done creating an experiment");
+        const newExperiment = response.data;
+        console.log("Experiment: ", newExperiment);
+        navigateTo("/host/select-lab", { state: { userName, newExperiment } }); //for now
       })
       .catch((error) => {
-        console.error("Error creating session:", error);
-        navigateTo("/host/select-lab", { state: { userName } }); //for now
+        console.error("Error creating experiment:", error);
+        //navigateTo("/host/select-lab", { state: { userName } }); //for now
       });
 
     console.log("Username: " + userName);
