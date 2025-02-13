@@ -113,7 +113,6 @@ export default function ChartComponent() {
 
     return(
         <div className='h-auto w-auto'>
-            <h1>EmotiBit Data Plot</h1>
             <div id="chart">
                 <Plot
                     data={[
@@ -137,8 +136,8 @@ export default function ChartComponent() {
                     // }
                     ]}
                     layout = {{
-                        width: 1200,
-                        height: 800,
+                        width: 1000,
+                        height: 300,
                        // grid: {rows: 1, columns: 2, pattern: 'independent'},
                         //title: 'Temperature over Time',
                         // xaxis: {
@@ -165,6 +164,9 @@ export default function ChartComponent() {
                         showlegend: true,
                         //responsive: true,
                     }}
+                    config={{
+                        displayModeBar: false 
+                      }}
                 />
             </div> 
         </div>
