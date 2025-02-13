@@ -5,7 +5,7 @@ Description:
  */
 const PORT = 3000;
 const HOST = "0.0.0.0"
-const ORIGIN_JOINER = "http://localhost:4500";
+const ORIGIN_JOINER = "http://localhost:4501";
 const ORIGIN_HOST = "http://localhost:5173";
 
 import grpc from "npm:@grpc/grpc-js";
@@ -103,6 +103,11 @@ io.on("connection", (socket) => {
         console.log("(main.ts): Emitting client-assignment with socketId:", socket.id);
         socket.emit("client-assignment", {socketId: socket.id});
     }); // Send socket ID to the client
+
+    socket.on("session-start", () => {
+        console.log("In session-create");
+        io.emit("session-start");
+     });
 
     //send socket Id to brainflow
     socket.on("brainflow-assignment", () => {

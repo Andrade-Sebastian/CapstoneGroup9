@@ -56,7 +56,7 @@ databaseRouter.post("/add-user-to-session", (req: Request, res: Response) => {
     }
 
     try{
-        addUserToSession(infoForDatabase)
+        //addUserToSession(infoForDatabase)
     }
     catch (error) {
         res.status(500).send({

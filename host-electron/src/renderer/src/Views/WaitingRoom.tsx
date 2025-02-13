@@ -68,6 +68,7 @@ export default function WaitingRoom() {
   function handleSubmit() {
     console.log('in handle submit')
       //-----HARDCODED FOR TESTING-------
+      socket.emit("session-start");
       navigateTo('/activity-room', { state: { userName, roomCode, labID, name, description, imageUrl } })
 
   }

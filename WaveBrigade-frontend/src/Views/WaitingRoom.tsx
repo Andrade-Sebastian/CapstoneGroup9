@@ -1,15 +1,18 @@
-import { useLocation } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { CiPlay1 } from "react-icons/ci";
 import socket from "./socket.tsx";
 import axios from "axios";
 import { Divider } from "@heroui/divider";
 import WaitingRoomCardComponent from "../Components/WaitingRoomCardComponent.tsx";
+import { useNavigate } from "react-router-dom";
+// -----JOINER=--------------------------//
 export default function WaitingRoom() {
   const location = useLocation();
   const { nickName, roomCode } = location.state || {};
   const [nicknames, setNickNames] = useState<string[]>([]);
   const [sessionID, setSessionID] = useState("");
+  const navigateTo = useNavigate()
 
   // useEffect(() => {
   //   // Emit join waiting room
@@ -31,15 +34,26 @@ export default function WaitingRoom() {
   //     socket.off("receive_names");
   //   };
   // }, [nickName, roomCode]);
-
+  useEffect(() => {
+    socket.on("session-start", () =>
+    {
+      console.log("joiner - ONsession start")
+      navigateTo('/active-experiment', {state: nickName})
+    });
+    return () => {
+      socket.off("session-start");
+    };
+  }, [navigateTo, nickName]);
+  
   useEffect(() => {
     const getSessionID = async () => {
       const response = await axios.get(
-        `http://wb-backend-express:3000/joiner/validateRoomCode/${roomCode}`
-      );
-      if (response.status === 200) {
-        setSessionID(response.data.sessionID);
-      }
+        `http://localhost:3000/joiner/validateRoomCode/${roomCode}`
+      )
+      .then((response) => {
+          setSessionID(response.data.sessionID);
+      });
+      
     };
 
     getSessionID();
@@ -52,7 +66,7 @@ export default function WaitingRoom() {
       try {
         console.log("Trying to get users from session " + sessionID);
         const response = await axios.get(
-          `http://wb-backend-express:3000/joiner/room-users/${sessionID}`
+          `http://localhost:3000/joiner/room-users/${sessionID}`
         );
         const users = response.data.users; //Array of IUser objects
 
@@ -83,7 +97,7 @@ export default function WaitingRoom() {
           <h1 className="text-3xl text-3xl font-semibold text-gray-800">
             Welcome to Session
           </h1>
-          <p className="text-6xl font-bold text-[#894DD6]">498742 {roomCode}</p>
+          <p className="text-6xl font-bold text-[#894DD6]">{roomCode}</p>
           <div className="space-y-2">
             <p className="text-lg">
               <span className="font-semibold"> NICKNAME:</span> {nickName}

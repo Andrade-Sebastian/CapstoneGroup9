@@ -12,6 +12,10 @@ export function useSocketManager(){
             sessionStorage.setItem("last_connected", Date.now().toString());
         });
         
+        socket.on("session-start", () => {
+           console.log("in session-start");
+        });
+
         //clearing session storage if last connected is older than 5 minutes
         const lastConnected = sessionStorage.getItem("last_connected");
         if(lastConnected){
@@ -24,6 +28,7 @@ export function useSocketManager(){
         }
         return () => {
             socket.off("initialization:socketAssigment");
+            socket.off("session-start");
             socket.disconnect();
         };
     }, []);
