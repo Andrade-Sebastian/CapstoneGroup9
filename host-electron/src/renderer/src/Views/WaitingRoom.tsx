@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
+/* eslint-disable prettier/prettier */
 import { useLocation } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import { CiPlay1 } from 'react-icons/ci'
@@ -14,6 +16,9 @@ import ModalComponent from '../components/Components/ModalComponent.js'
 import { CiCircleCheck } from 'react-icons/ci'
 import { error } from 'console'
 import { useNavigate } from "react-router-dom";
+import React from 'react';
+import { toNamespacedPath } from 'path';
+import toast, { Toaster } from 'react-hot-toast'
 
 export default function WaitingRoom() {
   const location = useLocation()
@@ -23,7 +28,12 @@ export default function WaitingRoom() {
   const [experimentTitle, setExperimentTitle] = useState(name || '')
   const [experimentDesc, setExperimentDesc] = useState(description || '')
   const [experimentType, setExperimentType] = useState<string>('')
+  const [serialNumber, setSerialNumber] = useState('')
+  const [IPAddress, setIPAddress] = useState('')
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isModalOpenEmoti, setIsModalOpenEmoti] = useState(false)
+  const [isModalOpenSettings, setIsModalOpenSettings] = useState(false)
+  const [selectedEmotiBitId, setSelectedEmotiBitId] = useState<string | null>(null);
   const [experimentIcon, setExperimentIcon] = useState<JSX.Element>(
     <CiPlay1 style={{ fontSize: '20px' }} />
   )
@@ -57,6 +67,8 @@ export default function WaitingRoom() {
   const handleBackButton = () => {
     navigateTo('/host/select-lab', { state: { userName, roomCode, labID, name, description, imageUrl } })
   }
+
+  // Begin Modal
   const handleOpenModal = () => setIsModalOpen(true)
   const handleCloseModal = () => setIsModalOpen(false)
   const handleAction = () => {
@@ -64,26 +76,63 @@ export default function WaitingRoom() {
     handleSubmit()
     handleCloseModal()
   }
+  //Add EmotiBit Modal
+  const handleOpenModalEmoti = () => setIsModalOpenEmoti(true);
+  const handleCloseModalEmoti = () => setIsModalOpenEmoti(false);
+  const handleConfirmEmoti = () =>{
+    if(!serialNumber.trim() || !IPAddress.trim()){
+      toast.error("Please enter both a Serial Number and an IP Address");
+      return;
+    }
+  
+    const newEmotiBit: IUser = {
+        userId: `user${emotiBits.length + 1}`,
+        socketId: `socket${Math.floor(Math.random() * 10000)}`,
+        nickname: `Joiner ${emotiBits.length + 1}`,
+        associatedDevice: {
+          serialNumber: serialNumber,
+          ipAddress: IPAddress
+        }
+      };
+      setEmotiBits((prevEmotiBits) => [...prevEmotiBits, newEmotiBit]);
+      setSerialNumber("");
+      setIPAddress("");
+      setIsModalOpenEmoti(false);
+    }
 
+  // Joined EmotiBit Settings Modal
+  const handleOpenModalSettings = (userId: string) => {
+    setSelectedEmotiBitId(userId);
+    setIsModalOpenSettings(true);
+  };
+
+  const handleCloseModalSettings = () => {
+    setIsModalOpenSettings(false);
+    setSelectedEmotiBitId(null);
+  };
+
+  const handleRemoveEmoti = () => {
+    if(!selectedEmotiBitId) return;
+    setEmotiBits((prevEmotiBits) =>
+    prevEmotiBits.filter((emotiBit) => emotiBit.userId !== selectedEmotiBitId));
+    setIsModalOpenSettings(false);
+  }
+  const handleRemoveUser = () => {
+    console.log("removing user");
+    setIsModalOpenSettings(false);
+  }
+  const handleUpdate = () => {
+    console.log("updating");
+    setIsModalOpenSettings(false);
+  }
+
+  //handleSubmit
   function handleSubmit() {
     console.log('in handle submit')
       //-----HARDCODED FOR TESTING-------
       socket.emit("session-start");
       navigateTo('/activity-room', { state: { userName, roomCode, labID, name, description, imageUrl } })
 
-  }
-
-  const addEmotiBit = () => {
-    const newEmotiBit: IUser = {
-      userId: uuidv4(),
-      socketId: uuidv4(),
-      nickname: `Joiner ${emotiBits.length + 1}`,
-      associatedDevice: {
-        serialNumber: `SN${Math.floor(Math.random() * 10000)}`,
-        ipAddress: `192.168.1.${Math.floor(Math.random() * 255)}`
-      }
-    }
-    setEmotiBits([...emotiBits, newEmotiBit])
   }
 
 
@@ -150,6 +199,7 @@ export default function WaitingRoom() {
   return (
     <div className="flex flex-col items-center justify-center mx-8">
       <div className="flex flex-col md:flex-row items-start justify-between gap-72">
+      <Toaster position="top-right" />
         {/* left section */}
         <div className="md:w-1/2 space-y-4">
           <h1 className="text-3xl text-3xl font-semibold text-gray-800">Welcome to Session</h1>
@@ -179,13 +229,13 @@ export default function WaitingRoom() {
         </div>
         <div className="w-full flex flex-col ">
           <h2 className="text-2xl font-semibold text-gray-800 mb-4"> Connected EmotiBits</h2>
-          <div className="flex flex-col gap-4 overflow-y-auto max-h-96 p-4 border rounded-md shadow-md">
+          <div className="flex-col gap-4 overflow-y-auto max-h-[300px] p-4 border rounded-md shadow-md ">
             {emotiBits.map((user) => (
-              <EmotiBitList key={user.userId} user={user} isConnected={true} />
+              <EmotiBitList key={user.userId} user={user} isConnected={true} onAction={() => handleOpenModalSettings(user.userId)} />
             ))}
           </div>
           <button
-            onClick={addEmotiBit}
+            onClick={handleOpenModalEmoti}
             className="mt-4 bg-[#7F56D9] hover:bg-violet-500 text-white font-semibold py-3 px-6 rounded-md shadow-md transition duration-300 ease-in-out"
           >
             Add EmotiBit
@@ -234,6 +284,74 @@ export default function WaitingRoom() {
           </h1>
         </div>
         
+      </ModalComponent>
+      <ModalComponent
+        onAction={handleConfirmEmoti}
+        isOpen={isModalOpenEmoti}
+        onCancel={handleCloseModalEmoti}
+        modalTitle="Add an EmotiBit"
+        button="Add EmotiBit"
+      >
+        <div className="mb-6">
+          <label htmlFor="serialNumber" className="block text-sm font-medium text-gray-700 mb-2">
+            Serial Number
+          </label>
+          <input
+            type="text"
+            id="serialNumber"
+            className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            value={serialNumber}
+            onChange={(e) => setSerialNumber(e.target.value)}
+          />
+        </div>
+        <div className="mb-6">
+          <label htmlFor="ipAddress" className="block text-sm font-medium text-gray-700 mb-2">
+            IP Address
+          </label>
+          <input
+            type="text"
+            id="ipAddress"
+            className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            value={IPAddress}
+            onChange={(e) => setIPAddress(e.target.value)}
+          />
+        </div>
+      </ModalComponent>
+      <ModalComponent
+        onAction={handleRemoveEmoti}
+        onAction2={handleRemoveUser}
+        onAction3={handleUpdate}
+        isOpen={isModalOpenSettings}
+        onCancel={handleCloseModalSettings}
+        modalTitle="EmotiBit Settings"
+        button="Remove EmotiBit"
+        button2="Remove User"
+        button3="Update"
+      >
+        <div className="mb-6">
+          <label htmlFor="serialNumber" className="block text-sm font-medium text-gray-700 mb-2">
+            Serial Number
+          </label>
+          <input
+            type="text"
+            id="serialNumber"
+            className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            value={serialNumber}
+            onChange={(e) => setSerialNumber(e.target.value)}
+          />
+        </div>
+        <div className="mb-6">
+          <label htmlFor="ipAddress" className="block text-sm font-medium text-gray-700 mb-2">
+            IP Address
+          </label>
+          <input
+            type="text"
+            id="ipAddress"
+            className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            value={IPAddress}
+            onChange={(e) => setIPAddress(e.target.value)}
+          />
+        </div>
       </ModalComponent>
     </div>
   )
