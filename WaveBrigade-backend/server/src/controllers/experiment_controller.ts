@@ -57,9 +57,10 @@ export function generateRandomCode(length: number){
     return lobbyCode;
 }
 
+
 export function createExperiment(templateId: string, description: string, experimentTemplate: {}, name: string){
     const newExperiment = {
-        id: generateRandomCode(6), //function for creating id
+        id: "6", //function for creating id
         name: name,
         labTemplate: template, 
         description: description,
@@ -69,6 +70,7 @@ export function createExperiment(templateId: string, description: string, experi
 
     return newExperiment;
 }
+
 
 export function updateExperiment (experimentId: string, newDescription: string, newTemplate: {}, newName: string) {
     let updatedExperiment = labs[int(experimentId)];

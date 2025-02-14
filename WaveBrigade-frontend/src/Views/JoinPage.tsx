@@ -22,23 +22,23 @@ export default function JoinPage() {
 
 
   // Get session ID when user types in a room code
-  useEffect(() => {
-    const getSessionID = async () => {
-      try {
-        const response = await axios.get(`http://wb-backend-express:3000/joiner/validateRoomCode/${StudentInputRoomCode}`);
-        if (response.status === 200) {
-          setSessionID(response.data.sessionID)
-          setSocketID(sessionStorage.getItem("socketID") || "");  
-        }
-      } catch (error) {
-        console.error("Error fetching session ID:", error);
-      }
-    };
-    if (StudentInputRoomCode) {
-      getSessionID();  // Call it when room code is entered
-    }
+  // useEffect(() => {
+  //   const getSessionID = async () => {
+  //     try {
+  //       const response = await axios.get(`http://localhost:3000/joiner/validateRoomCode/${StudentInputRoomCode}`);
+  //       if (response.status === 200) {
+  //         setSessionID(response.data.sessionID)//socketIO session ID -- old
+  //         setSocketID(sessionStorage.getItem("socketID") || "");  
+  //       }
+  //     } catch (error) {
+  //       console.error("Error fetching session ID:", error);
+  //     }
+  //   };
+  //   if (StudentInputRoomCode) {
+  //     getSessionID();  // Call it when room code is entered --change to when submitted
+  //   }
     
-  }, [StudentInputRoomCode]);  
+  // }, [StudentInputRoomCode]);  
 
 
 
@@ -78,7 +78,7 @@ export default function JoinPage() {
 
   const validateRoomCode = async (StudentInputRoomCode) => {
     try {
-      const response = await axios.get(`http://wb-backend-express:3000/joiner/validateRoomCode/${StudentInputRoomCode}`);
+      const response = await axios.get(`http://localhost:3000/joiner/validateRoomCode/${StudentInputRoomCode}`);
       if (response.status === 200) {
         console.log("Room code is valid!");
         setSessionID(response.data.sessionID);  // Store sessionID when room code is valid
@@ -96,17 +96,17 @@ export default function JoinPage() {
     console.log("Socket ID: " + socketID);
     console.log("Session ID: " + sessionID);
 
-    try {
-      await axios.post("http://wb-backend-express:3000/joiner/join-room", {
-        sessionID: sessionID,
-        socketId: socketID,
-        nickname: nickName,
-        associatedDevice: null
-      });
-
-    } catch (error) {
-      console.error("Error joining room:", error);
-    }
+    // try {
+    //   await axios.post("http://wb-backend-express:3000/database/add-user-to-session", {
+    //     userId: userId,
+    //     socketId: socketID,
+    //     nickname: nickName,
+    //     associatedDevice: null,
+    //     roomCode: StudentInputRoomCode
+    //   });
+    // } catch (error) {
+    //   console.error("Error joining room:", error);
+    // }
   };
   
 

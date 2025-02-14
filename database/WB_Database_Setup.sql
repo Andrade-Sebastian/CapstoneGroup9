@@ -1,15 +1,15 @@
 CREATE TABLE IF NOT EXISTS Experiment
 (
     ExperimentID serial PRIMARY KEY,
-    Name varchar(25) NOT NULL,
-    Description varchar(255) NOT NULL
+    Name varchar(100) NOT NULL,
+    Description varchar(100) NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS PhotoLab
 (
     PhotoLabID serial PRIMARY KEY,
     ExperimentID int REFERENCES Experiment(ExperimentID),
-    Path varchar(25) NOT NULL,
+    Path varchar(100) NOT NULL,
     Captions varchar(100) NOT NULL
 );
 
@@ -17,9 +17,9 @@ CREATE TABLE IF NOT EXISTS Session
 (
     SessionID serial PRIMARY KEY,
     ExperimentID int REFERENCES Experiment(ExperimentID),
-    SessionCode varchar(25) NOT NULL,
-    RoomCode varchar(10) NOT NULL,
-    HostSocketID varchar(25) NOT NULL,
+    SessionCode varchar(100) NOT NULL,
+    RoomCode varchar(100) NOT NULL,
+    HostSocketID varchar(100) NOT NULL,
     Users JSON ARRAY,
     isInitialized BOOLEAN NOT NULL,
     Configuration JSON NOT NULL,
@@ -28,25 +28,26 @@ CREATE TABLE IF NOT EXISTS Session
     SessionAvailable BOOLEAN NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS AssociatedDevice
+(
+    AssociatedDevice serial PRIMARY KEY,
+    IPAddress varchar(100) NOT NULL,
+    SerialNumber varchar(100) NOT NULL,
+    SocketDeviceID varchar(100) NOT NULL,
+    SamplingFrequency int NOT NULL DEFAULT 50,
+    FrontEndSocketID varchar(100) NOT NULL,
+    IsAvailable BOOLEAN NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS "User"
 (
     UserID serial PRIMARY KEY,
-    Name varchar(25) NOT NULL,
+    Name varchar(100) NOT NULL,
     AssociatedDevice int REFERENCES AssociatedDevice(AssociatedDevice),
     SessionID int REFERENCES Session(SessionID),
     ExpirationData int NOT NULL DEFAULT 50
 );
 
-CREATE TABLE IF NOT EXISTS AssociatedDevice
-(
-    AssociatedDevice serial PRIMARY KEY,
-    IPAddress varchar(25) NOT NULL,
-    SerialNumber varchar(25) NOT NULL,
-    SocketDeviceID varchar(25) NOT NULL,
-    SamplingFrequency int NOT NULL DEFAULT 50,
-    FrontEndSocketID varchar(25) NOT NULL,
-    IsAvailable BOOLEAN NOT NULL
-);
 
 CREATE TABLE IF NOT EXISTS AncilliaryDataFrame
 (
@@ -73,9 +74,10 @@ CREATE TABLE IF NOT EXISTS Recording
 
 CREATE TABLE IF NOT EXISTS IntersectionTable
 (
-    DataFrameID serial PRIMARY KEY
+    DataFrameID serial PRIMARY KEY,
     AncDataFrameID integer REFERENCES AncilliaryDataFrame(AncilliaryDataFrameID),
-    AuxDataFrameID integer REFERENCES AuxilliaryDataFrame(AuxDataFrameID),
+    AuxDataFrameID integer REFERENCES AuxilliaryDataFrame(AuxilliaryDataFrameID),
     RecordingID int REFERENCES Recording(RecordingID),
     Timestamp int NOT NULL
 );
+

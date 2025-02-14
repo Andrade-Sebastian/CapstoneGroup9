@@ -1,6 +1,11 @@
+/*
+Author:
+Data:
+Description:
+ */
 const PORT = 3000;
 const HOST = "0.0.0.0"
-const ORIGIN_JOINER = "http://localhost:4500";
+const ORIGIN_JOINER = "http://localhost:4501";
 const ORIGIN_HOST = "http://localhost:5173";
 
 import grpc from "npm:@grpc/grpc-js";
@@ -35,15 +40,25 @@ import hostRouter from "./routes/host_routes.ts"
 import joinerRouter from "./routes/joiner_routes.ts"
 import session_handlers from "./handlers/session_handlers.ts";
 import experimentRouter from "./routes/experiment_routes.ts";
-
+import databaseRouter from "./routes/database_routes.ts"
 const app = express();
+// app.get('/get-ip', (req, res) => {
+//     const ipAddress = req.headers['x-forwarded-for'] || req.ip;
+//     res.send({
+//         "message": `Your IP address is: ${ipAddress}`
+//     });
+// });
+
 const server = createServer(app);
 
 app.use(cors());
 //app.use(cors({origin: ORIGIN}));
 app.use("/host", hostRouter); 
 app.use("/joiner", joinerRouter); 
-//app.use("/experiment", experimentRouter);
+app.use("/database", databaseRouter)
+app.use("/experiment", experimentRouter);
+
+import { Request, Response } from "express";
 
 
 export const io = new Server(server, {
@@ -57,6 +72,28 @@ const currentSessions: { [key: string]: ISession } = {};
 const sessionNamespace = io.of("/session");
 let isHost = true;
 
+let frontEndSocketId = null;
+
+
+app.get('/get-brainflow-info', (req, res) => {
+    console.log("Getting Express IP")
+    const ipAddress = req.ip;
+    res.send({
+        "ip": ipAddress
+        //"port": PORT
+    })
+});
+
+app.get("/ip", (req: Request, res: Response) => {
+    console.log("(joiner_routes.ts): in /ip")
+    const ipAddress = (req.headers['x-forwarded-for'] as string) || req.ip;
+    res.status(200).send(
+        {
+        "message": `Your IP address is: ${ipAddress}`
+        }
+    );
+});
+
 
 io.on("connection", (socket) => {
     console.log("(main.ts): User Connected | socketID: " + socket.id)
@@ -67,18 +104,33 @@ io.on("connection", (socket) => {
         socket.emit("client-assignment", {socketId: socket.id});
     }); // Send socket ID to the client
 
+    socket.on("session-start", () => {
+        console.log("In session-create");
+        io.emit("session-start");
+     });
+
+    //send socket Id to brainflow
+    socket.on("brainflow-assignment", () => {
+        console.log("(main.ts): Emitting brainflow-assignment with socketId:", socket.id);
+        socket.emit("brainflow-assignment", {socketId: socket.id});
+    })
+
     //recieve emotibit data
-    socket.on('update', (data) => {
-       // console.log('Received data:', data);
+    socket.on('update', (payload) => {
+        const {data, ipAddress, serialNumber, backendIp, hostSessionId, userId, frontEndSocketId, assignSocketId} = payload;
+        console.log('Update Event: Received data:', JSON.stringify(data));
+        if(userId){
+            io.to(frontEndSocketId).emit(payload);
+        }
     });
 
     session_handlers(io, socket, rooms, isHost);
 
     //console.log("Running Script");
-    socket.on("update", (data) => {
-        console.log(data);
-        io.emit("update", data);
-    })
+    // socket.on("update", (data) => {
+    //     console.log(data);
+    //     io.emit("update", data);
+    // })
     
     socket.on("disconnect", async (data) => {
         console.log(`(main.ts): User Disconnected | socketID: ${socket.id}`);

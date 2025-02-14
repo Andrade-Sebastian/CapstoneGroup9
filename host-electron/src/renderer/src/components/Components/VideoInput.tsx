@@ -1,10 +1,12 @@
-import React from "react";
+import React, { useEffect} from "react";
 
 interface IVideoInput {
   width: number;
   height: number;
   onFileSelected: (isFileSelected: boolean) => void;
   onSourceChange: (source: string | null) => void;
+  videoSource?: string;
+  imageUrl?: string;
 }
 
 export default function VideoInput(props: IVideoInput) {
@@ -37,6 +39,12 @@ export default function VideoInput(props: IVideoInput) {
   const handleChoose = () => {
     inputRef.current?.click();
   };
+  useEffect(() => {
+    if(props.videoSource){
+      setSource(props.videoSource);
+      props.onSourceChange(props.videoSource);
+    }
+  },[props.videoSource]);
   return (
     <div className="flex flex-col justify-center items-center border p-4 rounded-md shadow-md">
         {/* Insert Video */}
@@ -59,12 +67,10 @@ export default function VideoInput(props: IVideoInput) {
             src={source}
             className="rounded-md shadow-md"
           />
-        </div>
-      )}
-      <div className="mt-4 text-sm text-gray-600">
-        {source ? "Video selected" : " Please select a video"} 
-        {/* show url or if there isn't anything, then just show nothing selected text */}
-      </div>
+    </div>
+    )}
     </div>
   );
 }
+
+

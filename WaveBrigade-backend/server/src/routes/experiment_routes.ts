@@ -1,6 +1,7 @@
 import express, {Request, Response} from 'express';
 import {ILab, IExperiment} from "../controllers/session_controller.ts";
-import { getAllExperiments, createExperiment, updateExperiment, deleteExperiment, viewExperiment } from "../controllers/experiment_controller.ts";
+import { createExperiment } from "../controllers/database.ts";
+import { getAllExperiments, updateExperiment, deleteExperiment, viewExperiment } from "../controllers/experiment_controller.ts";
 
 
 export const experimentRouter = express.Router();
@@ -24,12 +25,15 @@ experimentRouter.get("/", (req: Request, res: Response) => {
 //The functions within these routes need parameters
 
 //create experiment
-experimentRouter.post("/create", (req: Request, res: Response) => {
+experimentRouter.post("/create", async (req: Request, res: Response) => {
+    console.log("in /create experiment")
     try{
-        const{templateId, description, experimentTemplate, name} = req.body;
-        const newExperiment = createExperiment(templateId, description, experimentTemplate, name);
+        const{description, name} = req.body;
+        const newExperiment = await createExperiment(name, description);
+        console.log("IN ROUTE: ", newExperiment);
         res.status(201).send(newExperiment);
     } catch(error){
+        console.log("error in create experiment")
         res.status(500).send({error: error.message});
     }
 });

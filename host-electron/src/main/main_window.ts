@@ -5,8 +5,9 @@
  import { join } from 'path'
  import { is } from '@electron-toolkit/utils'
  
- function createMainWindow(route: string): void {
+ function createMainWindow(): void {
    const mainWindow = new BrowserWindow({
+     
      width: 900,
      height: 670,
      show: false,
@@ -20,7 +21,9 @@
    })
  
    mainWindow.on('ready-to-show', () => {
+    
      mainWindow.show()
+     mainWindow.webContents.openDevTools();
    })
  
    mainWindow.webContents.setWindowOpenHandler((details) => {
@@ -31,9 +34,9 @@
    // HMR for renderer base on electron-vite cli.
    // Load the remote URL for development or the local html file for production.
    if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
-     mainWindow.loadURL(join(process.env['ELECTRON_RENDERER_URL'], route))
+     mainWindow.loadURL(join(process.env['ELECTRON_RENDERER_URL'], "/"))
    } else {
-     const buildLocation = `file://${join(__dirname, `../renderer/index.html#/${route}`)}`
+     const buildLocation = `file://${join(__dirname, `../renderer/index.html#/${"/"}`)}`
      mainWindow.loadURL(buildLocation)
    }
  }

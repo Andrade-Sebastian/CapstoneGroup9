@@ -1,5 +1,5 @@
 import { io } from 'socket.io-client';
-const socket = io("http://wb-backend-express:4500", 
+const socket = io("http://localhost:3000", 
     {
         autoConnect: true //Prevents auto-connection when socket is imported
     }

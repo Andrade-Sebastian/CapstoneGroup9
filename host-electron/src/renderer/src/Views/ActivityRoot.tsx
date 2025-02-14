@@ -29,6 +29,7 @@ export default function HostCreateRoom() {
     }
   }
 
+  console.log("in activity root")
   //hardcoded to test host/session/create
   const [sessionInfo, setSessionInfo] = useState({
     sessionName: "",

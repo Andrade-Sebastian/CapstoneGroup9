@@ -5,7 +5,7 @@ import CardComponent from "../Components/CardComponent.tsx";
 
 
 import { io } from 'socket.io-client';
-const socket = io('http://wb-backend-express:3000');
+const socket = io('http://localhost:3000');
 
 import {useEffect} from 'react'
 

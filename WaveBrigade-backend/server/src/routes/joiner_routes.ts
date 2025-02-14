@@ -3,10 +3,17 @@ import {addDiscoveredDevice, getSessionState, IDevice, createSession, joinSessio
 import SessionManager from "../sessions_singleton.ts";
 import { addSocketToSession, removeSocket, getSessionBySocket, socketSessionMap } from "../sessionMappings.ts";
 import axios from "axios";
+import { validateRoomCode } from "../controllers/database.ts";
 const app = express();
 const joinerRouter = express.Router();
 joinerRouter.use(express.json());
-
+/*
+ .  .  .    .    .  .   .
+.  .   .    .   .      .
+"When a joiner joins.."
+.   .  .   .  . .    .  . 
+ . . . .  . .  .   .  . . 
+*/
 
 joinerRouter.get("/session/:sessionId", (req: Request, res: Response) => {
     const session = req.params.sessionId;
@@ -24,11 +31,18 @@ joinerRouter.get("/session/:sessionId", (req: Request, res: Response) => {
     }
 })
 
+//uses singleton chicken
 joinerRouter.post("/join-session/:requestedSessionId/:socketId", (req: Request, res: Response) => {
     const requestedSessionId = req.params.requestedSessionId;
     const socketId = req.params.socketId;
     console.log("URL PARAM:", requestedSessionId, socketId)
-    console.log("SESSIONS: " + JSON.stringify(SessionManager.getInstance().listSessions()))
+
+    //Get session at sessionID
+    //find the 'users' array
+    //"MODIFY" the array by pushing an IUser
+
+    
+    //console.log("SESSIONS: " + JSON.stringify(SessionManager.getInstance().listSessions()))
     try{    
         res.status(200).send(joinSession(requestedSessionId, socketId))
     }
@@ -40,6 +54,7 @@ joinerRouter.post("/join-session/:requestedSessionId/:socketId", (req: Request, 
     }
 )
 
+//chicken
 joinerRouter.get("/room-users/:sessionID", (req: Request, res: Response) => {
     const sessionID = req.params.sessionID;
 
@@ -70,37 +85,52 @@ joinerRouter.get("/room-users/:sessionID", (req: Request, res: Response) => {
 
 // import socketSessionMap from "../sessionMappings.ts";
 joinerRouter.post("/join-room", (req: Request, res: Response) => {
-    const {sessionID, socketID, nickname, associatedDevice} = req.body;
+//-----OLD SOCKETIO Code--
+    // const {sessionID, socketID, nickname, associatedDevice} = req.body;
     
     
-    console.log("(joiner_routes.ts): at '/join-room', received: " + JSON.stringify(req.body));
-    addSocketToSession(socketID, sessionID)
+    // console.log("(joiner_routes.ts): at '/join-room', received: " + JSON.stringify(req.body));
+    // addSocketToSession(socketID, sessionID)
 
-    console.log("socketMapping: " + JSON.stringify(socketSessionMap))
+    // console.log("socketMapping: " + JSON.stringify(socketSessionMap))
     
-    //join the room
-    joinRoom(sessionID, socketID, nickname, associatedDevice)
+    // //join the room
+    // joinRoom(sessionID, socketID, nickname, associatedDevice)
+//-----OLD SOCKETIO Code--
+
+
     
     return res.status(200).json({ message: "Successfully Joined session"});
     
     
 })
 
-joinerRouter.get("/validateRoomCode/:roomCode", (req: Request, res: Response) => {
+joinerRouter.get("/validateRoomCode/:roomCode", async (req: Request, res: Response) => {
     const roomCode = req.params.roomCode;
-    const liveSessions = SessionManager.getInstance().listSessions()
+    console.log("Roomcode: ", roomCode);
     
-    for (const sessionId in liveSessions) {
-        if (liveSessions[sessionId].roomCode === roomCode) {
-            console.log("(validateRoomCode): SessionID " + JSON.stringify(liveSessions[sessionId].sessionId))
-            return res.status(200).json({ 
-                message: "Successfully Validated room code",
-                sessionID: liveSessions[sessionId].sessionId
-            });// Return the matching session
+    try
+    {
+        const isValidRoomCode = await validateRoomCode(roomCode); //if the roomcode is valid, returns true
+        if (isValidRoomCode)
+        {
+            return res.status(200).json({ "isValidRoomCode": true});
+        }
+        else{
+            return res.status(201).json({
+                "isValidRoomCode": false
+            })
         }
     }
-    
-    return res.status(500).json({ message: "Room Code does not match up with an active session"});
+    catch(error)//postgres will return an error if the roomcode does not exist for the specified session,
+                //so we assume that it is not a valid room code
+    {
+        return res.status(201).json({
+            "isValidRoomCode": false,
+            "error": error
+        })
+    }
+
     
 })
 
@@ -160,6 +190,7 @@ joinerRouter.post("/verify-code", (req: Request, res: Response) => {
     }
 });
 
+//CHICKEN
 joinerRouter.get("/debug", (req: Request, res: Response) => {
     console.log("in /debug")
 

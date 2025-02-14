@@ -6,7 +6,7 @@ ENV POSTGRES_PASSWORD=postgres
 
 ENV POSTGRES_DB=WB_Database
 
-COPY ./WB_Database_Setup.sql /docker-entrypoint-initdb.d
+COPY ./seedingScript.sql /docker-entrypoint-initdb.d
 
 EXPOSE 5432
 

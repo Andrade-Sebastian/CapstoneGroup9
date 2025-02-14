@@ -24,7 +24,7 @@ export default function NavigationBar() {
         position="static"
         className="bg-gradient-to-br from-purple-700 to-violet-400 text-white h-20"
       >
-        <NavbarBrand className="pl-10">
+        <NavbarBrand className="p-10">
           <RiPulseFill style={{ fontSize: "24px" }} />
           <Link to="/">
             <p className="text-2xl hover:bg-neutral-200">WaveBrigade</p>

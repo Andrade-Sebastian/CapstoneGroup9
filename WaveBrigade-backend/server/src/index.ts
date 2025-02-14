@@ -48,7 +48,7 @@ app.use(cors());
 //cors setup
 const io = new Server(server, {
     cors: {
-        origin: "http://localhost:4500", //this is for frontend
+        origin: "http://localhost:4501", //this is for frontend
         methods: ["GET", "POST"], //this allows get and post to be used
     },
 });
@@ -112,6 +112,11 @@ io.on("connection", (socket) => {
             console.log("------END CREATE ROOM EVENT-------")
         }
     });
+    
+    socket.on("session-start", () => {
+        console.log("In session-create")
+     });
+
 
     //user joins a room || From join page
     socket.on("join_room", (data) => { //listens for join_room event from a Student ONLY, expects room code and nickName
