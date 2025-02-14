@@ -5,7 +5,7 @@ Description:
  */
 const PORT = 3000;
 const HOST = "0.0.0.0"
-const ORIGIN_JOINER = "http://localhost:4501";
+const ORIGIN_JOINER = "http://localhost:4500";
 const ORIGIN_HOST = "http://localhost:5173";
 
 import grpc from "npm:@grpc/grpc-js";
