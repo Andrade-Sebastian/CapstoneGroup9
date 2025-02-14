@@ -197,28 +197,28 @@ export default function WaitingRoom() {
   }, [])
 
   return (
-    <div className="flex flex-col items-center justify-center mx-8">
-      <div className="flex flex-col md:flex-row items-start justify-between gap-72">
+    <div className="flex flex-col items-center justify-center px-4 mx:px-8 w-full">
+      <div className="flex flex-col md:flex-row items-start justify-between w-full max-w-6xl gap-8">
       <Toaster position="top-right" />
         {/* left section */}
-        <div className="md:w-1/2 space-y-4">
-          <h1 className="text-3xl text-3xl font-semibold text-gray-800">Welcome to Session</h1>
-          <p className="text-6xl font-bold text-[#894DD6]">{roomCode}</p>
+        <div className="w-full md:w-1/2 space-y-4">
+          <h1 className="text-2xl md:text-3xl font-semibold text-gray-800 mt-6">Welcome to Session</h1>
+          <p className="text-6xl md:text-6xl font-bold text-[#894DD6] break-words">{roomCode}</p>
           <div className="space-y-2">
-            <p className="text-lg">
+            <p className="text-base md:text-lg">
               <span className="font-semibold"> NICKNAME:</span> {userName}
             </p>
-            <p className="text-lg">
+            <p className="text-base md:text-lg">
               <span className="font-semibold">SENSOR SERIAL NUMBER:</span> A93KFN2/SJPP2RK401
             </p>
-            <p className="text-lg">
+            <p className="text-base md:text-lg">
               <span className="font-semibold">SENSOR STATUS:</span>{' '}
-              <span className="text-green-500 font-bold">CONNECTED</span>
+              <span className="md:text-sm text-green-500 font-bold">CONNECTED</span>
             </p>
           </div>
         </div>
         {/* right section */}
-        <div className="md:w-1/2">
+        <div className="w-full md:w-1/2 mt-6">
           {/* HARD CODED LAB DESCRIPTION */}
           <WaitingRoomCardComponent
             icon={experimentIcon}
@@ -227,16 +227,16 @@ export default function WaitingRoom() {
             description={experimentDesc}
           ></WaitingRoomCardComponent>
         </div>
-        <div className="w-full flex flex-col ">
-          <h2 className="text-2xl font-semibold text-gray-800 mb-4"> Connected EmotiBits</h2>
-          <div className="flex-col gap-4 overflow-y-auto max-h-[300px] p-4 border rounded-md shadow-md ">
+        <div className="w-full flex flex-col mt-6">
+          <h2 className="text-xl lg:text-2xl font-semibold text-gray-800 mb-4"> Connected EmotiBits</h2>
+          <div className="flex-col gap-4 overflow-y-auto max-h-[300px] md:max-h-[400px] p-4 border rounded-md shadow-md ">
             {emotiBits.map((user) => (
               <EmotiBitList key={user.userId} user={user} isConnected={true} onAction={() => handleOpenModalSettings(user.userId)} />
             ))}
           </div>
           <button
             onClick={handleOpenModalEmoti}
-            className="mt-4 bg-[#7F56D9] hover:bg-violet-500 text-white font-semibold py-3 px-6 rounded-md shadow-md transition duration-300 ease-in-out"
+            className="mt-4 bg-[#7F56D9] hover:bg-violet-500 text-white font-semibold py-3 px-6 rounded-md shadow-md transition duration-300 ease-in-out md:w-auto"
           >
             Add EmotiBit
           </button>
@@ -249,12 +249,12 @@ export default function WaitingRoom() {
         </div>
       </div>
       <Divider className="my-6" />
-      <div className="flex justify-center space-x-8 text-lg font-medium text-gray-800">
+      <div className="flex justify-center flex-wrap gap-4 space-x-8 text-lg font-medium text-gray-800">
         {nicknames.map((name, index) => (
           <p key={index}>{name}</p>
         ))}
       </div>
-      <div className="flex gap-10 items-center justify-center">
+      <div className="flex flex-row gap-10 items-center justify-center">
         <button
           type="button"
           onClick={handleBackButton}

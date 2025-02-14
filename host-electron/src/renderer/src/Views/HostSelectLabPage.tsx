@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useLocation } from 'react-router-dom'
 import axios from 'axios'
 import { IoVideocam } from 'react-icons/io5'
-import { TfiGallery } from 'react-icons/tfi'
+import { RiGalleryFill } from "react-icons/ri";
 import { TiCamera } from 'react-icons/ti'
 import { LiaSatelliteSolid } from 'react-icons/lia'
 import CardComponentRadio from '../components/Components/CardComponentRadio.tsx'
@@ -61,7 +61,7 @@ export default function HostSelectLabPage() {
       id: '3',
       name: 'GalleryLab',
       description: 'Create a gallery experiment. Insert pictures to create a gallery style lab.',
-      iconPath: <TfiGallery className="size-8" />
+      iconPath: <RiGalleryFill className="size-8" />
     }
   ]
   const navigateTo = useNavigate()
@@ -104,8 +104,8 @@ export default function HostSelectLabPage() {
 
   // export default function ExperimentCreationForm({ handleSubmit, setExperimentName, setLabDescription, userName }) {
   return (
-    <div className="flex h-screen">
-      <div className="flex flec-col max-sm:hidden items-center justify-center w-2/5">
+    <div className="flex flex-col md:flex-row h-screen w-full">
+      <div className="hidden md:flex flex-col items-center justify-center lg:w-1/3 w-2/5">
       <Toaster position="top-right" />
         <SideComponent
           icon={<LiaSatelliteSolid style={{ fontSize: '200px' }} />}
@@ -113,10 +113,11 @@ export default function HostSelectLabPage() {
           description="Time to choose a lab template! Pick between a video, image, or image gallery lab"
         />
       </div>
-      <div className="flex flex-col items-center justify-center w-2/5">
-        <form onSubmit={handleSubmit} className="flex flex-col gap-14">
+      {/* Templates Container*/}
+      <div className="flex flex-col items-center justify-center w-full md:w-3/5 lg:w-2/3 p-6">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-8 w-full max-w-2xl">
           {/* LAB TEMPLATES */}
-          <div className="grid grid-cols-2 grid-rows-2 gap-20 items-center overflow-auto">
+          <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 grid-rows-2 gap-6 items-center">
             {/* Video Lab Checkbox and Description */}
 
             {/*A Single lab */}
@@ -135,7 +136,7 @@ export default function HostSelectLabPage() {
           <button
             type="submit"
             disabled={!selectedLab}
-            className={`mt-6 font-semibold py-3 px-6 rounded-md shadow-md transition duration-300 ease-in-out ${
+            className={`w-full md:w-auto mt-6 font-semibold py-3 px-6 rounded-md shadow-md transition duration-300 ease-in-out ${
               selectedLab
                 ? 'bg-[#7F56D9] hover:bg-violet-500 text-white'
                 : 'bg-gray-400 text-white cursor-not-allowed'
@@ -143,14 +144,13 @@ export default function HostSelectLabPage() {
           >
             Continue
           </button>
-          <div className="flex justify-center mt-4">
+          <div className="flex justify-center">
             <p
               className="text-semibold text-purple-600 hober:underline cursor-pointer"
               onClick={handlePreviousExperiments}
             >
-              {' '}
               View Previously Made Experiments
-            </p>{' '}
+            </p>
           </div>
         </form>
       </div>
