@@ -92,7 +92,7 @@ export default function VideoLab() {
           description="Start creating your experiment with videos. Choose a title, write a description, and select a a video to get started"
         />
       </div>
-      <div className="flex flex-col items-center justify-center w-2/5">
+      <div className="flex flex-col items-center justify-center w-full md:w-3/5 lg:w-3/5 p-6">
         <form onSubmit={handleSubmit} className="w-full max-w-md">
           <div className="mb-6">
             <label
@@ -138,10 +138,10 @@ export default function VideoLab() {
               <span className="text-purple-500"> *</span>
             </label>
             <VideoInput
-              width={250}
+              width={200}
               height={500}
               onFileSelected={setIsFileSelected}
-              onSourceChange = { setVideoSource}
+              onSourceChange = {setVideoSource}
               videoSource={videoSource}
               imageSource= {imageUrl}
             />

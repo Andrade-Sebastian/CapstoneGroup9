@@ -106,9 +106,9 @@ export default function PhotoLab() {
           description="Start creating your experiment with pictures. Choose a title, write a description, and select a photo to get started"
         />
       </div>
-      <div className="flex flex-col items-center justify-center w-2/5">
-        <form onSubmit={handleSubmit} className="w-full max-w-md">
-          <div className="mb-6">
+      <div className="flex flex-col items-center justify-center w-full md:w-3/5 lg:w-3/5 p-6 min-h-[600px] space-y-6 mt-50">
+        <form onSubmit={handleSubmit} className="w-full max-w-md space-y-6">
+          <div className="w-full">
             <label
               htmlFor="experimentTitle"
               className="block text-sm font-medium text-gray-700 mb-2"
@@ -125,7 +125,7 @@ export default function PhotoLab() {
               placeholder="Provide a title for your experiment"
             />
           </div>
-          <div className="mb-6">
+          <div className="w-full">
             <label
               htmlFor="experimentDesc"
               className="block text-sm font-medium text-gray-700 mb-2"
@@ -141,7 +141,7 @@ export default function PhotoLab() {
               placeholder="Provide a description for your experiment"
             ></textarea>
           </div>
-          <div className="mb-6">
+          <div className="w-full">
             <label htmlFor="addImage" className="block text-sm font-medium text-gray-700 mb-2">
               Add Image
               <span className="text-purple-500"> *</span>
@@ -156,7 +156,7 @@ export default function PhotoLab() {
             />
           </div>
 
-          <div className="mb-6">
+          <div className="w-full">
             <label htmlFor="caption" className="block text-sm font-medium text-gray-700 mb-2">
               Enter a Caption
               <span className="text-purple-500"> *</span>

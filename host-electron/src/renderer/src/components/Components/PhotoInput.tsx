@@ -40,7 +40,7 @@ export default function PhotoInput(props: IPhotoInput) {
     inputRef.current?.click();
   };
   return (
-    <div className="flex flex-col justify-center items-center border p-4 rounded-md shadow-md">
+    <div className="flex flex-col justify-center items-center border p-4 rounded-md shadow-md size-">
         {/* Insert image */}
       <input
         ref={inputRef}
