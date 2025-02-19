@@ -1,10 +1,10 @@
 import { useNavigate, useLocation } from 'react-router-dom'
 import React, { ReactElement, useEffect, useState } from 'react'
 import react from 'react' //path?
-import ImageCardComponent from '../components/Components/ImageCardComponent'
-import Carousel from '../components/Components/CarouselComponent'
-import SideComponent from '../components/Components/SideComponent.tsx'
-import ImageCardComponentRadio from '../components/Components/ImageCardComponentRadio'
+import ImageCardComponent from '../components/ImageCardComponent'
+import Carousel from '../components/CarouselComponent'
+import SideComponent from '../components/SideComponent.tsx'
+import ImageCardComponentRadio from '../components/ImageCardComponentRadio'
 import { BsMoonStars } from 'react-icons/bs'
 import toast, { Toaster } from 'react-hot-toast'
 

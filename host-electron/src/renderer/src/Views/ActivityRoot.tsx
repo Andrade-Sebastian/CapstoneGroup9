@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import SideComponent from "../components/Components/SideComponent.tsx";
+import SideComponent from "../components/SideComponent.tsx";
 import { IoEarthOutline } from "react-icons/io5";
 import { Icon } from "react-icons-kit";
 import { eyeOff } from "react-icons-kit/feather/eyeOff";

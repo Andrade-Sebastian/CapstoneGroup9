@@ -6,9 +6,10 @@ import { IoVideocam } from 'react-icons/io5'
 import { RiGalleryFill } from "react-icons/ri";
 import { TiCamera } from 'react-icons/ti'
 import { LiaSatelliteSolid } from 'react-icons/lia'
-import CardComponentRadio from '../components/Components/CardComponentRadio.tsx'
-import SideComponent from '../components/Components/SideComponent.tsx'
+import CardComponentRadio from '../components/CardComponentRadio.tsx'
+import SideComponent from '../components/SideComponent.tsx'
 import toast, { Toaster } from 'react-hot-toast'
+import { useSessionStore } from '../store/useSessionStore.tsx'
 //added routing to /host/select-lab
 //8:49 -
 //created HostSelectlabPage
@@ -26,11 +27,9 @@ export interface ILab {
 }
 
 export default function HostSelectLabPage() {
+  const navigateTo = useNavigate()
+  const { setExperimentId, roomCode } = useSessionStore();
   const location = useLocation()
-  console.log('@HOST SELECT LAB | location.state:', JSON.stringify(location.state))
-  const { userName, newExperiment} = location.state
-  console.log('HOSTSELECTLAB userName: ',userName);
-  console.log('HOSTSELECTLAB newExperiment: ', newExperiment);
   const [experimentName, setExperimentName] = useState('')
   const [labDescription, setLabDescription] = useState('')
   const [selectedLab, setSelectedLab] = useState<ILab>()
@@ -64,20 +63,18 @@ export default function HostSelectLabPage() {
       iconPath: <RiGalleryFill className="size-8" />
     }
   ]
-  const navigateTo = useNavigate()
 
   //const [labs, setLabs] = useState([]); //will hold the labs
 
   function handleSubmit(e: { preventDefault: () => void }) {
     e.preventDefault()
     if (selectedLab) {
-      const labID = selectedLab.id
       if (selectedLab.id === '1') {
-        navigateTo('/host/video-lab', { state: { userName, labID, newExperiment } })
+        navigateTo('/host/video-lab')
       } else if (selectedLab.id === '2') {
-        navigateTo('/host/photo-lab', { state: { userName, labID, newExperiment} })
+        navigateTo('/host/photo-lab')
       } else if (selectedLab.id === '3') {
-        navigateTo('/host/gallery-lab', { state: { userName, labID, newExperiment } })
+        navigateTo('/host/gallery-lab')
       } else {
         toast.error("Error, select another option.")
         //toast
@@ -110,7 +107,7 @@ export default function HostSelectLabPage() {
         <SideComponent
           icon={<LiaSatelliteSolid style={{ fontSize: '200px' }} />}
           headingTitle="Create an Experiment"
-          description="Time to choose a lab template! Pick between a video, image, or image gallery lab"
+          description="Time to choose a lab template! Pick between a video, image, or gallery lab"
         />
       </div>
       {/* Templates Container*/}

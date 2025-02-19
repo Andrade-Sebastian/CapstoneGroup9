@@ -9,24 +9,37 @@ import { IoVideocam } from 'react-icons/io5'
 import socket from './socket'
 import axios from 'axios'
 import { Divider } from '@heroui/divider'
-import WaitingRoomCardComponent from '../components/Components/WaitingRoomCardComponent'
+import WaitingRoomCardComponent from '../components/WaitingRoomCardComponent'
 import { IUser } from '@renderer/hooks/useSessionState'
-import EmotiBitList from '../components/Components/EmotiBitList'
-import ModalComponent from '../components/Components/ModalComponent.js'
+import EmotiBitList from '../components/EmotiBitList'
+import ModalComponent from '../components/ModalComponent.js'
 import { CiCircleCheck } from 'react-icons/ci'
 import { error } from 'console'
 import { useNavigate } from "react-router-dom";
 import React from 'react';
 import { toNamespacedPath } from 'path';
 import toast, { Toaster } from 'react-hot-toast'
+import { useSessionStore } from '../store/useSessionStore.tsx'
 
 export default function WaitingRoom() {
+  const navigateTo = useNavigate()
+  const {
+    sessionId,
+    users: emotiBits,
+    roomCode,
+    experimentId,
+    userName,
+    setSessionId,
+    setUsers,
+    addUser,
+    removeUser,
+  } = useSessionStore()
   const location = useLocation()
-  const {userName, roomCode, labID, name, description, imageUrl } = location.state || {}
+  // const {userName, roomCode, labID, name, description, imageUrl } = location.state || {}
   const [nicknames, setNickNames] = useState<string[]>([])
   const [sessionID, setSessionID] = useState('')
-  const [experimentTitle, setExperimentTitle] = useState(name || '')
-  const [experimentDesc, setExperimentDesc] = useState(description || '')
+  const [experimentTitle, setExperimentTitle] = useState('')
+  const [experimentDesc, setExperimentDesc] = useState('')
   const [experimentType, setExperimentType] = useState<string>('')
   const [serialNumber, setSerialNumber] = useState('')
   const [IPAddress, setIPAddress] = useState('')
@@ -37,38 +50,76 @@ export default function WaitingRoom() {
   const [experimentIcon, setExperimentIcon] = useState<JSX.Element>(
     <CiPlay1 style={{ fontSize: '20px' }} />
   )
-  const navigateTo = useNavigate()
-  const [emotiBits, setEmotiBits] = useState([
-    {
-      userId: 'user1',
-      socketId: 'socket123',
-      nickname: 'Alice',
-      associatedDevice: {
-        serialNumber: 'SN001',
-        ipAddress: '192.168.1.10'
-      }
-    },
-    {
-      userId: 'user2',
-      socketId: 'socket456',
-      nickname: 'Bob',
-      associatedDevice: {
-        serialNumber: 'SN002',
-        ipAddress: '192.168.1.11'
-      }
-    },
-    {
-      userId: 'user3',
-      socketId: 'socket789',
-      nickname: null,
-      associatedDevice: null
-    }
-  ])
-  const handleBackButton = () => {
-    navigateTo('/host/select-lab', { state: { userName, roomCode, labID, name, description, imageUrl } })
-  }
 
-  // Begin Modal
+  // const [emotiBits, setEmotiBits] = useState([
+  //   {
+  //     userId: 'user1',
+  //     socketId: 'socket123',
+  //     nickname: 'Alice',
+  //     associatedDevice: {
+  //       serialNumber: 'SN001',
+  //       ipAddress: '192.168.1.10'
+  //     }
+  //   },
+  //   {
+  //     userId: 'user2',
+  //     socketId: 'socket456',
+  //     nickname: 'Bob',
+  //     associatedDevice: {
+  //       serialNumber: 'SN002',
+  //       ipAddress: '192.168.1.11'
+  //     }
+  //   },
+  //   {
+  //     userId: 'user3',
+  //     socketId: 'socket789',
+  //     nickname: null,
+  //     associatedDevice: null
+  //   }
+  // ])
+  
+  useEffect(() => {
+    if (experimentId === '1') {
+      setExperimentType('VideoLab')
+      setExperimentIcon(<IoVideocam style={{ fontSize: '20px' }} />)
+    } else if (experimentId === '2') {
+      setExperimentType('PhotoLab')
+      setExperimentIcon(<TiCamera style={{ fontSize: '20px' }} />)
+    } else if (experimentId === '3') {
+      setExperimentType('GalleryLab')
+      setExperimentIcon(<TfiGallery style={{ fontSize: '20px' }} />)
+    } else {
+      toast.error('Invalid exerimentId received')
+    }
+  }, [experimentId])
+
+  useEffect(() => {
+    if(!sessionId)
+    setSessionId('session_12345')
+  }, [sessionId, setSessionId])
+
+  useEffect(() => {
+    if (!sessionID) return
+
+    const fetchUsers = async () => {
+      try {
+        console.log('Trying to get users from session ' + sessionID)
+        const response = await fetch(`http://localhost:3000/joiner/room-users/${sessionId}`)
+        if (!response.ok) throw new Error('Failed to fetch users')
+        const data = await response.json()
+        setUsers(data.users)
+        }
+        catch(error){
+        console.error('Error fetching users:', error)
+      }
+    }
+
+    fetchUsers()
+    const interval = setInterval(fetchUsers, 5000) //Refresh users every 5 seconds
+
+    return () => clearInterval(interval)
+  }, [sessionID, setUsers]) //Don't fetch any data until sessionID is set
+  //Modal Handlers
   const handleOpenModal = () => setIsModalOpen(true)
   const handleCloseModal = () => setIsModalOpen(false)
   const handleAction = () => {
@@ -76,31 +127,48 @@ export default function WaitingRoom() {
     handleSubmit()
     handleCloseModal()
   }
+
   //Add EmotiBit Modal
   const handleOpenModalEmoti = () => setIsModalOpenEmoti(true);
   const handleCloseModalEmoti = () => setIsModalOpenEmoti(false);
+  
   const handleConfirmEmoti = () =>{
     if(!serialNumber.trim() || !IPAddress.trim()){
       toast.error("Please enter both a Serial Number and an IP Address");
-      return;
+      return
     }
-  
-    const newEmotiBit: IUser = {
+
+    const newEmotiBit = {
         userId: `user${emotiBits.length + 1}`,
         socketId: `socket${Math.floor(Math.random() * 10000)}`,
         nickname: `Joiner ${emotiBits.length + 1}`,
         associatedDevice: {
           serialNumber: serialNumber,
           ipAddress: IPAddress
-        }
-      };
-      setEmotiBits((prevEmotiBits) => [...prevEmotiBits, newEmotiBit]);
-      setSerialNumber("");
-      setIPAddress("");
-      setIsModalOpenEmoti(false);
+      }
     }
+    addUser(newEmotiBit)
+    setSerialNumber('');
+    setIPAddress('');
+    setIsModalOpenEmoti(false);
+    }
+    // const newEmotiBit: IUser = {
+    //     userId: `user${emotiBits.length + 1}`,
+    //     socketId: `socket${Math.floor(Math.random() * 10000)}`,
+    //     nickname: `Joiner ${emotiBits.length + 1}`,
+    //     associatedDevice: {
+    //       serialNumber: serialNumber,
+    //       ipAddress: IPAddress
+    //     }
+    //   };
 
   // Joined EmotiBit Settings Modal
+  const handleRemoveEmoti = () => {
+    if(!selectedEmotiBitId) return;
+    setEmotiBits((prevEmotiBits) =>
+    prevEmotiBits.filter((emotiBit) => emotiBit.userId !== selectedEmotiBitId));
+    setIsModalOpenSettings(false);
+  }
   const handleOpenModalSettings = (userId: string) => {
     setSelectedEmotiBitId(userId);
     setIsModalOpenSettings(true);
@@ -111,12 +179,6 @@ export default function WaitingRoom() {
     setSelectedEmotiBitId(null);
   };
 
-  const handleRemoveEmoti = () => {
-    if(!selectedEmotiBitId) return;
-    setEmotiBits((prevEmotiBits) =>
-    prevEmotiBits.filter((emotiBit) => emotiBit.userId !== selectedEmotiBitId));
-    setIsModalOpenSettings(false);
-  }
   const handleRemoveUser = () => {
     console.log("removing user");
     setIsModalOpenSettings(false);
@@ -127,19 +189,12 @@ export default function WaitingRoom() {
   }
 
   //handleSubmit
-  function handleSubmit() {
-    console.log('in handle submit')
-      //-----HARDCODED FOR TESTING-------
-      socket.emit("session-start");
-      navigateTo('/activity-room', { state: { userName, roomCode, labID, name, description, imageUrl } })
-
-  }
-
-
-
+  
+  
+  
   // useEffect(() => {
   //   const getSessionID = async () => {
-  //     const response = await axios.get(`http://localhost:3000/joiner/validateRoomCode/${roomCode}`)
+    //     const response = await axios.get(`http://localhost:3000/joiner/validateRoomCode/${roomCode}`)
   //     if (response.status === 200) {
   //       setSessionID(response.data.sessionID)
   //     }
@@ -147,55 +202,18 @@ export default function WaitingRoom() {
 
   //   getSessionID()
   // }, [])
-
-  useEffect(() => {
-    if (!sessionID) return
-
-    const fetchUsers = async () => {
-      try {
-        console.log('Trying to get users from session ' + sessionID)
-        const response = await axios.get(`http://localhost:3000/joiner/room-users/${sessionID}`)
-        const users = response.data.users //Array of IUser objects
-
-        const nicknames = [] //holds only the nicknames of those IUser Objects
-
-        // initialize nicknames array
-        for (let i = 0; i < users.length; i++) {
-          nicknames.push(users[i].nickname)
-        }
-
-        setNickNames(nicknames)
-      } catch (error) {
-        console.error('Error fetching users:', error)
-      }
-    }
-
-    fetchUsers()
-    const interval = setInterval(fetchUsers, 5000) // Refresh users every 5 seconds
-
-    return () => clearInterval(interval)
-  }, [sessionID]) //Don't fetch any data until sessionID is set
-
   
-  useEffect(() => {
-    if (labID === '1') {
-      setExperimentType('VideoLab')
-      setExperimentIcon(<IoVideocam style={{ fontSize: '20px' }} />)
-    } else if (labID === '2') {
-      setExperimentType('PhotoLab')
-      setExperimentIcon(<TiCamera style={{ fontSize: '20px' }} />)
-    } else if (labID === '3') {
-      setExperimentType('GalleryLab')
-      setExperimentIcon(<TfiGallery style={{ fontSize: '20px' }} />)
-    } else {
-      toast.error('Invalid labID received:', labID)
-    }
-  }, [labID])
+  const handleBackButton = () => {
+    navigateTo('/host/select-lab')
+  }
+  
+  const handleSubmit =() => {
+    console.log('in handle submit')
+      //-----HARDCODED FOR TESTING-------
+      socket.emit("session-start");
+      navigateTo('/activity-room');
 
-  useEffect(() => {
-    console.log("in waiting room")
-  }, [])
-
+  }
   return (
     <div className="flex flex-col items-center justify-center px-4 mx:px-8 w-full">
       <div className="flex flex-col md:flex-row items-start justify-between w-full max-w-6xl gap-8">
@@ -206,7 +224,7 @@ export default function WaitingRoom() {
           <p className="text-6xl md:text-6xl font-bold text-[#894DD6] break-words">{roomCode}</p>
           <div className="space-y-2">
             <p className="text-base md:text-lg">
-              <span className="font-semibold"> NICKNAME:</span> {userName}
+              <span className="font-semibold"> NICKNAME:</span> 
             </p>
             <p className="text-base md:text-lg">
               <span className="font-semibold">SENSOR SERIAL NUMBER:</span> A93KFN2/SJPP2RK401

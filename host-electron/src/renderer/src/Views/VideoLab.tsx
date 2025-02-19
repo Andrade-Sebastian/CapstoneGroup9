@@ -1,8 +1,8 @@
 import { TbUfo } from "react-icons/tb";
-import SideComponent from "../components/Components/SideComponent";
+import SideComponent from "../components/SideComponent";
 import React, { useEffect, useState } from "react";
-import VideoInput from "../components/Components/VideoInput.js";
-import ModalComponent from "../components/Components/ModalComponent.js";
+import VideoInput from "../components/VideoInput.js";
+import ModalComponent from "../components/ModalComponent.js";
 import { useLocation } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import toast, { Toaster } from 'react-hot-toast'

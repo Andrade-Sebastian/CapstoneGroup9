@@ -1,12 +1,12 @@
-/* eslint-disable prettier/prettier */
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
-import SideComponent from '../components/Components/SideComponent.tsx'
+import SideComponent from '../components/SideComponent.tsx'
 import { IoEarthOutline } from 'react-icons/io5'
 import { Icon } from 'react-icons-kit'
 import { eyeOff } from 'react-icons-kit/feather/eyeOff'
 import { eye } from 'react-icons-kit/feather/eye'
+import { useSessionStore } from '../store/useSessionStore.tsx'
 
 // This is where the host will create the room
 
@@ -17,6 +17,7 @@ export default function HostCreateRoom() {
   const [type, setType] = useState('password')
   const [icon, setIcon] = useState(eyeOff)
   const navigateTo = useNavigate()
+  const {setSessionId, setExperimentId, setRoomCode, setUsers} = useSessionStore();
 
   function handleToggle() {
     //have eye open if text is censored, if not then eye closed
@@ -28,6 +29,15 @@ export default function HostCreateRoom() {
       setType('password')
     }
   }
+
+  function generateRandomCode(length: number){
+    const numbers = '0123456789';
+    let lobbyCode = '';
+    for (let i = 0; i < length; i++){
+        lobbyCode += numbers.charAt(Math.floor(Math.random() * numbers.length));
+    }
+    return lobbyCode;
+}
 
   //hardcoded to test host/session/create
   const [sessionInfo, setSessionInfo] = useState({
@@ -46,8 +56,17 @@ export default function HostCreateRoom() {
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
+    if (!userName.trim()){
+      toast.error("Please enter a valid name.");
+      return;
+    }
 
     console.log('creating an experiment')
+    const lobbyCode = generateRandomCode(6)
+    setSessionId(`session_${lobbyCode}`);
+    setExperimentId(lobbyCode);
+    setRoomCode(lobbyCode);
+    setUsers([]);
 
     axios
       .post('http://localhost:3000/experiment/create', {
@@ -58,7 +77,7 @@ export default function HostCreateRoom() {
         console.log('Done creating an experiment')
         const newExperiment = response.data
         console.log('Experiment: ', newExperiment)
-        navigateTo('/host/select-lab', { state: { userName, newExperiment } }) //for now
+        navigateTo('/host/select-lab') //for now
       })
       .catch((error) => {
         console.error('Error creating experiment:', error)
@@ -81,7 +100,7 @@ export default function HostCreateRoom() {
         <SideComponent
           icon={<IoEarthOutline style={{ fontSize: '200px' }} />}
           headingTitle="Start an Experiment"
-          description="Provide your name, check the box if you want to set a password and/or have spectators"
+          description="Provide your name and a password to begin. Check the box if you want to have spectators."
         />
       </div>
       <div className="flex flex-col items-center justify-center w-full md:w-3/5 lg:w-3/5 p-6">

@@ -1,101 +1,107 @@
-import { PiShootingStarThin } from 'react-icons/pi';
-import SideComponent from '../components/Components/SideComponent.tsx';
-import React, { useEffect, useState } from 'react';
-import PhotoInput from '../components/Components/PhotoInput.tsx';
-import ModalComponent from '../components/Components/ModalComponent.tsx';
-import { useLocation } from 'react-router-dom';
-import { useNavigate } from 'react-router-dom';
-import toast, { Toaster } from 'react-hot-toast';
-import axios from 'axios';
+import { PiShootingStarThin } from 'react-icons/pi'
+import SideComponent from '../components/SideComponent.tsx'
+import React, { useEffect, useState } from 'react'
+import PhotoInput from '../components/PhotoInput.tsx'
+import ModalComponent from '../components/ModalComponent.tsx'
+import { useLocation } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
+import toast, { Toaster } from 'react-hot-toast'
+import axios from 'axios'
 //import createSessionInDatabase from "../../../../../WaveBrigade-backend/server/src/controllers/database.ts"
-import { IUser } from '../hooks/useSessionState.tsx';
-
+import { IUser } from '../hooks/useSessionState.tsx'
+import { useSessionStore } from '../store/useSessionStore.tsx'
 
 export default function PhotoLab() {
   const location = useLocation()
   const navigateTo = useNavigate()
-  const { userName, labID, name, newExperiment, description, imageUrl} = location.state || {};
+  const { experimentId } = useSessionStore();
+  // const { userName, labID, name, newExperiment, description, imageUrl } = location.state || {}
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [experimentTitle, setExperimentTitle] = useState(name || '')
-  const [experimentDesc, setExperimentDesc] = useState(description || '')
+  const [experimentTitle, setExperimentTitle] = useState('')
+  const [experimentDesc, setExperimentDesc] = useState('')
   const [caption, setCaption] = useState('')
   const [isFileSelected, setIsFileSelected] = useState(false)
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [imageSource, setImageSource] = useState<string | null>(imageUrl || null)
+  const [imageSource, setImageSource] = useState<string | null>(null)
   //
   //console.log('*photolab*', JSON.stringify(location.state))
-
 
   const handleOpenModal = () => setIsModalOpen(true)
   const handleCloseModal = () => setIsModalOpen(false)
   const handleAction = () => {
-    console.log('Creating lobby...');
-    handleSubmit();
-    handleCloseModal();
+    console.log('Creating lobby...')
+    handleSubmit()
+    handleCloseModal()
   }
 
+  useEffect(() => {
+    if(!experimentId){
+      toast.error("No experiment selected.");
+    }
+  }, [experimentId]);
+
+  useEffect(() => {
+    if (imageSource) {
+      setIsFileSelected(true)
+    }
+  }, [imageSource])
+
   async function handleSubmit() {
-  //ADD TOASTS AND MODAL CONFIRMATION
-  //add to database using /database/photo-lab
-  const loadingToastId = toast.loading('Creating Lab...')
-  if (isSubmitting) return
+    //ADD TOASTS AND MODAL CONFIRMATION
+    //add to database using /database/photo-lab
+    const loadingToastId = toast.loading('Creating Lab...')
+    if (isSubmitting) return
 
-  setIsSubmitting(true)
+    setIsSubmitting(true)
 
-  try {
-    //logic for sending code to backend
-    //Create the experiment before doing this
-    console.log("EXPERIMENT ID: ", newExperiment.experimentid);
+    try {
+      //logic for sending code to backend
+      //Create the experiment before doing this
 
-    const response = await axios.post('http://localhost:3000/database/photo-lab', {
-      experimentID: newExperiment.experimentid,
-      path: imageSource, //null
-      captions: caption
-    });
-    
+      const response = await axios.post('http://localhost:3000/database/photo-lab', {
+        experimentID: experimentId,
+        path: imageSource, //null
+        captions: caption
+      })
+
       if (response.status === 200) {
-        
-        console.log("!!!creating a session");
-        toast.success('Lab was created successfully', { id: loadingToastId });
-        const sessionResponse = await axios.post("http://localhost:3000/host/session/create", {
-          selectedExperimentId: newExperiment.experimentid,
-          roomCode: "12345",
-          hostSocketId: "abcd123",
+        console.log('!!!creating a session')
+        toast.success('Lab was created successfully', { id: loadingToastId })
+        const sessionResponse = await axios.post('http://localhost:3000/host/session/create', {
+          selectedExperimentId: experimentId,
+          roomCode: experimentId,
+          hostSocketId: 'abcd123',
           startTimeStamp: null,
           isPasswordProtected: false,
-          password: "",
+          password: '',
           isSpectatorsAllowed: true,
           endTimeStamp: null
-        });
-        console.log("done creating session")
-        const roomCode = sessionResponse.data.roomcode;
-        console.log("navigating to waiting room", roomCode);
+        })
+        console.log('done creating session')
+        const roomCode = sessionResponse.data.roomcode
+        console.log('navigating to waiting room', roomCode)
+        //-----HARDCODED FOR TESTING-------
+        setTimeout(() => {
           //-----HARDCODED FOR TESTING-------
-          console.log(userName, roomCode, labID, name, description, imageUrl);
-          navigateTo('/waiting-room', { state: { userName, roomCode, labID, name, description, imageUrl } })
+          navigateTo('/waiting-room')
+        }, 2000)
       } else {
         //Lab creation fails
         toast.error('Could not create lab, try again', { id: loadingToastId })
       }
     } catch (error) {
-    console.error('Could not create lab, try again', error)
-    toast.error('Could not create lab, try again', { id: loadingToastId })
-  } finally {
-    setIsSubmitting(false)
+      console.error('Could not create lab, try again', error)
+      toast.error('Could not create lab, try again', { id: loadingToastId })
+    } finally {
+      setIsSubmitting(false)
+    }
   }
-}
-
 
   function handleChange(e) {
     console.log(e.target.files)
     setFile(URL.createObjectURL(e.target.files[0]))
   }
 
-  useEffect(() => {
-    if(imageSource){
-      setIsFileSelected(true);
-    }
-  }, [imageSource]);
   return (
     <div className="flex h-screen">
       <Toaster position="top-right" />
@@ -107,6 +113,7 @@ export default function PhotoLab() {
         />
       </div>
       <div className="flex flex-col items-center justify-center w-full md:w-3/5 lg:w-3/5 p-6 min-h-[600px] space-y-6 mt-50">
+      <p className="text-lg text-gray-600"> Experiment ID: {experimentId || "None"}</p>
         <form onSubmit={handleSubmit} className="w-full max-w-md space-y-6">
           <div className="w-full">
             <label
@@ -191,7 +198,7 @@ export default function PhotoLab() {
         onAction={handleAction}
         isOpen={isModalOpen}
         onCancel={handleCloseModal}
-        button='Create Lobby'
+        button="Create Lobby"
         modalTitle="LAB CONFIRMATION"
       >
         <div className="mb-6">
