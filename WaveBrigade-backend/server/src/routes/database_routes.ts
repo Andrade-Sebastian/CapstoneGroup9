@@ -38,38 +38,38 @@ databaseRouter.post("/photo-lab", async(req: Request, res: Response) => {
     })
 })
 
+// not used as of current database 2/14
+// databaseRouter.post("/add-user-to-session", (req: Request, res: Response) => {
+//     const {
+//         userId,  //string
+//         socketID,
+//         nickname, 
+//         roomCode
+//     } = req.body
 
-databaseRouter.post("/add-user-to-session", (req: Request, res: Response) => {
-    const {
-        userId,  //string
-        socketID,
-        nickname, 
-        roomCode
-    } = req.body
+//     const infoForDatabase: IUserDatabaseInfo = {
+//         userId: userId,
+//         socketId: socketID,
+//         nickname: nickname,
+//         associatedDevice: null,
+//         roomCode: roomCode
+//     }
 
-    const infoForDatabase: IUserDatabaseInfo = {
-        userId: userId,
-        socketId: socketID,
-        nickname: nickname,
-        associatedDevice: null,
-        roomCode: roomCode
-    }
+//     try{
+//         //addUserToSession(infoForDatabase)
+//     }
+//     catch (error) {
+//         res.status(500).send({
+//             "message": "Could not add user to session in the datab",
+//             "error": error
+//         });
+//     }
 
-    try{
-        //addUserToSession(infoForDatabase)
-    }
-    catch (error) {
-        res.status(500).send({
-            "message": "Could not add user to session in the datab",
-            "error": error
-        });
-    }
-
-    res.status(200).send({
-        "message": "In /add-user-to-session"
-    })
+//     res.status(200).send({
+//         "message": "In /add-user-to-session"
+//     })
 
 
-})
+// })
 
 export default databaseRouter;

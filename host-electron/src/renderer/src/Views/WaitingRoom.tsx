@@ -132,21 +132,7 @@ export default function WaitingRoom() {
       //-----HARDCODED FOR TESTING-------
       socket.emit("session-start");
       navigateTo('/activity-room', { state: { userName, roomCode, labID, name, description, imageUrl } })
-
   }
-
-
-
-  // useEffect(() => {
-  //   const getSessionID = async () => {
-  //     const response = await axios.get(`http://localhost:3000/joiner/validateRoomCode/${roomCode}`)
-  //     if (response.status === 200) {
-  //       setSessionID(response.data.sessionID)
-  //     }
-  //   }
-
-  //   getSessionID()
-  // }, [])
 
   useEffect(() => {
     if (!sessionID) return

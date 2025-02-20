@@ -107,8 +107,8 @@ export async function validateRoomCode(roomCode:string): Promise<boolean>
 	try{
 		await dbClient.connect();
 		const query = await dbClient.queryObject(`SELECT 
-			roomcode FROM session WHERE roomcode='${roomCode}';
-			`)
+			roomcode FROM session WHERE roomcode= $1`,
+			[roomCode]);
 		console.log(query)
 
 		if (query.rows.length > 0){//result is valid
@@ -356,5 +356,35 @@ export async function addUserToSession(initializationinfo: IUserDatabaseInfo): P
 	catch(error)
 	{
 		console.log("Unable to add user ", error)
+	}
+}
+
+export async function getUsersFromSession(sessionID: string){
+	try{
+		await dbClient.connect();
+		const query = await dbClient.queryObject(`SELECT * FROM Get_Session_Users($1)`,
+			[sessionID]
+		);
+		console.log("Users retrieved from ", sessionID, query);
+		return query.rows[0];
+	}
+	catch(error){
+		console.log("Unable to retrieve users");
+	}
+}
+
+export async function removeUserFromSession(sessionID: string, socketID: string){
+	try{
+		await dbClient.connect();
+		const query = await dbClient.queryObject(`DELETE FROM User WHERE sessionID = $1 AND frontendsocketid = $2`,
+			[sessionID, socketID]
+		);
+		console.log("Deleted user");
+	}
+	catch(error){
+		console.log("Unable to delete user");
+	}
+	finally{
+		await dbClient.end();
 	}
 }

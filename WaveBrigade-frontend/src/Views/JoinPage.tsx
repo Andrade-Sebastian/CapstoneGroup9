@@ -21,51 +21,38 @@ export default function JoinPage() {
   const [socketID, setSocketID] = useState("");
 
 
-  // Get session ID when user types in a room code
-  // useEffect(() => {
-  //   const getSessionID = async () => {
-  //     try {
-  //       const response = await axios.get(`http://localhost:3000/joiner/validateRoomCode/${StudentInputRoomCode}`);
-  //       if (response.status === 200) {
-  //         setSessionID(response.data.sessionID)//socketIO session ID -- old
-  //         setSocketID(sessionStorage.getItem("socketID") || "");  
-  //       }
-  //     } catch (error) {
-  //       console.error("Error fetching session ID:", error);
-  //     }
-  //   };
-  //   if (StudentInputRoomCode) {
-  //     getSessionID();  // Call it when room code is entered --change to when submitted
-  //   }
-    
-  // }, [StudentInputRoomCode]);  
-
-
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     const loadingToastId = toast.loading("Verifying Room Code...");
   
-    if (!StudentInputRoomCode || !nickName) {
+    if (!StudentInputRoomCode && !nickName) {
       console.error("Please enter both a nickname and a room code...");
       return;
     }
-
+    else{
+      if(StudentInputRoomCode.length !== 5){
+        console.error("Please enter a valid room code");
+        return;
+      }
+    }
+    
     try{
       const isValidRoomCode = await validateRoomCode(StudentInputRoomCode);
       if (isValidRoomCode) {
         toast.success("Connection Successful! Please standby", {id: loadingToastId});
-        setTimeout(() => {
-          joinRoom();
-          navigateTo("/connect-emotibit", {
-            state: {
-              nickName: nickName,
-              roomCode: StudentInputRoomCode,
-            }
-          });
-
-        })
+        const isJoinedRoom = await joinRoom();
+        if(isJoinedRoom){
+          setTimeout(() => {
+            navigateTo("/connect-emotibit", {
+              state: {
+                nickName: nickName,
+                roomCode: StudentInputRoomCode,
+              }
+            });
+          })
+        }
     }
     else{
       toast.error("Connection failed. Looks like we couldn't get you connected. Please check your room code and try again.", {id: loadingToastId});
@@ -92,23 +79,21 @@ export default function JoinPage() {
   };
 
   const joinRoom = async () => {
+    try{
+      console.log("Socket ID: " + socketID);
+      console.log("Session ID: " + sessionID);
+      const response = await axios.get(`http://localhost:3000/joiner/join-session/${sessionID}/${socketID}`);
+      if(response.status === 200){
+        console.log("Added user to session!");
+        return true;
+      }
+    }
+    catch(error){
+        console.error("Could not add User to session", error);
+        return false;
+      }
+    }
     
-    console.log("Socket ID: " + socketID);
-    console.log("Session ID: " + sessionID);
-
-    // try {
-    //   await axios.post("http://wb-backend-express:3000/database/add-user-to-session", {
-    //     userId: userId,
-    //     socketId: socketID,
-    //     nickname: nickName,
-    //     associatedDevice: null,
-    //     roomCode: StudentInputRoomCode
-    //   });
-    // } catch (error) {
-    //   console.error("Error joining room:", error);
-    // }
-  };
-  
 
   return (
     <div className="flex h-screen">
