@@ -34,7 +34,6 @@ export default function WaitingRoom() {
     addUser,
     removeUser,
   } = useSessionStore()
-  const location = useLocation()
   // const {userName, roomCode, labID, name, description, imageUrl } = location.state || {}
   const [nicknames, setNickNames] = useState<string[]>([])
   const [sessionID, setSessionID] = useState('')
@@ -50,33 +49,6 @@ export default function WaitingRoom() {
   const [experimentIcon, setExperimentIcon] = useState<JSX.Element>(
     <CiPlay1 style={{ fontSize: '20px' }} />
   )
-
-  // const [emotiBits, setEmotiBits] = useState([
-  //   {
-  //     userId: 'user1',
-  //     socketId: 'socket123',
-  //     nickname: 'Alice',
-  //     associatedDevice: {
-  //       serialNumber: 'SN001',
-  //       ipAddress: '192.168.1.10'
-  //     }
-  //   },
-  //   {
-  //     userId: 'user2',
-  //     socketId: 'socket456',
-  //     nickname: 'Bob',
-  //     associatedDevice: {
-  //       serialNumber: 'SN002',
-  //       ipAddress: '192.168.1.11'
-  //     }
-  //   },
-  //   {
-  //     userId: 'user3',
-  //     socketId: 'socket789',
-  //     nickname: null,
-  //     associatedDevice: null
-  //   }
-  // ])
   
   useEffect(() => {
     if (experimentId === '1') {
@@ -152,15 +124,6 @@ export default function WaitingRoom() {
     setIPAddress('');
     setIsModalOpenEmoti(false);
     }
-    // const newEmotiBit: IUser = {
-    //     userId: `user${emotiBits.length + 1}`,
-    //     socketId: `socket${Math.floor(Math.random() * 10000)}`,
-    //     nickname: `Joiner ${emotiBits.length + 1}`,
-    //     associatedDevice: {
-    //       serialNumber: serialNumber,
-    //       ipAddress: IPAddress
-    //     }
-    //   };
 
   // Joined EmotiBit Settings Modal
   const handleRemoveEmoti = () => {

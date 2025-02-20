@@ -239,24 +239,16 @@ export async function createVideoLabInDatabase(initializationInfo: IVideoLabData
 
 	try{
 		await dbClient.connect();
-		const pkQuery = await dbClient.queryObject(`SELECT 
-			MAX(videolabid) FROM videolab;
-			`)
-
-		const primaryKey: number = pkQuery.rows[0].max + 1//max primary key currently in the database
 
 		const query = await dbClient.queryObject(`
-			INSERT INTO videolab (
-			videolabid, 
+			INSERT INTO videolab ( 
 			experimentid,
-			path, 
-			captions
+			path
 			) 
-			VALUES ($1, $2, $3, $4);
+			VALUES ($1, $2);
 			`, [
-				primaryKey,
 				experimentID,
-				path,
+				path
 			]);
 
 		console.log("(database.ts): Video Lab Successfully Added")
@@ -274,22 +266,15 @@ export async function createGalleryLabInDatabase(initializationInfo: IGalleryLab
 
 	try{
 		await dbClient.connect();
-		const pkQuery = await dbClient.queryObject(`SELECT 
-			MAX(gallerylabid) FROM gallerylab;
-			`)
-
-		const primaryKey: number = pkQuery.rows[0].max + 1//max primary key currently in the database
 
 		const query = await dbClient.queryObject(`
 			INSERT INTO gallerylab (
-			gallerylabid, 
 			experimentid,
 			path, 
 			captions
 			) 
 			VALUES ($1, $2, $3, $4);
 			`, [
-				primaryKey,
 				experimentID,
 				path,
 				captions

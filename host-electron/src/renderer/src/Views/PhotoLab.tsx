@@ -3,19 +3,15 @@ import SideComponent from '../components/SideComponent.tsx'
 import React, { useEffect, useState } from 'react'
 import PhotoInput from '../components/PhotoInput.tsx'
 import ModalComponent from '../components/ModalComponent.tsx'
-import { useLocation } from 'react-router-dom'
 import { useNavigate } from 'react-router-dom'
 import toast, { Toaster } from 'react-hot-toast'
 import axios from 'axios'
-//import createSessionInDatabase from "../../../../../WaveBrigade-backend/server/src/controllers/database.ts"
 import { IUser } from '../hooks/useSessionState.tsx'
 import { useSessionStore } from '../store/useSessionStore.tsx'
 
 export default function PhotoLab() {
-  const location = useLocation()
   const navigateTo = useNavigate()
-  const { experimentId } = useSessionStore();
-  // const { userName, labID, name, newExperiment, description, imageUrl } = location.state || {}
+  const { experimentId, roomCode } = useSessionStore();
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [experimentTitle, setExperimentTitle] = useState('')
   const [experimentDesc, setExperimentDesc] = useState('')
@@ -23,8 +19,7 @@ export default function PhotoLab() {
   const [isFileSelected, setIsFileSelected] = useState(false)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [imageSource, setImageSource] = useState<string | null>(null)
-  //
-  //console.log('*photolab*', JSON.stringify(location.state))
+
 
   const handleOpenModal = () => setIsModalOpen(true)
   const handleCloseModal = () => setIsModalOpen(false)
@@ -69,7 +64,7 @@ export default function PhotoLab() {
         toast.success('Lab was created successfully', { id: loadingToastId })
         const sessionResponse = await axios.post('http://localhost:3000/host/session/create', {
           selectedExperimentId: experimentId,
-          roomCode: experimentId,
+          roomCode: roomCode,
           hostSocketId: 'abcd123',
           startTimeStamp: null,
           isPasswordProtected: false,
@@ -78,7 +73,6 @@ export default function PhotoLab() {
           endTimeStamp: null
         })
         console.log('done creating session')
-        const roomCode = sessionResponse.data.roomcode
         console.log('navigating to waiting room', roomCode)
         //-----HARDCODED FOR TESTING-------
         setTimeout(() => {
@@ -114,6 +108,7 @@ export default function PhotoLab() {
       </div>
       <div className="flex flex-col items-center justify-center w-full md:w-3/5 lg:w-3/5 p-6 min-h-[600px] space-y-6 mt-50">
       <p className="text-lg text-gray-600"> Experiment ID: {experimentId || "None"}</p>
+      <p className="text-lg text-gray-600"> Room Code: {roomCode || "None"}</p>
         <form onSubmit={handleSubmit} className="w-full max-w-md space-y-6">
           <div className="w-full">
             <label

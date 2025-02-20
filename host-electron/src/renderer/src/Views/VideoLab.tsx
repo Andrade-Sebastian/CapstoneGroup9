@@ -3,14 +3,51 @@ import SideComponent from "../components/SideComponent";
 import React, { useEffect, useState } from "react";
 import VideoInput from "../components/VideoInput.js";
 import ModalComponent from "../components/ModalComponent.js";
-import { useLocation } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import toast, { Toaster } from 'react-hot-toast'
 import socket from './socket';
 import axios from 'axios'
+import { useSessionStore } from '../store/useSessionStore.tsx'
 
 export default function VideoLab() {
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [experimentTitle, setExperimentTitle] = useState(name || '');
+  const [experimentDesc, setExperimentDesc] = useState('');
+  const [isFileSelected, setIsFileSelected] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [thumbnail, setThumbnail] = useState<string | null>(null);
+  const [videoSource, setVideoSource] = useState<string | null>(null);
+  const navigateTo = useNavigate();
+  const {roomCode, experimentId} = useSessionStore();
+
+  useEffect(() => {
+    if(videoSource){
+      setIsFileSelected(true);
+    }
+  }, [videoSource]);
+
+  useEffect(() => {
+    if(!experimentId){
+      toast.error("No experiment selected.");
+    }
+  }, [experimentId]);
+
+  //modal
+  const handleOpenModal = () => setIsModalOpen(true);
+  const handleCloseModal = () => setIsModalOpen(false);
+  const handleAction = () => {
+    console.log("Creating lobby...");
+    handleSubmit();
+    handleCloseModal();
+  };
+  const handleFileSelected = (isFileSelected: boolean) => {
+    console.log("File selected:", isFileSelected);
+  }
+  
+  function handleChange(e) {
+    console.log(e.target.files);
+    setFile(URL.createObjectURL(e.target.files[0]));
+  }
   async function handleSubmit() {
     //ADD TOASTS AND MODAL CONFIRMATION
     //add to database using /database/photo-lab
@@ -23,65 +60,37 @@ export default function VideoLab() {
       //logic for sending code to backend
       //Create the experiment before doing this
       const response = await axios.post('http://localhost:3000/database/video-lab', {
-        experimentID: labID,
+        experimentID: experimentId,
         path: videoSource, //null
       })
 
-      if (response.data.success) {
+      if (response.status === 200) {
         toast.success('Lab was created successfully', { id: loadingToastId })
+        const sessionResponse = await axios.post('http://localhost:3000/host/session/create', {
+          selectedExperimentId: experimentId,
+          roomCode: roomCode,
+          hostSocketId: 'abcd123',
+          startTimeStamp: null,
+          isPasswordProtected:false,
+          password: '',
+          isSpectatorsAllowed: true,
+          endTimeStamp: null
+        })
         setTimeout(() => {
           //-----HARDCODED FOR TESTING-------
-          navigateTo('/waiting-room', { state: { nickName, roomCode: '12345', labID, name, description, imageUrl } })
+          navigateTo('/waiting-room')
         }, 2000)
       } else {
         //Lab creation fails
         toast.error('Could not create lab, try again', { id: loadingToastId })
-        setTimeout(() => {
-          //-----HARDCODED FOR TESTING-------
-          navigateTo('/waiting-room', { state: { nickName, roomCode: '12345', labID, name, description, imageUrl } })
-        }, 2000)
       }
     } catch (error) {
       console.error('Could not create lab, try again', error)
       toast.error('Could not create lab, try again', { id: loadingToastId })
-      setTimeout(() => {
-        //-----HARDCODED FOR TESTING-------
-        navigateTo('/waiting-room', { state: { nickName, roomCode: '12345', labID, name, description, imageUrl } })
-      }, 2000)
     } finally {
       setIsSubmitting(false)
     }
   }
-  const location = useLocation();
-  const { nickName, labID, name, description, imageUrl, videoUrl } = location.state || {};
-  const [experimentTitle, setExperimentTitle] = useState(name || '');
-  const [experimentDesc, setExperimentDesc] = useState(description || '');
-  const [isFileSelected, setIsFileSelected] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [thumbnail, setThumbnail] = useState<string | null>(imageUrl || null);
-  const [videoSource, setVideoSource] = useState<string | undefined>(videoUrl || null);
-  const navigateTo = useNavigate();
-  //modal
-  const handleOpenModal = () => setIsModalOpen(true);
-  const handleCloseModal = () => setIsModalOpen(false);
-  const handleAction = () => {
-    console.log("Creating lobby...");
-    handleSubmit();
-    handleCloseModal();
-  };
-  const handleFileSelected = (isFileSelected: boolean) => {
-    console.log("File selected:", isFileSelected);
-  }
-
-  function handleChange(e) {
-    console.log(e.target.files);
-    setFile(URL.createObjectURL(e.target.files[0]));
-  }
-  useEffect(() => {
-    if(videoSource){
-      setIsFileSelected(true);
-    }
-  }, [videoSource]);
   return (
     <div className="flex h-screen">
       <div className="flex flex-col max-sm:hidden items-center justify-center w-2/5">
@@ -93,6 +102,8 @@ export default function VideoLab() {
         />
       </div>
       <div className="flex flex-col items-center justify-center w-full md:w-3/5 lg:w-3/5 p-6">
+      <p className="text-lg text-gray-600"> Experiment ID: {experimentId || "None"}</p>
+      <p className="text-lg text-gray-600"> Room Code: {roomCode || "None"}</p>
         <form onSubmit={handleSubmit} className="w-full max-w-md">
           <div className="mb-6">
             <label
@@ -143,7 +154,6 @@ export default function VideoLab() {
               onFileSelected={setIsFileSelected}
               onSourceChange = {setVideoSource}
               videoSource={videoSource}
-              imageSource= {imageUrl}
             />
           </div>
           <div className="flex gap-10 items-center justify-center">

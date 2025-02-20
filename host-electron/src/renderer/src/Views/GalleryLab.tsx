@@ -3,27 +3,25 @@ import SideComponent from '../components/SideComponent.tsx'
 import React, { useEffect, useState } from 'react'
 import GalleryInput from '../components/GalleryInput'
 import ModalComponent from '../components/ModalComponent.tsx'
-import { useLocation } from 'react-router-dom'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import toast, { Toaster } from 'react-hot-toast'
+import { useSessionStore } from '../store/useSessionStore.tsx'
 
 export default function GalleryLab() {
-  const location = useLocation()
-  const { nickName, labID, name, description, imageUrl } = location.state || {};
-  const [experimentTitle, setExperimentTitle] = useState(name || '')
-  const [experimentDesc, setExperimentDesc] = useState(description || '')
+  const { experimentId, roomCode } = useSessionStore();
+  const [experimentTitle, setExperimentTitle] = useState('')
+  const [experimentDesc, setExperimentDesc] = useState('')
   const [file, setFile] = useState()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [caption, setCaption] = useState()
   const [isFileSelected, setIsFileSelected] = useState(false)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isModalOpenPhoto, setIsModalOpenPhoto] = useState(false)
-  const [imageSource, setImageSource] = useState<string | null>(imageUrl || null)
+  const [imageSource, setImageSource] = useState<string | null>(null)
   const [tempImage, setTempImage] = useState<string | null>(null)
   const [imageList, setImageList] = useState<{url: string; caption: string} []>([])
   //
-  console.log('*photolab*', JSON.stringify(location.state))
   const navigateTo = useNavigate()
   
   const handleOpenModal = () => setIsModalOpen(true)
@@ -71,16 +69,26 @@ export default function GalleryLab() {
       //logic for sending code to backend
       //Create the experiment before doing this
       const response = await axios.post('http://localhost:3000/database/gallery-lab', {
-        experimentID: labID,
+        experimentID: experimentId,
         path: imageSource, //null
         captions: caption
       })
 
-      if (response.data.success) {
+      if (response.status === 200) {
         toast.success('Lab was created successfully', { id: loadingToastId })
+        const sessionResponse = await axios.post('http://localhost:3000/host/session/create', {
+          selectedExperimentId: experimentId,
+          roomCode: roomCode,
+          hostSocketId: 'abcd123',
+          startTimeStamp: null,
+          isPasswordProtected: false,
+          password: '',
+          isSpectatorAllowed: true,
+          endTimeStamp: null
+        })
         setTimeout(() => {
           //-----HARDCODED FOR TESTING-------
-          navigateTo('/waiting-room', { state: { nickName, roomCode: '12345', labID, name, description, imageUrl } })
+          navigateTo('/waiting-room')
         }, 2000)
       } else {
         //Lab creation fails
@@ -115,6 +123,8 @@ export default function GalleryLab() {
       </div>
       {/* Middle */}
       <div className="flex flex-col items-center justify-center w-2/5">
+      <p className="text-lg text-gray-600"> Experiment ID: {experimentId || "None"}</p>
+      <p className="text-lg text-gray-600"> Room Code: {roomCode || "None"}</p>
         <form onSubmit={handleSubmit} className="w-full max-w-md">
           <div className="mb-6">
             <label

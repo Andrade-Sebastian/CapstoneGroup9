@@ -17,7 +17,7 @@ export default function HostCreateRoom() {
   const [type, setType] = useState('password')
   const [icon, setIcon] = useState(eyeOff)
   const navigateTo = useNavigate()
-  const {setSessionId, setExperimentId, setRoomCode, setUsers} = useSessionStore();
+  const {setSessionId, setRoomCode, setUsers} = useSessionStore();
 
   function handleToggle() {
     //have eye open if text is censored, if not then eye closed
@@ -64,7 +64,6 @@ export default function HostCreateRoom() {
     console.log('creating an experiment')
     const lobbyCode = generateRandomCode(6)
     setSessionId(`session_${lobbyCode}`);
-    setExperimentId(lobbyCode);
     setRoomCode(lobbyCode);
     setUsers([]);
 

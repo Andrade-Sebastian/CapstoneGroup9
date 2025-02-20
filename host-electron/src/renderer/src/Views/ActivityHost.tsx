@@ -23,8 +23,8 @@ export default function WaitingRoom() {
   const { users, roomCode, experimentId, addUser, removeUser } = useSessionStore(); 
   const [nicknames, setNickNames] = useState<string[]>([])
   const [sessionID, setSessionID] = useState('')
-  const [experimentTitle, setExperimentTitle] = useState(name || '')
-  const [experimentDesc, setExperimentDesc] = useState(description || '')
+  const [experimentTitle, setExperimentTitle] = useState('')
+  const [experimentDesc, setExperimentDesc] = useState( '')
   const [experimentType, setExperimentType] = useState<string>('')
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [serialNumber, setSerialNumber] = useState('')
@@ -164,19 +164,19 @@ export default function WaitingRoom() {
     return () => clearInterval(interval)
   }, [sessionID]) //Don't fetch any data until sessionID is set
   useEffect(() => {
-    if (labID === '1') {
+    if (experimentId === '1') {
       setExperimentType('VideoLab')
       setExperimentIcon(<IoVideocam style={{ fontSize: '20px' }} />)
-    } else if (labID === '2') {
+    } else if (experimentId === '2') {
       setExperimentType('PhotoLab')
       setExperimentIcon(<TiCamera style={{ fontSize: '20px' }} />)
-    } else if (labID === '3') {
+    } else if (experimentId === '3') {
       setExperimentType('GalleryLab')
       setExperimentIcon(<TfiGallery style={{ fontSize: '20px' }} />)
     } else {
-      toast.error('Invalid labID received:', labID)
+      toast.error('Invalid experimentid received')
     }
-  }, [labID])
+  }, [experimentId])
   return (
     <div className="flex flex-col items-center justify-center mx-8">
       <Toaster position="top-right" />

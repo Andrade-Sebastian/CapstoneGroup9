@@ -1,6 +1,5 @@
 import React, { ReactElement, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useLocation } from 'react-router-dom'
 import axios from 'axios'
 import { IoVideocam } from 'react-icons/io5'
 import { RiGalleryFill } from "react-icons/ri";
@@ -10,14 +9,7 @@ import CardComponentRadio from '../components/CardComponentRadio.tsx'
 import SideComponent from '../components/SideComponent.tsx'
 import toast, { Toaster } from 'react-hot-toast'
 import { useSessionStore } from '../store/useSessionStore.tsx'
-//added routing to /host/select-lab
-//8:49 -
-//created HostSelectlabPage
-//installed nextUI
-//Use a listbox from nextUI
-//https://nextui.org/docs/components/listbox
 
-//    const { nickName, roomCode } = location.state || {};
 
 export interface ILab {
   id: string
@@ -29,7 +21,6 @@ export interface ILab {
 export default function HostSelectLabPage() {
   const navigateTo = useNavigate()
   const { setExperimentId, roomCode } = useSessionStore();
-  const location = useLocation()
   const [experimentName, setExperimentName] = useState('')
   const [labDescription, setLabDescription] = useState('')
   const [selectedLab, setSelectedLab] = useState<ILab>()
@@ -70,10 +61,13 @@ export default function HostSelectLabPage() {
     e.preventDefault()
     if (selectedLab) {
       if (selectedLab.id === '1') {
+        setExperimentId('1');
         navigateTo('/host/video-lab')
       } else if (selectedLab.id === '2') {
+        setExperimentId('2');
         navigateTo('/host/photo-lab')
       } else if (selectedLab.id === '3') {
+        setExperimentId('3');
         navigateTo('/host/gallery-lab')
       } else {
         toast.error("Error, select another option.")
