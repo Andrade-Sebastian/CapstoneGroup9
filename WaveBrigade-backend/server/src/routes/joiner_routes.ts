@@ -169,7 +169,7 @@ joinerRouter.post("/leave-room/:sessionID/:socketID", (req: Request, res: Respon
 })
 
 //stored procedure
-joinerRouter.post("/verify-serial", (req: Request, res: Response) => {
+joinerRouter.post("/verify-serial", async (req: Request, res: Response) => {
     console.log("Request received at /verify-serial:", req.body);
     const {nickName, roomCode, serialCode } = req.body;
     //change this later to the correct serial code implementation
