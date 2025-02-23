@@ -5,11 +5,45 @@
 	-- 3. Updating the availability status of a device
 	-- 4. Getting all users in a session
 	-- 5. Getting the state of a session
-drop function if exists Get_Session_State(VARCHAR(100));
+
 drop function if exists Check_Session_Availability(VARCHAR(100));
 drop function if exists Get_Session_Mappings(INT);
 drop function if exists Update_Device_Availability (INT, BOOL);
 drop function if exists Get_Session_Users(INT);
+drop function if exists Create_Session(INT, VARCHAR(100), VARCHAR(100), BOOLEAN, VARCHAR(100), BOOLEAN);
+drop function if exists Join_Session(VARCHAR(100), VARCHAR(100), TEXT, VARCHAR(100), TEXT);
+
+CREATE OR REPLACE FUNCTION Create_Session(experiment_id INT, room_code VARCHAR(100), host_socket_id VARCHAR(100), is_password_protected BOOLEAN, "password" VARCHAR(100), is_spectators_allowed BOOLEAN)
+RETURNS TABLE (-- SESSION MINUS PASSWORD
+	sessionid INT,
+    experimentid INT,
+    roomcode VARCHAR(100),
+    hostsocketid VARCHAR(100),
+    starttimestamp TIMESTAMP,
+    ispasswordprotected BOOLEAN,
+    isspectatorsallowed BOOLEAN,
+    endtimestamp TIMESTAMP
+) AS $$
+BEGIN
+	--insert the new session 
+	INSERT INTO session(experimentid, roomcode, hostsocketid, starttimestamp, ispasswordprotected, password, isspectatorsallowed, endtimestamp) 
+	VALUES (
+		experiment_id,
+		room_code, 
+		host_socket_id,
+		null, -- starttimestamp
+		is_password_protected, 
+		password, 
+		is_spectators_allowed, 
+		null -- endtimestamp
+	);
+    RETURN QUERY
+		SELECT session.sessionid, session.experimentid, session.roomcode, session.hostsocketid, session.starttimestamp, session.ispasswordprotected, session.isspectatorsallowed, session.endtimestamp from session
+			WHERE session.roomcode = room_code;	
+END;
+$$ LANGUAGE plpgsql;
+
+-- select * from Create_Session(2, '1234567', 'host-socket-id', FALSE, null, FALSE);
 
 --DONE
 --Check_Session_Availability (room_code): 
@@ -240,8 +274,8 @@ $$ LANGUAGE plpgsql;
 -- 3. return device-user table *done*
 
 
-drop function if exists Join_Session(VARCHAR(100), TEXT, VARCHAR(100), TEXT);
-CREATE FUNCTION Join_Session(param_nickname VARCHAR(100), room_code TEXT, user_role VARCHAR(100), sn_four_digits TEXT)
+
+CREATE FUNCTION Join_Session(param_nickname VARCHAR(100), socket_id VARCHAR(100), room_code TEXT, user_role VARCHAR(100), sn_four_digits TEXT)
 RETURNS TABLE(
 	joiner_deviceid INT, 
 	joiner_ipaddress VARCHAR(100),
@@ -291,7 +325,7 @@ BEGIN
             device_id, -- device
             found_session_id, 
             FALSE, 
-            NULL, -- frontendsocketid
+            socket_id, -- frontendsocketid
             NULL, -- leftsession
             user_role, 
             'secret' -- secret -- FUTURE
@@ -320,7 +354,7 @@ BEGIN
 		END IF;
 		END IF;
 	
-	--     -- Return all fields from Device and User tables
+	   -- Return all fields from Device and User tables
 	     RETURN QUERY 
 		    SELECT dev.deviceid, dev.ipaddress, dev.serialnumber, dev.devicesocketid, dev.samplingfrequency, 
 		           dev.isavailable, dev.isconnected, 

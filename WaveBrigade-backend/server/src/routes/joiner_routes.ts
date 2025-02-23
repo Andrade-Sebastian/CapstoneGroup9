@@ -3,6 +3,7 @@ import {addDiscoveredDevice, getSessionState, IDevice, createSession, joinSessio
 import SessionManager from "../sessions_singleton.ts";
 import { addSocketToSession, removeSocket, getSessionBySocket, socketSessionMap } from "../sessionMappings.ts";
 import axios from "axios";
+import {addUserToSession} from "../controllers/database.ts";
 import { validateRoomCode } from "../controllers/database.ts";
 const app = express();
 const joinerRouter = express.Router();
@@ -30,6 +31,34 @@ joinerRouter.get("/session/:sessionId", (req: Request, res: Response) => {
         }
     }
 })
+
+//roomcode, nickname, 
+joinerRouter.post("/session/join", async (req: Request, res: Response) => {
+    const {
+        socketID,
+		nickname, 
+		roomCode,
+		serialNumberLastFour
+	} = req.body;
+
+    try{
+        await addUserToSession({
+            "socketID": socketID,
+            "nickname": nickname,
+            "roomCode": roomCode,
+            "serialNumberLastFour": serialNumberLastFour
+        }).then(() => {
+            console.log("User successfully added to session")
+            return res.status(200).send("In /session/join");
+        }
+        )
+    }
+    catch(error){
+        console.log("Unable to add user ", error)
+    }
+
+}
+)
 
 //uses singleton chicken
 joinerRouter.post("/join-session/:requestedSessionId/:socketId", (req: Request, res: Response) => {
@@ -82,28 +111,6 @@ joinerRouter.get("/room-users/:sessionID", (req: Request, res: Response) => {
 });
 
 
-
-// import socketSessionMap from "../sessionMappings.ts";
-joinerRouter.post("/join-room", (req: Request, res: Response) => {
-//-----OLD SOCKETIO Code--
-    // const {sessionID, socketID, nickname, associatedDevice} = req.body;
-    
-    
-    // console.log("(joiner_routes.ts): at '/join-room', received: " + JSON.stringify(req.body));
-    // addSocketToSession(socketID, sessionID)
-
-    // console.log("socketMapping: " + JSON.stringify(socketSessionMap))
-    
-    // //join the room
-    // joinRoom(sessionID, socketID, nickname, associatedDevice)
-//-----OLD SOCKETIO Code--
-
-
-    
-    return res.status(200).json({ message: "Successfully Joined session"});
-    
-    
-})
 
 joinerRouter.get("/validateRoomCode/:roomCode", async (req: Request, res: Response) => {
     const roomCode = req.params.roomCode;
@@ -204,4 +211,67 @@ joinerRouter.get("/debug", (req: Request, res: Response) => {
 })
 
 
+import { Client } from "https://deno.land/x/postgres@v0.17.0/mod.ts";
+export const dbClient = new Client({
+  user: "postgres",
+  database: "WB_Database",
+  password: "postgres",
+  hostname: "wb-backend-database",
+  port: 5432,
+});
+
+//change to function
+joinerRouter.get("/session/getInfo/:roomCode", async (req: Request, res: Response) => {
+    console.log("In joiner/session/getInfo/:roomCode")
+
+    const roomCode = req.params.roomCode;
+
+    try{
+        await dbClient.connect()
+        
+        const query = await dbClient.queryObject(`SELECT 
+            sessionid, 
+            experimentid, 
+            roomcode, 
+            hostsocketid,
+            starttimestamp, 
+            ispasswordprotected,
+            isspectatorsallowed,
+            endtimestamp
+            FROM SESSION WHERE roomcode = '${roomCode}'`);
+            
+        const result = query.rows[0] as {
+            experimentid: string,
+            roomcode: string,
+            hostsocketid: string,
+            starttimestamp: string,
+            ispasswordprotected: boolean,
+            isspectatorsallowed: boolean,
+            endtimestamp: string | null
+        };
+
+        return res.status(200).send(result)
+
+    } 
+    catch(error: unknown)
+    {
+        console.log(error);
+        return res.status(500).send(error);
+    }
+    finally 
+    {
+        await dbClient.end();
+    }
+
+})
+
+
+
+
+
+
 export default joinerRouter;
+
+
+
+
