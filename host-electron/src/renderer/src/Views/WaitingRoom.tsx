@@ -152,19 +152,43 @@ export default function WaitingRoom() {
   }
 
   //handleSubmit
-  
-  
-  
-  // useEffect(() => {
-  //   const getSessionID = async () => {
-    //     const response = await axios.get(`http://localhost:3000/joiner/validateRoomCode/${roomCode}`)
-  //     if (response.status === 200) {
-  //       setSessionID(response.data.sessionID)
-  //     }
-  //   }
 
-  //   getSessionID()
-  // }, [])
+  function handleSubmit() {
+    console.log('in handle submit')
+      //-----HARDCODED FOR TESTING-------
+      socket.emit("session-start");
+      navigateTo('/activity-room', { state: { userName, roomCode, labID, name, description, imageUrl } })
+  }
+
+  useEffect(() => {
+    if (!sessionID) return
+
+    const fetchUsers = async () => {
+      try {
+        console.log('Trying to get users from session ' + sessionID)
+        const response = await axios.get(`http://localhost:3000/joiner/room-users/${sessionID}`)
+        const users = response.data.users //Array of IUser objects
+
+        const nicknames = [] //holds only the nicknames of those IUser Objects
+
+        // initialize nicknames array
+        for (let i = 0; i < users.length; i++) {
+          nicknames.push(users[i].nickname)
+        }
+
+        setNickNames(nicknames)
+      } catch (error) {
+        console.error('Error fetching users:', error)
+      }
+    }
+
+    fetchUsers()
+    const interval = setInterval(fetchUsers, 5000) // Refresh users every 5 seconds
+
+    return () => clearInterval(interval)
+  }, [sessionID]) //Don't fetch any data until sessionID is set
+
+
   
   const handleBackButton = () => {
     navigateTo('/host/select-lab')

@@ -9,16 +9,17 @@ experimentRouter.use(express.json());
 
 
 // get experiments array
-experimentRouter.get("/", (req: Request, res: Response) => {
-    try {
-        const experiments = getAllExperiments()
+//not used as of 2/14
+// experimentRouter.get("/debug", (req: Request, res: Response) => {
+//     try {
+//         const experiments = getAllExperiments()
 
-        res.status(200).send(experiments);
+//         res.status(200).send({"message": "in experiments debug"});
 
 
-    } catch (error) {
-    res.status(500).send({error: error.message})
-}})
+//     } catch (error) {
+//     res.status(500).send({error: error.message})
+// }})
 
 //unravel the body message sent from frontend
 //frontend has to send a body message so that we can update experiments
@@ -38,7 +39,7 @@ experimentRouter.post("/create", async (req: Request, res: Response) => {
     }
 });
 
-
+//for future purposes
 experimentRouter.put("/update/:id", (req: Request, res: Response) => {
     try{
         const {id} = req.params;
@@ -51,6 +52,7 @@ experimentRouter.put("/update/:id", (req: Request, res: Response) => {
     }
 });
 
+//for future purposes
 experimentRouter.delete("/delete/:id", (req: Request, res: Response) => {
     try{
         const {id} = req.params;
@@ -61,6 +63,7 @@ experimentRouter.delete("/delete/:id", (req: Request, res: Response) => {
     }
 });
 
+//for future purposes ?
 experimentRouter.get("/view/:id", (req: Request, res: Response) => {
     try{
         const {id} = req.params;

@@ -355,9 +355,6 @@ function leaveRoom(requestedSessionId: string, socketID: string) {
     console.log("socketId:", socketID);
 
 
-    if (sessionManager.getSession(requestedSessionId)) { //chicken
-        console.log(`session ${requestedSessionId} found`)
-
         
         // Get the users
         const session = sessionManager.getSession(requestedSessionId); //chicken
@@ -370,7 +367,7 @@ function leaveRoom(requestedSessionId: string, socketID: string) {
             console.log("Users array AFTER removing user:", session.users);
         }
 
-    } else {
+     else {
         throw new Error(
             `Could not find session ${requestedSessionId}. Was the backend changed at all? That deletes all active sessions.`
         );
