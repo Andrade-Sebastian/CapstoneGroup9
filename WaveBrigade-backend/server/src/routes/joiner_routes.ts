@@ -25,7 +25,7 @@ joinerRouter.get("/session/:sessionId", (req: Request, res: Response) => {
             if (error.name === "SESSION_NOT_FOUND") {
                 return res.status(400).send({
                     error: error.name,
-                    message: error.messagexx
+                    message: error.message
                 })
             }
         }
