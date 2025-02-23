@@ -115,6 +115,14 @@ io.on("connection", (socket) => {
     
     socket.on("session-start", () => {
         console.log("In session-create")
+
+        
+     });
+    socket.on("experiment-data", (data) => {
+        console.log("In experient-data in index.ts")
+        const {experimentTitle, experimentDesc, experimentId } = data;
+
+        
      });
 
 

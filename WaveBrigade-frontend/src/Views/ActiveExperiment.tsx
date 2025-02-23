@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import socket from "./socket.tsx";
 import { Divider } from "@heroui/divider";
 import ChartComponent from "../Components/ChartComponent.tsx";
+import { useJoinerStore } from "../hooks/stores/useJoinerStore.ts";
 import React from "react";
 
 export default function ActiveExperiment() {
@@ -15,8 +16,7 @@ export default function ActiveExperiment() {
   const [activeTab, setActiveTab] = useState("images");
   const [activeChart, setActiveChart] = useState("heartRateChart");
   const [recievedData, setRecievedData] = useState<number[]>([]);
-  const location = useLocation();
-  const { nickName } = location.state || {};
+  const { isConnected, serial, nickname, roomCode, experimentId, experimentTitle, experimentDesc} = useJoinerStore()
 
   useEffect(() => {
     console.log("Running active experiment");
@@ -37,7 +37,7 @@ export default function ActiveExperiment() {
   return (
     <div className="flex h-screen bg-white p-4">
       {/* picture  */}
-      <div className="flex flex-col items-center w-3/4 p-6 bg-white shadow-md rounded-lg">
+      <div className="flex flex-col items-center w-3/4 p-auto bg-white shadow-md rounded-lg">
         <div className="flex justify-center w-full">
           <img
             src="https://www.usatoday.com/gcdn/authoring/authoring-images/2024/08/19/USAT/74862648007-getty-images-2087314411.jpg?crop=1023,576,x0,y53&width=660&height=371&format=pjpg&auto=webp"

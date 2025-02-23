@@ -1,5 +1,5 @@
 import express, { Request, Response } from "express";
-import { createPhotoLabInDatabase, addUserToSession, IUserDatabaseInfo} from "../controllers/database.ts";
+import { createPhotoLabInDatabase, createVideoLabInDatabase, createGalleryLabInDatabase, addUserToSession, IUserDatabaseInfo} from "../controllers/database.ts";
 import { IUser } from "../typings.ts";
 
 const databaseRouter = express.Router();
@@ -35,6 +35,52 @@ databaseRouter.post("/photo-lab", async(req: Request, res: Response) => {
     }
     res.status(200).send({
         "message": "In Photo-lab"
+    })
+})
+databaseRouter.post("/video-lab", async(req: Request, res: Response) => {
+    //check to see if the type matches
+    const videoLabInfo = req.body;
+    // const {
+    //     experimentID,
+    //     path,
+    //     captions
+    // } = req.body;
+
+    try{
+        console.log("(database_routes.ts: In videoLab, recieved : ", JSON.stringify(videoLabInfo))
+        await createVideoLabInDatabase(videoLabInfo)
+        console.log("(database_routes.ts): !!Video Lab to database :D-=")
+    } catch (error) {
+        res.status(500).send({
+            "message": "Could not add video lab to database",
+            "error": error
+        });
+    }
+    res.status(200).send({
+        "message": "In video-lab"
+    })
+})
+databaseRouter.post("/gallery-lab", async(req: Request, res: Response) => {
+    //check to see if the type matches
+    const galleryLabInfo = req.body;
+    // const {
+    //     experimentID,
+    //     path,
+    //     captions
+    // } = req.body;
+
+    try{
+        console.log("(database_routes.ts: In galleryLab, recieved : ", JSON.stringify(galleryLabInfo))
+        await createGalleryLabInDatabase(galleryLabInfo)
+        console.log("(database_routes.ts): !!Gallery Lab to database :D-=")
+    } catch (error) {
+        res.status(500).send({
+            "message": "Could not add gallery lab to database",
+            "error": error
+        });
+    }
+    res.status(200).send({
+        "message": "In gallery-lab"
     })
 })
 

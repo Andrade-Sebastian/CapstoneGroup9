@@ -108,6 +108,11 @@ io.on("connection", (socket) => {
         console.log("In session-create");
         io.emit("session-start");
      });
+    socket.on("experiment-data", (data) => {
+        console.log("In experiment-data in main.ts, here is the data", data);
+        io.emit("experiment-data", data);
+        console.log("hopefully emitted");
+     });
 
     //send socket Id to brainflow
     socket.on("brainflow-assignment", () => {

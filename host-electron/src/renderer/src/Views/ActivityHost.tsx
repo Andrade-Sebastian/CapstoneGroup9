@@ -7,55 +7,36 @@ import { IoVideocam } from 'react-icons/io5'
 import socket from './socket'
 import axios from 'axios'
 import { Divider } from '@heroui/divider'
-import WaitingRoomCardComponent from '../components/Components/WaitingRoomCardComponent'
+import WaitingRoomCardComponent from '../components/WaitingRoomCardComponent'
 import { IUser } from '@renderer/hooks/useSessionState'
-import EmotiBitList from '../components/Components/EmotiBitList'
-import ModalComponent from '../components/Components/ModalComponent.js'
+import EmotiBitList from '../components/EmotiBitList'
+import ModalComponent from '../components/ModalComponent.js'
 import { CiCircleCheck } from 'react-icons/ci'
 import { error } from 'console'
 import toast, { Toaster } from 'react-hot-toast'
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from 'react-router-dom'
+import { useSessionStore } from '../store/useSessionStore.tsx'
+import React from 'react';
 
 export default function WaitingRoom() {
   const location = useLocation()
-  const { nickName, roomCode, labID, name, description, imageUrl } = location.state || {}
+  // const { nickName, roomCode, labID, name, description, imageUrl } = location.state || {}
+  const { users, roomCode, experimentId, addUser, removeUser, experimentTitle, experimentDesc, hostName } = useSessionStore(); 
   const [nicknames, setNickNames] = useState<string[]>([])
   const [sessionID, setSessionID] = useState('')
-  const [experimentTitle, setExperimentTitle] = useState(name || '')
-  const [experimentDesc, setExperimentDesc] = useState(description || '')
   const [experimentType, setExperimentType] = useState<string>('')
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [serialNumber, setSerialNumber] = useState('')
+  const [IPAddress, setIPAddress] = useState('')
+  const [isModalOpenEmoti, setIsModalOpenEmoti] = useState(false)
+  const [isModalOpenSettings, setIsModalOpenSettings] = useState(false)
+  const [selectedEmotiBitId, setSelectedEmotiBitId] = useState<string | null>(null)
+  const [emotiBits, setEmotiBits] = useState<IUser[]>(location.state?.emotiBits || [])
   const navigateTo = useNavigate()
   const [experimentIcon, setExperimentIcon] = useState<JSX.Element>(
     <CiPlay1 style={{ fontSize: '20px' }} />
   )
-  const [emotiBits, setEmotiBits] = useState([
-    {
-      userId: 'user1',
-      socketId: 'socket123',
-      nickname: 'Alice',
-      associatedDevice: {
-        serialNumber: 'SN001',
-        ipAddress: '192.168.1.10'
-      }
-    },
-    {
-      userId: 'user2',
-      socketId: 'socket456',
-      nickname: 'Bob',
-      associatedDevice: {
-        serialNumber: 'SN002',
-        ipAddress: '192.168.1.11'
-      }
-    },
-    {
-      userId: 'user3',
-      socketId: 'socket789',
-      nickname: null,
-      associatedDevice: null
-    }
-  ])
-  const handleMask = () => toast.error("No joiner to mask")
+  const handleMask = () => toast.error('No joiner to mask')
   const handleOpenModal = () => setIsModalOpen(true)
   const handleCloseModal = () => setIsModalOpen(false)
   const handleAction = () => {
@@ -63,25 +44,63 @@ export default function WaitingRoom() {
     handleSubmit()
     handleCloseModal()
   }
+
+  //Add EmotiBit Modal
+  const handleOpenModalEmoti = () => setIsModalOpenEmoti(true)
+  const handleCloseModalEmoti = () => setIsModalOpenEmoti(false)
+  const handleConfirmEmoti = () => {
+    if (!serialNumber.trim() || !IPAddress.trim()) {
+      toast.error('Please enter both a Serial Number and an IP Address')
+      return
+    }
+    const newEmotiBit: IUser = {
+      userId: `user${emotiBits.length + 1}`,
+      socketId: `socket${Math.floor(Math.random() * 10000)}`,
+      nickname: `Joiner ${emotiBits.length + 1}`,
+      associatedDevice: {
+        serialNumber: serialNumber,
+        ipAddress: IPAddress
+      }
+    }
+    setEmotiBits((prevEmotiBits) => [...prevEmotiBits, newEmotiBit])
+    setSerialNumber('')
+    setIPAddress('')
+    setIsModalOpenEmoti(false)
+  }
+
+  // Joined EmotiBit Settings Modal
+  const handleOpenModalSettings = (userId: string) => {
+    setSelectedEmotiBitId(userId)
+    setIsModalOpenSettings(true)
+  }
+
+  const handleCloseModalSettings = () => {
+    setIsModalOpenSettings(false)
+    setSelectedEmotiBitId(null)
+  }
+
+  const handleRemoveEmoti = () => {
+    if (!selectedEmotiBitId) return
+    setEmotiBits((prevEmotiBits) =>
+      prevEmotiBits.filter((emotiBit) => emotiBit.userId !== selectedEmotiBitId)
+    )
+    setIsModalOpenSettings(false)
+  }
+  const handleRemoveUser = () => {
+    console.log('removing user')
+    setIsModalOpenSettings(false)
+  }
+  const handleUpdate = () => {
+    console.log('updating')
+    setIsModalOpenSettings(false)
+  }
+
   function handleSubmit() {
     console.log('in handle submit')
     setTimeout(() => {
       //-----HARDCODED FOR TESTING-------
-      navigateTo('/summary', { state: { nickName, roomCode: '12345', labID, name, description, imageUrl } })
+      navigateTo('/summary')
     }, 2000)
-  }
-
-  const addEmotiBit = () => {
-    const newEmotiBit: IUser = {
-      userId: uuidv4(),
-      socketId: uuidv4(),
-      nickname: `Joiner ${emotiBits.length + 1}`,
-      associatedDevice: {
-        serialNumber: `SN${Math.floor(Math.random() * 10000)}`,
-        ipAddress: `192.168.1.${Math.floor(Math.random() * 255)}`
-      }
-    }
-    setEmotiBits([...emotiBits, newEmotiBit])
   }
 
   // useEffect(() => {
@@ -144,22 +163,22 @@ export default function WaitingRoom() {
     return () => clearInterval(interval)
   }, [sessionID]) //Don't fetch any data until sessionID is set
   useEffect(() => {
-    if (labID === '1') {
+    if (experimentId === '1') {
       setExperimentType('VideoLab')
       setExperimentIcon(<IoVideocam style={{ fontSize: '20px' }} />)
-    } else if (labID === '2') {
+    } else if (experimentId === '2') {
       setExperimentType('PhotoLab')
       setExperimentIcon(<TiCamera style={{ fontSize: '20px' }} />)
-    } else if (labID === '3') {
+    } else if (experimentId === '3') {
       setExperimentType('GalleryLab')
       setExperimentIcon(<TfiGallery style={{ fontSize: '20px' }} />)
     } else {
-      toast.error('Invalid labID received:', labID)
+      toast.error('Invalid experimentid received')
     }
-  }, [labID])
+  }, [experimentId])
   return (
     <div className="flex flex-col items-center justify-center mx-8">
-    <Toaster position="top-right" />
+      <Toaster position="top-right" />
       <div className="flex flex-col md:flex-row items-start justify-between gap-72">
         {/* left section */}
         <div className="md:w-1/2 space-y-4">
@@ -167,7 +186,7 @@ export default function WaitingRoom() {
           <p className="text-6xl font-bold text-[#894DD6]">{roomCode}</p>
           <div className="space-y-2">
             <p className="text-lg">
-              <span className="font-semibold"> NICKNAME:</span> {nickName}
+              <span className="font-semibold"> NICKNAME:</span> {hostName}
             </p>
             <p className="text-lg">
               <span className="font-semibold">SENSOR SERIAL NUMBER:</span> A93KFN2/SJPP2RK401
@@ -188,25 +207,33 @@ export default function WaitingRoom() {
             description={experimentDesc}
           ></WaitingRoomCardComponent>
         </div>
-        <div className="w-full flex flex-col ">
-          <h2 className="text-2xl font-semibold text-gray-800 mb-4"> Connected EmotiBits</h2>
-          <div className="flex flex-col gap-4 overflow-y-auto max-h-96 p-4 border rounded-md shadow-md">
+        <div className="w-full flex flex-col mt-6">
+          <h2 className="text-xl lg:text-2xl font-semibold text-gray-800 mb-4">
+            {' '}
+            Connected EmotiBits
+          </h2>
+          <div className="flex-col gap-4 overflow-y-auto max-h-[300px] md:max-h-[400px] p-4 border rounded-md shadow-md ">
             {emotiBits.map((user) => (
-              <EmotiBitList key={user.userId} user={user} isConnected={true} />
+              <EmotiBitList
+                key={user.userId}
+                user={user}
+                isConnected={true}
+                onAction={() => handleOpenModalSettings(user.userId)}
+              />
             ))}
           </div>
           <button
-            onClick={addEmotiBit}
-            className="mt-4 bg-[#7F56D9] hover:bg-violet-500 text-white font-semibold py-3 px-6 rounded-md shadow-md transition duration-300 ease-in-out"
+            onClick={handleOpenModalEmoti}
+            className="mt-4 bg-[#7F56D9] hover:bg-violet-500 text-white font-semibold py-3 px-6 rounded-md shadow-md transition duration-300 ease-in-out md:w-auto"
           >
             Add EmotiBit
           </button>
           {/* <EmotiBitList
-            icon={<CiCircleCheck style={{ fontSize: '20px' }} />}
-            joiner="Joanna"
-            serial="AS8FD90G9DD0GD9F"
-            ip="123.456.78"
-          ></EmotiBitList> */}
+                   icon={<CiCircleCheck style={{ fontSize: '20px' }} />}
+                   joiner="Joanna"
+                   serial="AS8FD90G9DD0GD9F"
+                   ip="123.456.78"
+                 ></EmotiBitList> */}
         </div>
       </div>
       <Divider className="my-6" />
@@ -244,7 +271,74 @@ export default function WaitingRoom() {
             Are you sure you want to end the experiment?
           </h1>
         </div>
-        
+      </ModalComponent>
+      <ModalComponent
+        onAction={handleConfirmEmoti}
+        isOpen={isModalOpenEmoti}
+        onCancel={handleCloseModalEmoti}
+        modalTitle="Add an EmotiBit"
+        button="Add EmotiBit"
+      >
+        <div className="mb-6">
+          <label htmlFor="serialNumber" className="block text-sm font-medium text-gray-700 mb-2">
+            Serial Number
+          </label>
+          <input
+            type="text"
+            id="serialNumber"
+            className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            value={serialNumber}
+            onChange={(e) => setSerialNumber(e.target.value)}
+          />
+        </div>
+        <div className="mb-6">
+          <label htmlFor="ipAddress" className="block text-sm font-medium text-gray-700 mb-2">
+            IP Address
+          </label>
+          <input
+            type="text"
+            id="ipAddress"
+            className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            value={IPAddress}
+            onChange={(e) => setIPAddress(e.target.value)}
+          />
+        </div>
+      </ModalComponent>
+      <ModalComponent
+        onAction={handleRemoveEmoti}
+        onAction2={handleRemoveUser}
+        onAction3={handleUpdate}
+        isOpen={isModalOpenSettings}
+        onCancel={handleCloseModalSettings}
+        modalTitle="EmotiBit Settings"
+        button="Remove EmotiBit"
+        button2="Remove User"
+        button3="Update"
+      >
+        <div className="mb-6">
+          <label htmlFor="serialNumber" className="block text-sm font-medium text-gray-700 mb-2">
+            Serial Number
+          </label>
+          <input
+            type="text"
+            id="serialNumber"
+            className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            value={serialNumber}
+            onChange={(e) => setSerialNumber(e.target.value)}
+          />
+        </div>
+        <div className="mb-6">
+          <label htmlFor="ipAddress" className="block text-sm font-medium text-gray-700 mb-2">
+            IP Address
+          </label>
+          <input
+            type="text"
+            id="ipAddress"
+            className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            value={IPAddress}
+            onChange={(e) => setIPAddress(e.target.value)}
+          />
+        </div>
       </ModalComponent>
     </div>
   )
