@@ -7,14 +7,15 @@ import { useNavigate } from 'react-router-dom'
 import toast, { Toaster } from 'react-hot-toast'
 import axios from 'axios'
 import { IUser } from '../hooks/useSessionState.tsx'
+import socket from './socket'
 import { useSessionStore } from '../store/useSessionStore.tsx'
 
 export default function PhotoLab() {
   const navigateTo = useNavigate()
-  const { experimentId, roomCode } = useSessionStore();
+  const { experimentId, roomCode, setExperimentTitle, setExperimentDesc } = useSessionStore();
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [experimentTitle, setExperimentTitle] = useState('')
-  const [experimentDesc, setExperimentDesc] = useState('')
+  const [experimentsTitle, setExperimentsTitle] = useState('')
+  const [experimentsDesc, setExperimentsDesc] = useState('')
   const [caption, setCaption] = useState('')
   const [isFileSelected, setIsFileSelected] = useState(false)
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -74,6 +75,11 @@ export default function PhotoLab() {
         })
         console.log('done creating session')
         console.log('navigating to waiting room', roomCode)
+        setExperimentTitle(experimentsTitle)
+        setExperimentDesc(experimentsDesc)
+        console.log('sending out some experiment data')
+        socket.emit("experiment-data", {experimentsTitle, experimentsDesc, experimentId})
+        console.log('hopefully sent out some experiment data')
         //-----HARDCODED FOR TESTING-------
         setTimeout(() => {
           //-----HARDCODED FOR TESTING-------
@@ -122,8 +128,8 @@ export default function PhotoLab() {
               id="experimentTitle"
               className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
               //   focus:outline-none focus:ring-2 focus:ring-indigo-500
-              onChange={(e) => setExperimentTitle(e.target.value)}
-              value={experimentTitle}
+              onChange={(e) => setExperimentsTitle(e.target.value)}
+              value={experimentsTitle}
               placeholder="Provide a title for your experiment"
             />
           </div>
@@ -138,8 +144,8 @@ export default function PhotoLab() {
               id="experimentDesc"
               className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
               //   focus:outline-none focus:ring-2 focus:ring-indigo-500
-              onChange={(e) => setExperimentDesc(e.target.value)}
-              value={experimentDesc}
+              onChange={(e) => setExperimentsDesc(e.target.value)}
+              value={experimentsDesc}
               placeholder="Provide a description for your experiment"
             ></textarea>
           </div>
@@ -176,9 +182,9 @@ export default function PhotoLab() {
             <button
               type="button"
               onClick={handleOpenModal}
-              disabled={!experimentTitle.trim() || !isFileSelected}
+              disabled={!experimentsTitle.trim() || !isFileSelected}
               className={`mt-6 font-semibold py-3 px-6 rounded-md shadow-md transition duration-300 ease-in-out ${
-                experimentTitle.trim() && isFileSelected
+                experimentsTitle.trim() && isFileSelected
                   ? 'bg-[#7F56D9] hover:bg-violet-500 text-white'
                   : 'bg-gray-400 text-white cursor-not-allowed'
               }`}
@@ -205,8 +211,8 @@ export default function PhotoLab() {
             id="experimentTitle"
             className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
             disabled
-            value={experimentTitle}
-            onChange={(e) => setExperimentTitle(e.target.value)}
+            value={experimentsTitle}
+            onChange={(e) => setExperimentsTitle(e.target.value)}
           />
         </div>
         <div className="mb-6">
@@ -217,8 +223,8 @@ export default function PhotoLab() {
             id="experimentDesc"
             className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
             //   focus:outline-none focus:ring-2 focus:ring-indigo-500
-            onChange={(e) => setExperimentDesc(e.target.value)}
-            value={experimentDesc}
+            onChange={(e) => setExperimentsDesc(e.target.value)}
+            value={experimentsDesc}
             disabled
           ></textarea>
         </div>

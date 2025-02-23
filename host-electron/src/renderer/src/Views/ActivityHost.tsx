@@ -16,15 +16,14 @@ import { error } from 'console'
 import toast, { Toaster } from 'react-hot-toast'
 import { useNavigate } from 'react-router-dom'
 import { useSessionStore } from '../store/useSessionStore.tsx'
+import React from 'react';
 
 export default function WaitingRoom() {
   const location = useLocation()
   // const { nickName, roomCode, labID, name, description, imageUrl } = location.state || {}
-  const { users, roomCode, experimentId, addUser, removeUser } = useSessionStore(); 
+  const { users, roomCode, experimentId, addUser, removeUser, experimentTitle, experimentDesc, hostName } = useSessionStore(); 
   const [nicknames, setNickNames] = useState<string[]>([])
   const [sessionID, setSessionID] = useState('')
-  const [experimentTitle, setExperimentTitle] = useState('')
-  const [experimentDesc, setExperimentDesc] = useState( '')
   const [experimentType, setExperimentType] = useState<string>('')
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [serialNumber, setSerialNumber] = useState('')
@@ -187,7 +186,7 @@ export default function WaitingRoom() {
           <p className="text-6xl font-bold text-[#894DD6]">{roomCode}</p>
           <div className="space-y-2">
             <p className="text-lg">
-              <span className="font-semibold"> NICKNAME:</span> {nickName}
+              <span className="font-semibold"> NICKNAME:</span> {hostName}
             </p>
             <p className="text-lg">
               <span className="font-semibold">SENSOR SERIAL NUMBER:</span> A93KFN2/SJPP2RK401

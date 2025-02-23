@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import socket from "./socket.tsx";
 import { Divider } from "@heroui/divider";
 import ChartComponent from "../Components/ChartComponent.tsx";
+import { useJoinerStore } from "../hooks/stores/useJoinerStore.ts";
 import React from "react";
 
 export default function ActiveExperiment() {
@@ -15,8 +16,7 @@ export default function ActiveExperiment() {
   const [activeTab, setActiveTab] = useState("images");
   const [activeChart, setActiveChart] = useState("heartRateChart");
   const [recievedData, setRecievedData] = useState<number[]>([]);
-  const location = useLocation();
-  const { nickName } = location.state || {};
+  const { isConnected, serial, nickname, roomCode, experimentId, experimentTitle, experimentDesc} = useJoinerStore()
 
   useEffect(() => {
     console.log("Running active experiment");

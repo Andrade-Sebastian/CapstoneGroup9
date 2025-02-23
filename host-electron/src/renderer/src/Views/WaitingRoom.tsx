@@ -25,20 +25,20 @@ export default function WaitingRoom() {
   const navigateTo = useNavigate()
   const {
     sessionId,
+    hostName,
     users: emotiBits,
     roomCode,
     experimentId,
-    userName,
     setSessionId,
     setUsers,
     addUser,
     removeUser,
+    experimentTitle,
+    experimentDesc
   } = useSessionStore()
   // const {userName, roomCode, labID, name, description, imageUrl } = location.state || {}
   const [nicknames, setNickNames] = useState<string[]>([])
   const [sessionID, setSessionID] = useState('')
-  const [experimentTitle, setExperimentTitle] = useState('')
-  const [experimentDesc, setExperimentDesc] = useState('')
   const [experimentType, setExperimentType] = useState<string>('')
   const [serialNumber, setSerialNumber] = useState('')
   const [IPAddress, setIPAddress] = useState('')
@@ -187,14 +187,14 @@ export default function WaitingRoom() {
           <p className="text-6xl md:text-6xl font-bold text-[#894DD6] break-words">{roomCode}</p>
           <div className="space-y-2">
             <p className="text-base md:text-lg">
-              <span className="font-semibold"> NICKNAME:</span> 
+              <span className="font-semibold"> NICKNAME:</span> {hostName}
             </p>
             <p className="text-base md:text-lg">
               <span className="font-semibold">SENSOR SERIAL NUMBER:</span> A93KFN2/SJPP2RK401
             </p>
             <p className="text-base md:text-lg">
-              <span className="font-semibold">SENSOR STATUS:</span>{' '}
-              <span className="md:text-sm text-green-500 font-bold">CONNECTED</span>
+              <span className="font-semibold">PARTICIPANTS</span>
+              <span className="md:text-sm font-light"> 1</span>
             </p>
           </div>
         </div>

@@ -7,6 +7,8 @@ import { Icon } from 'react-icons-kit'
 import { eyeOff } from 'react-icons-kit/feather/eyeOff'
 import { eye } from 'react-icons-kit/feather/eye'
 import { useSessionStore } from '../store/useSessionStore.tsx'
+import toast, { Toaster } from "react-hot-toast";
+import React from 'react';
 
 // This is where the host will create the room
 
@@ -17,7 +19,7 @@ export default function HostCreateRoom() {
   const [type, setType] = useState('password')
   const [icon, setIcon] = useState(eyeOff)
   const navigateTo = useNavigate()
-  const {setSessionId, setRoomCode, setUsers} = useSessionStore();
+  const {setHostName, setSessionId, setRoomCode, setUsers} = useSessionStore();
 
   function handleToggle() {
     //have eye open if text is censored, if not then eye closed
@@ -64,6 +66,7 @@ export default function HostCreateRoom() {
     console.log('creating an experiment')
     const lobbyCode = generateRandomCode(6)
     setSessionId(`session_${lobbyCode}`);
+    setHostName(userName)
     setRoomCode(lobbyCode);
     setUsers([]);
 
@@ -96,6 +99,7 @@ export default function HostCreateRoom() {
   return (
     <div className="flex h-screen">
       <div className="flex flex-col md:flex-row max-sm:hidden items-center justify-center md:w-2/5 lg:w-2/5">
+      <Toaster position="top-right" />
         <SideComponent
           icon={<IoEarthOutline style={{ fontSize: '200px' }} />}
           headingTitle="Start an Experiment"
