@@ -388,3 +388,13 @@ export async function removeUserFromSession(sessionID: string, socketID: string)
 		await dbClient.end();
 	}
 }
+
+export async function valideDeviceSerial(nickName: string, roomCode:string, serialCode: string){
+	try{
+		await dbClient.connect();
+		const query = await dbClient.queryObject(`SELECT FROM `);
+	}
+	catch(error){
+		console.log("Unable to validate emotibit");
+	}
+}
