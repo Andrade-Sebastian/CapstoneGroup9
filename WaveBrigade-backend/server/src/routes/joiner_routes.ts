@@ -3,8 +3,7 @@ import {addDiscoveredDevice, getSessionState, IDevice, createSession, joinSessio
 import SessionManager from "../sessions_singleton.ts";
 import { addSocketToSession, removeSocket, getSessionBySocket, socketSessionMap } from "../sessionMappings.ts";
 import axios from "axios";
-import {addUserToSession} from "../controllers/database.ts";
-import { validateRoomCode } from "../controllers/database.ts";
+import {addUserToSession, getUsersFromSession, validateRoomCode, removeUserFromSession, valideDeviceSerial } from "../controllers/database.ts";
 const app = express();
 const joinerRouter = express.Router();
 joinerRouter.use(express.json());
@@ -16,6 +15,7 @@ joinerRouter.use(express.json());
  . . . .  . .  .   .  . . 
 */
 
+//stored procedure
 joinerRouter.get("/session/:sessionId", (req: Request, res: Response) => {
     const session = req.params.sessionId;
     try {
@@ -31,6 +31,8 @@ joinerRouter.get("/session/:sessionId", (req: Request, res: Response) => {
         }
     }
 })
+
+
 
 //roomcode, nickname, 
 joinerRouter.post("/session/join", async (req: Request, res: Response) => {
@@ -60,7 +62,7 @@ joinerRouter.post("/session/join", async (req: Request, res: Response) => {
 }
 )
 
-//uses singleton chicken
+//uses singleton chicken -> stored procedure
 joinerRouter.post("/join-session/:requestedSessionId/:socketId", (req: Request, res: Response) => {
     const requestedSessionId = req.params.requestedSessionId;
     const socketId = req.params.socketId;
@@ -70,8 +72,6 @@ joinerRouter.post("/join-session/:requestedSessionId/:socketId", (req: Request, 
     //find the 'users' array
     //"MODIFY" the array by pushing an IUser
 
-    
-    //console.log("SESSIONS: " + JSON.stringify(SessionManager.getInstance().listSessions()))
     try{    
         res.status(200).send(joinSession(requestedSessionId, socketId))
     }
@@ -83,12 +83,13 @@ joinerRouter.post("/join-session/:requestedSessionId/:socketId", (req: Request, 
     }
 )
 
-//chicken
+
 joinerRouter.get("/room-users/:sessionID", (req: Request, res: Response) => {
     const sessionID = req.params.sessionID;
 
     try {
-        const users = getSessionState(sessionID).users;
+        
+        const users = getUsersFromSession(sessionID);
         return res.status(200).send({
             "users": users
         });
@@ -110,8 +111,6 @@ joinerRouter.get("/room-users/:sessionID", (req: Request, res: Response) => {
     }
 });
 
-
-
 joinerRouter.get("/validateRoomCode/:roomCode", async (req: Request, res: Response) => {
     const roomCode = req.params.roomCode;
     console.log("Roomcode: ", roomCode);
@@ -122,11 +121,6 @@ joinerRouter.get("/validateRoomCode/:roomCode", async (req: Request, res: Respon
         if (isValidRoomCode)
         {
             return res.status(200).json({ "isValidRoomCode": true});
-        }
-        else{
-            return res.status(201).json({
-                "isValidRoomCode": false
-            })
         }
     }
     catch(error)//postgres will return an error if the roomcode does not exist for the specified session,
@@ -141,23 +135,13 @@ joinerRouter.get("/validateRoomCode/:roomCode", async (req: Request, res: Respon
     
 })
 
-//IN DEVELOOPMENT
 joinerRouter.post("/leave-room/:sessionID/:socketID", (req: Request, res: Response) => {
     const sessionID = req.params.sessionID;
     const socketID = req.params.socketID;
     
-    // users: Array<IUser>;
-
     
     try {
-        const sessionInfo = getSessionState(sessionID);
-
-        
-        //console.log("Users: " + JSON.stringify(sessionInfo.users));
-        leaveRoom(sessionID, socketID)
-        
-        //sessionInfo.users.findIndex
-        //remove user from sessionInfo with the socketID provided in the params
+        const users = removeUserFromSession(sessionID, socketID);
 
         //Free up EmotiBit if possible (do last)
         return res.status(200).send({
@@ -184,10 +168,12 @@ joinerRouter.post("/leave-room/:sessionID/:socketID", (req: Request, res: Respon
 
 })
 
-joinerRouter.post("/verify-code", (req: Request, res: Response) => {
-    console.log("Request received at /verify-code:", req.body);
+//stored procedure
+joinerRouter.post("/verify-serial", (req: Request, res: Response) => {
+    console.log("Request received at /verify-serial:", req.body);
     const {nickName, roomCode, serialCode } = req.body;
     //change this later to the correct serial code implementation
+    const validSerial = await valideDeviceSerial(nickName, roomCode, serialCode);
     const validSerialCode = "1234";
     if (serialCode === validSerialCode){
         return res.status(200).json({ success:true });
@@ -197,7 +183,7 @@ joinerRouter.post("/verify-code", (req: Request, res: Response) => {
     }
 });
 
-//CHICKEN
+//CHICKEN -> store procedure ?
 joinerRouter.get("/debug", (req: Request, res: Response) => {
     console.log("in /debug")
 
