@@ -43,7 +43,7 @@ export async function createExperiment(experimentName: string, description: stri
         const result = await dbClient.queryObject(`INSERT INTO experiment(name,description) VALUES($1,$2) RETURNING experimentid, name, description`,
           [experimentName, description]);
         console.log("(database.ts): Result: ", result);
-		return result.rows[0];
+		return result.rows[0] as string;
       } finally {
         // Release the connection back into the pool
         await dbClient.end();
@@ -127,19 +127,26 @@ export async function validateRoomCode(roomCode:string): Promise<boolean>
 	}
 }
 
-// Author: Emanuelle Pelayo & Haley Marquez
+interface ISessionCreationParams{
+	experimentID: number,
+	roomCode: string,
+	hostSocketID: string,
+	isPasswordProtected: boolean | null,
+	password: string | null,
+	isSpectatorsAllowed: boolean | null,
+}
+// Author: Emanuelle Pelayo
 // Purpose: Adds a session to the database
-export async function createSessionInDatabase(initializationInfo: ISessionDatabaseInfo): Promise<string> {
+export async function createSessionInDatabase(initializationInfo: ISessionCreationParams): Promise<string> {
 	const {
 		experimentID,
 		roomCode,
 		hostSocketID,
-		startTimeStamp,
 		isPasswordProtected,
 		password,
 		isSpectatorsAllowed, 
-		endTimeStamp 
 	} = initializationInfo;
+
 
 	//const initializationInfoToPrint = JSON.stringify(initializationInfo);
 	//console.log("(database.ts): Receieved initialization Info: "+ initializationInfoToPrint)
@@ -149,29 +156,10 @@ export async function createSessionInDatabase(initializationInfo: ISessionDataba
 		await dbClient.connect(); // Connect to the database 
 		console.log("(database.ts): createSessionInDatabase() - Connected to Database");
 		const result = await dbClient.queryObject(
-			`INSERT INTO session(
-				experimentid, 
-				roomcode, 
-				hostsocketid, 
-				starttimestamp,
-				ispasswordprotected,
-				password, 
-				isspectatorsallowed,
-				endtimestamp)
-			VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING roomcode`, 
-				[
-					experimentID,             // $1 -> experimentid
-					roomCode,                 // $4 -> roomcode
-					hostSocketID,             // $5 -> hostsocketid
-					startTimeStamp,
-					isPasswordProtected,
-					password,
-					isSpectatorsAllowed,
-					endTimeStamp
-				]);
+			`SELECT * FROM Create_Session(${experimentID}, '${roomCode}', '${hostSocketID}', ${isPasswordProtected}, '${password}', ${isSpectatorsAllowed});`);
 		console.log("(database.ts): ", result)
-		console.log("(database.ts): Session created successfully");
-		return result.rows[0];
+		console.log("(database.ts): RESULT" + JSON.stringify(result));
+		return (result.rows[0]);
 
 	}
 	catch (error) 
@@ -302,59 +290,83 @@ export async function createGalleryLabInDatabase(initializationInfo: IGalleryLab
 	}
 }
 
-export interface IUserDatabaseInfo {
-	userId: string | null;
-	socketId: string;
+
+
+export interface IAddUserToSessionInfo {
+	socketID: string;
 	nickname: string | null;
-	associatedDevice: IDevice | null;
 	roomCode: string | null;
+	serialNumberLastFour: string | null;
 }
 
-
-export async function addUserToSession(initializationinfo: IUserDatabaseInfo): Promise<void>{
-
+//assuming the user is a joiner.
+export async function addUserToSession(initializationInfo: IAddUserToSessionInfo): Promise<void>{
 	const {
-		userId,
-		socketId,
+		socketID,
 		nickname, 
-		associatedDevice,
-		roomCode
-	} = initializationinfo;
+		roomCode,
+		serialNumberLastFour
+	} = initializationInfo;
+	const userRole = "joiner";
 
-	const newUser: IUser = {
-		userId: userId,
-		socketId: socketId,
-		nickname: nickname,
-		associatedDevice: associatedDevice
-	}
-
-
-	//console.log("(database.ts): AddUser, recieved", JSON.stringify(initializationinfo))
-
+	console.log("(database.ts): addUserToSession() ", initializationInfo)
 	try{
-
 		await dbClient.connect();
 
-		const query = await dbClient.queryObject(`SELECT sessionid, users FROM session WHERE roomcode = '${roomCode}'`) //Get all primary keys with roomcode inputted by the user. 
-		console.log(roomCode)
-		const sessionID: number = query.rows[0].sessionid;
-		const usersArray: Array<IUser> = query.rows[0].users;
+		//add the user to the session
+		const query = await dbClient.queryObject(`SELECT * FROM
+			Join_Session('${nickname}', '${socketID}', '${roomCode}', '${userRole}','${serialNumberLastFour}');`) 
 		
-		console.log(`(database.ts): ${usersArray.length} Users array before adding: ` + JSON.stringify(usersArray));
-
-		//push the user to the array 
-		usersArray.push(newUser)
-		console.log(`(database.ts): ${usersArray.length} -- Users array after adding: ` + JSON.stringify(usersArray));
-
-		const updateQuery = await dbClient.queryObject(
-			`UPDATE session SET users = ARRAY(SELECT jsonb_array_elements($1::jsonb)) WHERE sessionid = $2;`,
-			[JSON.stringify(usersArray), sessionID]
-		  );
-		console.log(updateQuery);
+		//console.log("(database.ts): ", query)
 		console.log("(database.ts): User Successfully Added To Session")
 	}
 	catch(error)
 	{
 		console.log("Unable to add user ", error)
+		throw error;
 	}
+}
+
+export interface IRegisterDeviceInfo {
+	sessionID: string, 
+    serialNumber: string,
+    ipAddress: string,
+	deviceSocketID: string
+}
+
+export async function registerDevice(initializationInfo: IRegisterDeviceInfo){
+	const {
+		sessionID, 
+        serialNumber,
+        ipAddress,
+        deviceSocketID
+	} = initializationInfo;
+
+	try{
+
+		await dbClient.connect();
+		const query = await dbClient.queryObject(`
+			INSERT INTO DEVICE(
+				ipaddress, 
+				serialnumber, 
+				devicesocketid, 
+				samplingfrequency, 
+				isavailable, 
+				isconnected)
+				VALUES ($1, $2, $3, $4, $5, $6)`, 
+					[initializationInfo.ipAddress, 
+					initializationInfo.serialNumber,
+					initializationInfo.deviceSocketID,
+					50, // -> samplingFrequency
+					true,  // -> isAvailable
+					false // -> isConnected: only true when the joiner connects their emotibit
+				]);
+		console.log(query)
+		console.log("registerDevice(Database): Hi")
+	}
+	catch(error)
+	{
+		console.log("Unable to add user ", error)
+	}
+
 }
