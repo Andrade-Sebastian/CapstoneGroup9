@@ -3,7 +3,7 @@ import {addDiscoveredDevice, getSessionState, IDevice, createSession, joinSessio
 import SessionManager from "../sessions_singleton.ts";
 import { addSocketToSession, removeSocket, getSessionBySocket, socketSessionMap } from "../sessionMappings.ts";
 import axios from "axios";
-import {addUserToSession, getUsersFromSession, validateRoomCode, removeUserFromSession, valideDeviceSerial } from "../controllers/database.ts";
+import {addUserToSession, getUsersFromSession, validateRoomCode, removeUserFromSession, validDeviceSerial } from "../controllers/database.ts";
 const app = express();
 const joinerRouter = express.Router();
 joinerRouter.use(express.json());
@@ -172,14 +172,19 @@ joinerRouter.post("/leave-room/:sessionID/:socketID", (req: Request, res: Respon
 joinerRouter.post("/verify-serial", async (req: Request, res: Response) => {
     console.log("Request received at /verify-serial:", req.body);
     const {nickName, roomCode, serialCode } = req.body;
+    try{
     //change this later to the correct serial code implementation
-    const validSerial = await valideDeviceSerial(nickName, roomCode, serialCode);
-    const validSerialCode = "1234";
-    if (serialCode === validSerialCode){
-        return res.status(200).json({ success:true });
+        //const validSerial = await validDeviceSerial(nickName, roomCode, serialCode);
+        const validSerialCode = "1234";
+        if (serialCode === validSerialCode){
+            return res.status(200).json({ success:true });
+        }
+        else{
+            return res.status(400).json({success: false, message: "Invalid code"});
+        }
     }
-    else{
-        return res.status(400).json({success: false, message: "Invalid code"});
+    catch(error){
+        console.log("Error occured", error);
     }
 });
 

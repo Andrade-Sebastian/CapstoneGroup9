@@ -30,7 +30,7 @@ const handleSubmit = async (e: React.FormEvent) =>{
 
   try{
     //logic for sending code to backend
-    const response = await axios.post("http://localhost:3000/joiner/verify-code",{
+    const response = await axios.post("http://localhost:3000/joiner/verify-serial",{
       nickName: nickname,
       roomCode: roomCode,
       serialCode: code,

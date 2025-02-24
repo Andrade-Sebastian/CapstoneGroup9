@@ -386,7 +386,7 @@ export async function removeUserFromSession(sessionID: string, socketID: string)
 	}
 }
 
-export async function valideDeviceSerial(nickName: string, roomCode:string, serialCode: string){
+export async function validDeviceSerial(nickName: string, roomCode:string, serialCode: string){
 	try{
 		await dbClient.connect();
 		const query = await dbClient.queryObject(`SELECT FROM `);

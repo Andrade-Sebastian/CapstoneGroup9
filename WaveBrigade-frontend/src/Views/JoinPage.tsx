@@ -43,7 +43,7 @@ export default function JoinPage() {
       const isValidRoomCode = await validateRoomCode(StudentInputRoomCode);
       if (isValidRoomCode) {
         toast.success("Connection Successful! Please standby", {id: loadingToastId});
-        const isJoinedRoom = await joinRoom();
+        const isJoinedRoom = await joinRoom(StudentInputRoomCode);
         if(isJoinedRoom){
           setTimeout(() => {
             navigateTo("/connect-emotibit", {
@@ -81,11 +81,16 @@ export default function JoinPage() {
     }
   };
 
-  const joinRoom = async () => {
+  const joinRoom = async (StudentInputRoomCode: string) => {
     try{
       console.log("Socket ID: " + socketID);
       console.log("Session ID: " + sessionID);
-      const response = await axios.get(`http://localhost:3000/joiner/join-session/${sessionID}/${socketID}`);
+      const response = await axios.post(`http://localhost:3000/joiner/session/join/`, {
+        socketID: socketID,
+        nickname: nickName,
+        roomCode: StudentInputRoomCode,
+        serialNumberLastFour: "1234",
+      });
       if(response.status === 200){
         console.log("Added user to session!");
         return true;

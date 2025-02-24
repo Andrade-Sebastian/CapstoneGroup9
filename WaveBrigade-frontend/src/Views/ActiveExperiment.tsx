@@ -53,12 +53,12 @@ export default function ActiveExperiment() {
           <div className="text-lg font-semibold">
             ECG Chart - 33 BPM Average
           </div>
-            <ChartComponent />
+            <ChartComponent chart_type={1} />
             </div>
             ) : activeChart === "temperatureChart" ? (
-              <div> <p>temperature chart</p></div>
+              <div> <p>temperature chart</p> <ChartComponent chart_type={2} /></div>
             ) :(
-              <div> <p> GSR/EDA </p> </div>
+              <div> <p> GSR/EDA </p> <ChartComponent chart_type={3} /> </div>
             )}
           </div>
         </div>
