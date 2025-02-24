@@ -10,10 +10,10 @@ drop function if exists Check_Session_Availability(VARCHAR(100));
 drop function if exists Get_Session_Mappings(INT);
 drop function if exists Update_Device_Availability (INT, BOOL);
 drop function if exists Get_Session_Users(INT);
-drop function if exists Create_Session(INT, VARCHAR(100), VARCHAR(100), BOOLEAN, VARCHAR(100), BOOLEAN);
+drop function if exists Create_Session(VARCHAR(100), VARCHAR(100), BOOLEAN, VARCHAR(100), BOOLEAN);
 drop function if exists Join_Session(VARCHAR(100), VARCHAR(100), TEXT, VARCHAR(100), TEXT);
 
-CREATE OR REPLACE FUNCTION Create_Session(experiment_id INT, room_code VARCHAR(100), host_socket_id VARCHAR(100), is_password_protected BOOLEAN, "password" VARCHAR(100), is_spectators_allowed BOOLEAN)
+CREATE OR REPLACE FUNCTION Create_Session(room_code VARCHAR(100), host_socket_id VARCHAR(100), is_password_protected BOOLEAN, "password" VARCHAR(100), is_spectators_allowed BOOLEAN)
 RETURNS TABLE (-- SESSION MINUS PASSWORD
 	sessionid INT,
     experimentid INT,
@@ -26,9 +26,8 @@ RETURNS TABLE (-- SESSION MINUS PASSWORD
 ) AS $$
 BEGIN
 	--insert the new session 
-	INSERT INTO session(experimentid, roomcode, hostsocketid, starttimestamp, ispasswordprotected, password, isspectatorsallowed, endtimestamp) 
+	INSERT INTO session(roomcode, hostsocketid, starttimestamp, ispasswordprotected, password, isspectatorsallowed, endtimestamp) 
 	VALUES (
-		experiment_id,
 		room_code, 
 		host_socket_id,
 		null, -- starttimestamp

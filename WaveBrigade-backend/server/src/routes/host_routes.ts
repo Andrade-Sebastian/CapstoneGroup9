@@ -1,5 +1,5 @@
 import express, { Request, Response } from "npm:express";
-import { createSessionInDatabase, registerDevice, IRegisterDeviceInfo} from "../controllers/database.ts";
+import { createSessionInDatabase, registerDevice, IRegisterDeviceInfo, assignExperimentToSession} from "../controllers/database.ts";
 
 const hostRouter = express.Router();
 hostRouter.use(express.json());
@@ -9,13 +9,12 @@ hostRouter.use(express.json());
 //Purpose: Creates a new session in the database
 //Returns: The session that was created (JSON)
 hostRouter.post("/session/create", async (req: Request, res: Response) => {
-    
+  
+
     try {
         console.log("(host_routes.ts): Creating session");
         const session = await createSessionInDatabase(
         {
-            experimentID: req.body.experimentID,
-            roomCode: req.body.roomCode,
             hostSocketID: req.body.hostSocketID,
             isPasswordProtected: req.body.isPasswordProtected,
             password: req.body.password,
@@ -29,6 +28,17 @@ hostRouter.post("/session/create", async (req: Request, res: Response) => {
     }
 })
 
+hostRouter.patch("/session/assign-experiment", async (req: Request, res: Response) => {
+    const {
+        sessionID,
+        experimentID
+    } = req.body;
+
+    
+
+    //assign experiment to session
+    console.log("In /session/assign-experiment");
+})
 
 hostRouter.get("/debug", async (req: Request, res: Response) => {
     console.log("At debug | recieved: " + JSON.stringify(req.body));

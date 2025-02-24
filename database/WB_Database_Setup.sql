@@ -7,7 +7,7 @@
 --Done Refactoring
 CREATE TABLE IF NOT EXISTS Experiment
 (
-    ExperimentID serial PRIMARY KEY,
+    ExperimentID serial PRIMARY KEY, --Nullable
     Name varchar(100) NOT NULL,
     Description varchar(255) --Nullable
 );

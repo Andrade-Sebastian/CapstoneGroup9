@@ -19,7 +19,13 @@ export default function HostCreateRoom() {
   const [type, setType] = useState('password')
   const [icon, setIcon] = useState(eyeOff)
   const navigateTo = useNavigate()
-  const {setHostName, setSessionId, setRoomCode, setUsers} = useSessionStore();
+  const {setHostName, setSessionId, setRoomCode, setUsers, sessionId, roomCode} = useSessionStore();
+
+  useEffect(() => {
+    console.log('Session ID: ' + sessionId);
+    console.log('Room Code: ' + roomCode);
+
+  }, [sessionId, roomCode]);
 
   function handleToggle() {
     //have eye open if text is censored, if not then eye closed
@@ -32,14 +38,6 @@ export default function HostCreateRoom() {
     }
   }
 
-  function generateRandomCode(length: number){
-    const numbers = '0123456789';
-    let lobbyCode = '';
-    for (let i = 0; i < length; i++){
-        lobbyCode += numbers.charAt(Math.floor(Math.random() * numbers.length));
-    }
-    return lobbyCode;
-}
 
   //hardcoded to test host/session/create
   const [sessionInfo, setSessionInfo] = useState({
@@ -64,28 +62,29 @@ export default function HostCreateRoom() {
     }
 
     console.log('creating an experiment')
-    const lobbyCode = generateRandomCode(6)
-    setSessionId(`session_${lobbyCode}`);
-    setHostName(userName)
-    setRoomCode(lobbyCode);
+
+
+    setHostName(userName);
+
     setUsers([]);
-
-    axios
-      .post('http://localhost:3000/experiment/create', {
-        description: 'Sexy ass mike tyson with a gyyaat',
-        name: 'Mike Tyson Lab'
-      })
-      .then((response) => {
-        console.log('Done creating an experiment')
-        const newExperiment = response.data
-        console.log('Experiment: ', newExperiment)
-        navigateTo('/host/select-lab') //for now
-      })
-      .catch((error) => {
-        console.error('Error creating experiment:', error)
-        //navigateTo("/host/select-lab", { state: { userName } }); //for now
-      })
-
+   
+    axios.post('http://localhost:3000/host/session/create', {
+      hostSocketID: sessionStorage.getItem('socketID'),
+      isPasswordProtected: true,
+      password: password,
+      isSpectatorsAllowed: allowSpectators
+    })
+    .then((response) => {
+      // 
+      if(response.status === 200){
+        setSessionId(response.data.sessionid);
+        setRoomCode(response.data.roomcode);
+      }
+      console.log(response.data);
+      //navigate to idk
+      navigateTo('/host/select-lab/')
+    })
+    
     console.log('Username: ' + userName)
     console.log('Continue Button clicked')
     console.log('Navigating to Media')
