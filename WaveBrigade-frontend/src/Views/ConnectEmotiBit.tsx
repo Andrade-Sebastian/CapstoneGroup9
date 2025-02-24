@@ -1,18 +1,20 @@
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import SideComponent from "../Components/SideComponent";
 import { PiAtomThin } from "react-icons/pi";
 import SerialCodeInput from "../Components/SerialInput";
 import axios from "axios";
+import socket from "./socket.tsx";
 import toast, { Toaster } from "react-hot-toast";
+import { useJoinerStore } from "../hooks/stores/useJoinerStore.ts";
+import React from "react";
 
 export default function ConnectEmotiBit() {
-  const location = useLocation();
-  const { nickName, roomCode } = location.state || {};
   const [code, setCode] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigateTo = useNavigate();
+  const { setExperimentId, setExperimentTitle, setExperimentDesc, setIsConnected, setSerial, nickname, roomCode} = useJoinerStore()
 
 const handleComplete = (code: string) => {
   console.log("Serial Code Entered:", code);
@@ -29,14 +31,16 @@ const handleSubmit = async (e: React.FormEvent) =>{
   try{
     //logic for sending code to backend
     const response = await axios.post("http://localhost:3000/joiner/verify-code",{
-      nickName: nickName,
+      nickName: nickname,
       roomCode: roomCode,
       serialCode: code,
     });
     if(response.data.success){
       toast.success("Connection Successful! Your EmotiBit was connected successfully", {id: loadingToastId});
+      setIsConnected(true)
+      setSerial(code)
       setTimeout(() => {
-        navigateTo("/waiting-room", {state: {nickName, roomCode}});
+        navigateTo("/waiting-room");
       }, 2000);
       }
     else{
@@ -51,6 +55,20 @@ const handleSubmit = async (e: React.FormEvent) =>{
     setIsSubmitting(false);
   }
   };
+  useEffect(() => {
+    const handleExperimentData = (data) => {
+      console.log("Received experiment-data:", data);
+      const {experimentTitle, experimentDesc, experimentId} = data;
+      setExperimentId(experimentId);
+      setExperimentTitle(experimentTitle);
+      setExperimentDesc(experimentDesc);
+    };
+    socket.on("experiment-data", handleExperimentData);
+
+    return () => {
+      socket.off("experiment-data", handleExperimentData);
+    };
+  }, []);
   return (
     <div className="flex h-screen">
       <Toaster position="top-right" /> 

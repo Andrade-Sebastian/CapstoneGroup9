@@ -1,4 +1,7 @@
 {
     "deno.enable": true,
-    "cmake.sourceDirectory": "/Users/emanpelayo/Documents/real_docs/CS/Current_Classes/CS425/CapstoneGroup9/emotiBitGRPC"
+    "cmake.sourceDirectory": "/Users/emanpelayo/Documents/real_docs/CS/Current_Classes/CS425/CapstoneGroup9/emotiBitGRPC",
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true,
+    "eslint.format.enable": false
 }

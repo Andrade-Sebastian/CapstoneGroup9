@@ -7,10 +7,10 @@ import { IoVideocam } from 'react-icons/io5'
 import socket from './socket'
 import axios from 'axios'
 import { Divider } from '@heroui/divider'
-import WaitingRoomCardComponent from '../components/Components/WaitingRoomCardComponent'
+import WaitingRoomCardComponent from '../components/WaitingRoomCardComponent'
 import { IUser } from '@renderer/hooks/useSessionState'
-import EmotiBitList from '../components/Components/EmotiBitList'
-import ModalComponent from '../components/Components/ModalComponent.js'
+import EmotiBitList from '../components/EmotiBitList'
+import ModalComponent from '../components/ModalComponent.js'
 import { useNavigate } from "react-router-dom";
 export default function Summary() {
   const [isModalOpen, setIsModalOpen] = useState(false)
