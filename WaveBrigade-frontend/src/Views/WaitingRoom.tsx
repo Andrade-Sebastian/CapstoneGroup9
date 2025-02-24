@@ -6,13 +6,14 @@ import axios from "axios";
 import { Divider } from "@heroui/divider";
 import WaitingRoomCardComponent from "../Components/WaitingRoomCardComponent.tsx";
 import { useNavigate } from "react-router-dom";
+import { useJoinerStore } from "../hooks/stores/useJoinerStore.ts";
+import React from "react";
 // -----JOINER=--------------------------//
 export default function WaitingRoom() {
-  const location = useLocation();
-  const { nickName, roomCode } = location.state || {};
   const [nicknames, setNickNames] = useState<string[]>([]);
   const [sessionID, setSessionID] = useState("");
   const navigateTo = useNavigate()
+  const { isConnected, serial, nickname, roomCode, experimentId, experimentTitle, experimentDesc} = useJoinerStore()
 
   // useEffect(() => {
   //   // Emit join waiting room
@@ -38,12 +39,12 @@ export default function WaitingRoom() {
     socket.on("session-start", () =>
     {
       console.log("joiner - ONsession start")
-      navigateTo('/active-experiment', {state: nickName})
+      navigateTo('/active-experiment')
     });
     return () => {
       socket.off("session-start");
     };
-  }, [navigateTo, nickName]);
+  }, [navigateTo]);
   
   useEffect(() => {
     const getSessionID = async () => {
@@ -100,15 +101,21 @@ export default function WaitingRoom() {
           <p className="text-6xl font-bold text-[#894DD6]">{roomCode}</p>
           <div className="space-y-2">
             <p className="text-lg">
-              <span className="font-semibold"> NICKNAME:</span> {nickName}
+              <span className="font-semibold"> NICKNAME:</span> {nickname}
             </p>
             <p className="text-lg">
-              <span className="font-semibold">SENSOR SERIAL NUMBER:</span>{" "}
-              A93KFN2/SJPP2RK401
+              <span className="font-semibold">SENSOR SERIAL NUMBER:</span>
+              {serial}
             </p>
             <p className="text-lg">
-              <span className="font-semibold">SENSOR STATUS:</span>{" "}
-              <span className="text-green-500 font-bold">CONNECTED</span>
+              <span className="font-semibold">SENSOR STATUS:</span>
+              <div>
+                {isConnected ? (
+                  <span className="text-green-500 font-bold"> CONNECTED</span>
+                ): (
+                  <span className="text-red-500 font-bold"> NOT CONNECTED</span>
+                )}
+              </div>
             </p>
           </div>
         </div>
@@ -117,9 +124,9 @@ export default function WaitingRoom() {
           {/* HARD CODED LAB DESCRIPTION */}
           <WaitingRoomCardComponent
             icon={<CiPlay1 style={{ fontSize: "20px" }} />}
-            labType="Video Lab"
-            labTitle="A Compilation of Horror Movie Scenes"
-            description="A video compilation of scenes from classic horror movies to study the effects of fear in the human body."
+            labType={experimentId}
+            labTitle={experimentTitle}
+            description={experimentDesc}
           ></WaitingRoomCardComponent>
         </div>
       </div>

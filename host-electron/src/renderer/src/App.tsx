@@ -1,6 +1,6 @@
 
 import { Outlet } from "react-router-dom";
-import NavigationBar from "./components/Components/NavigationBar";
+import NavigationBar from "./components/NavigationBar";
 import useBrainflowManager from './hooks/useBrainflowManager';
 import { useEffect } from 'react';
 

@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 //import { io } from "socket.io-client";
-import socket from '../Views/socket';
+import socket from '../Views/socket.tsx';
 export function useSocketManager(){
     useEffect(() => {
         socket.on("initialization:socketAssignment", (data) => {
@@ -15,6 +15,10 @@ export function useSocketManager(){
         socket.on("session-start", () => {
            console.log("in session-start");
         });
+        socket.on("experiment-data", () => {
+           console.log("in experiment-data in useSocketManager");
+        });
+        
 
         //clearing session storage if last connected is older than 5 minutes
         const lastConnected = sessionStorage.getItem("last_connected");
@@ -29,6 +33,7 @@ export function useSocketManager(){
         return () => {
             socket.off("initialization:socketAssigment");
             socket.off("session-start");
+            socket.off("experiment-data");
             socket.disconnect();
         };
     }, []);

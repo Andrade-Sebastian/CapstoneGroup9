@@ -7,6 +7,7 @@ import axios from "axios";
 import { useJoinerStore } from "../hooks/stores/useJoinerStore.ts";
 import { PiPlanetLight } from "react-icons/pi";
 import toast, { Toaster } from "react-hot-toast";
+import React from "react";
 
 export default function JoinPage() {
   const [nickName, setNickName] = useState("");
@@ -16,9 +17,9 @@ export default function JoinPage() {
   const [userId, setUserId] = useState("");
   const navigateTo = useNavigate();
   const [sessionID, setSessionID] = useState("")
-  const updateUser = useJoinerStore((state) => state.updateUser);
   const [users, setUsers] = useState<string[]>([]) //list of users to send to waiting room
   const [socketID, setSocketID] = useState("");
+  const { setNickname, setRoomCode} = useJoinerStore()
 
 
 
@@ -69,6 +70,8 @@ export default function JoinPage() {
       if (response.status === 200) {
         console.log("Room code is valid!");
         setSessionID(response.data.sessionID);  // Store sessionID when room code is valid
+        setRoomCode(StudentInputRoomCode)
+        setNickname(nickName)
         return true;
       }
       return false;
@@ -98,6 +101,7 @@ export default function JoinPage() {
   return (
     <div className="flex h-screen">
       <div className="flex flex-col max-sm:hidden items-center justify-center w-2/5">
+      <Toaster position="top-right" />
       <SideComponent
         icon={<PiPlanetLight style={{ fontSize: "200px" }} />}  
         headingTitle="Enter Your Nickname and Room Code"

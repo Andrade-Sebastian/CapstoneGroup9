@@ -1,10 +1,10 @@
 import { useNavigate, useLocation } from 'react-router-dom'
 import React, { ReactElement, useEffect, useState } from 'react'
 import react from 'react' //path?
-import ImageCardComponent from '../components/Components/ImageCardComponent'
-import Carousel from '../components/Components/CarouselComponent'
-import SideComponent from '../components/Components/SideComponent.tsx'
-import ImageCardComponentRadio from '../components/Components/ImageCardComponentRadio'
+import ImageCardComponent from '../components/ImageCardComponent'
+import Carousel from '../components/CarouselComponent'
+import SideComponent from '../components/SideComponent.tsx'
+import ImageCardComponentRadio from '../components/ImageCardComponentRadio'
 import { BsMoonStars } from 'react-icons/bs'
 import toast, { Toaster } from 'react-hot-toast'
 
@@ -69,8 +69,8 @@ export default function PreviouslyMadeExperiments() {
   }, [selectedLab])
   return (
     <>
-      <div className="flex h-screen">
-        <div className="flex flex-col max-sm:hidden items-center justify-center w-2/5">
+      <div className="flex flex-col md:flex-row h-screen w-full">
+        <div className="hidden md:flex flex-col items-center justify-center lg:w-1/3 w-2/5">
           <Toaster position="top-right" />
           <SideComponent
             icon={<BsMoonStars style={{ fontSize: '200px' }} />}
@@ -78,10 +78,10 @@ export default function PreviouslyMadeExperiments() {
             description="Stuck on what to create? Click on some previously made experiments and get started right away!"
           />
         </div>
-        <div className="flex flex-col items-center justify-center w-2/5">
-          <form onSubmit={handleSubmit} className="flex flex-col gap-14">
+        <div className="flex flex-col items-center justify-center w-full md:w-3/5 lg:w-2/3 p-6">
+          <form onSubmit={handleSubmit} className="flex flex-col gap-8 w-full max-w-2xl">
             {/* LAB TEMPLATES */}
-            <div className="grid grid-cols-2 grid-rows-2 gap-20 items-center overflow-auto">
+            <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 grid-rows-2 gap-6 items-center">
               {/* Video Lab Checkbox and Description */}
 
               {/*A Single lab */}
@@ -100,7 +100,7 @@ export default function PreviouslyMadeExperiments() {
             <button
               type="submit"
               disabled={!selectedLab}
-              className={`mt-6 font-semibold py-3 px-6 rounded-md shadow-md transition duration-300 ease-in-out ${
+              className={`w-full md:w-auto mt-6  font-semibold py-3 px-6 rounded-md shadow-md transition duration-300 ease-in-out ${
                 selectedLab
                   ? 'bg-[#7F56D9] hover:bg-violet-500 text-white'
                   : 'bg-gray-400 text-white cursor-not-allowed'
