@@ -12,7 +12,7 @@ hostRouter.post("/session/create", async (req: Request, res: Response) => {
   
 
     try {
-        console.log("(host_routes.ts): Creating session");
+        console.log("/session/create: ", JSON.stringify(req.body));
         const session = await createSessionInDatabase(
         {
             hostSocketID: req.body.hostSocketID,
@@ -20,7 +20,7 @@ hostRouter.post("/session/create", async (req: Request, res: Response) => {
             password: req.body.password,
             isSpectatorsAllowed: req.body.isSpectatorsAllowed,
         });
-            console.log("(host_routes.ts): Finished adding new session to database");
+            // console.log("(host_routes.ts): Finished adding new session to database");
             return res.status(200).send(session);
         }
     catch(error) {
@@ -73,23 +73,4 @@ export default hostRouter;
 
 
 
-
-
-
-
-// hostRouter.get("/session/:sessionId", (req: Request, res: Response) => {
-//     const session = req.params.sessionId;
-//     try {
-//         return res.status(200).send(getSessionState(session))
-//     } catch (error) {
-//         if (error instanceof Error) {
-//             if (error.name === "SESSION_NOT_FOUND") {
-//                 return res.status(400).send({
-//                     error: error.name,
-//                     message: error.message
-//                 })
-//             }
-//         }
-//     }
-// })
 

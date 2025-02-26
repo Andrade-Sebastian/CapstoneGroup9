@@ -176,8 +176,8 @@ export async function createSessionInDatabase(initializationInfo: ISessionCreati
 		console.log("(database.ts): createSessionInDatabase() - Connected to Database");
 		const result = await dbClient.queryObject(
 			`SELECT * FROM Create_Session('${roomCode}', '${hostSocketID}', ${isPasswordProtected}, '${password}', ${isSpectatorsAllowed});`);
-		console.log("(database.ts): ", result)
-		console.log("(database.ts): RESULT" + JSON.stringify(result));
+		//console.log("(database.ts): ", result)
+		//console.log("(database.ts): RESULT" + JSON.stringify(result));
 		return (result.rows[0]);
 
 	}
@@ -187,9 +187,9 @@ export async function createSessionInDatabase(initializationInfo: ISessionCreati
 	}
 	finally 
 	{
-		console.log("(Database.ts): ending database connection")
+		//console.log("(Database.ts): ending database connection")
 		await dbClient.end();
-		console.log("(Database.ts): finished ending database connection")
+		//console.log("(Database.ts): finished ending database connection")
 	}
 }
 
@@ -209,6 +209,7 @@ export interface IPhotoLabDatabaseInfo {
 	experimentDescription: string | null,
 	experimentCaptions: string | null,
 	imageBlob: string;
+	socketID: string;
 }
 
 
@@ -225,31 +226,47 @@ export async function getSessionState(sessionID: number){
 	}
 }
 
+async function getSessionIDFromSocketID(socketID: string){
+	try{
+		await dbClient.connect();
+		const query = await dbClient.queryObject(`SELECT sessionid FROM session WHERE hostsocketid = $1`,
+			[socketID]
+		);
+		return query.rows[0].sessionid;
+	}
+	catch(error){
+		console.log("Unable to retrieve session id", error);
+	}
+}
 
 export async function createPhotoLabInDatabase(initializationInfo: IPhotoLabDatabaseInfo, sessionID: null | number=null ): Promise<void>{
 	const {
 		experimentTitle,
 		experimentDescription,
 		experimentCaptions,
+		imageBlob,
+		socketID
 	} = initializationInfo;
-	let experimentID = null;
 
+	let experimentID = null;
 
 	try{
 		await dbClient.connect();
-
+		
 		const createExperimentQuery = await dbClient.queryObject(`
 			INSERT INTO experiment(name, description)
-				VALUES ($1, $2)
-				returning experimentid;`, 
-				[
-					experimentTitle,
-					experimentDescription
-				]
+			VALUES ($1, $2)
+			returning experimentid;`, 
+			[
+				experimentTitle,
+				experimentDescription
+			]
 		);
+
 		experimentID = createExperimentQuery.rows[0].experimentid;
 
 
+		//Add a photo lab 
 		const query = await dbClient.queryObject(`
 			INSERT INTO photolab ( 
 			experimentid,
@@ -259,21 +276,33 @@ export async function createPhotoLabInDatabase(initializationInfo: IPhotoLabData
 			VALUES ($1, $2, $3);
 			`, [
 				experimentID,
-				"hardcoded string",
+				imageBlob,
 				experimentCaptions
-			]);
-		
-		console.log(query);
+				]
+		);
+
+		//get session id from host socket id 
+		const sessionID = await getSessionIDFromSocketID(socketID);
+
+		//relate the experiment to the session		
+		const updateSessionQuery = await dbClient.queryObject(`
+			UPDATE session
+			SET experimentid = ${experimentID}
+			WHERE sessionid = ${sessionID}; `);
+
 		console.log("(database.ts): Photo Lab Successfully Added")
-		if (sessionID !== null){
-			assignExperimentToSession(sessionID, experimentID);
-		}
-		console.log("HERE" +  experimentID);
+
+
 		return experimentID;
 	}
 	catch(error){
 		console.log("Error adding photo lab to the database: " + error)
 	}
+}
+
+
+{
+
 }
 
 

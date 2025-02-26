@@ -1,5 +1,5 @@
 import express, { Request, Response } from "express";
-import { createPhotoLabInDatabase, createVideoLabInDatabase, createGalleryLabInDatabase, addUserToSession, IUserDatabaseInfo, getSessionState, getPhotoLabInfo} from "../controllers/database.ts";
+import { createPhotoLabInDatabase, createVideoLabInDatabase, createGalleryLabInDatabase, addUserToSession, IUserDatabaseInfo, getSessionState, getPhotoLabInfo, assignExperimentToSession} from "../controllers/database.ts";
 import { IUser } from "../typings.ts";
 
 const databaseRouter = express.Router();
@@ -19,8 +19,15 @@ databaseRouter.post("/photo-lab", async(req: Request, res: Response) => {
     const {
         experimentTitle, 
         experimentDescription,
-        experimentCaption
+        experimentCaptions,
+        socketID
     } = req.body;
+
+
+    console.log("Experiment Title: ", experimentTitle)
+    console.log("Experiment Description: ", experimentDescription)
+    console.log("Experiment Caption: ", experimentCaptions)
+    console.log("Socket ID: ", socketID)
 
 
     //create an experiment
@@ -29,17 +36,16 @@ databaseRouter.post("/photo-lab", async(req: Request, res: Response) => {
     
     //create a photo lab, relating that to the experiment id that was previously created
     try{
-        console.log("(database_routes.ts: In PhotoLab, recieved : ", JSON.stringify(req.body))
+        console.log("/photo-lab: Recieved: ", JSON.stringify(req.body))
         experimentID = await createPhotoLabInDatabase({
             experimentTitle: experimentTitle,
             experimentDescription: experimentDescription,
-            experimentCaptions: experimentCaption,
+            experimentCaptions: experimentCaptions,
             imageBlob: "asdfghj",
-        })
-        console.log("(database_routes.ts): !!Photo Lab to database :D-=")
+            socketID: socketID
+        }, )
 
 
-    
     } catch (error) {
         res.status(500).send({
             "message": "Could not add photo lab to database",
@@ -47,7 +53,10 @@ databaseRouter.post("/photo-lab", async(req: Request, res: Response) => {
         });
     }
     console.log("experimentID - RES CALL: ", experimentID)
-    res.status(200).send(getPhotoLabInfo(experimentID))
+    //res.status(200).send(getPhotoLabInfo(experimentID))
+    res.status(200).send({
+        "message": "In photo-lab"
+    })
 })
 
 databaseRouter.post("/photo-lab/:sessionID", async(req: Request, res: Response) => {

@@ -27,7 +27,8 @@ experimentRouter.use(express.json());
 
 //create experiment
 experimentRouter.post("/create", async (req: Request, res: Response) => {
-    console.log("in /create experiment")
+    console.log("/create experiment")
+    console.log("req.body: ", req.body)
     try{
         const{description, name} = req.body;
         const newExperiment = await createExperiment(name, description);
