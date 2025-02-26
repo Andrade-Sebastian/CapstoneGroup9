@@ -30,11 +30,8 @@ const handleSubmit = async (e: React.FormEvent) =>{
 
   try{
     //logic for sending code to backend
-    const response = await axios.post("http://localhost:3000/joiner/verify-code",{
-      nickName: nickname,
-      roomCode: roomCode,
-      serialCode: code,
-    });
+    const response = await axios.post(`http://localhost:3000/joiner/verify-code/${roomCode}`);
+
     if(response.data.success){
       toast.success("Connection Successful! Your EmotiBit was connected successfully", {id: loadingToastId});
       setIsConnected(true)

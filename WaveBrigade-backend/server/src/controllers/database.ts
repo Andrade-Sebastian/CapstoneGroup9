@@ -1,5 +1,5 @@
 import { Client } from "https://deno.land/x/postgres@v0.17.0/mod.ts";
-import { IDevice, ISessionDatabaseInfo, IUser } from "./session_controller.ts";
+import { IDevice, ISessionDatabaseInfo, IUser, ISessionCredentials } from "./session_controller.ts";
 
 
 export const dbClient = new Client({
@@ -127,16 +127,24 @@ export async function getMaxPhotoLabIDsFromDB()
 
 export async function validateRoomCode(roomCode:string): Promise<boolean>
 {
+
+	let isValidRoomCode = false;
+
 	try{
 		await dbClient.connect();
 		const query = await dbClient.queryObject(`SELECT 
-			roomcode FROM session WHERE roomcode= $1`,
+			sessionid FROM session WHERE roomcode= $1 LIMIT 1`,
 			[roomCode]);
 		console.log(query)
 
 		if (query.rows.length > 0){//result is valid
 			console.log("(database.ts): Validated room code")
-			return true;
+			const sessionID = query.rows[0].sessionid;
+			isValidRoomCode = true;
+			return {
+				isValidRoomCode: isValidRoomCode,
+				sessionID: sessionID
+			};
 		}
 
 		console.log("returning false")
@@ -146,7 +154,6 @@ export async function validateRoomCode(roomCode:string): Promise<boolean>
 	catch(error){
 		console.log("(database.ts): No valid room code: " + error)
 		return false;
-		
 	}
 }
 
@@ -168,7 +175,7 @@ export async function createSessionInDatabase(initializationInfo: ISessionCreati
 		isSpectatorsAllowed, 
 	} = initializationInfo;
 
-	const roomCode = generateRandomCode(6);
+	const roomCode = generateRandomCode(5);
 
 	try 
 	{
@@ -375,6 +382,7 @@ export interface IAddUserToSessionInfo {
 
 //assuming the user is a joiner.
 export async function addUserToSession(initializationInfo: IAddUserToSessionInfo): Promise<void>{
+	console.log("(database.ts): addUserToSession() ", initializationInfo)
 	const {
 		socketID,
 		nickname, 
@@ -387,11 +395,21 @@ export async function addUserToSession(initializationInfo: IAddUserToSessionInfo
 	try{
 		await dbClient.connect();
 
-		//add the user to the session
+		// 
+// user joins the waiting room without conecting an emotibit
+	if (serialNumberLastFour === null || serialNumberLastFour === "" || serialNumberLastFour === undefined)
+	{
+		console.log("(database.ts): User is joining without an emotibit")
+		const query = await dbClient.queryObject(`SELECT * FROM
+			Join_Session_Without_EmotiBit('${nickname}', '${socketID}', '${roomCode}', '${userRole}');`)
+	}
+	else{
+		console.log("(database.ts): User is joining with an emotibit")
+		//add the user to the session with the emotibit
 		const query = await dbClient.queryObject(`SELECT * FROM
 			Join_Session('${nickname}', '${socketID}', '${roomCode}', '${userRole}','${serialNumberLastFour}');`) 
+	}
 		
-		//console.log("(database.ts): ", query)
 		console.log("(database.ts): User Successfully Added To Session")
 	}
 	catch(error)

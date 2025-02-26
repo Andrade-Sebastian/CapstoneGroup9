@@ -96,11 +96,11 @@ app.get("/ip", (req: Request, res: Response) => {
 
 
 io.on("connection", (socket) => {
-    console.log("(main.ts): User Connected | socketID: " + socket.id)
-    console.log(`(main.ts): Total connections: ${io.engine.clientsCount}`);
+    // console.log("(main.ts): User Connected | socketID: " + socket.id)
+    // console.log(`(main.ts): Total connections: ${io.engine.clientsCount}`);
 
     socket.on("client-assignment", () => {
-        console.log("(main.ts): Emitting client-assignment with socketId:", socket.id);
+        //console.log("(main.ts): Emitting client-assignment with socketId:", socket.id);
         socket.emit("client-assignment", {socketId: socket.id});
     }); // Send socket ID to the client
 
@@ -138,8 +138,8 @@ io.on("connection", (socket) => {
     // })
     
     socket.on("disconnect", async (data) => {
-        console.log(`(main.ts): User Disconnected | socketID: ${socket.id}`);
-        console.log(`(main.ts): Total connections: ${io.engine.clientsCount}`);
+        // console.log(`(main.ts): User Disconnected | socketID: ${socket.id}`);
+        // console.log(`(main.ts): Total connections: ${io.engine.clientsCount}`);
 
 
         const sessionID = getSessionBySocket(socket.id);
