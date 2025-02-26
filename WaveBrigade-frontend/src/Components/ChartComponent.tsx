@@ -11,28 +11,32 @@ interface IDataType {
     //chart_name: string;
     //chart_color: string;
 }
+let max = 98;
+let min = 93;
+const now: Date = new Date();
 
 export default function ChartComponent(props: IDataType) {
     let lastDataType = 0;
+    
     const [plotState, acceptPlotDataState] = useState<Array<number>>([]);
     const [timeState, acceptTimeState] = useState<Array<number>>([]);
-    const [edaState, acceptEdaDataState] = useState<Array<number>>([]);
+    //const [edaState, acceptEdaDataState] = useState<Array<number>>([]);
 
     function addDataPoint(ancDataFrame, auxDataFrame, timeStamp: number){
         
         const numOfPoints = plotState.length;
         const numOfTimeStamps = timeState.length;
-        let current_data: number;
+        let current_data = 0;
 
         console.log("LENGTH OF ARRAY: ", numOfPoints);
 
-        if(numOfTimeStamps == 10){
-            timeState.shift();
-            acceptTimeState(timeState => [...timeState, timeStamp * 1000]);
-        }
-        else{
-            acceptTimeState(timeState => [...timeState, timeStamp * 1000]);
-        }
+        // if(numOfTimeStamps == 10){
+        //     timeState.shift();
+        //     acceptTimeState(timeState => [...timeState, timeStamp * 1000]);
+        // }
+        // else{
+        //     acceptTimeState(timeState => [...timeState, timeStamp * 1000]);
+        // }
 
         // CHART TYPE IF STATEMENTS  
         if(props.chart_type === 1){
@@ -51,13 +55,34 @@ export default function ChartComponent(props: IDataType) {
             return 0;
         }
 
-        if(numOfPoints == 100){
-            plotState.shift();
-            acceptPlotDataState(plotState => [...plotState, current_data]);
-        }
-        else{
-            acceptPlotDataState(plotState => [...plotState, current_data]);
-        }
+        let counter = 0;
+        const intervalId = setInterval(() => {
+            counter++
+            max = Math.max(max, Math.round(current_data));
+            min = max - 1;
+            console.log("MAX: ", max);
+            console.log("MIN: ", min);
+            if(numOfPoints === 100){
+                console.log("100 POINTS RECIEVED");
+                const temp_plot = [...plotState];
+                temp_plot.shift();
+                temp_plot.push(current_data);
+                acceptPlotDataState(temp_plot);
+                //acceptPlotDataState(plotState => plotState.slice(0, (100 - plotState.length)));
+                acceptPlotDataState(plotState => [...plotState, current_data]);
+            }
+            else{
+                acceptPlotDataState(plotState => [...plotState, current_data]);
+            }
+
+            if(counter >= 5){
+                clearInterval(intervalId);
+                max = current_data;
+                min = max - 1;
+            }
+        }, 8000)
+        
+        
     }
 
     useEffect(() => {
@@ -67,23 +92,18 @@ export default function ChartComponent(props: IDataType) {
             socket.emit("brainflow-client-assign", {socketId: socket.id});
         }
 
-        function simulateData(){
-            const randomTemp = Math.random(); // Random temperature between 0 and 40
-            const randomEda = Math.random() * 2; // Random EDA value between 0 and 2
-            const currentTime = Date.now() / 1000; // Current timestamp in seconds
+        // function simulateData(){
+        //     const randomTemp = Math.random(); // Random temperature between 0 and 40
+        //     const randomEda = Math.random() * 2; // Random EDA value between 0 and 2
+        //     const currentTime = Date.now() / 1000; // Current timestamp in seconds
 
-            //addTempDataPoint(randomTemp, currentTime);
-        }
+        //     //addTempDataPoint(randomTemp, currentTime);
+        // }
 
         function onUpdate(payload){
-            console.log("=======================ONUPDATE")
             const {ancData, auxData, ipAddress, serialNumber, backendIp, hostSessionId, userId, frontEndSocketId, assignSocketId} = payload;
-            console.log("INSIDE ON UPDATE FUNCTION");
             addDataPoint(ancData, auxData, ancData.timestamp);
         }
-        socket.on("connect", () => {
-            console.log("Connect");
-        })
         //brainflowConnect();
         socket.on("brainflow-assignment", brainflowConnect);
         //Plot.relayout(Chart, onUpdate);
@@ -104,10 +124,10 @@ export default function ChartComponent(props: IDataType) {
         // }, 50);
 
         //recieve emotibit data
-        console.log("===============RIGHT BEFORE SOCKET ON UPDATE IN USE EFFECT TOO==========")
         socket.on('update', onUpdate);
-        console.log("===============AFTER the stuff=============")
-        
+        // socket.on("connect", () => {
+        //     console.log("Connect");
+        // })
 
         
 
@@ -127,7 +147,7 @@ export default function ChartComponent(props: IDataType) {
                     {
                         //x: timeState,
                         y: plotState,
-                        mode: 'lines+markers',          // Line chart
+                        mode: 'lines',          // Line chart
                         type: 'line',
                         name: 'Temperature (°C)', //props.chart_name, // Label for the trace
                         line: {color: 'rgb(255, 99, 132)'} //props.chart_color } //'rgb(255, 99, 132)'} // Line color
@@ -151,13 +171,13 @@ export default function ChartComponent(props: IDataType) {
                         // xaxis: {
                         //     title: 'Timestamp',
                         //     dtick: 1,
-                        //     //type: 'date',         // Time axis for the x-axis
-                        //     //tickformat: '%H:%M', // Display hours, minutes, and seconds in the tooltip
+                        //     type: 'date',         // Time axis for the x-axis
+                        //     tickformat: '%M:%S', // Display hours, minutes, and seconds in the tooltip
                         // },
                         yaxis: {
                             title: 'Temperature (°C)',//props.chart_name,,
-                            range: [30, 36],
-                            tick: 0.5,
+                            range: [min, max + 1],
+                            tick: 1,
                         },
                         // xaxis2: {
                         //     title: 'Timestamp',

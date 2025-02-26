@@ -21,16 +21,16 @@ export default function ActiveExperiment() {
   useEffect(() => {
     console.log("Running active experiment");
 
-    socket.on("update", (data) => {
-      if (Array.isArray(data)) {
-        console.log("Data received:", data);
-        setRecievedData(data);
-      } else {
-        console.error("Did not receive an array of data, received:", data);
-      }
-    });
+    // socket.on("update", (data) => {
+    //   if (Array.isArray(data)) {
+    //     console.log("Data received:", data);
+    //     setRecievedData(data);
+    //   } else {
+    //     console.error("Did not receive an array of data, received:", data);
+    //   }
+    // });
     return () => {
-      socket.off("update");
+      //socket.off("update");
     };
   }, [recievedData]);
 
@@ -64,7 +64,7 @@ export default function ActiveExperiment() {
         </div>
         <Divider className="my-3" />
         <div className="mt-4 flex justify-between w-full items-center">
-          <p className="font-semibold">Nickname: {nickName} <span className="font-light">Sebastian</span></p>
+          <p className="font-semibold">Nickname: {nickname} <span className="font-light">Sebastian</span></p>
           <div className="flex space-x-4">
             <button
               className={`text-3xl p-4 rounded-lg ${

@@ -181,7 +181,7 @@ function sendData(socket) {
                     console.log("DATA :", ancData.data1);
                     //emit to socket an object that holds data and op parameters
                     socket.emit('update', __assign({ ancData: ancData, auxData: auxData }, operationParameters));
-                    return [4 /*yield*/, sleep(1000)];
+                    return [4 /*yield*/, sleep(100)];
                 case 3:
                     _a.sent();
                     return [3 /*break*/, 2];
@@ -224,7 +224,6 @@ function main() {
                 case 4:
                     //ensures only a valid socket connection before attempting to connect to emotibit
                     if (connectionSuccessful) {
-                        console.log("CONNECTION IS SUCCESSFULLLLllllll");
                         // writeHeaderstoCSV(ancFilePath, ancHeaders);
                         // writeHeaderstoCSV(auxFilePath, auxHeaders);
                         // prepareBoard();

@@ -124,9 +124,7 @@ io.on("connection", (socket) => {
     socket.on('update', (payload) => {
         const {ancData, auxData, ipAddress, serialNumber, backendIp, hostSessionId, userId, frontEndSocketId, assignSocketId} = payload;
         console.log('Update Event: Received data:', JSON.stringify(ancData.data1));
-        if(userId){
-            io.emit(payload);
-        }
+        io.emit('update', payload);
     });
 
     session_handlers(io, socket, rooms, isHost);
