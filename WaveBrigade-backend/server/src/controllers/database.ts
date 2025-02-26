@@ -18,8 +18,43 @@ interface ISessionInitialization {
 	allowSpectators: boolean;
 }
 
+interface ISessionCreationParams{
+	experimentID: number,
+	roomCode: string,
+	hostSocketID: string,
+	isPasswordProtected: boolean | null,
+	password: string | null,
+	isSpectatorsAllowed: boolean | null,
+}
 
+export interface IPhotoLabDatabaseInfo {
+	experimentID: number,
+	path: string, //Image path
+	captions: string 
+}
+export interface IVideoLabDatabaseInfo {
+	experimentID: number,
+	path: string, //Image path
+}
+export interface IGalleryLabDatabaseInfo {
+	experimentID: number,
+	path: string, //Image path
+	captions: string 
+}
 
+export interface IAddUserToSessionInfo {
+	socketID: string;
+	nickname: string | null;
+	roomCode: string | null;
+	serialNumberLastFour: string | null;
+}
+
+export interface IRegisterDeviceInfo {
+	sessionID: string, 
+    serialNumber: string,
+    ipAddress: string,
+	deviceSocketID: string
+}
 
 function isolateSessionIDs(sessions) 
 {
@@ -127,14 +162,6 @@ export async function validateRoomCode(roomCode:string): Promise<boolean>
 	}
 }
 
-interface ISessionCreationParams{
-	experimentID: number,
-	roomCode: string,
-	hostSocketID: string,
-	isPasswordProtected: boolean | null,
-	password: string | null,
-	isSpectatorsAllowed: boolean | null,
-}
 // Author: Emanuelle Pelayo
 // Purpose: Adds a session to the database
 export async function createSessionInDatabase(initializationInfo: ISessionCreationParams): Promise<string> {
@@ -172,22 +199,6 @@ export async function createSessionInDatabase(initializationInfo: ISessionCreati
 		await dbClient.end();
 		console.log("(Database.ts): finished ending database connection")
 	}
-}
-
-
-export interface IPhotoLabDatabaseInfo {
-	experimentID: number,
-	path: string, //Image path
-	captions: string 
-}
-export interface IVideoLabDatabaseInfo {
-	experimentID: number,
-	path: string, //Image path
-}
-export interface IGalleryLabDatabaseInfo {
-	experimentID: number,
-	path: string, //Image path
-	captions: string 
 }
 
 export async function createPhotoLabInDatabase(initializationInfo: IPhotoLabDatabaseInfo): Promise<void>{
@@ -276,14 +287,6 @@ export async function createGalleryLabInDatabase(initializationInfo: IGalleryLab
 }
 
 
-
-export interface IAddUserToSessionInfo {
-	socketID: string;
-	nickname: string | null;
-	roomCode: string | null;
-	serialNumberLastFour: string | null;
-}
-
 //assuming the user is a joiner.
 export async function addUserToSession(initializationInfo: IAddUserToSessionInfo): Promise<void>{
 	const {
@@ -310,13 +313,6 @@ export async function addUserToSession(initializationInfo: IAddUserToSessionInfo
 		console.log("Unable to add user ", error)
 		throw error;
 	}
-}
-
-export interface IRegisterDeviceInfo {
-	sessionID: string, 
-    serialNumber: string,
-    ipAddress: string,
-	deviceSocketID: string
 }
 
 export async function registerDevice(initializationInfo: IRegisterDeviceInfo){
