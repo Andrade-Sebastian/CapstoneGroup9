@@ -20,6 +20,7 @@ databaseRouter.post("/photo-lab", async(req: Request, res: Response) => {
         experimentTitle, 
         experimentDescription,
         experimentCaptions,
+        imageBlob,
         socketID
     } = req.body;
 
@@ -28,6 +29,7 @@ databaseRouter.post("/photo-lab", async(req: Request, res: Response) => {
     console.log("Experiment Description: ", experimentDescription)
     console.log("Experiment Caption: ", experimentCaptions)
     console.log("Socket ID: ", socketID)
+    console.log("Image Blob: ", imageBlob)
 
 
     //create an experiment
@@ -41,7 +43,7 @@ databaseRouter.post("/photo-lab", async(req: Request, res: Response) => {
             experimentTitle: experimentTitle,
             experimentDescription: experimentDescription,
             experimentCaptions: experimentCaptions,
-            imageBlob: "asdfghj",
+            imageBlob: imageBlob,
             socketID: socketID
         }, )
 
