@@ -15,6 +15,7 @@ export function useSocketManager(){
         socket.on("session-start", () => {
            console.log("in session-start");
         });
+        
         socket.on("experiment-data", () => {
            console.log("in experiment-data in useSocketManager");
         });

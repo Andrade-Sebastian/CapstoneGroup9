@@ -54,25 +54,26 @@ export default function PhotoLab() {
       //logic for sending code to backend
       //Create the experiment before doing this
 
+      // const createExperiment = await axios.post('http://localhost:3000/experiment/create', {
+      //   description: experimentsDesc,
+      //   name: experimentsTitle
+      // })
+
+      // if (createExperiment.status !== 200) {
+      //   toast.error('Could not create lab, try again', { id: loadingToastId })
+      // }
+
       const response = await axios.post('http://localhost:3000/database/photo-lab', {
-        experimentID: experimentId,
-        path: imageSource, //null
-        captions: caption
+        experimentTitle: experimentsTitle,
+        experimentDescription: experimentsDesc,
+        experimentCaptions: caption, //experimentCaption
+        imageBlob: imageSource, 
+        socketID: sessionStorage.getItem("socketID")
       })
 
       if (response.status === 200) {
         console.log('!!!creating a session')
         toast.success('Lab was created successfully', { id: loadingToastId })
-        const sessionResponse = await axios.post('http://localhost:3000/host/session/create', {
-          selectedExperimentId: experimentId,
-          roomCode: roomCode,
-          hostSocketId: 'abcd123',
-          startTimeStamp: null,
-          isPasswordProtected: false,
-          password: '',
-          isSpectatorsAllowed: true,
-          endTimeStamp: null
-        })
         console.log('done creating session')
         console.log('navigating to waiting room', roomCode)
         setExperimentTitle(experimentsTitle)

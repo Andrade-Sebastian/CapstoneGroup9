@@ -1,5 +1,5 @@
 import { Client } from "https://deno.land/x/postgres@v0.17.0/mod.ts";
-import { IDevice, ISessionDatabaseInfo, IUser } from "./session_controller.ts";
+import { IDevice, ISessionDatabaseInfo, IUser, ISessionCredentials } from "./session_controller.ts";
 
 
 export const dbClient = new Client({
@@ -19,8 +19,6 @@ interface ISessionInitialization {
 }
 
 interface ISessionCreationParams{
-	experimentID: number,
-	roomCode: string,
 	hostSocketID: string,
 	isPasswordProtected: boolean | null,
 	password: string | null,
@@ -56,6 +54,31 @@ export interface IRegisterDeviceInfo {
     ipAddress: string,
 	deviceSocketID: string
 }
+
+export async function getPhotoLabInfo(experimentID: number){
+	try{
+		await dbClient.connect();
+		const query = await dbClient.queryObject(`SELECT * FROM photolab JOIN experiment 
+			ON photolab.experimentid = ${experimentID};`,
+		);
+		console.log("Photo Lab Info: ", query);
+		return query.rows[0];
+	}
+	catch(error){
+		console.log("Unable to retrieve photo lab info", error);
+	}
+}
+
+
+function generateRandomCode(length: number){
+    const numbers = '0123456789';
+    let lobbyCode = '';
+    for (let i = 0; i < length; i++){
+        lobbyCode += numbers.charAt(Math.floor(Math.random() * numbers.length));
+    }
+    return lobbyCode;
+}
+
 
 function isolateSessionIDs(sessions) 
 {
@@ -140,16 +163,24 @@ export async function getMaxPhotoLabIDsFromDB()
 
 export async function validateRoomCode(roomCode:string): Promise<boolean>
 {
+
+	let isValidRoomCode = false;
+
 	try{
 		await dbClient.connect();
 		const query = await dbClient.queryObject(`SELECT 
-			roomcode FROM session WHERE roomcode= $1`,
+			sessionid FROM session WHERE roomcode= $1 LIMIT 1`,
 			[roomCode]);
 		console.log(query)
 
 		if (query.rows.length > 0){//result is valid
 			console.log("(database.ts): Validated room code")
-			return true;
+			const sessionID = query.rows[0].sessionid;
+			isValidRoomCode = true;
+			return {
+				isValidRoomCode: isValidRoomCode,
+				sessionID: sessionID
+			};
 		}
 
 		console.log("returning false")
@@ -159,34 +190,37 @@ export async function validateRoomCode(roomCode:string): Promise<boolean>
 	catch(error){
 		console.log("(database.ts): No valid room code: " + error)
 		return false;
-		
 	}
 }
+
+interface ISessionCreationParams{
+	hostSocketID: string,
+	isPasswordProtected: boolean | null,
+	password: string | null,
+	isSpectatorsAllowed: boolean | null,
+}
+
 
 // Author: Emanuelle Pelayo
 // Purpose: Adds a session to the database
 export async function createSessionInDatabase(initializationInfo: ISessionCreationParams): Promise<string> {
 	const {
-		experimentID,
-		roomCode,
 		hostSocketID,
 		isPasswordProtected,
 		password,
 		isSpectatorsAllowed, 
 	} = initializationInfo;
 
-
-	//const initializationInfoToPrint = JSON.stringify(initializationInfo);
-	//console.log("(database.ts): Receieved initialization Info: "+ initializationInfoToPrint)
+	const roomCode = generateRandomCode(5);
 
 	try 
 	{
 		await dbClient.connect(); // Connect to the database 
 		console.log("(database.ts): createSessionInDatabase() - Connected to Database");
 		const result = await dbClient.queryObject(
-			`SELECT * FROM Create_Session(${experimentID}, '${roomCode}', '${hostSocketID}', ${isPasswordProtected}, '${password}', ${isSpectatorsAllowed});`);
-		console.log("(database.ts): ", result)
-		console.log("(database.ts): RESULT" + JSON.stringify(result));
+			`SELECT * FROM Create_Session('${roomCode}', '${hostSocketID}', ${isPasswordProtected}, '${password}', ${isSpectatorsAllowed});`);
+		//console.log("(database.ts): ", result)
+		//console.log("(database.ts): RESULT" + JSON.stringify(result));
 		return (result.rows[0]);
 
 	}
@@ -196,22 +230,75 @@ export async function createSessionInDatabase(initializationInfo: ISessionCreati
 	}
 	finally 
 	{
-		console.log("(Database.ts): ending database connection")
+		//console.log("(Database.ts): ending database connection")
 		await dbClient.end();
-		console.log("(Database.ts): finished ending database connection")
+		//console.log("(Database.ts): finished ending database connection")
 	}
 }
 
-export async function createPhotoLabInDatabase(initializationInfo: IPhotoLabDatabaseInfo): Promise<void>{
+export interface IPhotoLabDatabaseInfo {
+	experimentTitle: string, 
+	experimentDescription: string | null,
+	experimentCaptions: string | null,
+	imageBlob: string;
+	socketID: string;
+}
+
+
+export async function getSessionState(sessionID: number){
+	try{
+		await dbClient.connect();
+		const query = await dbClient.queryObject(`SELECT * FROM session WHERE sessionid = $1`,
+			[sessionID]
+		);
+		return query.rows[0];
+	}
+	catch(error){
+		console.log("Unable to retrieve state", error);
+	}
+}
+
+async function getSessionIDFromSocketID(socketID: string){
+	try{
+		await dbClient.connect();
+		const query = await dbClient.queryObject(`SELECT sessionid FROM session WHERE hostsocketid = $1`,
+			[socketID]
+		);
+		return query.rows[0].sessionid;
+	}
+	catch(error){
+		console.log("Unable to retrieve session id", error);
+	}
+}
+
+export async function createPhotoLabInDatabase(initializationInfo: IPhotoLabDatabaseInfo, sessionID: null | number=null ): Promise<void>{
 	const {
-		experimentID,
-		path, 
-		captions
+		experimentTitle,
+		experimentDescription,
+		experimentCaptions,
+		imageBlob,
+		socketID
 	} = initializationInfo;
+
+	let experimentID = null;
 
 	try{
 		await dbClient.connect();
+		
+		const createExperimentQuery = await dbClient.queryObject(`
+			INSERT INTO experiment(name, description)
+			VALUES ($1, $2)
+			returning experimentid;`, 
+			[
+				experimentTitle,
+				experimentDescription
+			]
+		);
 
+		experimentID = createExperimentQuery.rows[0].experimentid;
+
+
+		//Add a photo lab 
 		const query = await dbClient.queryObject(`
 			INSERT INTO photolab ( 
 			experimentid,
@@ -221,31 +308,30 @@ export async function createPhotoLabInDatabase(initializationInfo: IPhotoLabData
 			VALUES ($1, $2, $3);
 			`, [
 				experimentID,
-				path,
-				captions
-			]);
+				imageBlob,
+				experimentCaptions
+				]
+		);
+
+		//get session id from host socket id 
+		const sessionID = await getSessionIDFromSocketID(socketID);
+
+		//relate the experiment to the session		
+		const updateSessionQuery = await dbClient.queryObject(`
+			UPDATE session
+			SET experimentid = ${experimentID}
+			WHERE sessionid = ${sessionID}; `);
 
 		console.log("(database.ts): Photo Lab Successfully Added")
+
+
+		return experimentID;
 	}
 	catch(error){
 		console.log("Error adding photo lab to the database: " + error)
 	}
 }
 
-export async function getPhotoPath(experimentID: number){
-	try{
-		await dbClient.connect();
-
-		const query = await dbClient.queryObject(`SELECT path, captions FROM photolab WHERE experimentid = $1`,
-			[experimentID]
-		);
-		console.log("PHOTO LAB RESULT: ", query.rows[0]);
-		return query.rows[0];
-	}
-	catch(error){
-		console.log("Error retrieving information from photolab: ", error);
-	}
-}
 export async function createVideoLabInDatabase(initializationInfo: IVideoLabDatabaseInfo): Promise<void>{
 	const {
 		experimentID,
@@ -272,6 +358,8 @@ export async function createVideoLabInDatabase(initializationInfo: IVideoLabData
 		console.log("Error adding video lab to the database: " + error)
 	}
 }
+
+
 export async function createGalleryLabInDatabase(initializationInfo: IGalleryLabDatabaseInfo): Promise<void>{
 	const {
 		experimentID,
@@ -305,6 +393,7 @@ export async function createGalleryLabInDatabase(initializationInfo: IGalleryLab
 
 //assuming the user is a joiner.
 export async function addUserToSession(initializationInfo: IAddUserToSessionInfo): Promise<void>{
+	console.log("(database.ts): addUserToSession() ", initializationInfo)
 	const {
 		socketID,
 		nickname, 
@@ -318,12 +407,22 @@ export async function addUserToSession(initializationInfo: IAddUserToSessionInfo
 	try{
 		await dbClient.connect();
 
-		//add the user to the session
+		// 
+// user joins the waiting room without conecting an emotibit
+	if (serialNumberLastFour === null || serialNumberLastFour === "" || serialNumberLastFour === undefined)
+	{
+		console.log("(database.ts): User is joining without an emotibit")
+		const query = await dbClient.queryObject(`SELECT * FROM
+			Join_Session_Without_EmotiBit('${nickname}', '${socketID}', '${roomCode}', '${userRole}');`)
+	}
+	else{
+		console.log("(database.ts): User is joining with an emotibit")
+		//add the user to the session with the emotibit
 		const query = await dbClient.queryObject(`SELECT * FROM Join_Session($1, $2, $3, $4, $5, $6)`,
 			[nickname, socketID, roomCode, userRole, serialNumberLastFour, deviceID]
 		);
+	}
 		
-		//console.log("(database.ts): ", query)
 		console.log("(database.ts): User Successfully Added To Session")
 	}
 	catch(error)
@@ -415,3 +514,19 @@ export async function validDeviceSerial(nickName: string, roomCode:number, seria
 	}
 }
 
+
+export async function assignExperimentToSession(sessionID: number, experimentID: string){
+
+	//add the experiment to the session
+	//assign the experiment to the session
+	try{
+		await dbClient.connect();
+		const query = await dbClient.queryObject(`UPDATE session
+		SET experimentid = ${experimentID}
+		WHERE sessionid = ${sessionID}; `);
+	}
+	catch(error){
+		console.log("Unable to assign experiment to session", error);
+	}	
+
+}

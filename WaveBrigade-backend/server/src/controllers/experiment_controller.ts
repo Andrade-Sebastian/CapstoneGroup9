@@ -2,7 +2,7 @@ import {ILab, IExperiment} from "../controllers/session_controller.ts";
 import experimentRouter from "../routes/experiment_routes.ts";
 
 
-
+const folderName = "/media";
 // export interface ILab {
 //     id: string;
 //     name: string;
@@ -55,6 +55,23 @@ export function generateRandomCode(length: number){
         lobbyCode += numbers.charAt(Math.floor(Math.random() * numbers.length));
     }
     return lobbyCode;
+}
+
+//given a file's hex & photo lab {id}, 
+//save the photo lab image to directory /media/photo-lab/photo-lab-{id}
+
+export async function savePhotoLabImage(photoLabId: string, file: string){
+    const imageName = `${photoLabId}.png`;
+    const imagePath = `${folderName}/photo-lab/${imageName}`;
+    //use a file writer to write the file to the directory given hex code
+
+    //file writer 
+    //node directory functions 
+    
+    //save file to directory
+    const imageFile = await Deno.create(imagePath);
+
+    return imagePath;
 }
 
 

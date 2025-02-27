@@ -3,7 +3,7 @@ import {addDiscoveredDevice, getSessionState, IDevice, createSession, joinSessio
 import SessionManager from "../sessions_singleton.ts";
 import { addSocketToSession, removeSocket, getSessionBySocket, socketSessionMap } from "../sessionMappings.ts";
 import axios from "axios";
-import {addUserToSession, getUsersFromSession, validateRoomCode, removeUserFromSession, validDeviceSerial, getPhotoPath } from "../controllers/database.ts";
+import {addUserToSession, getUsersFromSession, validateRoomCode, removeUserFromSession, validDeviceSerial} from "../controllers/database.ts";
 const app = express();
 const joinerRouter = express.Router();
 joinerRouter.use(express.json());
@@ -65,26 +65,6 @@ joinerRouter.post("/session/join", async (req: Request, res: Response) => {
 }
 )
 
-//uses singleton chicken -> stored procedure
-joinerRouter.post("/join-session/:requestedSessionId/:socketId", (req: Request, res: Response) => {
-    const requestedSessionId = req.params.requestedSessionId;
-    const socketId = req.params.socketId;
-    console.log("URL PARAM:", requestedSessionId, socketId)
-
-    //Get session at sessionID
-    //find the 'users' array
-    //"MODIFY" the array by pushing an IUser
-
-    try{    
-        res.status(200).send(joinSession(requestedSessionId, socketId))
-    }
-    catch(error: unknown){
-        res.status(500).send("Server Error")
-        throw new Error("Could not join session")
-    }
-    
-    }
-)
 
 
 joinerRouter.get("/room-users/:sessionID", (req: Request, res: Response) => {
@@ -276,8 +256,27 @@ joinerRouter.get("/getPhoto/:experimentID", async (req: Request, res: Response) 
     }
 })
 
+joinerRouter.get("/verify-code/:roomCode", async (req: Request, res: Response) => {
+    const roomCode  = req.params.roomCode;
+    console.log("Room Code: ", roomCode);
 
 
+    try {
+        const {
+            isValidRoomCode,
+            sessionID
+        } = await validateRoomCode(roomCode);
+
+        //check the 
+        if (isValidRoomCode) {
+            return res.status(200).json({ 
+                sessionID: sessionID
+             })
+        }
+    } catch (error) {
+        return res.status(400).json({ error: error });
+    }
+});
 
 
 export default joinerRouter;
