@@ -46,18 +46,16 @@ joinerRouter.post("/session/join", async (req: Request, res: Response) => {
 	} = req.body;
 
     try{
-        await addUserToSession({
+        const session = await addUserToSession(
+        {
             "socketID": socketID,
             "nickname": nickname,
             "roomCode": roomCode,
             "serialNumberLastFour": serialNumberLastFour,
             "deviceID": deviceID
-        }).then(() => {
-            console.log("User successfully added to session")
-            return res.status(200).send("In /session/join");
-        }
-        
-        )
+        });
+        console.log(session);
+        return res.status(200).send(session);
     }
     catch(error){
         console.log("Unable to add user ", error)
