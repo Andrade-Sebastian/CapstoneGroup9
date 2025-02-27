@@ -431,6 +431,7 @@ export async function addUserToSession(initializationInfo: IAddUserToSessionInfo
 		deviceID
 	} = initializationInfo;
 	const userRole = "joiner";
+	
 
 	console.log("(database.ts): addUserToSession() ", initializationInfo)
 	try{
@@ -440,6 +441,7 @@ export async function addUserToSession(initializationInfo: IAddUserToSessionInfo
 		const query = await dbClient.queryObject(`SELECT * FROM Join_Session($1, $2, $3, $4, $5, $6)`,
 			[nickname, socketID, roomCode, userRole, serialNumberLastFour, deviceID]
 		);
+		
 
 		const changeDeviceAvailabilityQuery = await dbClient.queryObject(`UPDATE device
 		SET isavailable = false
@@ -449,7 +451,7 @@ export async function addUserToSession(initializationInfo: IAddUserToSessionInfo
 			SET isconnected = false
 			WHERE deviceid = ${deviceID}; `);
 		
-		console.log("(database.ts): User Successfully Added To Session")
+		return query.rows[0]; 
 	}
 	catch(error)
 	{
