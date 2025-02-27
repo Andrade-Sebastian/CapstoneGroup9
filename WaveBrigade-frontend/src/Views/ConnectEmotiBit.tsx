@@ -17,27 +17,31 @@ export default function ConnectEmotiBit() {
   const navigateTo = useNavigate();
   const { setExperimentId, setExperimentTitle, setExperimentDesc, setIsConnected, setSerial, setDeviceId, nickname, roomCode, socketId, serial, deviceId} = useJoinerStore()
 
-const handleComplete = (code: string) => {
-  console.log("Serial Code Entered:", code);
-  setCode(code);
-};
-const handleSubmit = async (e: React.FormEvent) =>{
-  e.preventDefault();
+  const handleComplete = (code: string) => {
+    console.log("Serial Code Entered:", code);
+    setCode(code);
+  };
 
-  const loadingToastId = toast.loading("Verifying code...");
-  if (isSubmitting) return;
+  const handleSubmit = async (e: React.FormEvent) =>{
+    e.preventDefault();
 
-  setIsSubmitting(true);
+    const loadingToastId = toast.loading("Verifying code...");
+    if (isSubmitting) return;
+
+    setIsSubmitting(true);
 
   try{
+    console.log("stuff: ", nickname, " | ",  roomCode, " | ", code);
     //logic for sending code to backend
     const response = await axios.post("http://localhost:3000/joiner/verify-serial",{
       nickName: nickname,
       roomCode: roomCode,
       serialCode: code,
     });
+    //does not pass this 
 
     const {success, deviceID} = response.data;
+    console.log("RESPONSE DATA: ", response.data);
     // console.log("DEVICE ID RETURNED FROM RESPONSE: ", deviceID);
     // setDevice(deviceID);
     // console.log("DEVICE ID STORED IN REACT STATE: ", device);
@@ -80,8 +84,6 @@ const handleSubmit = async (e: React.FormEvent) =>{
 
   const joinRoom = async (device: number) => {
     try{
-      console.log("Socket ID: " + socketId);
-      //console.log("Session ID: " + sessionID);
       const response = await axios.post(`http://localhost:3000/joiner/session/join/`, {
         socketID: socketId,
         nickname: nickname,

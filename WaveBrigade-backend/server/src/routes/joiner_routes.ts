@@ -56,6 +56,7 @@ joinerRouter.post("/session/join", async (req: Request, res: Response) => {
             console.log("User successfully added to session")
             return res.status(200).send("In /session/join");
         }
+        
         )
     }
     catch(error){
@@ -155,10 +156,12 @@ joinerRouter.post("/leave-room/:sessionID/:socketID", (req: Request, res: Respon
 joinerRouter.post("/verify-serial", async (req: Request, res: Response) => {
     console.log("Request received at /verify-serial:", req.body);
     const {nickName, roomCode, serialCode } = req.body;
+
+
     try{
     //change this later to the correct serial code implementation
         const validSerialCode = await validDeviceSerial(nickName, roomCode, serialCode);
-        
+        console.log("Valid serial code: ", validSerialCode);
         if (validSerialCode){
             const deviceID = validSerialCode.deviceid
             return res.status(200).json({success: true, deviceID: deviceID});

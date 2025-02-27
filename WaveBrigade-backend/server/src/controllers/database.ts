@@ -55,6 +55,35 @@ export interface IRegisterDeviceInfo {
 	deviceSocketID: string
 }
 
+
+export async function makeDeviceAvailable(deviceID: number)
+{
+	try{
+		await dbClient.connect();
+		const query = await dbClient.queryObject(`UPDATE device
+		SET isavailable = true
+		WHERE deviceid = ${deviceID}; `);
+	}
+	catch(error){
+		console.log("Unable to make device not available", error);
+	}
+}
+
+export async function makeDeviceNotAvailable(deviceID: number)
+{
+	try{
+		await dbClient.connect();
+		const query = await dbClient.queryObject(`UPDATE device
+		SET isavailable = false
+		WHERE deviceid = ${deviceID}; `);
+	}
+	catch(error){
+		console.log("Unable to make device not available", error);
+	}
+}	
+
+
+
 export async function getPhotoLabInfo(experimentID: number){
 	try{
 		await dbClient.connect();
@@ -407,21 +436,18 @@ export async function addUserToSession(initializationInfo: IAddUserToSessionInfo
 	try{
 		await dbClient.connect();
 
-		// 
-// user joins the waiting room without conecting an emotibit
-	if (serialNumberLastFour === null || serialNumberLastFour === "" || serialNumberLastFour === undefined)
-	{
-		console.log("(database.ts): User is joining without an emotibit")
-		const query = await dbClient.queryObject(`SELECT * FROM
-			Join_Session_Without_EmotiBit('${nickname}', '${socketID}', '${roomCode}', '${userRole}');`)
-	}
-	else{
-		console.log("(database.ts): User is joining with an emotibit")
 		//add the user to the session with the emotibit
 		const query = await dbClient.queryObject(`SELECT * FROM Join_Session($1, $2, $3, $4, $5, $6)`,
 			[nickname, socketID, roomCode, userRole, serialNumberLastFour, deviceID]
 		);
-	}
+
+		const changeDeviceAvailabilityQuery = await dbClient.queryObject(`UPDATE device
+		SET isavailable = false
+		WHERE deviceid = ${deviceID}; `);
+
+		const changeDeviceAvailabilityQuery2 = await dbClient.queryObject(`UPDATE device
+			SET isconnected = false
+			WHERE deviceid = ${deviceID}; `);
 		
 		console.log("(database.ts): User Successfully Added To Session")
 	}
@@ -500,11 +526,14 @@ export async function removeUserFromSession(sessionID: string, socketID: string)
 }
 
 export async function validDeviceSerial(nickName: string, roomCode:number, serialCode: string){
+	console.log("validDeviceSerial: ", serialCode)
 	try{
 		await dbClient.connect();
-		const query = await dbClient.queryObject(`SELECT deviceid FROM device WHERE serialnumber = $1 AND isavailable = $2`,
-			[serialCode, true]
+		const query = await dbClient.queryObject(`SELECT deviceid FROM device WHERE RIGHT(device.serialnumber, 4) = $1 AND isavailable = $2`,
+			[serialCode, true] 
 		);
+
+		console.log("HERE+++ ", query);
 		
 		return query.rows[0];
 		
@@ -530,3 +559,4 @@ export async function assignExperimentToSession(sessionID: number, experimentID:
 	}	
 
 }
+
