@@ -275,7 +275,7 @@ $$ LANGUAGE plpgsql;
 
 
 
-CREATE FUNCTION Join_Session(param_nickname VARCHAR(100), socket_id VARCHAR(100), room_code TEXT, user_role VARCHAR(100), sn_four_digits TEXT)
+CREATE FUNCTION Join_Session(param_nickname VARCHAR(100), socket_id VARCHAR(100), room_code TEXT, user_role VARCHAR(100), sn_four_digits TEXT, device_id INT)
 RETURNS TABLE(
 	joiner_deviceid INT, 
 	joiner_ipaddress VARCHAR(100),

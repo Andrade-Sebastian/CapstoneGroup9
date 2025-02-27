@@ -19,7 +19,7 @@ export default function JoinPage() {
   const [sessionID, setSessionID] = useState("")
   const [users, setUsers] = useState<string[]>([]) //list of users to send to waiting room
   const [socketID, setSocketID] = useState("");
-  const { setNickname, setRoomCode} = useJoinerStore()
+  const { setNickname, setRoomCode, setUserSocketId} = useJoinerStore()
 
 
 
@@ -43,17 +43,9 @@ export default function JoinPage() {
       const isValidRoomCode = await validateRoomCode(StudentInputRoomCode);
       if (isValidRoomCode) {
         toast.success("Connection Successful! Please standby", {id: loadingToastId});
-        const isJoinedRoom = await joinRoom(StudentInputRoomCode);
-        if(isJoinedRoom){
-          setTimeout(() => {
-            navigateTo("/connect-emotibit", {
-              state: {
-                nickName: nickName,
-                roomCode: StudentInputRoomCode,
-              }
-            });
-          })
-        }
+        setTimeout(() => {
+          navigateTo("/connect-emotibit");
+        });
     }
     else{
       toast.error("Connection failed. Looks like we couldn't get you connected. Please check your room code and try again.", {id: loadingToastId});
@@ -70,8 +62,9 @@ export default function JoinPage() {
       if (response.status === 200) {
         console.log("Room code is valid!");
         setSessionID(response.data.sessionID);  // Store sessionID when room code is valid
-        setRoomCode(StudentInputRoomCode)
-        setNickname(nickName)
+        setRoomCode(StudentInputRoomCode);
+        setNickname(nickName);
+        setUserSocketId(socketID);
         return true;
       }
       return false;
@@ -80,27 +73,6 @@ export default function JoinPage() {
       return false;
     }
   };
-
-  const joinRoom = async (StudentInputRoomCode: string) => {
-    try{
-      console.log("Socket ID: " + socketID);
-      console.log("Session ID: " + sessionID);
-      const response = await axios.post(`http://localhost:3000/joiner/session/join/`, {
-        socketID: socketID,
-        nickname: nickName,
-        roomCode: StudentInputRoomCode,
-        serialNumberLastFour: "1234",
-      });
-      if(response.status === 200){
-        console.log("Added user to session!");
-        return true;
-      }
-    }
-    catch(error){
-        console.error("Could not add User to session", error);
-        return false;
-      }
-    }
     
 
   return (

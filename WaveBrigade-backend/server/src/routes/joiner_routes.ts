@@ -3,7 +3,7 @@ import {addDiscoveredDevice, getSessionState, IDevice, createSession, joinSessio
 import SessionManager from "../sessions_singleton.ts";
 import { addSocketToSession, removeSocket, getSessionBySocket, socketSessionMap } from "../sessionMappings.ts";
 import axios from "axios";
-import {addUserToSession, getUsersFromSession, validateRoomCode, removeUserFromSession, validDeviceSerial } from "../controllers/database.ts";
+import {addUserToSession, getUsersFromSession, validateRoomCode, removeUserFromSession, validDeviceSerial, getPhotoPath } from "../controllers/database.ts";
 const app = express();
 const joinerRouter = express.Router();
 joinerRouter.use(express.json());
@@ -36,11 +36,13 @@ joinerRouter.get("/session/:sessionId", (req: Request, res: Response) => {
 
 //roomcode, nickname, 
 joinerRouter.post("/session/join", async (req: Request, res: Response) => {
+    console.log("In /session/join: ", req.body);
     const {
         socketID,
 		nickname, 
 		roomCode,
-		serialNumberLastFour
+		serialNumberLastFour,
+        deviceID
 	} = req.body;
 
     try{
@@ -48,7 +50,8 @@ joinerRouter.post("/session/join", async (req: Request, res: Response) => {
             "socketID": socketID,
             "nickname": nickname,
             "roomCode": roomCode,
-            "serialNumberLastFour": serialNumberLastFour
+            "serialNumberLastFour": serialNumberLastFour,
+            "deviceID": deviceID
         }).then(() => {
             console.log("User successfully added to session")
             return res.status(200).send("In /session/join");
@@ -174,10 +177,11 @@ joinerRouter.post("/verify-serial", async (req: Request, res: Response) => {
     const {nickName, roomCode, serialCode } = req.body;
     try{
     //change this later to the correct serial code implementation
-        //const validSerial = await validDeviceSerial(nickName, roomCode, serialCode);
-        const validSerialCode = "1234";
-        if (serialCode === validSerialCode){
-            return res.status(200).json({ success:true });
+        const validSerialCode = await validDeviceSerial(nickName, roomCode, serialCode);
+        
+        if (validSerialCode){
+            const deviceID = validSerialCode.deviceid
+            return res.status(200).json({success: true, deviceID: deviceID});
         }
         else{
             return res.status(400).json({success: false, message: "Invalid code"});
@@ -256,6 +260,21 @@ joinerRouter.get("/session/getInfo/:roomCode", async (req: Request, res: Respons
 
 })
 
+joinerRouter.get("/getPhoto/:experimentID", async (req: Request, res: Response) => {
+    console.log("In joiner/getPhoto/:experimentID", req.body);
+
+    const experimentID = req.params.experimentID;
+
+    try{
+        const photoInfo = await getPhotoPath(experimentID);
+        return res.status(200).send(photoInfo);
+
+    }
+    catch(error){
+        console.log(error);
+        return res.status(500).send(error);
+    }
+})
 
 
 

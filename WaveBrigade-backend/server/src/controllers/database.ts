@@ -47,6 +47,7 @@ export interface IAddUserToSessionInfo {
 	nickname: string | null;
 	roomCode: string | null;
 	serialNumberLastFour: string | null;
+	deviceID: number;
 }
 
 export interface IRegisterDeviceInfo {
@@ -230,6 +231,21 @@ export async function createPhotoLabInDatabase(initializationInfo: IPhotoLabData
 		console.log("Error adding photo lab to the database: " + error)
 	}
 }
+
+export async function getPhotoPath(experimentID: number){
+	try{
+		await dbClient.connect();
+
+		const query = await dbClient.queryObject(`SELECT path, captions FROM photolab WHERE experimentid = $1`,
+			[experimentID]
+		);
+		console.log("PHOTO LAB RESULT: ", query.rows[0]);
+		return query.rows[0];
+	}
+	catch(error){
+		console.log("Error retrieving information from photolab: ", error);
+	}
+}
 export async function createVideoLabInDatabase(initializationInfo: IVideoLabDatabaseInfo): Promise<void>{
 	const {
 		experimentID,
@@ -293,7 +309,8 @@ export async function addUserToSession(initializationInfo: IAddUserToSessionInfo
 		socketID,
 		nickname, 
 		roomCode,
-		serialNumberLastFour
+		serialNumberLastFour,
+		deviceID
 	} = initializationInfo;
 	const userRole = "joiner";
 
@@ -302,8 +319,9 @@ export async function addUserToSession(initializationInfo: IAddUserToSessionInfo
 		await dbClient.connect();
 
 		//add the user to the session
-		const query = await dbClient.queryObject(`SELECT * FROM
-			Join_Session('${nickname}', '${socketID}', '${roomCode}', '${userRole}','${serialNumberLastFour}');`) 
+		const query = await dbClient.queryObject(`SELECT * FROM Join_Session($1, $2, $3, $4, $5, $6)`,
+			[nickname, socketID, roomCode, userRole, serialNumberLastFour, deviceID]
+		);
 		
 		//console.log("(database.ts): ", query)
 		console.log("(database.ts): User Successfully Added To Session")
@@ -382,10 +400,15 @@ export async function removeUserFromSession(sessionID: string, socketID: string)
 	}
 }
 
-export async function validDeviceSerial(nickName: string, roomCode:string, serialCode: string){
+export async function validDeviceSerial(nickName: string, roomCode:number, serialCode: string){
 	try{
 		await dbClient.connect();
-		const query = await dbClient.queryObject(`SELECT FROM `);
+		const query = await dbClient.queryObject(`SELECT deviceid FROM device WHERE serialnumber = $1 AND isavailable = $2`,
+			[serialCode, true]
+		);
+		
+		return query.rows[0];
+		
 	}
 	catch(error){
 		console.log("Unable to validate emotibit");

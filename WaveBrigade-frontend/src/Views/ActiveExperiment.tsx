@@ -6,6 +6,7 @@ import { BsChatSquareText } from "react-icons/bs";
 import { TbHexagons } from "react-icons/tb";
 import { useEffect, useState } from "react";
 import socket from "./socket.tsx";
+import axios from "axios";
 import { Divider } from "@heroui/divider";
 import ChartComponent from "../Components/ChartComponent.tsx";
 import { useJoinerStore } from "../hooks/stores/useJoinerStore.ts";
@@ -20,6 +21,16 @@ export default function ActiveExperiment() {
 
   useEffect(() => {
     console.log("Running active experiment");
+    console.log("Experiment ID in Store: ", useJoinerStore.getState().experimentId);
+    const getPhotoInfo = async () => {
+      const response = await axios.get(`http://localhost:3000/joiner/getPhoto/${experimentId}`)
+      .then((response) => {
+        console.log("PHOTO LAB RESPONSE RECIEVED: ", response);
+      })
+    };
+
+    getPhotoInfo();
+
 
     // socket.on("update", (data) => {
     //   if (Array.isArray(data)) {
