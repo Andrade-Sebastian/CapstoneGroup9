@@ -82,7 +82,7 @@ const emotiBitObject = {
 
 
 io.on("connection", (socket) => {
-    console.log(`User Connected: ${socket.id}`); //when a new client connects to the server, it will log it
+    // console.log(`User Connected: ${socket.id}`); //when a new client connects to the server, it will log it
     
     //listens for send_code event from HostSelectMedia Page
     socket.on("create_room", (data) => {

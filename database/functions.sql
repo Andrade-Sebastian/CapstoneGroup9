@@ -10,10 +10,14 @@ drop function if exists Check_Session_Availability(VARCHAR(100));
 drop function if exists Get_Session_Mappings(INT);
 drop function if exists Update_Device_Availability (INT, BOOL);
 drop function if exists Get_Session_Users(INT);
-drop function if exists Create_Session(INT, VARCHAR(100), VARCHAR(100), BOOLEAN, VARCHAR(100), BOOLEAN);
+drop function if exists Create_Session(VARCHAR(100), VARCHAR(100), BOOLEAN, VARCHAR(100), BOOLEAN);
 drop function if exists Join_Session(VARCHAR(100), VARCHAR(100), TEXT, VARCHAR(100), TEXT);
+drop function if exists Join_Session_Without_EmotiBit(VARCHAR(100), VARCHAR(100), TEXT, VARCHAR(100));
 
-CREATE OR REPLACE FUNCTION Create_Session(experiment_id INT, room_code VARCHAR(100), host_socket_id VARCHAR(100), is_password_protected BOOLEAN, "password" VARCHAR(100), is_spectators_allowed BOOLEAN)
+
+
+
+CREATE OR REPLACE FUNCTION Create_Session(room_code VARCHAR(100), host_socket_id VARCHAR(100), is_password_protected BOOLEAN, "password" VARCHAR(100), is_spectators_allowed BOOLEAN)
 RETURNS TABLE (-- SESSION MINUS PASSWORD
 	sessionid INT,
     experimentid INT,
@@ -26,9 +30,8 @@ RETURNS TABLE (-- SESSION MINUS PASSWORD
 ) AS $$
 BEGIN
 	--insert the new session 
-	INSERT INTO session(experimentid, roomcode, hostsocketid, starttimestamp, ispasswordprotected, password, isspectatorsallowed, endtimestamp) 
+	INSERT INTO session(roomcode, hostsocketid, starttimestamp, ispasswordprotected, password, isspectatorsallowed, endtimestamp) 
 	VALUES (
-		experiment_id,
 		room_code, 
 		host_socket_id,
 		null, -- starttimestamp
@@ -130,7 +133,7 @@ $$ LANGUAGE plpgsql;
 
 -- Create_Device (ip_address, serial_number, device_socket_id, sampling_frequency): 
 -- Used when Host adds a new device to a session. Returns Device Table
-drop function if exists Create_Device(VARCHAR(100), VARCHAR(100), VARCHAR(100), INT );
+drop function if exists Create_Device(VARCHAR(100), VARCHAR(100), VARCHAR(100), INT);
 
 CREATE FUNCTION Create_Device(
     ip_address VARCHAR(100), 
@@ -151,7 +154,7 @@ DECLARE
     new_device_id INT;
 BEGIN
     -- Insert into Device table and return the new DeviceID
-    INSERT INTO Device (IPAddress, SerialNumber, DeviceSocketID, SamplingFrequency, IsAvailable, IsConnected)
+    INSERT INTO Device (ipaddress, serialnumber, devicesocketid, samplingfrequency, isavailable, isconnected)
 	    VALUES (ip_address, serial_number, device_socket_id, sampling_frequency, TRUE, FALSE)
 	    RETURNING DEVICE.DeviceID INTO new_device_id;
 
@@ -275,7 +278,7 @@ $$ LANGUAGE plpgsql;
 
 
 
-CREATE FUNCTION Join_Session(param_nickname VARCHAR(100), socket_id VARCHAR(100), room_code TEXT, user_role VARCHAR(100), sn_four_digits TEXT)
+CREATE FUNCTION Join_Session(param_nickname VARCHAR(100), socket_id VARCHAR(100), room_code TEXT, user_role VARCHAR(100), sn_four_digits TEXT, device_id INT)
 RETURNS TABLE(
 	joiner_deviceid INT, 
 	joiner_ipaddress VARCHAR(100),
@@ -331,6 +334,7 @@ BEGIN
             'secret' -- secret -- FUTURE
         ) RETURNING userid INTO user_id;	
 		
+		RAISE NOTICE 'updating device availability';
 		--Make the device unavailable for other users
 		IF user_id IS NOT NULL THEN
 			PERFORM Update_Device_Availability(device_id, FALSE);
@@ -367,3 +371,63 @@ END
 $$ LANGUAGE plpgsql;
 
 -- SELECT * FROM Join_Session('JohnDoe', '12345', 'Joiner', '3456');
+
+CREATE OR REPLACE FUNCTION Join_Session_Without_EmotiBit(param_nickname VARCHAR(100), socket_id VARCHAR(100), room_code TEXT, user_role VARCHAR(100))
+RETURNS TABLE(
+	joiner_userid INT,
+	joiner_nickname VARCHAR(100),
+	joiner_sessionid INT,
+	joiner_ismasked BOOL,
+	joiner_frontendsocketid VARCHAR(100),
+	joiner_leftsession TIMESTAMP,
+	joiner_userrole VARCHAR(100)
+	)AS $$
+
+	
+DECLARE 
+    found_session_id INT;
+	device_id INT;
+	user_id INT;
+BEGIN
+
+    -- Get session ID by checking session availability
+    SELECT session__id INTO found_session_id FROM Check_Session_Availability(room_code) LIMIT 1;
+
+	IF found_session_id IS NULL THEN
+		RAISE EXCEPTION 'No session found for RoomCode: %', room_code;
+	END IF;
+	
+    IF found_session_id IS NOT NULL THEN
+		RAISE NOTICE 'Session found with ID: %', found_session_id;
+
+		-- Create a User
+        INSERT INTO "User" (
+            nickname, 
+            device, 
+            sessionid, 
+            ismasked, 
+            frontendsocketid, 
+            leftsession, 
+            userrole, 
+            secret
+        ) 
+        VALUES (
+            param_nickname, 
+            null, -- device
+            found_session_id, 
+            FALSE, 
+            socket_id, -- frontendsocketid
+            NULL, -- leftsession
+            user_role, 
+            'secret' -- secret -- FUTURE
+        ) RETURNING userid INTO user_id;	
+	END IF;
+	
+	-- Return all fields from Device and User tables
+	RETURN QUERY 
+	SELECT 
+			"User".userid, "User".nickname, "User".sessionid, "User".ismasked, 
+			"User".frontendsocketid, "User".leftsession, "User".userrole
+	FROM "User" where "User".userid = user_id;
+END
+$$ LANGUAGE plpgsql;

@@ -96,11 +96,11 @@ app.get("/ip", (req: Request, res: Response) => {
 
 
 io.on("connection", (socket) => {
-    console.log("(main.ts): User Connected | socketID: " + socket.id)
-    console.log(`(main.ts): Total connections: ${io.engine.clientsCount}`);
+    // console.log("(main.ts): User Connected | socketID: " + socket.id)
+    // console.log(`(main.ts): Total connections: ${io.engine.clientsCount}`);
 
     socket.on("client-assignment", () => {
-        console.log("(main.ts): Emitting client-assignment with socketId:", socket.id);
+        //console.log("(main.ts): Emitting client-assignment with socketId:", socket.id);
         socket.emit("client-assignment", {socketId: socket.id});
     }); // Send socket ID to the client
 
@@ -122,11 +122,9 @@ io.on("connection", (socket) => {
 
     //recieve emotibit data
     socket.on('update', (payload) => {
-        const {data, ipAddress, serialNumber, backendIp, hostSessionId, userId, frontEndSocketId, assignSocketId} = payload;
-        console.log('Update Event: Received data:', JSON.stringify(data));
-        if(userId){
-            io.to(frontEndSocketId).emit(payload);
-        }
+        const {ancData, auxData, ipAddress, serialNumber, backendIp, hostSessionId, userId, frontEndSocketId, assignSocketId} = payload;
+        console.log('Update Event: Received data:', JSON.stringify(ancData.data1));
+        io.emit('update', payload);
     });
 
     session_handlers(io, socket, rooms, isHost);
@@ -138,8 +136,8 @@ io.on("connection", (socket) => {
     // })
     
     socket.on("disconnect", async (data) => {
-        console.log(`(main.ts): User Disconnected | socketID: ${socket.id}`);
-        console.log(`(main.ts): Total connections: ${io.engine.clientsCount}`);
+        // console.log(`(main.ts): User Disconnected | socketID: ${socket.id}`);
+        // console.log(`(main.ts): Total connections: ${io.engine.clientsCount}`);
 
 
         const sessionID = getSessionBySocket(socket.id);

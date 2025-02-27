@@ -126,32 +126,65 @@ function prepareBoard() {
 //sends data and operation parameters to backend socket
 function sendData(socket) {
     return __awaiter(this, void 0, void 0, function () {
-        var data_current, data, error_1;
+        var ancData, auxData, anc_data, aux_data, error_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    _a.trys.push([0, 5, 6, 8]);
+                    ancData = {
+                        package: 0,
+                        data1: 0,
+                        data2: 0,
+                        data3: 0,
+                        timestamp: 0,
+                        unknown: 0,
+                    };
+                    auxData = {
+                        package: 0,
+                        data1: 0,
+                        data2: 0,
+                        data3: 0,
+                        timestamp: 0,
+                        unknown: 0,
+                    };
                     _a.label = 1;
                 case 1:
-                    if (!true) return [3 /*break*/, 4];
-                    data_current = board.getBoardData(500, brainflow_1.BrainFlowPresets.ANCILLARY_PRESET);
-                    if (!(data_current.length !== 0)) return [3 /*break*/, 3];
-                    data = {
-                        package: data_current[0][0],
-                        data1: data_current[1][0],
-                        data2: data_current[2][0],
-                        data3: data_current[3][0],
-                        timestamp: data_current[4][0],
-                        unknown: data_current[5][0],
-                    };
-                    console.log("DATA :" + data.data1);
-                    //emit to socket an object that holds data and op parameters
-                    socket.emit('update', __assign({ data: data }, operationParameters));
-                    return [4 /*yield*/, sleep(1000)];
+                    _a.trys.push([1, 5, 6, 8]);
+                    prepareBoard();
+                    board.startStream();
+                    _a.label = 2;
                 case 2:
+                    if (!true) return [3 /*break*/, 4];
+                    anc_data = board.getBoardData(500, brainflow_1.BrainFlowPresets.ANCILLARY_PRESET);
+                    aux_data = board.getBoardData(500, brainflow_1.BrainFlowPresets.AUXILIARY_PRESET);
+                    if (anc_data.length !== 0) { //doesn't log data if it is empty
+                        ancData = {
+                            package: anc_data[0][0],
+                            data1: anc_data[1][0],
+                            data2: anc_data[2][0],
+                            data3: anc_data[3][0],
+                            timestamp: anc_data[4][0],
+                            unknown: anc_data[5][0],
+                        };
+                    }
+                    ;
+                    if (aux_data.length !== 0) {
+                        auxData = {
+                            package: aux_data[0][0],
+                            data1: aux_data[1][0],
+                            data2: aux_data[2][0],
+                            data3: aux_data[3][0],
+                            timestamp: aux_data[4][0],
+                            unknown: aux_data[5][0],
+                        };
+                    }
+                    ;
+                    console.log("DATA :", ancData.data1);
+                    //emit to socket an object that holds data and op parameters
+                    socket.emit('update', __assign({ ancData: ancData, auxData: auxData }, operationParameters));
+                    return [4 /*yield*/, sleep(100)];
+                case 3:
                     _a.sent();
-                    _a.label = 3;
-                case 3: return [3 /*break*/, 1];
+                    return [3 /*break*/, 2];
                 case 4: return [3 /*break*/, 8];
                 case 5:
                     error_1 = _a.sent();
@@ -193,8 +226,8 @@ function main() {
                     if (connectionSuccessful) {
                         // writeHeaderstoCSV(ancFilePath, ancHeaders);
                         // writeHeaderstoCSV(auxFilePath, auxHeaders);
-                        prepareBoard();
-                        sendData(operationParameters.assignSocketId);
+                        // prepareBoard();
+                        sendData(socket);
                     }
                     return [2 /*return*/, "0"];
             }
