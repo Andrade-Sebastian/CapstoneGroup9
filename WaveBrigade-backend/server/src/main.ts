@@ -122,11 +122,9 @@ io.on("connection", (socket) => {
 
     //recieve emotibit data
     socket.on('update', (payload) => {
-        const {data, ipAddress, serialNumber, backendIp, hostSessionId, userId, frontEndSocketId, assignSocketId} = payload;
-        console.log('Update Event: Received data:', JSON.stringify(data));
-        if(userId){
-            io.to(frontEndSocketId).emit(payload);
-        }
+        const {ancData, auxData, ipAddress, serialNumber, backendIp, hostSessionId, userId, frontEndSocketId, assignSocketId} = payload;
+        console.log('Update Event: Received data:', JSON.stringify(ancData.data1));
+        io.emit('update', payload);
     });
 
     session_handlers(io, socket, rooms, isHost);

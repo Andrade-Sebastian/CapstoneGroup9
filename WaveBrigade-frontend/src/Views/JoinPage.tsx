@@ -18,7 +18,7 @@ export default function JoinPage() {
   const navigateTo = useNavigate();
   const [sessionID, setSessionID] = useState("")
   const [socketID, setSocketID] = useState("");
-  const { setNickname, setRoomCode, roomCode} = useJoinerStore()
+  const { setNickname, setRoomCode, roomCode, setUserSocketId} = useJoinerStore()
 
 
   const handleSubmit = async (e) => {
@@ -41,17 +41,9 @@ export default function JoinPage() {
       const isValidRoomCode = await validateRoomCode(StudentInputRoomCode);
       if (isValidRoomCode) {
         toast.success("Connection Successful! Please standby", {id: loadingToastId});
-        const isJoinedRoom = await joinRoom();
-        if(isJoinedRoom){
-          setTimeout(() => {
-            navigateTo("/connect-emotibit", {
-              state: {
-                nickName: nickName,
-                roomCode: StudentInputRoomCode,
-              }
-            });
-          })
-        }
+        setTimeout(() => {
+          navigateTo("/connect-emotibit");
+        });
     }
     else{
       toast.error("Connection failed. Looks like we couldn't get you connected. Please check your room code and try again.", {id: loadingToastId});
@@ -75,7 +67,9 @@ export default function JoinPage() {
       {
         console.log("Room code is valid!");
         setSessionID(response.data.sessionID);  // Store sessionID when room code is valid
-        setNickname(nickName)
+        setRoomCode(StudentInputRoomCode);
+        setNickname(nickName);
+        setUserSocketId(socketID);
         return true;
       }
       return false;
@@ -84,28 +78,6 @@ export default function JoinPage() {
       return false;
     }
   };
-
-  const joinRoom = async () => {
-    try{
-      console.log("Socket ID: " + sessionStorage.getItem("socketID"));
-      console.log("Session ID: " + sessionID);
-      const response = await axios.post(`http://localhost:3000/joiner/session/join`,
-      {
-        socketID: sessionStorage.getItem("socketID"),
-		    nickname: nickName, 
-		    roomCode: StudentInputRoomCode,
-		    serialNumberLastFour: null
-      });
-      if(response.status === 200){
-        console.log("Added user to session!");
-        return true;
-      }
-    }
-    catch(error){
-        console.error("Could not add User to session", error);
-        return false;
-      }
-    }
     
 
   return (

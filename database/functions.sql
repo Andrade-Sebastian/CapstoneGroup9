@@ -133,7 +133,7 @@ $$ LANGUAGE plpgsql;
 
 -- Create_Device (ip_address, serial_number, device_socket_id, sampling_frequency): 
 -- Used when Host adds a new device to a session. Returns Device Table
-drop function if exists Create_Device(VARCHAR(100), VARCHAR(100), VARCHAR(100), INT );
+drop function if exists Create_Device(VARCHAR(100), VARCHAR(100), VARCHAR(100), INT);
 
 CREATE FUNCTION Create_Device(
     ip_address VARCHAR(100), 
@@ -154,7 +154,7 @@ DECLARE
     new_device_id INT;
 BEGIN
     -- Insert into Device table and return the new DeviceID
-    INSERT INTO Device (IPAddress, SerialNumber, DeviceSocketID, SamplingFrequency, IsAvailable, IsConnected)
+    INSERT INTO Device (ipaddress, serialnumber, devicesocketid, samplingfrequency, isavailable, isconnected)
 	    VALUES (ip_address, serial_number, device_socket_id, sampling_frequency, TRUE, FALSE)
 	    RETURNING DEVICE.DeviceID INTO new_device_id;
 
@@ -278,7 +278,7 @@ $$ LANGUAGE plpgsql;
 
 
 
-CREATE FUNCTION Join_Session(param_nickname VARCHAR(100), socket_id VARCHAR(100), room_code TEXT, user_role VARCHAR(100), sn_four_digits TEXT)
+CREATE FUNCTION Join_Session(param_nickname VARCHAR(100), socket_id VARCHAR(100), room_code TEXT, user_role VARCHAR(100), sn_four_digits TEXT, device_id INT)
 RETURNS TABLE(
 	joiner_deviceid INT, 
 	joiner_ipaddress VARCHAR(100),
@@ -334,6 +334,7 @@ BEGIN
             'secret' -- secret -- FUTURE
         ) RETURNING userid INTO user_id;	
 		
+		RAISE NOTICE 'updating device availability';
 		--Make the device unavailable for other users
 		IF user_id IS NOT NULL THEN
 			PERFORM Update_Device_Availability(device_id, FALSE);

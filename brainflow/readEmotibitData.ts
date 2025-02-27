@@ -129,31 +129,66 @@ function prepareBoard(){
 //sends data and operation parameters to backend socket
 async function sendData(socket: Socket): Promise<void>
 {
+    let ancData = {
+        package: 0,
+        data1: 0,
+        data2: 0,
+        data3: 0,
+        timestamp: 0,
+        unknown: 0,
+    };
+
+    let auxData = {
+        package: 0,
+        data1: 0,
+        data2: 0,
+        data3: 0,
+        timestamp: 0,
+        unknown: 0,
+    }; 
+
     try{
-    
+        prepareBoard();
+        board.startStream();
         while(true){
+            
             // const passedTime = passedDate.getTime();
             // console.log("CURRENT: " + currentTime);
             // console.log("PASSED: " + passedTime);
-            const data_current = board.getBoardData(500, BrainFlowPresets.ANCILLARY_PRESET);
-            if(data_current.length !== 0){ //doesn't log data if it is empty
-                const data = {
-                    package: data_current[0][0],
-                    data1: data_current[1][0],
-                    data2: data_current[2][0],
-                    data3: data_current[3][0],
-                    timestamp: data_current[4][0],
-                    unknown: data_current[5][0],
+            const anc_data = board.getBoardData(500, BrainFlowPresets.ANCILLARY_PRESET);
+            const aux_data = board.getBoardData(500, BrainFlowPresets.AUXILIARY_PRESET);
+
+            if(anc_data.length !== 0){ //doesn't log data if it is empty
+                ancData = {
+                    package: anc_data[0][0],
+                    data1: anc_data[1][0],
+                    data2: anc_data[2][0],
+                    data3: anc_data[3][0],
+                    timestamp: anc_data[4][0],
+                    unknown: anc_data[5][0],
                 };
-                console.log("DATA :" + data.data1);
+            };
+            if(aux_data.length !== 0){
+                    auxData = {
+                        package: aux_data[0][0],
+                        data1: aux_data[1][0],
+                        data2: aux_data[2][0],
+                        data3: aux_data[3][0],
+                        timestamp: aux_data[4][0],
+                        unknown: aux_data[5][0],
+                    };
+            };
+            
+            console.log("DATA :", ancData.data1);
                 //emit to socket an object that holds data and op parameters
                 socket.emit('update', {
-                    data: data,
+                    ancData: ancData,
+                    auxData: auxData,
                     ...operationParameters
                 });
-                await sleep(1000);
+                await sleep(10000);
             }
-    }}
+    }
     catch(error){
         console.error(error);
     }
@@ -180,8 +215,8 @@ async function main(): Promise<string>{
     if(connectionSuccessful){
         // writeHeaderstoCSV(ancFilePath, ancHeaders);
         // writeHeaderstoCSV(auxFilePath, auxHeaders);
-        prepareBoard();
-        sendData(operationParameters.assignSocketId);
+       // prepareBoard();
+        sendData(socket);
     }
 
     return "0"; 

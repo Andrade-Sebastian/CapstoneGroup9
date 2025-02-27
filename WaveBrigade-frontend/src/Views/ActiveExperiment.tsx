@@ -6,6 +6,7 @@ import { BsChatSquareText } from "react-icons/bs";
 import { TbHexagons } from "react-icons/tb";
 import { useEffect, useState } from "react";
 import socket from "./socket.tsx";
+import axios from "axios";
 import { Divider } from "@heroui/divider";
 import ChartComponent from "../Components/ChartComponent.tsx";
 import { useJoinerStore } from "../hooks/stores/useJoinerStore.ts";
@@ -20,17 +21,27 @@ export default function ActiveExperiment() {
 
   useEffect(() => {
     console.log("Running active experiment");
+    console.log("Experiment ID in Store: ", useJoinerStore.getState().experimentId);
+    const getPhotoInfo = async () => {
+      const response = await axios.get(`http://localhost:3000/joiner/getPhoto/${experimentId}`)
+      .then((response) => {
+        console.log("PHOTO LAB RESPONSE RECIEVED: ", response);
+      })
+    };
 
-    socket.on("update", (data) => {
-      if (Array.isArray(data)) {
-        console.log("Data received:", data);
-        setRecievedData(data);
-      } else {
-        console.error("Did not receive an array of data, received:", data);
-      }
-    });
+    getPhotoInfo();
+
+
+    // socket.on("update", (data) => {
+    //   if (Array.isArray(data)) {
+    //     console.log("Data received:", data);
+    //     setRecievedData(data);
+    //   } else {
+    //     console.error("Did not receive an array of data, received:", data);
+    //   }
+    // });
     return () => {
-      socket.off("update");
+      //socket.off("update");
     };
   }, [recievedData]);
 
@@ -53,18 +64,18 @@ export default function ActiveExperiment() {
           <div className="text-lg font-semibold">
             ECG Chart - 33 BPM Average
           </div>
-            <ChartComponent />
+            <ChartComponent chart_type={1} />
             </div>
             ) : activeChart === "temperatureChart" ? (
-              <div> <p>temperature chart</p></div>
+              <div> <p>temperature chart</p> <ChartComponent chart_type={2} /></div>
             ) :(
-              <div> <p> GSR/EDA </p> </div>
+              <div> <p> GSR/EDA </p> <ChartComponent chart_type={3} /> </div>
             )}
           </div>
         </div>
         <Divider className="my-3" />
         <div className="mt-4 flex justify-between w-full items-center">
-          <p className="font-semibold">Nickname: {nickName} <span className="font-light">Sebastian</span></p>
+          <p className="font-semibold">Nickname: {nickname} <span className="font-light">Sebastian</span></p>
           <div className="flex space-x-4">
             <button
               className={`text-3xl p-4 rounded-lg ${
