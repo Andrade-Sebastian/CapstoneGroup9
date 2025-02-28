@@ -29,34 +29,35 @@ function App() {
 
   useEffect(() => 
   {
-      console.log("(App.tsx): making socket");
+    console.log("(App.tsx): making socket");
 
-      // Emit the "client-assignment" event
-      socket.emit("client-assignment");
-      socket.on("client-assignment", (data: { socketId: string }) => {
-        setIsSocketAssigned(true);
-        console.log("Socket ID assigned: ", data.socketId, " |Assigned: ", isSocketAssigned);
-        // Listen for the "client-assignment" event
-        console.log("Adding socketID to session storage");
-        console.log("sessionStorage operation:", data.socketId);
+    // Emit the "client-assignment" event
+    socket.emit("client-assignment");
+    socket.on("client-assignment", (data: { socketId: string }) => {
+      setIsSocketAssigned(true);
+      console.log("Socket ID assigned: ", data.socketId, " |Assigned: ", isSocketAssigned);
+      // Listen for the "client-assignment" event
+      console.log("Adding socketID to session storage");
+      console.log("sessionStorage operation:", data.socketId);
 
-        sessionStorage.setItem("socketID", data.socketId);
-        console.log("Current session storage:", sessionStorage.getItem("socketID"));
+      sessionStorage.setItem("socketID", data.socketId);
+      console.log("Current session storage:", sessionStorage.getItem("socketID"));
 
-        // Update state to prevent re-assignment
+      // Update state to prevent re-assignment
+    });
+
+      socket.on("clear-session", () => {
+        console.log("Clearing session storage due to disconnection");
+        sessionStorage.removeItem("socketID");
+        console.log("session storage cleared. Current socketID in Session Storage: ", sessionStorage.getItem("socketID"));
       });
-
-        socket.on("clear-session", () => {
-          console.log("Clearing session storage due to disconnection");
-          sessionStorage.removeItem("socketID");
-          console.log("session storage cleared. Current socketID in Session Storage: ", sessionStorage.getItem("socketID"));
-        });
-    // Cleanup the event listener when the component unmounts or re-renders
-    return () => {
-      socket.off("client-assignment");
-      socket.off("clear-session");
-    };
-  }, [isSocketAssigned]);  // Dependency on isSocketAssigned to run when it changes
+  // Cleanup the event listener when the component unmounts or re-renders
+  return () => {
+    socket.off("client-assignment");
+    socket.off("clear-session");
+  };
+    
+  }, []);  // Dependency on isSocketAssigned to run when it changes
 
 
 

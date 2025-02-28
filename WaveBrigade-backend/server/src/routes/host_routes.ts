@@ -9,10 +9,9 @@ hostRouter.use(express.json());
 //Purpose: Creates a new session in the database
 //Returns: The session that was created (JSON)
 hostRouter.post("/session/create", async (req: Request, res: Response) => {
-  
 
     try {
-        console.log("/session/create: ", JSON.stringify(req.body));
+
         const session = await createSessionInDatabase(
         {
             hostSocketID: req.body.hostSocketID,
@@ -20,25 +19,14 @@ hostRouter.post("/session/create", async (req: Request, res: Response) => {
             password: req.body.password,
             isSpectatorsAllowed: req.body.isSpectatorsAllowed,
         });
-            // console.log("(host_routes.ts): Finished adding new session to database");
-            return res.status(200).send(session);
-        }
+
+        return res.status(200).send(session);
+    }
     catch(error) {
         console.log("Error adding session to database", error);
     }
 })
 
-hostRouter.patch("/session/assign-experiment", async (req: Request, res: Response) => {
-    const {
-        sessionID,
-        experimentID
-    } = req.body;
-
-    
-
-    //assign experiment to session
-    console.log("In /session/assign-experiment");
-})
 
 hostRouter.get("/debug", async (req: Request, res: Response) => {
     console.log("At debug | recieved: " + JSON.stringify(req.body));

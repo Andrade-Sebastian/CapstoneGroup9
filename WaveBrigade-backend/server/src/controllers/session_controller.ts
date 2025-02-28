@@ -239,7 +239,7 @@ async function createSession(initializationData: ISessionInitialization) {
                 //add to DB
                 console.log("(session_controller.ts): Adding Session to Database")
                 //console.log ("(session_controller.ts): To DB: " + JSON.stringify(sessionInfo))
-                await createSessionInDatabase(sessionInfo)
+                //await createSessionInDatabase(sessionInfo)
                 console.log("(session_controller.ts): Session added to Database")
                 //console.log(session.discoveredDevices);
                 //console.log("Adding session")
@@ -313,17 +313,7 @@ function joinRoom(requestedSessionId: string, socketID: string, nickname: string
 
         //for debugging
         const sessionStateAfter = getSessionState(requestedSessionId);
-        //console.log("sessionState AFTER adding user: " + JSON.stringify(sessionStateAfter))
 
-
-        // sessionState.users = sessionState.users.concat(
-        //     {
-        //         userId: "1",
-        //         socketId: socketID,
-        //         nickname: nickname,
-        //         associatedDevice: associatedDevice
-        //     }
-        // );
         return getSessionState(requestedSessionId)
     }
     else{

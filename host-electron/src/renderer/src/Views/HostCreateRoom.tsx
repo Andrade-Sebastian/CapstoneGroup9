@@ -85,8 +85,8 @@ export default function HostCreateRoom() {
       }
       console.log(response.data);
       //navigate to idk
-      navigateTo('/host/select-lab/')
-    })
+    navigateTo('/host/select-lab/')})
+  
     
     console.log('Username: ' + userName)
     console.log('Continue Button clicked')

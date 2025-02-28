@@ -1,7 +1,9 @@
 import { ReactElement } from "react";
+import axios from "axios";
+
 
 interface IModalComponent {
-  onAction: () => void;
+  onAction: (e: any) => void;
   onAction2?: () => void;
   onAction3?: () => void;
   isOpen: boolean;
@@ -12,11 +14,19 @@ interface IModalComponent {
   button3?: string;
   children: ReactElement | Array<ReactElement>;
 }
-function onCancel(){
 
+interface photoLabData {
+  experimentTitle: string;
+  experimentsDesc: string;
+  imageSource: string;
+  caption: string;
 }
-export default function ModalComponent(props: IModalComponent) {
+
+
+
+export default function ModalComponent(props: IModalComponent, photoLabData: photoLabData) {
   const handleModalClick = (e: React.MouseEvent) => e.stopPropagation();
+
   if(!props.isOpen) return null; //if modal is closed, don't open
   return (
     //w-lvw h-svh
