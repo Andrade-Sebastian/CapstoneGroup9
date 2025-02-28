@@ -137,7 +137,7 @@ export default function ChartComponent() {
                     ]}
                     layout = {{
                         width: 1000,
-                        height: 300,
+                        height: 180,
                        // grid: {rows: 1, columns: 2, pattern: 'independent'},
                         //title: 'Temperature over Time',
                         // xaxis: {

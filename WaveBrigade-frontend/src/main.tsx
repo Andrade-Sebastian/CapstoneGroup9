@@ -21,6 +21,7 @@ import ConnectEmotiBit from './Views/ConnectEmotiBit.tsx';
 import ActiveExperiment from './Views/ActiveExperiment.tsx';
 import About from './Views/About.tsx';
 import React from 'react';
+import EnterPassword from './Views/EnterPassword.tsx';
 
 
 
@@ -31,7 +32,7 @@ const router = createBrowserRouter([
     children:[
       {
         index: true, 
-        element: <Home />
+        element: <JoinPage />
       },
       {
         path: "about",
@@ -40,6 +41,10 @@ const router = createBrowserRouter([
       {
         path: "join",
         element: <JoinPage />
+      },
+      {
+        path: "enter-password",
+        element: <EnterPassword />
       },
       {
         path: "connect-emotibit",

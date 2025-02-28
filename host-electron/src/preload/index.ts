@@ -3,14 +3,18 @@ import { electronAPI } from '@electron-toolkit/preload'
 
 export type TYPE_BRAINFLOW_LAUNCH = "brainflow:launch" 
 export const BRAINFLOW_LAUNCH: TYPE_BRAINFLOW_LAUNCH = "brainflow:launch"
+export type BRAINFLOW_STATUS = "brainflow:status"
 export type BRAINFLOW_DESTROY = "brainflow:destroy"
+export type BRAINFLOW_DESTROY_USER = "brainflow:destroy-user"
 
 
 //event names for renderer
 export type ActivityEvents =
   //each one of these is called a "channel"
   TYPE_BRAINFLOW_LAUNCH | //launches brainflow
+  BRAINFLOW_STATUS | //status
   BRAINFLOW_DESTROY | //closes brainflow
+  BRAINFLOW_DESTROY_USER | //user destruction
   "brainflow:launched"|
   "activity:viewUser"| //host selects student to view
   "brainflow:launchError"| 
@@ -22,7 +26,9 @@ export type ActivityEvents =
 
 const activityEventsChannels: Array<ActivityEvents> = [
   "brainflow:launch",
+  "brainflow:status",
   "brainflow:destroy",
+  "brainflow:destroy-user",
   "activity:viewUser",
   "brainflow:launchError",
   "brainflow:connectingEmotibit",

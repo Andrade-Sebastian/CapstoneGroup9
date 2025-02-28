@@ -1,11 +1,12 @@
 
 import { Outlet } from "react-router-dom";
-import NavigationBar from "./components/NavigationBar";
-import useBrainflowManager from './hooks/useBrainflowManager';
+import NavigationBar from "./components/NavigationBar.tsx";
+import useBrainflowManager from './hooks/useBrainflowManager.ts';
 import { useEffect } from 'react';
-
 function App() {
   const {launchProcess} = useBrainflowManager();
+  const ipc = window.api
+  const { handleUserLeaveSession } = useBrainflowManager();
 
   useEffect(() => {
     //hardcoded for testing
@@ -19,7 +20,11 @@ function App() {
       socketID: "string"
     }
   })
-}, []) 
+}, [])
+
+  useEffect(() => {
+    
+  })
 
 
 

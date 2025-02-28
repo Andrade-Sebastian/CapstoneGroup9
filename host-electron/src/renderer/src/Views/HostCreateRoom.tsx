@@ -62,6 +62,9 @@ export default function HostCreateRoom() {
       toast.error("Please enter a valid name.");
       return;
     }
+    else if(!password.trim() || password.length < 3){
+      toast.error("Please enter a password of at least more than three characters")
+    }
 
     console.log('creating an experiment')
     const lobbyCode = generateRandomCode(6)

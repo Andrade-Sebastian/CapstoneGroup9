@@ -42,7 +42,7 @@ export default function ActiveExperiment() {
           <img
             src="https://www.usatoday.com/gcdn/authoring/authoring-images/2024/08/19/USAT/74862648007-getty-images-2087314411.jpg?crop=1023,576,x0,y53&width=660&height=371&format=pjpg&auto=webp"
             alt="obama"
-            className="rounded-lg w-full max-w-5xl h-auto"
+            className="rounded-lg w-full max-w-lg h-auto"
           />
         </div>
         {/* Chart stuff*/}
@@ -64,7 +64,7 @@ export default function ActiveExperiment() {
         </div>
         <Divider className="my-3" />
         <div className="mt-4 flex justify-between w-full items-center">
-          <p className="font-semibold">Nickname: {nickName} <span className="font-light">Sebastian</span></p>
+          <p className="font-semibold">Nickname: {nickname} <span className="font-light">Sebastian</span></p>
           <div className="flex space-x-4">
             <button
               className={`text-3xl p-4 rounded-lg ${

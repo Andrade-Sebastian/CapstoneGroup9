@@ -2,7 +2,7 @@ import {create} from "zustand";
 
 
 export interface IUser {
-    userId: number; //serial
+    userId: string; //serial
     socketId: string; //Frontend socket ID 
     nickname: string | null;
     associatedDevice: IDevice | null;
@@ -40,17 +40,19 @@ export interface ISessionCredentials {
 }
 
 export interface IAppState {
-    sessionID: number | undefined,
+    sessionID: string | undefined,
+    roomCode: string | undefined,
     experimentID: IExperiment | undefined,
 
     // backendSessionID: string,
     // roomCode: string,
     // hostSocketId: string,
-    users: Array<IUser>,
+    users: IUser[];
     // isInitialized: boolean,
     // configuration: ISessionConfiguration,
     // credentials: ISessionCredentials,
-    discoveredDevices: Array<IDevice>		
+    discoveredDevices: IDevice[];
+    isSpectatorAllowed: boolean;	
 }
 
 
@@ -62,7 +64,7 @@ interface Actions{
     removeUser: (userID: number) => void,
 
     //create a session
-    createSession: (sessionID: number, experimentID: number) => void,
+    createSession: (sessionID: number, roomCode: string, experimentID: number) => void,
 
     //remove a session if session is ended
     removeSession: (sessionID: number) => void,
@@ -80,6 +82,12 @@ interface Actions{
 
 const useSessionStore = create<IAppState & Actions>((set) => ({
     //Returning a new array containing the passed in user 
+    sessionID: undefined,
+    roomCode: undefined,
+    experiment: null,
+    users: [],
+    discoveredDevices: [],
+    isSpectatorAllowed: false,
 
     addUser: (user: IUser) => set((state: IAppState) => ({users: [...state.users, user]})),
     removeUser: (userID: number) => set((state: IAppState) => ({users: state.users.filter((user) => user.userId == userID)})),
