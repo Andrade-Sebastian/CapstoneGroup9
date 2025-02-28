@@ -293,8 +293,7 @@ RETURNS TABLE(
 	joiner_ismasked BOOL, 
 	joiner_frontendsocketid VARCHAR(100), 
 	joiner_leftsession TIMESTAMP, 
-	joiner_userrole VARCHAR(100),
-	joiner_secret VARCHAR(100)
+	joiner_userrole VARCHAR(100)
 	)AS $$
 DECLARE 
     found_session_id INT;
@@ -363,7 +362,7 @@ BEGIN
 		    SELECT dev.deviceid, dev.ipaddress, dev.serialnumber, dev.devicesocketid, dev.samplingfrequency, 
 		           dev.isavailable, dev.isconnected, 
 		           usr.userid, usr.nickname, usr.sessionid, usr.ismasked, 
-		           usr.frontendsocketid, usr.leftsession, usr.userrole, usr.secret
+		           usr.frontendsocketid, usr.leftsession, usr.userrole
 		    FROM Device dev
 		    LEFT JOIN "User" usr ON usr.device = dev.deviceid
 		    	WHERE dev.deviceid = device_id;
