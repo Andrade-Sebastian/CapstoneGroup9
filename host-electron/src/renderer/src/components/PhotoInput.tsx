@@ -16,6 +16,9 @@ export default function PhotoInput(props: IPhotoInput) {
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]; //retrieves the file by the host from the input's files array.
+    //console.log('', file);
+   // console.log("File name: " + file?.name);
+
 
     if (!file){
         setError("No file selected.");
@@ -40,6 +43,7 @@ export default function PhotoInput(props: IPhotoInput) {
     inputRef.current?.click();
   };
   return (
+    
     <div className="flex flex-col justify-center items-center border p-4 rounded-md shadow-md size-">
         {/* Insert image */}
       <input

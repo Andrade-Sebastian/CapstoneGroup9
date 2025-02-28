@@ -25,11 +25,6 @@ interface ISessionCreationParams{
 	isSpectatorsAllowed: boolean | null,
 }
 
-export interface IPhotoLabDatabaseInfo {
-	experimentID: number,
-	path: string, //Image path
-	captions: string 
-}
 export interface IVideoLabDatabaseInfo {
 	experimentID: number,
 	path: string, //Image path
@@ -85,12 +80,15 @@ export async function makeDeviceNotAvailable(deviceID: number)
 
 
 export async function getPhotoLabInfo(experimentID: number){
+	console.log("Experiment passed in", experimentID);
+
+
 	try{
 		await dbClient.connect();
-		const query = await dbClient.queryObject(`SELECT * FROM photolab JOIN experiment 
+		const query = await dbClient.queryObject(`SELECT experiment.experimentid, path, captions, name, description FROM photolab JOIN experiment 
 			ON photolab.experimentid = ${experimentID};`,
 		);
-		console.log("Photo Lab Info: ", query);
+		console.log("Photo Lab Info: ", query.rows[0]);
 		return query.rows[0];
 	}
 	catch(error){
@@ -233,13 +231,14 @@ interface ISessionCreationParams{
 // Author: Emanuelle Pelayo
 // Purpose: Adds a session to the database
 export async function createSessionInDatabase(initializationInfo: ISessionCreationParams): Promise<string> {
+	
 	const {
 		hostSocketID,
 		isPasswordProtected,
 		password,
 		isSpectatorsAllowed, 
 	} = initializationInfo;
-
+	console.log("HELLO: ", initializationInfo)
 	const roomCode = generateRandomCode(5);
 
 	try 
@@ -287,20 +286,41 @@ export async function getSessionState(sessionID: number){
 	}
 }
 
-async function getSessionIDFromSocketID(socketID: string){
-	try{
-		await dbClient.connect();
-		const query = await dbClient.queryObject(`SELECT sessionid FROM session WHERE hostsocketid = $1`,
-			[socketID]
-		);
-		return query.rows[0].sessionid;
-	}
-	catch(error){
-		console.log("Unable to retrieve session id", error);
-	}
+export async function getSessionIDFromSocketID(socketID: string){
+	console.log("getSessionIDFromSocketID() -> socketID: ", socketID)
+
+	const cleanSocketID = socketID.replace(/^"|"$/g, "");
+
+	console.log("cleaned ", cleanSocketID)
+	try {
+        await dbClient.connect();
+        console.log("Starting query, socketID being passed: ", socketID);
+
+        // Properly use parameterized query: no string interpolation with ${}
+        const query = await dbClient.queryObject<{ sessionid: number }>(
+            `SELECT sessionid FROM session WHERE hostsocketid = $1`, 
+            [cleanSocketID] // Pass socketID as a parameter
+        );
+
+        console.log("Query result sessionid", query.rows[0].sessionid);
+
+        if (query.rows.length > 0) {
+            return query.rows[0].sessionid; // Return the session ID
+        } else {
+            console.warn("No session found for socketID:", socketID);
+            return null; // Return null if no session found
+        }
+    } catch (error) {
+        console.error("Unable to retrieve session id", error);
+        return null; // Return null on error
+    } finally {
+        await dbClient.end(); // Always close the database connection
+    }
 }
 
-export async function createPhotoLabInDatabase(initializationInfo: IPhotoLabDatabaseInfo, sessionID: null | number=null ): Promise<void>{
+
+
+export async function createPhotoLabInDatabase(initializationInfo: IPhotoLabDatabaseInfo, sessionID: null | number=null ): Promise<number>{
 	const {
 		experimentTitle,
 		experimentDescription,
@@ -309,6 +329,7 @@ export async function createPhotoLabInDatabase(initializationInfo: IPhotoLabData
 		socketID
 	} = initializationInfo;
 
+	console.log(socketID);
 	let experimentID = null;
 
 	try{
@@ -324,6 +345,8 @@ export async function createPhotoLabInDatabase(initializationInfo: IPhotoLabData
 			]
 		);
 
+
+		console.log("crcreateExperimentQuery: ", createExperimentQuery.rows[0].experimentid)
 		experimentID = createExperimentQuery.rows[0].experimentid;
 
 
@@ -342,23 +365,43 @@ export async function createPhotoLabInDatabase(initializationInfo: IPhotoLabData
 				]
 		);
 
+		console.log("CreatePhotoLabInDatabase() -> socketID: ", socketID)
 		//get session id from host socket id 
-		const sessionID = await getSessionIDFromSocketID(socketID);
+		let sessionID = -1
 
+		try{
+			sessionID = await getSessionIDFromSocketID(socketID);
+			
+		}catch(error)
+		{
+			console.log(error);;
+		
+		}
+		console.log()
+		console.log("CreatePhotoLabInDatabase() -> sessionID, experimentID", sessionID, experimentID)
+
+		console.log("Updating session")
 		//relate the experiment to the session		
-		const updateSessionQuery = await dbClient.queryObject(`
-			UPDATE session
-			SET experimentid = ${experimentID}
-			WHERE sessionid = ${sessionID}; `);
+		try{
+			await dbClient.connect()
+			const updateSessionQuery = await dbClient.queryObject(`
+				UPDATE session
+				SET experimentid = ${experimentID}
+				WHERE sessionid = ${sessionID}; `)
+		}catch(error)
+		{
+			console.log(error)
+		}
+		
+		console.log("Experiment id", experimentID)
 
-		console.log("(database.ts): Photo Lab Successfully Added")
 
-
-		return experimentID;
 	}
 	catch(error){
 		console.log("Error adding photo lab to the database: " + error)
 	}
+
+	return experimentID
 }
 
 export async function createVideoLabInDatabase(initializationInfo: IVideoLabDatabaseInfo): Promise<void>{

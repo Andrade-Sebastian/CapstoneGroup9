@@ -1,11 +1,25 @@
 import express, { Request, Response } from "express";
-import { createPhotoLabInDatabase, createVideoLabInDatabase, createGalleryLabInDatabase, addUserToSession, IUserDatabaseInfo, getSessionState, getPhotoLabInfo, assignExperimentToSession} from "../controllers/database.ts";
-import { IUser } from "../typings.ts";
+import { createPhotoLabInDatabase, createVideoLabInDatabase, createGalleryLabInDatabase, getSessionIDFromSocketID, addUserToSession, IUserDatabaseInfo, getSessionState, getPhotoLabInfo, assignExperimentToSession} from "../controllers/database.ts";
+import multer from "multer";
+import fs from 'node:fs';
+import { determineFileExtension, getNumberFilesInDirectory } from "../controllers/photolab_controller.ts";
+import axios from 'axios';
+
+import fsPromises from 'node:fs/promises';
+
+
+const photoLabMediaDirectory = "/app/backend/server/src/media/photo-lab";
+const photoLabFolderExists = fs.existsSync("/app/backend/server/src/media/photo-lab");
+
+// Ensure the directory exists
+if (!photoLabFolderExists) {
+    fs.mkdirSync(photoLabMediaDirectory, { recursive: true });
+}
+
 
 const databaseRouter = express.Router();
-databaseRouter.use(express.json());
+databaseRouter.use(express.json()); 
 
-// joinerRouter.get("/session/:sessionId", (req: Request, res: Response) => {
 /*
  .  .  .    .    .  .   .
 .  .   .    .   .      .
@@ -13,74 +27,91 @@ databaseRouter.use(express.json());
 .   .  .   .  . .    .  . 
  . . . .  . .  .   .  . . 
 */
-//database/photo
-databaseRouter.post("/photo-lab", async(req: Request, res: Response) => {
-    //check to see if the type matches
-    const {
-        experimentTitle, 
-        experimentDescription,
-        experimentCaptions,
-        imageBlob,
-        socketID
-    } = req.body;
 
 
-    console.log("Experiment Title: ", experimentTitle)
-    console.log("Experiment Description: ", experimentDescription)
-    console.log("Experiment Caption: ", experimentCaptions)
-    console.log("Socket ID: ", socketID)
-    console.log("Image Blob: ", imageBlob)
+// set suffix for file name
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, '/app/backend/server/src/media/photo-lab');
+    },
+    filename: (req, file, cb) => {
+        const fileExt = file.originalname
+        cb(null, file.originalname);
+    }
+});
+
+const upload = multer({ storage });
 
 
-    //create an experiment
-    let experimentID = null;
+databaseRouter.post("/photo-lab", upload.single("imageBlob"), async(req: Request, res: Response) => {
 
-    
-    //create a photo lab, relating that to the experiment id that was previously created
+    const experimentTitle = req.body.experimentTitle;
+    const experimentDescription = req.body.experimentDescription
+    const experimentCaptions = req.body.experimentCaptions;
+    const imageBlob = req.body.imageBlob;
+    const socketID = req.body.socketID
+
+    //giving the file a new name ex. (#).jpg
+    let fileNumber = await getNumberFilesInDirectory(photoLabMediaDirectory);
+    let detectedFileExtension = determineFileExtension(req.file) 
+    const fileName = fileNumber + detectedFileExtension
+
+
+    if (req.file) //if a file was provided
+    {
+        console.log("There do be a file")
+        console.log("Uploaded file: ", req.file)
+    }
+    else //if no file was provided
+    {
+        console.log("No file provided");
+        return res.status(500).send("No file provided");
+    }
+
+    let experimentID = null
+    console.log("New Filename, ", fileName)
+
+    //change the req.file.name to filename
+    console.log("File path", req.file.path);
+
+ 
+    //add the file to the /app/backend/server/src/media/photo-lab directory
     try{
-        console.log("/photo-lab: Recieved: ", JSON.stringify(req.body))
+        await fsPromises.rename(req.file.path, `/app/backend/server/src/media/photo-lab/${fileName}`);
+    }
+    catch(error){
+        console.log("Error moving file: ", error);
+        return res.status(500).send("Error moving file.");
+    };
+
+    //add the photo lab to the database
+    let sessionID = -1;
+
+    try{
+        sessionID = await getSessionIDFromSocketID(socketID);
+
+        console.log("Session id--", sessionID)
         experimentID = await createPhotoLabInDatabase({
-            experimentTitle: experimentTitle,
+            experimentTitle: experimentTitle, 
             experimentDescription: experimentDescription,
             experimentCaptions: experimentCaptions,
-            imageBlob: imageBlob,
+            imageBlob: fileName,
             socketID: socketID
-        }, )
-
-
-    } catch (error) {
+        }, sessionID)
+    } 
+    catch (error) {
         res.status(500).send({
             "message": "Could not add photo lab to database",
             "error": error
         });
     }
-    console.log("experimentID - RES CALL: ", experimentID)
-    //res.status(200).send(getPhotoLabInfo(experimentID))
+    
     res.status(200).send({
-        "message": "In photo-lab"
+        "message": "succeess"
     })
-})
-
-databaseRouter.post("/photo-lab/:sessionID", async(req: Request, res: Response) => {
-    const {
-        experimentTitle, 
-        experimentDescription,
-        experimentCaption
-    } = req.body;
-
-    console.log("req.body: ", req.body)
-    const sessionID = Number(req.params.sessionID); 
-    createPhotoLabInDatabase({
-        ...req.body,
-        imageBlob: "asdfghj",
-    }, sessionID);
-
-    const sessionState = await getSessionState(sessionID);
-    console.log("sessionState: ", sessionState)
-    res.status(200).send(sessionState);
-
-
-})
+});
+        
+    
 
 
 databaseRouter.post("/video-lab", async(req: Request, res: Response) => {
@@ -106,6 +137,8 @@ databaseRouter.post("/video-lab", async(req: Request, res: Response) => {
         "message": "In video-lab"
     })
 })
+
+
 databaseRouter.post("/gallery-lab", async(req: Request, res: Response) => {
     //check to see if the type matches
     const galleryLabInfo = req.body;
@@ -130,38 +163,5 @@ databaseRouter.post("/gallery-lab", async(req: Request, res: Response) => {
     })
 })
 
-// not used as of current database 2/14
-// databaseRouter.post("/add-user-to-session", (req: Request, res: Response) => {
-//     const {
-//         userId,  //string
-//         socketID,
-//         nickname, 
-//         roomCode
-//     } = req.body
-
-//     const infoForDatabase: IUserDatabaseInfo = {
-//         userId: userId,
-//         socketId: socketID,
-//         nickname: nickname,
-//         associatedDevice: null,
-//         roomCode: roomCode
-//     }
-
-//     try{
-//         //addUserToSession(infoForDatabase)
-//     }
-//     catch (error) {
-//         res.status(500).send({
-//             "message": "Could not add user to session in the datab",
-//             "error": error
-//         });
-//     }
-
-//     res.status(200).send({
-//         "message": "In /add-user-to-session"
-//     })
-
-
-// })
-
 export default databaseRouter;
+

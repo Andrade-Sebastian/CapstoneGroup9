@@ -11,6 +11,8 @@ COPY . .
 
 EXPOSE 3000
 
+run chmod -R 777 /app/backend/server/src/media/photo-lab
+
 run ["deno", "install"]
 
 cmd ["deno", "task", "dev-main"]
