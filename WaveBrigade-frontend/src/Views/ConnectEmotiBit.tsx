@@ -12,33 +12,45 @@ import React from "react";
 
 export default function ConnectEmotiBit() {
   const [code, setCode] = useState("");
+  const [device, setDevice] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigateTo = useNavigate();
-  const { setExperimentId, setExperimentTitle, setExperimentDesc, setIsConnected, setSerial, nickname, roomCode} = useJoinerStore()
+  const { setExperimentId, setExperimentTitle, setExperimentDesc, setIsConnected, setSerial, setDeviceId, nickname, roomCode, socketId, serial, deviceId} = useJoinerStore()
 
-const handleComplete = (code: string) => {
-  console.log("Serial Code Entered:", code);
-  setCode(code);
-};
-const handleSubmit = async (e: React.FormEvent) =>{
-  e.preventDefault();
+  const handleComplete = (code: string) => {
+    console.log("Serial Code Entered:", code);
+    setCode(code);
+  };
 
-  const loadingToastId = toast.loading("Verifying code...");
-  if (isSubmitting) return;
+  const handleSubmit = async (e: React.FormEvent) =>{
+    e.preventDefault();
 
-  setIsSubmitting(true);
+    const loadingToastId = toast.loading("Verifying code...");
+    if (isSubmitting) return;
+
+    setIsSubmitting(true);
 
   try{
+    console.log("stuff: ", nickname, " | ",  roomCode, " | ", code);
     //logic for sending code to backend
-    const response = await axios.post("http://localhost:3000/joiner/verify-code",{
+    const response = await axios.post("http://localhost:3000/joiner/verify-serial",{
       nickName: nickname,
       roomCode: roomCode,
       serialCode: code,
     });
-    if(response.data.success){
+    //does not pass this 
+
+    const {success, deviceID} = response.data;
+    console.log("RESPONSE DATA: ", response.data);
+    // console.log("DEVICE ID RETURNED FROM RESPONSE: ", deviceID);
+    // setDevice(deviceID);
+    // console.log("DEVICE ID STORED IN REACT STATE: ", device);
+
+    if(success){
       toast.success("Connection Successful! Your EmotiBit was connected successfully", {id: loadingToastId});
-      setIsConnected(true)
-      setSerial(code)
+      setIsConnected(true);
+      setSerial(code);
+      joinRoom(deviceID);
       setTimeout(() => {
         navigateTo("/waiting-room");
       }, 2000);
@@ -69,6 +81,27 @@ const handleSubmit = async (e: React.FormEvent) =>{
       socket.off("experiment-data", handleExperimentData);
     };
   }, []);
+
+  const joinRoom = async (device: number) => {
+    try{
+      const response = await axios.post(`http://localhost:3000/joiner/session/join/`, {
+        socketID: socketId,
+        nickname: nickname,
+        roomCode: roomCode,
+        serialNumberLastFour: code,
+        deviceID: device,
+      });
+      if(response.status === 200){
+        console.log("Added user to session!");
+        return true;
+      }
+    }
+    catch(error){
+        console.error("Could not add User to session", error);
+        return false;
+      }
+    }
+
   return (
     <div className="flex h-screen">
       <Toaster position="top-right" /> 

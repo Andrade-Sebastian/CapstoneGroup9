@@ -10,17 +10,15 @@ import toast, { Toaster } from "react-hot-toast";
 import React from "react";
 
 export default function JoinPage() {
+  // const [isJoining, setIsJoining] = useState(false);
+  // const [isSpectator, setIsSpectator] = useState("");
+  // const [userId, setUserId] = useState("");
   const [nickName, setNickName] = useState("");
   const [StudentInputRoomCode, setStudentInputRoomCode] = useState("");
-  const [isJoining, setIsJoining] = useState(false);
-  const [isSpectator, setIsSpectator] = useState("");
-  const [userId, setUserId] = useState("");
   const navigateTo = useNavigate();
   const [sessionID, setSessionID] = useState("")
-  const [users, setUsers] = useState<string[]>([]) //list of users to send to waiting room
   const [socketID, setSocketID] = useState("");
-  const { setNickname, setRoomCode} = useJoinerStore()
-
+  const { setNickname, setRoomCode, roomCode, setUserSocketId} = useJoinerStore()
 
 
   const handleSubmit = async (e) => {
@@ -62,12 +60,20 @@ export default function JoinPage() {
 
   const validateRoomCode = async (StudentInputRoomCode) => {
     try {
-      const response = await axios.get(`http://localhost:3000/joiner/validateRoomCode/${StudentInputRoomCode}`);
-      if (response.status === 200) {
+      console.log("Validating room code..." + StudentInputRoomCode);
+      setRoomCode(StudentInputRoomCode); // Store the room code in global state
+
+      const response = await axios.get(`http://localhost:3000/joiner/verify-code/${StudentInputRoomCode}`);
+      setSessionID(response.data.sessionID);
+      console.log("Session ID: ", sessionID);
+      console.log("Response status: " , response.status)
+      if (response.status === 200) 
+      {
         console.log("Room code is valid!");
         setSessionID(response.data.sessionID);  // Store sessionID when room code is valid
-        setRoomCode(StudentInputRoomCode)
-        setNickname(nickName)
+        setRoomCode(StudentInputRoomCode);
+        setNickname(nickName);
+        setUserSocketId(socketID);
         return true;
       }
       return false;
@@ -76,22 +82,6 @@ export default function JoinPage() {
       return false;
     }
   };
-
-  const joinRoom = async () => {
-    try{
-      console.log("Socket ID: " + socketID);
-      console.log("Session ID: " + sessionID);
-      const response = await axios.get(`http://localhost:3000/joiner/join-session/${sessionID}/${socketID}`);
-      if(response.status === 200){
-        console.log("Added user to session!");
-        return true;
-      }
-    }
-    catch(error){
-        console.error("Could not add User to session", error);
-        return false;
-      }
-    }
     
 
   return (

@@ -41,8 +41,10 @@ interface JoinerState{
     joinerId: string;
     nickname: string | null;
     roomCode: string;
+    socketId: string;
     isConnected: boolean;
     serial: string;
+    deviceId: string;
     experimentId: string;
     experimentTitle: string;
     experimentDesc: string;
@@ -51,8 +53,10 @@ interface JoinerState{
     setJoinerId: (id: string) => void;
     setNickname: (nickname: string | null) => void;
     setRoomCode: (roomCode: string) => void;
+    setUserSocketId: (socket: string) => void;
     setIsConnected: (isConnected: boolean) => void;
     setSerial: (serial: string) => void;
+    setDeviceId: (deviceid: string) => void;
     setExperimentId: (id: string) => void;
     setExperimentTitle: (experimentTitle: string) => void;
     setExperimentDesc: (experimentDesc: string) => void;
@@ -63,8 +67,10 @@ export const useJoinerStore = create<JoinerState>()(
         joinerId: '',
         nickname: null,
         roomCode: '',
+        socketId: '',
         isConnected: false,
         serial: '',
+        deviceId: '',
         experimentId: '',
         experimentTitle: '',
         experimentDesc: '',
@@ -72,8 +78,10 @@ export const useJoinerStore = create<JoinerState>()(
         setJoinerId: (id:string): void => set(() => ({ joinerId: id})),
         setNickname: (nickname: string | null): void => set(() => ({nickname})),
         setRoomCode: (roomCode: string): void => set(() => ({ roomCode})),
+        setUserSocketId: (socketId: string): void => set(() => ({ socketId: socketId})),
         setIsConnected: (isConnected: boolean): void => set(() => ({ isConnected})),
         setSerial: (serial: string): void => set(() => ({serial})),
+        setDeviceId: (deviceid: string): void => set(() => ({deviceId: deviceid})),
         setExperimentId: (id: string): void => set(() => ({experimentId: id})),
         setExperimentTitle: (title: string): void => set(() => ({ experimentTitle: title})),
         setExperimentDesc: (desc: string): void => set(() => ({ experimentDesc: desc})),
