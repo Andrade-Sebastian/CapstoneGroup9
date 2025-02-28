@@ -3,7 +3,7 @@ import {addDiscoveredDevice, getSessionState, IDevice, createSession, joinSessio
 import SessionManager from "../sessions_singleton.ts";
 import { addSocketToSession, removeSocket, getSessionBySocket, socketSessionMap } from "../sessionMappings.ts";
 import axios from "axios";
-import {addUserToSession, getUsersFromSession, validateRoomCode, removeUserFromSession, validDeviceSerial} from "../controllers/database.ts";
+import {addUserToSession, getUsersFromSession, validateRoomCode, removeUserFromSession, validDeviceSerial, validatePassword} from "../controllers/database.ts";
 const app = express();
 const joinerRouter = express.Router();
 joinerRouter.use(express.json());
@@ -279,6 +279,20 @@ joinerRouter.get("/verify-code/:roomCode", async (req: Request, res: Response) =
     }
 });
 
+joinerRouter.post("/validatePassword", async (req: Request, res: Response) => {
+    console.log("In /validatePassword", req.body);
+    const {sessionID, password} = req.body;
+
+    try{
+        const isValidPassword = await validatePassword(sessionID, password);
+        if(isValidPassword){
+            return res.status(200).json({success: true})
+        }
+    }
+    catch(error){
+        return res.status(400).json({success: false, message: "Invalid password"});
+    }
+});
 
 export default joinerRouter;
 

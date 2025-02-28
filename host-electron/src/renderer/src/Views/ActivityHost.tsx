@@ -99,7 +99,7 @@ export default function WaitingRoom() {
   }
 
   function handleSubmit() {
-    handleHostEndSession(); //process destruction for all users 
+    //handleHostEndSession(); //process destruction for all users 
     console.log('in handle submit')
     setTimeout(() => {
       //-----HARDCODED FOR TESTING-------

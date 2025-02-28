@@ -10,10 +10,11 @@ import { Link, Outlet } from "react-router-dom";
 import NavigationBar from "./Components/NavigationBar";
 import { useEffect, useState, useRef } from "react";
 import socket from "./Views/socket.tsx"
+import { useJoinerStore } from "./hooks/stores/useJoinerStore.ts";
 
 function App() {
-  //useSocketManager();
 
+  const {setUserSocketId} = useJoinerStore();
   const [isSocketAssigned, setIsSocketAssigned] = useState(false);
 
   useEffect(() => {
@@ -28,8 +29,8 @@ function App() {
         console.log("Adding socketID to session storage");
         console.log("sessionStorage operation:", data.socketId);
 
-        sessionStorage.setItem("socketID", data.socketId);
-        console.log("Current session storage:", sessionStorage.getItem("socketID"));
+        setUserSocketId(data.socketId);
+        console.log("Current session storage:", data.socketId);
 
         // Update state to prevent re-assignment
         setIsSocketAssigned(true);
@@ -37,8 +38,8 @@ function App() {
 
       socket.on("clear-session", () => {
         console.log("Clearing session storage due to disconnection");
-        sessionStorage.removeItem("socketID");
-        console.log("session storage cleared. Current socketID in Session Storage: ", sessionStorage.getItem("socketID"));
+        setUserSocketId("");
+        console.log("session storage cleared. Current socketID in Session Storage");
       });
 
 
