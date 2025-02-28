@@ -53,7 +53,7 @@ export default function ActiveExperiment() {
           <img
             src="https://www.usatoday.com/gcdn/authoring/authoring-images/2024/08/19/USAT/74862648007-getty-images-2087314411.jpg?crop=1023,576,x0,y53&width=660&height=371&format=pjpg&auto=webp"
             alt="obama"
-            className="rounded-lg w-full max-w-5xl h-auto"
+            className="rounded-lg w-full max-w-lg h-auto"
           />
         </div>
         {/* Chart stuff*/}
@@ -64,12 +64,12 @@ export default function ActiveExperiment() {
           <div className="text-lg font-semibold">
             ECG Chart - 33 BPM Average
           </div>
-            <ChartComponent chart_type={1} />
+            <ChartComponent chart_type={1} chart_name="BPM" chart_color="rgb(23, 190, 207)"/>
             </div>
             ) : activeChart === "temperatureChart" ? (
-              <div> <p>temperature chart</p> <ChartComponent chart_type={2} /></div>
+              <div> <p>temperature chart</p> <ChartComponent chart_type={2} chart_name="°F" chart_color="rgb(255, 99, 132)" /></div>
             ) :(
-              <div> <p> GSR/EDA </p> <ChartComponent chart_type={3} /> </div>
+              <div> <p> GSR/EDA </p> <ChartComponent chart_type={3} chart_name="EDA" chart_color="rgb(75,0,130)"/> </div>
             )}
           </div>
         </div>

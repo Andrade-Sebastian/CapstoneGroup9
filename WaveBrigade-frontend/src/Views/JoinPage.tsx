@@ -8,84 +8,72 @@ import SideComponent from "../Components/SideComponent.tsx";
 
 
 export default function JoinPage() {
-	// const [isJoining, setIsJoining] = useState(false);
-	// const [isSpectator, setIsSpectator] = useState("");
-	// const [userId, setUserId] = useState("");
-	const [nickName, setNickName] = useState("");
-	const [StudentInputRoomCode, setStudentInputRoomCode] = useState("");
-	const [sessionID, setSessionID] = useState("");
-	const { setNickname, setRoomCode, roomCode, setUserSocketId, socketId } = useJoinerStore();
-	const navigateTo = useNavigate();
-
-	//set socketID upon page load
-	useEffect(() => {
-		setUserSocketId(JSON.stringify(sessionStorage.getItem("socketID")));
-	}, []);
+  const [nickName, setNickName] = useState("");
+  const [StudentInputRoomCode, setStudentInputRoomCode] = useState("");
+  const navigateTo = useNavigate();
+  const [sessionID, setSessionID] = useState("")
+  const [socketID, setSocketID] = useState("");
+  const { setNickname, setRoomCode, setSessionId} = useJoinerStore();
 
 
 	const handleSubmit = async (e) => {
 		setRoomCode(StudentInputRoomCode);
 		e.preventDefault();
 
-		const loadingToastId = toast.loading("Verifying Room Code...");
+    // const loadingToastId = toast.loading("Verifying Room Code...");
+  
+    if (!StudentInputRoomCode && !nickName) {
+      console.error("Please enter both a nickname and a room code...");
+      return;
+    }
+    else{
+      if(StudentInputRoomCode.length !== 5){
+        toast.error("Error. Please enter a valid room code.")
+        console.error("Please enter a valid room code");
+        return;
+      }
+    }
+    
+    try{
+      const isValidRoomCode = await validateRoomCode(StudentInputRoomCode);
+      if (isValidRoomCode) {
+        toast.success("Room code valid. Password is needed...");
+          setTimeout(() => {
+            navigateTo('/enter-password')
+          }, 2000)
+    }
+    else{
+      toast.error("Connection failed. Looks like we couldn't get you connected. Please check your room code and try again.");
+    }
+    }catch(error){
+      console.error("Error verifying code:", error);
+      toast.error("Connection failed. Looks like we couldn't get you connected. Please check your room code and try again.")
+    }
+  };
 
-		if (!StudentInputRoomCode && !nickName) {
-			console.error("Please enter both a nickname and a room code...");
-			return;
-		}
-		else {
-			if (StudentInputRoomCode.length !== 5) {
-				console.error("Please enter a valid room code");
-				return;
-			}
-		}
+  const validateRoomCode = async (StudentInputRoomCode) => {
+    try {
+      console.log("Validating room code..." + StudentInputRoomCode);
+      setRoomCode(StudentInputRoomCode); // Store the room code in global state
 
-		try {
-			const isValidRoomCode = await validateRoomCode(StudentInputRoomCode);
-
-			// Tell the user that the connection was successful and navigate to the next page
-			if (isValidRoomCode)
-			{
-				toast.success("Connection Successful! Please standby", { id: loadingToastId });
-				setTimeout(() => {
-					navigateTo("/connect-emotibit");
-				});
-			}
-			else {
-				toast.error("Connection failed. Looks like we couldn't get you connected. Please check your room code and try again.", { id: loadingToastId });
-			}
-		} catch (error) {
-			console.error("Error verifying code:", error);
-			toast.error("Connection failed. Looks like we couldn't get you connected. Please check your room code and try again.", { id: loadingToastId })
-		}
-	};
-
-	const validateRoomCode = async (roomCode) => {
-		try {
-
-			const response = await axios.get(`http://localhost:3000/joiner/verify-code/${roomCode}`);
-			setSessionID(response.data.sessionID); //Store SessionID in global state
-
-			if (response.status === 200) {
-				console.log("Room code is valid!");
-
-				//Store everything in global state
-				setSessionID(response.data.sessionID);
-				setRoomCode(StudentInputRoomCode); 
-				setNickname(nickName);
-				setUserSocketId(socketId);
-				
-				return true;
-			}
-
-			return false;
-
-		} catch (error) {
-			console.error("Could not validate room code due to an API Error", error);
-			return false;
-		}
-	};
-
+      const response = await axios.get(`http://localhost:3000/joiner/verify-code/${StudentInputRoomCode}`);
+      console.log("Session ID: ", response.data.sessionID);
+      console.log("Response status: " , response.status)
+      if (response.status === 200) 
+      {
+        console.log("Room code is valid!");
+        setSessionId(response.data.sessionID);  // Store sessionID when room code is valid
+        setRoomCode(StudentInputRoomCode);
+        setNickname(nickName);
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error("Could not validate room code due to an API Error", error);
+      return false;
+    }
+  };
+    
 
 	return (
 		<div className="flex h-screen">

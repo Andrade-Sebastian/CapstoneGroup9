@@ -605,3 +605,23 @@ export async function assignExperimentToSession(sessionID: number, experimentID:
 
 }
 
+export async function validatePassword(sessionID:string, password:string): Promise<boolean>{
+	
+	let isValidPass = false;
+
+	try{
+		await dbClient.connect();
+		const query = await dbClient.queryObject(`SELECT sessionid FROM session WHERE sessionid = $1 AND password = $2`,
+			[sessionID, password]
+		);
+		if(query.rows.length > 0){
+			isValidPass = true;
+		}
+	}
+	catch(error){
+		console.log("Password is not valid", error);
+	}
+
+	return isValidPass;
+}
+

@@ -2,7 +2,6 @@ import { BrowserWindow } from 'electron'
 import { ChildProcess } from 'child_process'
 
 export interface IActivityInstance {
-  browserWindow: BrowserWindow | undefined
   brainflowProcess: ChildProcess
   ipAddress: string
   serialNumber: string

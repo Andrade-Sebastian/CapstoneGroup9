@@ -5,9 +5,10 @@ import useBrainflowManager from './hooks/useBrainflowManager.ts';
 import { useEffect, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
 
-
 function App() {
   const {launchProcess} = useBrainflowManager();
+  const ipc = window.api
+  const { handleUserLeaveSession } = useBrainflowManager();
 
   useEffect(() => {
     //hardcoded for testing
@@ -57,7 +58,6 @@ function App() {
   };
     
   }, []);  // Dependency on isSocketAssigned to run when it changes
-
 
 
 
