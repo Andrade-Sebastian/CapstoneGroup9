@@ -8,8 +8,8 @@ import socket from '../Views/socket.tsx';
 //Skin Response - 3
 interface IDataType {
     chart_type: number;
-    //chart_name: string;
-    //chart_color: string;
+    chart_name: string;
+    chart_color: string;
 }
 let max = 98;
 let min = 93;
@@ -47,7 +47,7 @@ export default function ChartComponent(props: IDataType) {
             console.log("TEMP CHART: ", current_data);
         }
         else if(props.chart_type === 3){
-            current_data = (ancDataFrame.data1);
+            current_data = (ancDataFrame.data1)
             console.log("EDA CHART" , current_data);
         }
         else{
@@ -60,27 +60,28 @@ export default function ChartComponent(props: IDataType) {
             counter++
             max = Math.max(max, Math.round(current_data));
             min = max - 1;
-            console.log("MAX: ", max);
-            console.log("MIN: ", min);
-            if(numOfPoints === 100){
-                console.log("100 POINTS RECIEVED");
-                const temp_plot = [...plotState];
-                temp_plot.shift();
-                temp_plot.push(current_data);
-                acceptPlotDataState(temp_plot);
-                //acceptPlotDataState(plotState => plotState.slice(0, (100 - plotState.length)));
-                acceptPlotDataState(plotState => [...plotState, current_data]);
-            }
-            else{
-                acceptPlotDataState(plotState => [...plotState, current_data]);
-            }
+            //console.log("MAX: ", max);
+            //console.log("MIN: ", min);
 
             if(counter >= 5){
                 clearInterval(intervalId);
                 max = current_data;
                 min = max - 1;
             }
-        }, 8000)
+        }, 10000);
+
+        if(numOfPoints === 100){
+            console.log("100 POINTS RECIEVED");
+            const temp_plot = [...plotState];
+            temp_plot.shift();
+            temp_plot.push(current_data);
+            acceptPlotDataState(temp_plot);
+            //acceptPlotDataState(plotState => plotState.slice(0, (100 - plotState.length)));
+           // acceptPlotDataState(plotState => [...plotState, current_data]);
+        }
+        else{
+            acceptPlotDataState(plotState => [...plotState, current_data]);
+        }
         
         
     }
@@ -142,6 +143,7 @@ export default function ChartComponent(props: IDataType) {
     return(
         <div className='h-auto w-auto'>
             <div id="chart">
+                
                 <Plot
                     data={[
                     {
@@ -149,8 +151,8 @@ export default function ChartComponent(props: IDataType) {
                         y: plotState,
                         mode: 'lines',          // Line chart
                         type: 'line',
-                        name: 'Temperature (°C)', //props.chart_name, // Label for the trace
-                        line: {color: 'rgb(255, 99, 132)'} //props.chart_color } //'rgb(255, 99, 132)'} // Line color
+                        name: props.chart_name, // Label for the trace
+                        line: {color: props.chart_color} //'rgb(255, 99, 132)'} // Line color
                     },
                     // {
                     //     x: timeState,
@@ -175,7 +177,7 @@ export default function ChartComponent(props: IDataType) {
                         //     tickformat: '%M:%S', // Display hours, minutes, and seconds in the tooltip
                         // },
                         yaxis: {
-                            title: 'Temperature (°C)',//props.chart_name,,
+                            title: 'Temperature (°F)',//props.chart_name,,
                             range: [min, max + 1],
                             tick: 1,
                         },
