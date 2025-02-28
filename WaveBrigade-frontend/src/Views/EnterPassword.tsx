@@ -12,15 +12,10 @@ import { Icon } from 'react-icons-kit'
 import toast, { Toaster } from "react-hot-toast";
 
 export default function EnterFunction() {
-    const [nickName, setNickName] = useState("");
-    const [StudentInputRoomCode, setStudentInputRoomCode] = useState("");
-    const [isJoining, setIsJoining] = useState(false);
-    const [userId, setUserId] = useState("");
     const navigateTo = useNavigate();
-    const [sessionID, setSessionID] = useState("")
     const [users, setUsers] = useState<string[]>([]) //list of users to send to waiting room
     const [socketID, setSocketID] = useState("");
-    const { roomCode } = useJoinerStore()
+    const { roomCode, sessionId, socketId} = useJoinerStore()
     const [ password, setPassword]  = useState("");
     const [type, setType] = useState('password')
     const [icon, setIcon] = useState(eyeOff)
@@ -47,15 +42,12 @@ export default function EnterFunction() {
         //ONCE VALIDATE PASSWORD IS CREATED REMOVE PASSWORD FROM IF STATEMENTS LINES 49 AND 52
         try{
           const isValidPassword = await validatePassword(password);
-          if (isValidPassword || password) {
+          if (isValidPassword) {
             toast.success("Joining session...");
-            const isJoinedRoom = await joinRoom();
-            if(isJoinedRoom|| password ){
-                     setTimeout(() => {
-          navigateTo('/connect-emotibit')
-        }, 2000)
-            }
-        }
+            setTimeout(() => {
+              navigateTo('/connect-emotibit')
+            }, 2000)
+          }
         else{
           toast.error("Connection failed. Looks like we couldn't get you connected. Please check the password and try again.");
         }
@@ -65,35 +57,23 @@ export default function EnterFunction() {
         }
       };
     
-      const validatePassword = async (password) => {
+      const validatePassword = async (password: string) => {
         try {
-          const response = await axios.get(`http://localhost:3000/joiner/validatePassword/${password}`);
-          if (response.status === 200) {
+          const response = await axios.post(`http://localhost:3000/joiner/validatePassword`,
+            {
+              sessionID: sessionId,
+              password: password
+            }
+          );
+          if (response.data.success) {
             console.log("Password is valid");
             return true;
           }
-          return false;
         } catch (error) {
           console.error("Could not validate password due to an API Error", error);
           return false;
         }
       };
-    
-      const joinRoom = async () => {
-        try{
-          console.log("Socket ID: " + socketID);
-          console.log("Session ID: " + sessionID);
-          const response = await axios.get(`http://localhost:3000/joiner/join-session/${sessionID}/${socketID}`);
-          if(response.status === 200){
-            console.log("Added user to session!");
-            return true;
-          }
-        }
-        catch(error){
-            console.error("Could not add User to session", error);
-            return false;
-          }
-        }
           
   return (
     <div className="flex h-screen">

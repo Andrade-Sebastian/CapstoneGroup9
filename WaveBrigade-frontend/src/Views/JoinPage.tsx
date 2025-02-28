@@ -8,17 +8,15 @@ import { useJoinerStore } from "../hooks/stores/useJoinerStore.ts";
 import { PiPlanetLight } from "react-icons/pi";
 import toast, { Toaster } from "react-hot-toast";
 import React from "react";
+import { useSocketManager } from "../hooks/useSocketManager.ts";
 
 export default function JoinPage() {
-  // const [isJoining, setIsJoining] = useState(false);
-  // const [isSpectator, setIsSpectator] = useState("");
-  // const [userId, setUserId] = useState("");
   const [nickName, setNickName] = useState("");
   const [StudentInputRoomCode, setStudentInputRoomCode] = useState("");
   const navigateTo = useNavigate();
   const [sessionID, setSessionID] = useState("")
   const [socketID, setSocketID] = useState("");
-  const { setNickname, setRoomCode, roomCode, setUserSocketId} = useJoinerStore()
+  const { setNickname, setRoomCode, setSessionId} = useJoinerStore();
 
 
   const handleSubmit = async (e) => {
@@ -31,7 +29,7 @@ export default function JoinPage() {
       return;
     }
     else{
-      if(StudentInputRoomCode.length !== 5 || !isNaN(+StudentInputRoomCode)){
+      if(StudentInputRoomCode.length !== 5){
         toast.error("Error. Please enter a valid room code.")
         console.error("Please enter a valid room code");
         return;
@@ -42,12 +40,9 @@ export default function JoinPage() {
       const isValidRoomCode = await validateRoomCode(StudentInputRoomCode);
       if (isValidRoomCode) {
         toast.success("Room code valid. Password is needed...");
-        const isJoinedRoom = await joinRoom();
-        if(isJoinedRoom){
           setTimeout(() => {
             navigateTo('/enter-password')
           }, 2000)
-        }
     }
     else{
       toast.error("Connection failed. Looks like we couldn't get you connected. Please check your room code and try again.");
@@ -64,16 +59,14 @@ export default function JoinPage() {
       setRoomCode(StudentInputRoomCode); // Store the room code in global state
 
       const response = await axios.get(`http://localhost:3000/joiner/verify-code/${StudentInputRoomCode}`);
-      setSessionID(response.data.sessionID);
-      console.log("Session ID: ", sessionID);
+      console.log("Session ID: ", response.data.sessionID);
       console.log("Response status: " , response.status)
       if (response.status === 200) 
       {
         console.log("Room code is valid!");
-        setSessionID(response.data.sessionID);  // Store sessionID when room code is valid
+        setSessionId(response.data.sessionID);  // Store sessionID when room code is valid
         setRoomCode(StudentInputRoomCode);
         setNickname(nickName);
-        setUserSocketId(socketID);
         return true;
       }
       return false;

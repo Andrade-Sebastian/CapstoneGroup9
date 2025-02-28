@@ -25,17 +25,17 @@ export default function useBrainflowManager()
         ipc.send('brainflow:destroy', sessionId)
     };
 
-    useEffect(() => {
-        const handleDisconnect = (event, userId) => {
-            console.log(`UseEffect: recieved event to disconnect user ${userId}`);
-            handleUserLeaveSession(userId);
-        };
+    // useEffect(() => {
+    //     const handleDisconnect = (event, userId) => {
+    //         console.log(`UseEffect: recieved event to disconnect user ${userId}`);
+    //         handleUserLeaveSession(userId);
+    //     };
 
-        ipc.receive('user-disconnected', handleDisconnect);
-        return() => {
-            ipc.receive('user-disconnected', handleDisconnect)();
-        };
-    }, []);
+    //     ipc.receive('user-disconnected', handleDisconnect);
+    //     return() => {
+    //         ipc.receive('user-disconnected', handleDisconnect)();
+    //     };
+    // }, []);
 
 
     const launchProcess = (user: IUser) => {
