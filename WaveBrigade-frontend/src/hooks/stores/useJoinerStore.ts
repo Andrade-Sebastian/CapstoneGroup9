@@ -1,6 +1,6 @@
 
 // import { create } from 'zustand'
-// import {IUser} from "../../typings.ts"
+import {IUser} from "../../typings.ts"
 // import {IDevice} from "../../typings.ts"
 
 
@@ -48,6 +48,7 @@ interface JoinerState{
     experimentId: string;
     experimentTitle: string;
     experimentDesc: string;
+    users: Array<IUser>;
 
     setJoinerId: (id: string) => void;
     setNickname: (nickname: string | null) => void;

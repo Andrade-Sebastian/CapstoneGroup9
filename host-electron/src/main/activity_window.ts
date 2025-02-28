@@ -1,11 +1,15 @@
 
 import icon from '../../resources/icon.png?asset'
-import { shell, BrowserWindow, ipcMain, ipcRenderer } from 'electron'
+import { shell, BrowserWindow, ipcMain, ipcRenderer, session } from 'electron'
 import { join } from 'path'
 import { is } from '@electron-toolkit/utils'
 import { ChildProcess, spawn } from 'child_process'
 import { echoProcessChannels, EchoProcessChannel } from '../preload'
 import os from 'os'
+import * as echo_server_binary_aarch64_apple_darwin from '../../resources/echo_server_aarch64-apple-darwin'
+import * as echo_server_binary_x86_64_apple_darwin from '../../resources/echo_server_aarch64-apple-darwin?asset&asarUnpack'
+import * as echo_server_binary_x86_64_pc_windows from '../../resources/echo_server_aarch64-apple-darwin?asset&asarUnpack'
+
 
 //import echo_server_binary_aarch64_apple_darwin from '../../resources'
 const echoServers: Record<number, {
@@ -17,19 +21,21 @@ const echoServers: Record<number, {
   
 }
 
-function loadEchoServerBinary(): string{ //need binary files under resources
+function loadEchoServerBinary(): string{ 
   if (os.platform() === 'darwin' && os.arch() === 'arm64')
-    return 
-  else if (os.platform() === 'darwin' && os.arch() === 'x64')
-    return
-  else return //windows
+    return //echo_server_binary_aarch64_apple_darwin
+    else if (os.platform() === 'darwin' && os.arch() === 'x64')
+      return //echo_server_binary_x86_64_apple_darwin
+  else return //echo_server_binary_x86_64_pc_windows//windows
 }
 
 function createProcessWindow(sessionId: string, userId: string): BrowserWindow {
   const processWindow = new BrowserWindow({
     width: 900,
     height: 670,
-    show: true,
+    show: false,
+    resizable: false,
+    title: `SessionID ${sessionId}`,
     autoHideMenuBar: true,
     ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
@@ -112,9 +118,9 @@ function sendEchoProcessInformation(event, processPID): void {
   }
 
   function destroyEchoProcess(event, processPID): void{
-    const window = BrowserWindow.fromId(event.send.id)
+    const window = BrowserWindow.fromId(event.sender.id)
     const process = echoServers[processPID]
-    const successfully_killed = [SpeechRecognitionResultList.instance.kill()]
+    const successfully_killed = [process.instance.kill()]
     if(successfully_killed && window ) {
       window.close()
       const process_window_index = windows.findIndex((windowItem) => windowItem.label === processPID)
@@ -125,11 +131,17 @@ function sendEchoProcessInformation(event, processPID): void {
     else console.error(`Could not find process viewer window for ${processPID}`)
   }
 
-// Event listener for creating echo server processes
+  // function killAllEchoProcesses(): void{
+  //   Object.entries(echoServers).forEach(([_key, echoServer]) => {
+  //     echoServer.instance.kill()
+  //   })
+  // }
+
+//Event listener for creating echo server processes
 ipcMain.on('echo-server:launch', createEchoServerProcesses)
 ipcMain.on('echo-server:info', sendEchoProcessInformation)
 ipcMain.on('echo-server:destroy', destroyEchoProcess)
-//app.on('quit', killAllEchoProcesses)
+// app.on('quit', killAllEchoProcesses)
 
 export default createProcessWindow
 
