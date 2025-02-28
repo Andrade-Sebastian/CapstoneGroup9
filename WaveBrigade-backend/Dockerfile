@@ -11,7 +11,9 @@ COPY . .
 
 EXPOSE 3000
 
-run chmod -R 777 /app/backend/server/src/media/photo-lab
+run mkdir -p /server/src/media/photo-lab
+
+run chmod -R 777 /server/src/media/photo-lab
 
 run ["deno", "install"]
 

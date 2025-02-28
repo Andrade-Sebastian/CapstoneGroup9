@@ -3,7 +3,7 @@ import {addDiscoveredDevice, getSessionState, IDevice, createSession, joinSessio
 import SessionManager from "../sessions_singleton.ts";
 import { addSocketToSession, removeSocket, getSessionBySocket, socketSessionMap } from "../sessionMappings.ts";
 import axios from "axios";
-import {addUserToSession, getUsersFromSession, validateRoomCode, removeUserFromSession, validDeviceSerial, validatePassword} from "../controllers/database.ts";
+import {addUserToSession, getUsersFromSession, validateRoomCode, removeUserFromSession, validDeviceSerial, validatePassword, getPhotoLabInfo} from "../controllers/database.ts";
 const app = express();
 const joinerRouter = express.Router();
 joinerRouter.use(express.json());
@@ -247,7 +247,7 @@ joinerRouter.get("/getPhoto/:experimentID", async (req: Request, res: Response) 
     const experimentID = req.params.experimentID;
 
     try{
-        const photoInfo = await getPhotoPath(experimentID);
+        const photoInfo = await getPhotoLabInfo(experimentID);
         return res.status(200).send(photoInfo);
 
     }
