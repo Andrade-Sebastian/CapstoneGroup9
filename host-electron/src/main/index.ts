@@ -1,9 +1,15 @@
 import { app, BrowserWindow, ipcMain, session } from 'electron'
 import { electronApp, optimizer } from '@electron-toolkit/utils'
 import { spawn } from 'child_process'
-import createMainWindow from './main_window'
-import ActivitySingleton from './activitySingleton'
+import createMainWindow from './main_window.ts'
+import ActivitySingleton from './activitySingleton.ts'
 
+
+export const windows:Array<{
+  instance: BrowserWindow
+  type: 'main' | 'process'
+  label: string
+}> = []
 
 // import createProcessWindow from './process_window'
 
@@ -23,6 +29,11 @@ app.whenReady().then(() => {
     optimizer.watchWindowShortcuts(window)
   })
 
+  windows.push({
+    instance: createMainWindow('/main'),
+    type: 'main',
+    label: 'main'
+  })
   createMainWindow()
   // createProcessWindow("1234", "69")
   // 4343 is the argument that will be passed to the process window
@@ -41,13 +52,11 @@ app.whenReady().then(() => {
   app.on('activate', function () {
     // On macOS it's common to re-create a window in the app when the
     // dock icon is clicked and there are no other windows open.
-    if (BrowserWindow.getAllWindows().length === 0) createMainWindow()
+    if (BrowserWindow.getAllWindows().length === 0) createMainWindow('/main')
   })
 })
 
-// Quit when all windows are closed, except on macOS. There, it's common
-// for applications and their menu bar to stay active until the user quits
-// explicitly with Cmd + Q.
+
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit()
@@ -85,8 +94,47 @@ function spawnBrainFlow(
   return instance
 }
 
-// In this file you can include the rest of your app"s specific main process
-// code. You can also put them in separate files and require them here.
+function processDestroyer(event, userId: string): void{
+  //const process = echoServers[userId]
+  const activitySingleton = ActivitySingleton.getInstance()
+  const processEntry = activitySingleton.activityInstances[userId];
+
+  if(!processEntry){ //if processEntry is empty
+    console.log(`Could not find a process for user: ${userId}`)
+    event.reply('echo-server:destroy-failed', `No process found for userID: ${userId}`);
+    return;
+  }
+
+  console.log(`Destroying process for userID: ${userId}`)
+
+  const successfully_killed = processEntry.brainflowProcess.kill() //returns bool
+
+  if(successfully_killed){
+    delete activitySingleton.activityInstances[userId]; //deletes from echo servers
+    console.log(`Deleted process for userId: ${userId}, ProcessPID ${processEntry.brainflowProcess!.pid}`)
+
+    event.reply('echo-server:destroyed', {userId});
+  }
+  else{
+    console.log(`could not destroy process for userId: ${userId}`)
+    event.reply('echo-server:destroyed-failed', `Failed to destroy process for userId: ${userId}`);
+  }
+}
+
+function processStatus(event, userId: string): void{
+  const activitySingleton = ActivitySingleton.getInstance()
+  const processEntry = activitySingleton.activityInstances[userId];
+
+  if(!processEntry){ 
+    console.log(`Could not find a process for user: ${userId}`)
+    event.reply('echo-server:destroy-failed', `No process found for userID: ${userId}`);
+    return;
+  }
+  console.log(`Checking status for process of userID: ${userId}, ProcessPID ${processEntry.brainflowProcess!.pid}`)
+  
+  event.reply('echo-server:status', {user: userId}) //what other variables needs to be shared?
+}
+
 ipcMain.on(
   "brainflow:launch",
   (
@@ -123,8 +171,7 @@ ipcMain.on(
     brainflowInstance.on("error", () => {
       console.log("(main/index.ts): Error in Brainflow script")
     })
-
-  
   }
-
 )
+ipcMain.on('echo-server:destroy-user', processDestroyer);
+ipcMain.on('echo-server:status', processStatus);

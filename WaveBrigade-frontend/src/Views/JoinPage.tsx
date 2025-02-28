@@ -24,14 +24,15 @@ export default function JoinPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const loadingToastId = toast.loading("Verifying Room Code...");
+    // const loadingToastId = toast.loading("Verifying Room Code...");
   
     if (!StudentInputRoomCode && !nickName) {
       console.error("Please enter both a nickname and a room code...");
       return;
     }
     else{
-      if(StudentInputRoomCode.length !== 5){
+      if(StudentInputRoomCode.length !== 5 || !isNaN(+StudentInputRoomCode)){
+        toast.error("Error. Please enter a valid room code.")
         console.error("Please enter a valid room code");
         return;
       }
@@ -40,17 +41,20 @@ export default function JoinPage() {
     try{
       const isValidRoomCode = await validateRoomCode(StudentInputRoomCode);
       if (isValidRoomCode) {
-        toast.success("Connection Successful! Please standby", {id: loadingToastId});
-        setTimeout(() => {
-          navigateTo("/connect-emotibit");
-        });
+        toast.success("Room code valid. Password is needed...");
+        const isJoinedRoom = await joinRoom();
+        if(isJoinedRoom){
+          setTimeout(() => {
+            navigateTo('/enter-password')
+          }, 2000)
+        }
     }
     else{
-      toast.error("Connection failed. Looks like we couldn't get you connected. Please check your room code and try again.", {id: loadingToastId});
+      toast.error("Connection failed. Looks like we couldn't get you connected. Please check your room code and try again.");
     }
     }catch(error){
       console.error("Error verifying code:", error);
-      toast.error("Connection failed. Looks like we couldn't get you connected. Please check your room code and try again.", {id: loadingToastId})
+      toast.error("Connection failed. Looks like we couldn't get you connected. Please check your room code and try again.")
     }
   };
 

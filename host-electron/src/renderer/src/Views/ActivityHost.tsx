@@ -17,11 +17,14 @@ import toast, { Toaster } from 'react-hot-toast'
 import { useNavigate } from 'react-router-dom'
 import { useSessionStore } from '../store/useSessionStore.tsx'
 import React from 'react';
+import useBrainflowManager from '../hooks/useBrainflowManager.ts';
 
 export default function WaitingRoom() {
   const location = useLocation()
   // const { nickName, roomCode, labID, name, description, imageUrl } = location.state || {}
   const { users, roomCode, experimentId, addUser, removeUser, experimentTitle, experimentDesc, hostName } = useSessionStore(); 
+  const { handleUserLeaveSession } = useBrainflowManager();
+  const { handleHostEndSession } = useBrainflowManager();
   const [nicknames, setNickNames] = useState<string[]>([])
   const [sessionID, setSessionID] = useState('')
   const [experimentType, setExperimentType] = useState<string>('')
@@ -96,6 +99,7 @@ export default function WaitingRoom() {
   }
 
   function handleSubmit() {
+    handleHostEndSession(); //process destruction for all users 
     console.log('in handle submit')
     setTimeout(() => {
       //-----HARDCODED FOR TESTING-------
