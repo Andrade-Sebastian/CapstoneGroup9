@@ -22,9 +22,9 @@ function App() {
   })
 }, [])
 
-  useEffect(() => {
-    handleUserLeaveSession(userId); //process destruction for all users 
-  })
+  // useEffect(() => {
+  //   handleUserLeaveSession(userId); //process destruction for all users 
+  // })
 
 
 

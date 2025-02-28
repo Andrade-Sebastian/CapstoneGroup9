@@ -97,9 +97,7 @@ function spawnBrainFlow(
 function processDestroyer(event, userId: string): void{
   //const process = echoServers[userId]
   const activitySingleton = ActivitySingleton.getInstance()
-  const processEntry = Object.entries(activitySingleton).find(
-    ([, echoServer]) => echoServer.userID === userId
-  );
+  const processEntry = activitySingleton.activityInstances[userId];
 
   if(!processEntry){ //if processEntry is empty
     console.log(`Could not find a process for user: ${userId}`)
@@ -107,16 +105,15 @@ function processDestroyer(event, userId: string): void{
     return;
   }
 
-  const [processPID, echoServer] = processEntry; //deconstructing..
-  console.log(`Destroying process for userID: ${userId}, PID: ${processPID}`)
+  console.log(`Destroying process for userID: ${userId}`)
 
-  const successfully_killed = echoServer.instance.kill() //returns bool
+  const successfully_killed = processEntry.brainflowProcess.kill() //returns bool
 
   if(successfully_killed){
-    delete activitySingleton[processPID]; //deletes from echo servers
-    console.log(`Deleted process for userId: ${userId}`)
+    delete activitySingleton.activityInstances[userId]; //deletes from echo servers
+    console.log(`Deleted process for userId: ${userId}, ProcessPID ${processEntry.brainflowProcess!.pid}`)
 
-    event.reply('echo-server:destroyed', {userId, processPID});
+    event.reply('echo-server:destroyed', {userId});
   }
   else{
     console.log(`could not destroy process for userId: ${userId}`)
@@ -126,20 +123,16 @@ function processDestroyer(event, userId: string): void{
 
 function processStatus(event, userId: string): void{
   const activitySingleton = ActivitySingleton.getInstance()
-  const processEntry = Object.entries(activitySingleton).find(
-    ([, activitySingleton]) => activitySingleton.userID = userId
-    
-  );
+  const processEntry = activitySingleton.activityInstances[userId];
 
   if(!processEntry){ 
     console.log(`Could not find a process for user: ${userId}`)
     event.reply('echo-server:destroy-failed', `No process found for userID: ${userId}`);
     return;
   }
-  const [processPID, activitySingleton] = processEntry;
-  console.log(`Checking status for process of userID: ${userId}, PID: ${processPID}`)
+  console.log(`Checking status for process of userID: ${userId}, ProcessPID ${processEntry.brainflowProcess!.pid}`)
   
-  event.reply('echo-server:status', {user: userId, pid: processPID}) //what other variables needs to be shared?
+  event.reply('echo-server:status', {user: userId}) //what other variables needs to be shared?
 }
 
 ipcMain.on(
