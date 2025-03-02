@@ -35,7 +35,7 @@ export default function PhotoLab() {
     }
   }, [photoLabImageSource])
 
-  const sendExperimentData = async(experimentTitle, experimentDesc, experimentId) => {
+  const sendExperimentData = async(experimentTitle: string, experimentDesc: string, experimentId: string) => {
     try{
         const response = await axios.post("http://localhost:3000/host/send-experiment", {
           experimentTitle,

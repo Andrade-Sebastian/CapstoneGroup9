@@ -93,7 +93,7 @@ export default function WaitingRoom() {
   useEffect(() => {
     const getExperimentData = async() => {
       try{
-        const response = await axios.get("http://localhost:3000/send-experiment");
+        const response = await axios.get("http://localhost:3000/host/get-experiment");
         if(response.status == 200){
           const experimentTitle = response.data.experimentTitle
           const experimentId = response.data.experimentId
