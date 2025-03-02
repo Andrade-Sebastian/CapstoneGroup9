@@ -1,5 +1,6 @@
 import express, { Request, Response } from "npm:express";
 import { createSessionInDatabase, registerDevice, IRegisterDeviceInfo, assignExperimentToSession} from "../controllers/database.ts";
+import { red } from "https://deno.land/std@0.160.0/fmt/colors.ts";
 
 const hostRouter = express.Router();
 hostRouter.use(express.json());
@@ -56,6 +57,21 @@ hostRouter.post("/register-device", async(req: Request, res: Response) => {
     return res.status(200).send({
         "message": "In /host/register-device"
     })
+})
+
+hostRouter.post("/send-experiment", (req: Request, res: Response) => {
+    try{
+
+        //const { experimentTitle, experimentDesc, experimentId } = req.body;
+        return res.status(200).send(req.body)
+
+    }
+    catch(error){
+        console.error("Error receiving experiment data", error)
+        return res.status(400).send({success: false, message: "Error receiving data"})
+    }
+
+
 })
 export default hostRouter;
 

@@ -10,18 +10,18 @@ function App() {
   const ipc = window.api
   const { handleUserLeaveSession } = useBrainflowManager();
 
-  useEffect(() => {
-    //hardcoded for testing
-    launchProcess({
-      userId: 1, //serial
-      socketId:"socket-test", //Frontend socket ID 
-      nickname: "unc",
-      associatedDevice: {
-        serialNumber: "string",
-        ipAddress: "string",
-        socketID: "string"
-      }})
-  }, []);
+  // useEffect(() => {
+  //   //hardcoded for testing
+  //   launchProcess({
+  //     userId: 1, //serial
+  //     socketId:"socket-test", //Frontend socket ID 
+  //     nickname: "unc",
+  //     associatedDevice: {
+  //       serialNumber: "string",
+  //       ipAddress: "string",
+  //       socketID: "string"
+  //     }})
+  // }, []);
 
 
   const [isSocketAssigned, setIsSocketAssigned] = useState(false);

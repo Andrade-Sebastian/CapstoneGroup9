@@ -67,20 +67,7 @@ export default function ConnectEmotiBit() {
     setIsSubmitting(false);
   }
   };
-  useEffect(() => {
-    const handleExperimentData = (data) => {
-      console.log("Received experiment-data:", data);
-      const {experimentTitle, experimentDesc, experimentId} = data;
-      setExperimentId(experimentId);
-      setExperimentTitle(experimentTitle);
-      setExperimentDesc(experimentDesc);
-    };
-    socket.on("experiment-data", handleExperimentData);
-
-    return () => {
-      socket.off("experiment-data", handleExperimentData);
-    };
-  }, []);
+  
 
   const joinRoom = async (device: number) => {
     try{

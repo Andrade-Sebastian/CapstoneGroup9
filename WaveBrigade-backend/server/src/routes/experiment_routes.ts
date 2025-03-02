@@ -75,6 +75,23 @@ experimentRouter.get("/view/:id", (req: Request, res: Response) => {
     }
 });
 
+experimentRouter.get("/validate-brainflow", (req: Request, res: Response) => {
+    try{
+        console.log("Receieved request at /validate-brainflow")
+        const isBrainFlowValid = true;
+        if (isBrainFlowValid){
+            res.status(200).send({success: true, message: "Brainflow validation successful"})
+        }
+        else{
+            return res.status(400).send({success: false, error: error.message})
+        }
+    }
+    catch(error){
+        console.error("Error validating brainflow", error)
+        return res.status(500).send({success: false, error: error.message})
+    }
+})
+
 
 
 export default experimentRouter;
