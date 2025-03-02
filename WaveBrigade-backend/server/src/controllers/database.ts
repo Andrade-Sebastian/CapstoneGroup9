@@ -57,10 +57,12 @@ export async function makeDeviceAvailable(deviceID: number)
 		await dbClient.connect();
 		const query = await dbClient.queryObject(`UPDATE device
 		SET isavailable = true
-		WHERE deviceid = ${deviceID}; `);
+		WHERE deviceid = $1 `,
+		[deviceID]);
+		console.log("Device made available");
 	}
 	catch(error){
-		console.log("Unable to make device not available", error);
+		console.log("Unable to make device available", error);
 	}
 }
 
@@ -70,7 +72,8 @@ export async function makeDeviceNotAvailable(deviceID: number)
 		await dbClient.connect();
 		const query = await dbClient.queryObject(`UPDATE device
 		SET isavailable = false
-		WHERE deviceid = ${deviceID}; `);
+		WHERE deviceid = $1`,
+		[deviceID]);
 	}
 	catch(error){
 		console.log("Unable to make device not available", error);
@@ -188,7 +191,7 @@ export async function getMaxPhotoLabIDsFromDB()
 // }
 
 
-export async function validateRoomCode(roomCode:string): Promise<boolean>
+export async function validateRoomCode(roomCode:string)
 {
 
 	let isValidRoomCode = false;
@@ -209,14 +212,14 @@ export async function validateRoomCode(roomCode:string): Promise<boolean>
 				sessionID: sessionID
 			};
 		}
-
-		console.log("returning false")
-		return false;
 		
 	}
 	catch(error){
 		console.log("(database.ts): No valid room code: " + error)
-		return false;
+		return {
+			isValidRoomCode: isValidRoomCode,
+			sessionID: ""
+		}
 	}
 }
 
@@ -475,8 +478,6 @@ export async function addUserToSession(initializationInfo: IAddUserToSessionInfo
 	} = initializationInfo;
 	const userRole = "joiner";
 	
-
-	console.log("(database.ts): addUserToSession() ", initializationInfo)
 	try{
 		await dbClient.connect();
 
@@ -547,7 +548,7 @@ export async function getUsersFromSession(sessionID: string){
 			[sessionID]
 		);
 		console.log("Users retrieved from ", sessionID, query);
-		return query.rows[0];
+		return query.rows;
 	}
 	catch(error){
 		console.log("Unable to retrieve users");
@@ -557,10 +558,15 @@ export async function getUsersFromSession(sessionID: string){
 export async function removeUserFromSession(sessionID: string, socketID: string){
 	try{
 		await dbClient.connect();
-		const query = await dbClient.queryObject(`DELETE FROM User WHERE sessionID = $1 AND frontendsocketid = $2`,
+		const getDevice = await dbClient.queryObject(`SELECT device FROM "User" WHERE sessionID = $1 AND frontendsocketid = $2 AND userrole = $3`,
+			[sessionID, socketID, "joiner"]
+		)
+		const query = await dbClient.queryObject(`DELETE FROM "User" WHERE sessionID = $1 AND frontendsocketid = $2`,
 			[sessionID, socketID]
 		);
 		console.log("Deleted user");
+		const deviceID = getDevice.rows[0]
+		await makeDeviceAvailable(deviceID.device);
 	}
 	catch(error){
 		console.log("Unable to delete user");
