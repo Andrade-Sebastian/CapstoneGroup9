@@ -50,6 +50,71 @@ export interface IRegisterDeviceInfo {
 	deviceSocketID: string
 }
 
+// {
+// 	wb-backend-express   |   userid: 4,
+// 	wb-backend-express   |   nickname: "eman",
+// 	wb-backend-express   |   device: 1,
+// 	wb-backend-express   |   sessionid: null,
+// 	wb-backend-express   |   ismasked: null,
+// 	wb-backend-express   |   frontendsocketid: "abc123",
+// 	wb-backend-express   |   leftsession: null,
+// 	wb-backend-express   |   userrole: null,
+// 	wb-backend-express   |   secret: null
+// 	wb-backend-express   | }
+export interface IUserIdentity{
+	userID: number,
+	nickname: string, 
+	deviceID: number,
+	sessionID: number,
+	isMasked: boolean | null,
+	frontendSocketID: string,
+	leftSession: boolean | null,
+	userRole: string | null,
+	secret: string | null
+}
+
+
+export async function verifyUserExists(userID: number, socketID: string): Promise<IUserIdentity>{
+	await dbClient.connect();
+
+	
+	console.log("Starting query")
+	const query = await dbClient.queryObject(`SELECT * FROM "User" where "User".frontendsocketid=$1 and "User".userid=$2`, [socketID, userID]);
+	console.log(query)
+	console.log("[0]",query.rows[0]);
+
+	return new Promise<IUserIdentity>((resolve, reject) => {
+
+		if (query.rows.length > 0){
+			const userInfo: IUserIdentity = {
+				userID: query.rows[0].userid,
+				nickname: query.rows[0].nickname,
+				deviceID: query.rows[0].device,
+				sessionID: query.rows[0].sessionid,
+				isMasked: query.rows[0].ismasked,
+				frontendSocketID: query.rows[0].frontendsocketid,
+				leftSession: query.rows[0].leftSession,
+				userRole: query.rows[0].userrole,
+				secret: query.rows[0].secret
+			};
+			console.log("Final object", userInfo)
+
+			resolve(userInfo) //return the info
+			// return userInfo;
+		}
+		else{
+			reject(null)
+			//return null;
+			console.log("error verifying")
+			// throw new Error("Unable to verify the user");
+		}
+	})
+
+	
+	
+
+}
+
 
 export async function makeDeviceAvailable(deviceID: number)
 {
@@ -64,6 +129,7 @@ export async function makeDeviceAvailable(deviceID: number)
 	}
 }
 
+
 export async function makeDeviceNotAvailable(deviceID: number)
 {
 	try{
@@ -74,6 +140,7 @@ export async function makeDeviceNotAvailable(deviceID: number)
 	}
 	catch(error){
 		console.log("Unable to make device not available", error);
+		await dbClient.end();
 	}
 }	
 

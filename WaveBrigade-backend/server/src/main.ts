@@ -11,6 +11,7 @@ const ORIGIN_HOST = "http://localhost:5173";
 import grpc from "npm:@grpc/grpc-js";
 import socketSessionMap, { getSessionBySocket, removeSocket } from "./sessionMappings.ts";
 import axios from "npm:axios";
+import { verifyUserExists } from "./controllers/database.ts";
 
 //CHANGE TO RELATIVE PATH
 const PROTO_PATH = "./server/src/grpc/protos/emotiBits.proto";
@@ -41,7 +42,9 @@ import joinerRouter from "./routes/joiner_routes.ts"
 import session_handlers from "./handlers/session_handlers.ts";
 import experimentRouter from "./routes/experiment_routes.ts";
 import databaseRouter from "./routes/database_routes.ts"
-const app = express();
+import { Request, Response } from "express";
+
+
 // app.get('/get-ip', (req, res) => {
 //     const ipAddress = req.headers['x-forwarded-for'] || req.ip;
 //     res.send({
@@ -49,16 +52,40 @@ const app = express();
 //     });
 // });
 
+//import passport from "./authentication.js";
+// import userRouter from "./routes/user.ts"
+// import authRouter from "./routes/auth.ts";
+
+// ------ ------ ------ ------ ------ ------ ------ ------ ------ ------
+import passport from "npm:passport";
+import LocalStrategy from "npm:passport-local";
+
+
+
+passport.use(new LocalStrategy.Strategy(
+{
+    usernameField: 'userID',
+    passwordField: 'socketID'
+}, function (userID, socketID, done) {
+
+    return verifyUserExists(userID, socketID).then((user) => done(user)).catch((data) => {
+        done(null);
+    })
+}
+));
+
+
+const app = express();
 const server = createServer(app);
 
 app.use(cors());
-//app.use(cors({origin: ORIGIN}));
 app.use("/host", hostRouter); 
 app.use("/joiner", joinerRouter); 
 app.use("/database", databaseRouter)
 app.use("/experiment", experimentRouter);
+//app.use("/auth", authRouter);
+//app.use("/user", passport.authenticate("jwt", {session: false}), userRouter)
 
-import { Request, Response } from "express";
 
 
 export const io = new Server(server, {
@@ -179,3 +206,5 @@ io.on("connection", (socket) => {
 server.listen(PORT, HOST, () => {
     console.log(`(main.ts): Express & SocketIO Server running at http://localhost:${PORT}`);
 })
+
+

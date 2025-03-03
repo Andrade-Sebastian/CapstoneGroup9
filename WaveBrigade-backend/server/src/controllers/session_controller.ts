@@ -17,6 +17,8 @@ export interface IUser {
     nickname: string | null;
     associatedDevice: IDevice | null;
 }
+
+
 export interface ILab {
     id: string;
     name: string;

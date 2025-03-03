@@ -1,15 +1,17 @@
 import express, { Request, Response } from "express";
-import { createPhotoLabInDatabase, createVideoLabInDatabase, createGalleryLabInDatabase, getSessionIDFromSocketID, addUserToSession, IUserDatabaseInfo, getSessionState, getPhotoLabInfo, assignExperimentToSession} from "../controllers/database.ts";
+import { createPhotoLabInDatabase, createVideoLabInDatabase, createGalleryLabInDatabase, getSessionIDFromSocketID, addUserToSession, IUserDatabaseInfo, getSessionState, getPhotoLabInfo, assignExperimentToSession, verifyUserExists} from "../controllers/database.ts";
 import multer from "multer";
 import fs from 'node:fs';
 import { determineFileExtension, getNumberFilesInDirectory } from "../controllers/photolab_controller.ts";
 import axios from 'axios';
-
+import { IUserIdentity } from "../controllers/database.ts";
 import fsPromises from 'node:fs/promises';
 
 
 const photoLabMediaDirectory = "/app/backend/server/src/media/photo-lab";
 const photoLabFolderExists = fs.existsSync("/app/backend/server/src/media/photo-lab");
+
+
 
 // Ensure the directory exists
 if (!photoLabFolderExists) {
@@ -41,6 +43,18 @@ const storage = multer.diskStorage({
 });
 
 const upload = multer({ storage });
+
+
+databaseRouter.post("/verify-user", async(req: Request, res: Response) => {
+    console.log(JSON.stringify(req.body))
+
+    verifyUserExists(req.body.userID, req.body.socketID).then((user: IUserIdentity) => {
+        console.log("user", user)
+        res.status(200).send(user);
+    })
+    
+})
+
 
 
 databaseRouter.post("/photo-lab", upload.single("imageBlob"), async(req: Request, res: Response) => {

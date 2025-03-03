@@ -11,13 +11,18 @@
     "express": "npm:express@^4.21.1",
     "express-session": "npm:express-session@^1.18.1",
     "fs": "npm:fs@^0.0.1-security",
+    "jsonwebtoken": "npm:jsonwebtoken@^9.0.2",
     "multer": "npm:multer@^1.4.5-lts.1",
+    "passport": "npm:passport@^0.7.0",
+    "passport-jwt": "npm:passport-jwt@^4.0.1",
+    "passport-local": "npm:passport-local@^1.0.0",
     "protobufjs": "npm:protobufjs@7.4.0",
     "socket.io": "npm:socket.io@^4.8.1",
     "socketio": "npm:socketio@^1.0.0",
     "uuid": "npm:uuid@^11.0.3",
     "grpc": "npm:@grpc/grpc-js"
   },
+  
   "compilerOptions": {
     "lib": [
       "es2015",

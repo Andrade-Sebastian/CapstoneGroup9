@@ -161,7 +161,7 @@ joinerRouter.post("/verify-serial", async (req: Request, res: Response) => {
         const validSerialCode = await validDeviceSerial(nickName, roomCode, serialCode);
         console.log("Valid serial code: ", validSerialCode);
         if (validSerialCode){
-            const deviceID = validSerialCode.deviceid
+            const deviceID = validSerialCode.deviceid;
             return res.status(200).json({success: true, deviceID: deviceID});
         }
         else{
