@@ -4,24 +4,25 @@ import NavigationBar from "./components/NavigationBar.tsx";
 import useBrainflowManager from './hooks/useBrainflowManager.ts';
 import { useEffect, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
+import React from "react";
 
 function App() {
   const {launchProcess} = useBrainflowManager();
   const ipc = window.api
   const { handleUserLeaveSession } = useBrainflowManager();
 
-  useEffect(() => {
-    //hardcoded for testing
-    launchProcess({
-      userId: 1, //serial
-      socketId:"socket-test", //Frontend socket ID 
-      nickname: "unc",
-      associatedDevice: {
-        serialNumber: "string",
-        ipAddress: "string",
-        socketID: "string"
-      }})
-  }, []);
+  // useEffect(() => {
+  //   //hardcoded for testing
+  //   launchProcess({
+  //     userId: 1, //serial
+  //     socketId:"socket-test", //Frontend socket ID 
+  //     nickname: "unc",
+  //     associatedDevice: {
+  //       serialNumber: "string",
+  //       ipAddress: "string",
+  //       socketID: "string"
+  //     }})
+  // }, []);
 
 
   const [isSocketAssigned, setIsSocketAssigned] = useState(false);
@@ -69,7 +70,7 @@ function App() {
           <Outlet />
         </div>
     </div>
-  )
+  );
 
 }
 

@@ -50,6 +50,7 @@ interface JoinerState{
     experimentDesc: string;
     users: Array<IUser>;
     sessionId: string;
+    secret: string | undefined;
 
     setJoinerId: (id: string) => void;
     setNickname: (nickname: string | null) => void;
@@ -63,6 +64,8 @@ interface JoinerState{
     setExperimentDesc: (experimentDesc: string) => void;
     setUsers: (users: Array<IUser>) => void;
     setSessionId: (id: string) => void;
+    setUsers: (users: Array<IUser>) => void;
+    setSecret: (secret: string) => void;
 }
 
 export const useJoinerStore = create<JoinerState>()(
@@ -79,6 +82,8 @@ export const useJoinerStore = create<JoinerState>()(
         experimentDesc: '',
         users: [],
         sessionId: '',
+        users: [],
+        secret: undefined,
 
         setJoinerId: (id:string): void => set(() => ({ joinerId: id})),
         setNickname: (nickname: string | null): void => set(() => ({nickname})),
@@ -90,6 +95,7 @@ export const useJoinerStore = create<JoinerState>()(
         setExperimentId: (id: string): void => set(() => ({experimentId: id})),
         setExperimentTitle: (title: string): void => set(() => ({ experimentTitle: title})),
         setExperimentDesc: (desc: string): void => set(() => ({ experimentDesc: desc})),
+        setSecret: (secret: string): void => set(() => ({secret}))
         setUsers: (users: Array<IUser>): void => set(() => ({users: users})),
         setSessionId: (id: string): void => set(() => ({sessionId: id}))
 }));

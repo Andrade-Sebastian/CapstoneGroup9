@@ -4,10 +4,13 @@ import useSessionStore, { IAppState, IUser } from "./useSessionState.tsx"
 import { useParams } from "react-router-dom"
 import { useState, useEffect } from "react"
 import { echoProcessAPI } from '../../../preload/index.ts'
+import { useSessionStore } from "../store/useSessionStore.tsx"
+import axios from "axios";
 
 
 export default function useBrainflowManager()
 {
+    const [isBrainFlowValid, setIsBrainFlowValid] = useState(false);
     const {users, sessionId} = useSessionStore();
     const ipc = window.api
     console.log("LOOK HERE" , ipc)
@@ -15,27 +18,60 @@ export default function useBrainflowManager()
 
     const handleUserLeaveSession = (userId: string) => {
         console.log(`User ${userId} is leaving the session, destroying process...`);
-        ipc.send('brainflow:destroy-user', userId);
+        //ipc.send('brainflow:destroy-user', userId);
     };
     const handleHostEndSession = () => {
         console.log(`Host is ending session ${sessionId}, destroying user processes...`);
         for(let i = 0; i < users.length; i++){
             ipc.send('brainflow:destroy-user', users.userId);
+            
         }
         ipc.send('brainflow:destroy', sessionId)
     };
 
-    // useEffect(() => {
-    //     const handleDisconnect = (event, userId) => {
-    //         console.log(`UseEffect: recieved event to disconnect user ${userId}`);
-    //         handleUserLeaveSession(userId);
-    //     };
 
-    //     ipc.receive('user-disconnected', handleDisconnect);
-    //     return() => {
-    //         ipc.receive('user-disconnected', handleDisconnect)();
+    const testingFunc = (event, userId) => {
+        console.log("userId", userId)
+    }
+    useEffect(() => {
+        const handleDisconnect = (event, userId) => {
+            console.log(`UseEffect: recieved event to disconnect user ${userId}`);
+            handleUserLeaveSession(userId);
+        };
+
+        const cleanupFunc = ipc.receive('brainflow:destroy-user', testingFunc);
+        return () => cleanupFunc()
+            
+    }, []);
+
+    // useEffect(() => {
+    //     async function validateBrainFlow(){
+    //         try{
+    //             console.log("Validating Brainflow...")
+    //             const response = await axios.get("http://localhost:3000/experiments/validate-brainflow");
+    //             const data = await response.data 
+
+    //             if (response.status == 200){
+    //                 console.log("Brainflow validated")
+    //                 setIsBrainFlowValid(true)
+    //                 console.log("Launching brainflow")
+    //                 ipc.send("brainflow:launch", sessionId);
+    //                 console.log("Brainflow launched")
+    //             }
+    //             else{
+    //                 console.error("Brainflow failed to launch")
+    //             }
+    //         }
+    //         catch(error){
+    //             console.error("Error: ", error)
+    //         }
+    //     }
+    //     validateBrainFlow();
+    //     return () => {
+    //         console.log("Cleaning up brainflow");
     //     };
-    // }, []);
+    // },[]);
+
 
 
     const launchProcess = (user: IUser) => {
@@ -43,7 +79,7 @@ export default function useBrainflowManager()
     }
 
 
-    return {launchProcess, handleUserLeaveSession, handleHostEndSession}
+    return {launchProcess, handleUserLeaveSession, handleHostEndSession, isBrainFlowValid}
     
 
 }

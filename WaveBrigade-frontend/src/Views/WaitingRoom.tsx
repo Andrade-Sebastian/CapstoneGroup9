@@ -13,7 +13,7 @@ export default function WaitingRoom() {
   const [nicknames, setNickNames] = useState<string[]>([]);
   const [sessionID, setSessionID] = useState("");
   const navigateTo = useNavigate()
-  const { isConnected, serial, nickname, roomCode, experimentId, experimentTitle, experimentDesc} = useJoinerStore()
+  const { isConnected, serial, nickname, roomCode, setExperimentId, setExperimentTitle, setExperimentDesc} = useJoinerStore()
 
   // useEffect(() => {
   //   // Emit join waiting room
@@ -90,6 +90,27 @@ export default function WaitingRoom() {
     return () => clearInterval(interval);
   }, [sessionID]); //Don't fetch any data until sessionID is set
 
+  useEffect(() => {
+    const getExperimentData = async() => {
+      try{
+        const response = await axios.get("http://localhost:3000/host/get-experiment");
+        if(response.status == 200){
+          const experimentTitle = response.data.experimentTitle
+          const experimentId = response.data.experimentId
+          const experimentDesc = response.data.experimentDesc
+
+          setExperimentTitle(experimentTitle)
+          setExperimentId(experimentId)
+          setExperimentDesc(experimentDesc)
+        }
+      }
+      catch(error){
+        console.log("Error receiving experiment data from host: ", error)
+        
+      }
+    };
+    getExperimentData();
+  },[])
   return (
     <div className="flex flex-col items-center justify-center h-1/2 mx-8">
       <div className="flex flex-col md:flex-row items-start justify-between gap-72">

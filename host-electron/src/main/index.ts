@@ -171,6 +171,7 @@ ipcMain.on(
     brainflowInstance.on("error", () => {
       console.log("(main/index.ts): Error in Brainflow script")
     })
+    event.reply("brainflow:launched", { sessionId, status: "success"});
   }
 )
 ipcMain.on('echo-server:destroy-user', processDestroyer);
