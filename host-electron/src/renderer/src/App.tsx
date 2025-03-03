@@ -4,6 +4,7 @@ import NavigationBar from "./components/NavigationBar.tsx";
 import useBrainflowManager from './hooks/useBrainflowManager.ts';
 import { useEffect, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
+import React from "react";
 
 function App() {
   const {launchProcess} = useBrainflowManager();
@@ -69,7 +70,7 @@ function App() {
           <Outlet />
         </div>
     </div>
-  )
+  );
 
 }
 

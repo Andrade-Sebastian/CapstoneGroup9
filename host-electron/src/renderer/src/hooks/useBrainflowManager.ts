@@ -22,11 +22,11 @@ export default function useBrainflowManager()
     };
     const handleHostEndSession = () => {
         console.log(`Host is ending session ${sessionId}, destroying user processes...`);
-        // for(let i = 0; i < users.length; i++){
-        //     ipc.send('brainflow:destroy-user', users.userId);
+        for(let i = 0; i < users.length; i++){
+            ipc.send('brainflow:destroy-user', users.userId);
             
-        // }
-        //ipc.send('brainflow:destroy', sessionId)
+        }
+        ipc.send('brainflow:destroy', sessionId)
     };
 
 
@@ -34,13 +34,13 @@ export default function useBrainflowManager()
         console.log("userId", userId)
     }
     useEffect(() => {
-        // const handleDisconnect = (event, userId) => {
-        //     console.log(`UseEffect: recieved event to disconnect user ${userId}`);
-        //     handleUserLeaveSession(userId);
-        // };
+        const handleDisconnect = (event, userId) => {
+            console.log(`UseEffect: recieved event to disconnect user ${userId}`);
+            handleUserLeaveSession(userId);
+        };
 
-        //const cleanupFunc = ipc.receive('user-disconnected', testingFunc);
-        //return () => cleanupFunc()
+        const cleanupFunc = ipc.receive('brainflow:destroy-user', testingFunc);
+        return () => cleanupFunc()
             
     }, []);
 

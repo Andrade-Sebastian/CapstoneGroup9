@@ -5,7 +5,7 @@ import { PiPlanetLight } from "react-icons/pi";
 import toast, { Toaster } from "react-hot-toast";
 import axios from "axios";
 import SideComponent from "../Components/SideComponent.tsx";
-import useBrainflowManager from "../../../host-electron/src/renderer/src/hooks/useBrainflowManager.ts";
+// import useBrainflowManager from "../../../host-electron/src/renderer/src/hooks/useBrainflowManager.ts";
 
 export default function JoinPage() {
   const [nickName, setNickName] = useState("");
@@ -14,7 +14,7 @@ export default function JoinPage() {
   const [sessionID, setSessionID] = useState("")
   const [socketID, setSocketID] = useState("");
   const { setNickname, setRoomCode, setSessionId} = useJoinerStore();
-  const { launchProcess } = useBrainflowManager();
+  //const { launchProcess } = useBrainflowManager();
 
 	const handleSubmit = async (e) => {
 		setRoomCode(StudentInputRoomCode);
@@ -69,9 +69,11 @@ export default function JoinPage() {
         console.log("Response from validate room code", response.data)
         return true;
       }
+      toast.error("Could not validate code due to an API error...")
       return false;
     } catch (error) {
       console.error("Could not validate room code due to an API Error", error);
+      toast.error("Could not validate code due to an API error...")
       return false;
     }
   };

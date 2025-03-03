@@ -22,7 +22,7 @@ import ActiveExperiment from './Views/ActiveExperiment.tsx';
 import About from './Views/About.tsx';
 import React from 'react';
 import EnterPassword from './Views/EnterPassword.tsx';
-
+import PrivateRoute from './utils/PrivateRoute.tsx';
 
 
 const router = createBrowserRouter([
@@ -44,19 +44,19 @@ const router = createBrowserRouter([
       },
       {
         path: "enter-password",
-        element: <EnterPassword />
+        element: <PrivateRoute><EnterPassword /></PrivateRoute>
       },
       {
         path: "connect-emotibit",
-        element: <ConnectEmotiBit />
+        element: <PrivateRoute><ConnectEmotiBit /></PrivateRoute>
       },
       {
         path: "waiting-room",
-        element: <WaitingRoom />
+        element: <PrivateRoute><WaitingRoom /></PrivateRoute>
       },
       {
         path:"active-experiment",
-        element: <ActiveExperiment />
+        element: <PrivateRoute><ActiveExperiment /></PrivateRoute>
       },
   ]
       
