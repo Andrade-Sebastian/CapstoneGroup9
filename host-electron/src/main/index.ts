@@ -101,7 +101,7 @@ function processDestroyer(event, userId: string): void{
 
   if(!processEntry){ //if processEntry is empty
     console.log(`Could not find a process for user: ${userId}`)
-    event.reply('echo-server:destroy-failed', `No process found for userID: ${userId}`);
+    event.reply('brainflow:destroyedError', userId);
     return;
   }
 
@@ -113,11 +113,11 @@ function processDestroyer(event, userId: string): void{
     delete activitySingleton.activityInstances[userId]; //deletes from echo servers
     console.log(`Deleted process for userId: ${userId}, ProcessPID ${processEntry.brainflowProcess!.pid}`)
 
-    event.reply('echo-server:destroyed', {userId});
+    event.reply('brainflow:destroyed', userId);
   }
   else{
     console.log(`could not destroy process for userId: ${userId}`)
-    event.reply('echo-server:destroyed-failed', `Failed to destroy process for userId: ${userId}`);
+    event.reply('brainflow:destroyedError', userId);
   }
 }
 
@@ -171,8 +171,9 @@ ipcMain.on(
     brainflowInstance.on("error", () => {
       console.log("(main/index.ts): Error in Brainflow script")
     })
+
     event.reply("brainflow:launched", { sessionId, status: "success"});
+
   }
 )
-ipcMain.on('echo-server:destroy-user', processDestroyer);
-ipcMain.on('echo-server:status', processStatus);
+ipcMain.on('brainflow:destroy', processDestroyer);

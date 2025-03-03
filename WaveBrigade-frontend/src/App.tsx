@@ -31,9 +31,12 @@ import WaitingRoom from "./Views/WaitingRoom.tsx";
 import ActiveExperiment from "./Views/ActiveExperiment.tsx";
 import React from "react";
 import { disconnect } from "node:process";
+import toast, { Toaster } from "react-hot-toast";
+
 function App() {
   const { setUserSocketId } = useJoinerStore();
   const [isSocketAssigned, setIsSocketAssigned] = useState(false);
+  const ipc = window.api
 
   useEffect(() => {
     if (!isSocketAssigned) {
@@ -68,15 +71,115 @@ function App() {
       socket.off("client-assignment");
       socket.off("clear-session");
     };
-  }, [isSocketAssigned]);  // Dependency on isSocketAssigned to run when it changes
+  }, [isSocketAssigned]); // Dependency on isSocketAssigned to run when it changes
+
+  useEffect(() => {
+    const cleanup = ipc.receive(
+      "brainflow:launched",
+      (event, userId) => {
+        toast.success("Successfully launched Brainflow")
+      }
+    );
+
+    return (): void => cleanup();
+  }, [toast]);
+
+  useEffect(() => {
+    const cleanup = ipc.receive(
+      "brainflow:destroy",
+      (event, userId) => {
+        toast.success("Successfully disconnected user")
+      }
+    );
+
+    return (): void => cleanup();
+  }, [toast]);
+
+  useEffect(() => {
+    const cleanup = ipc.receive(
+      "brainflow:launchError",
+      (event, userId) => {
+        toast.error("Error: Launching Brainflow failed.")
+      }
+    );
+
+    return (): void => cleanup();
+  }, [toast]);
+
+  useEffect(() => {
+    const cleanup = ipc.receive(
+      "brainflow:status",
+      (event, userId) => {
+        toast.success("Successfully received Brainflow status")
+      }
+    );
+
+    return (): void => cleanup();
+  }, [toast]);
+
+  useEffect(() => {
+    const cleanup = ipc.receive(
+      "brainflow:destroyed",
+      (event, userId) => {
+        toast.success("Successfully initiated Brainflow destroyed")
+      }
+    );
+
+    return (): void => cleanup();
+  }, [toast]);
+
+  useEffect(() => {
+    const cleanup = ipc.receive(
+      "brainflow:destroyedError",
+      (event, userId) => {
+        toast.error("Error: Failed to disconnect user")
+      }
+    );
+
+    return (): void => cleanup();
+  }, [toast]);
+  
+  useEffect(() => {
+    const cleanup = ipc.receive(
+      "brainflow:connectingEmotibit",
+      (event, userId) => {
+        toast.success("Emotibit connecting")
+      }
+    );
+
+    return (): void => cleanup();
+  }, [toast]);
+
+  useEffect(() => {
+    const cleanup = ipc.receive(
+      "brainflow:connectedEmotibit",
+      (event, userId) => {
+        toast.success("Emotibit successfully connected")
+      }
+    );
+
+    return (): void => cleanup();
+  }, [toast]);
+
+  useEffect(() => {
+    const cleanup = ipc.receive(
+      "brainflow:disconnectEmotibit",
+      (event, userId) => {
+        toast.success("Emotibt successfully disconnected")
+      }
+    );
+
+    return (): void => cleanup();
+  }, [toast]);
 
   return (
-      <div className="flex flex-col h-screen max-h-screen overflow-auto bg-white">
-        <NavigationBar />
-        <div className="flex flex-col grow h-full overflow-auto">
-          <Outlet/>
-        </div>
+    <div className="flex flex-col h-screen max-h-screen overflow-auto bg-white">
+      <Toaster position="top-right" />
+      <NavigationBar />
+      <div className="flex flex-col grow h-full overflow-auto">
+        <Outlet />
       </div>
+    </div>
   );
 }
 

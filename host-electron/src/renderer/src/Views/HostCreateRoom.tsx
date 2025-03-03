@@ -19,6 +19,7 @@ export default function HostCreateRoom() {
   const [type, setType] = useState('password')
   const [icon, setIcon] = useState(eyeOff)
   const navigateTo = useNavigate()
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const {setHostName, setSessionId, setRoomCode, setUsers, sessionId, roomCode} = useSessionStore();
 
   useEffect(() => {
@@ -62,6 +63,7 @@ export default function HostCreateRoom() {
     }
     else if(!password.trim() || password.length < 3){
       toast.error("Please enter a password of at least more than three characters")
+      return;
     }
 
     console.log('creating an experiment')
@@ -70,7 +72,10 @@ export default function HostCreateRoom() {
     setHostName(userName);
 
     setUsers([]);
-   
+    const loadingToastId = toast.loading('Creating Lab...')
+    if (isSubmitting) return
+
+    setIsSubmitting(true)
     axios.post('http://localhost:3000/host/session/create', {
       hostSocketID: sessionStorage.getItem('socketID'),
       isPasswordProtected: true,
@@ -80,12 +85,17 @@ export default function HostCreateRoom() {
     .then((response) => {
       // 
       if(response.status === 200){
+        toast.success('Lab was created successfully', { id: loadingToastId })
         setSessionId(response.data.sessionid);
         setRoomCode(response.data.roomcode);
+        navigateTo('/host/select-lab/')
+      }
+      else{
+        toast.error('Could not create lab, try again', { id: loadingToastId })
       }
       console.log(response.data);
-      //navigate to idk
-    navigateTo('/host/select-lab/')})
+      
+  })
   
     
     console.log('Username: ' + userName)
@@ -149,7 +159,8 @@ export default function HostCreateRoom() {
               </span>
             </div>
           </div>
-          <div className="flex flex-col gap-4 mb-4">
+          {/* SPECTATOR */}
+          {/* <div className="flex flex-col gap-4 mb-4">
             <div className="flex items-center gap-2 mb-4">
               <input
                 type="checkbox"
@@ -162,7 +173,7 @@ export default function HostCreateRoom() {
                 Allow Spectators
               </label>
             </div>
-          </div>
+          </div> */}
           <div className="flex gap-10 items-center justify-center">
             <button
               type="submit"

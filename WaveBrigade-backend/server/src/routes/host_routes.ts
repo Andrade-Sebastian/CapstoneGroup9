@@ -60,33 +60,6 @@ hostRouter.post("/register-device", async(req: Request, res: Response) => {
         "message": "In /host/register-device"
     })
 })
-//Author: Sebastian Andrade
-//Purpose: sending experiment data between host and joiner
-hostRouter.post("/send-experiment", (req: Request, res: Response) => {
-    try{
-        experimentData = req.body
-        //const { experimentTitle, experimentDesc, experimentId } = req.body;
-        return res.status(200).send({success: true})
-
-    }
-    catch(error){
-        console.error("Error receiving experiment data", error)
-        return res.status(400).send({success: false, message: "Error receiving data"})
-    }
-
-
-})
-
-hostRouter.get("/get-experiment", (req: Request, res:Response) =>{
-    try{
-        console.log("Here is the request body", req.body)
-        return res.status(200).send(experimentData)
-    }
-    catch(error){
-        console.error("Error sending data", error)
-        return res.status(400).send({success: false, message: "Error sending data"})
-    }
-})
 export default hostRouter;
 
 

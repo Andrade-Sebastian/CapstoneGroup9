@@ -20,6 +20,7 @@ import React from 'react';
 import { toNamespacedPath } from 'path';
 import toast, { Toaster } from 'react-hot-toast'
 import { useSessionStore } from '../store/useSessionStore.tsx'
+import useBrainflowManager from '../hooks/useBrainflowManager.ts'
 
 export default function WaitingRoom() {
   const navigateTo = useNavigate()
@@ -48,6 +49,7 @@ export default function WaitingRoom() {
   const [experimentIcon, setExperimentIcon] = useState<JSX.Element>(
     <CiPlay1 style={{ fontSize: '20px' }} />
   )
+  const { handleUserLeaveSession} = useBrainflowManager();
   
   useEffect(() => {
     if (experimentId === '1') {
@@ -117,6 +119,9 @@ export default function WaitingRoom() {
 
   const handleRemoveUser = () => {
     console.log("removing user");
+    if (!selectedEmotiBitId) return;
+    //handleUserLeaveSession(emotiBit.userId); //when user leaves session
+    console.log("handling remove user from edit emotibit modal")
     setIsModalOpenSettings(false);
   }
   const handleUpdate = () => {
@@ -186,7 +191,7 @@ export default function WaitingRoom() {
             </p>
             <p className="text-base md:text-lg">
               <span className="font-semibold">PARTICIPANTS</span>
-              <span className="md:text-sm font-light"> 1</span>
+              <span className="md:text-sm font-light"> {nicknames.length}</span>
             </p>
           </div>
         </div>
@@ -227,7 +232,7 @@ export default function WaitingRoom() {
           <p key={index}>{name}</p>
         ))}
       </div>
-      <div className="flex flex-row gap-10 items-center justify-center">
+      <div className="absolute bottom-0  flex flex-row gap-10 items-center justify-center pb-6 ">
         <button
           type="button"
           onClick={handleBackButton}
@@ -242,7 +247,6 @@ export default function WaitingRoom() {
         >
           Begin
         </button>
-        {/*This will redirect to Media Page */}
       </div>
       <ModalComponent
         onAction={handleAction}
@@ -293,13 +297,13 @@ export default function WaitingRoom() {
       <ModalComponent
         onAction={handleRemoveEmoti}
         onAction2={handleRemoveUser}
-        onAction3={handleUpdate}
+        //onAction3={handleUpdate}
         isOpen={isModalOpenSettings}
         onCancel={handleCloseModalSettings}
         modalTitle="EmotiBit Settings"
         button="Remove EmotiBit"
         button2="Remove User"
-        button3="Update"
+        // button3="Update"
       >
         <div className="mb-6">
           <label htmlFor="serialNumber" className="block text-sm font-medium text-gray-700 mb-2">

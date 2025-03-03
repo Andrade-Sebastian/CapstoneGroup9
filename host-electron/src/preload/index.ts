@@ -20,7 +20,10 @@ export type ActivityEvents =
   "brainflow:launchError"| 
   "brainflow:connectingEmotibit"|
   "brainflow:connectedEmotibit"|
-  "brainflow:disconnectEmotibit"  //disconnect emotibit
+  "brainflow:disconnectEmotibit"|  //disconnect emotibit
+  "brainflow:destroyed"|
+  "brainflow:destroyedError"
+
   
 
 
@@ -34,6 +37,8 @@ const activityEventsChannels: Array<ActivityEvents> = [
   "brainflow:connectingEmotibit",
   "brainflow:connectedEmotibit",
   "brainflow:disconnectEmotibit",
+  "brainflow:destroyed",
+  "brainflow:destroyedError"
 ]
 
 // Custom APIs for renderer

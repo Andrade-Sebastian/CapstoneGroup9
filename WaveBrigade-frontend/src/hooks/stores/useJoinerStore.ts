@@ -80,7 +80,6 @@ export const useJoinerStore = create<JoinerState>()(
         experimentId: '',
         experimentTitle: '',
         experimentDesc: '',
-        users: [],
         sessionId: '',
         users: [],
         secret: undefined,
@@ -95,7 +94,7 @@ export const useJoinerStore = create<JoinerState>()(
         setExperimentId: (id: string): void => set(() => ({experimentId: id})),
         setExperimentTitle: (title: string): void => set(() => ({ experimentTitle: title})),
         setExperimentDesc: (desc: string): void => set(() => ({ experimentDesc: desc})),
-        setSecret: (secret: string): void => set(() => ({secret}))
+        setSecret: (secret: string): void => set(() => ({secret})),
         setUsers: (users: Array<IUser>): void => set(() => ({users: users})),
         setSessionId: (id: string): void => set(() => ({sessionId: id}))
 }));
