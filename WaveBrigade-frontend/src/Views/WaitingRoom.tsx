@@ -8,6 +8,7 @@ import WaitingRoomCardComponent from "../Components/WaitingRoomCardComponent.tsx
 import { useNavigate } from "react-router-dom";
 import { useJoinerStore } from "../hooks/stores/useJoinerStore.ts";
 import React from "react";
+import toast, { Toaster } from "react-hot-toast";
 // -----JOINER=--------------------------//
 export default function WaitingRoom() {
   const [nicknames, setNickNames] = useState<string[]>([]);
@@ -117,6 +118,7 @@ export default function WaitingRoom() {
       try{
         const response = await axios.get("http://localhost:3000/database/photo-lab/info/:photolabid");
         if(response.status == 200){
+          toast.success("Successfully received photolab data.")
           const { experimentId, path, captions, experimentTitle, experimentDesc } = response.data
           setExperimentId(experimentId)
           setExperimentTitle(experimentTitle)
@@ -124,6 +126,7 @@ export default function WaitingRoom() {
         }
       }
       catch(error){
+        toast.error("Failed to receive photolab data")
         console.log("Error receiving experiment data in joiner fe: ", error);
       }
     };
@@ -134,6 +137,7 @@ export default function WaitingRoom() {
     <div className="flex flex-col items-center justify-center h-1/2 mx-8">
       <div className="flex flex-col md:flex-row items-start justify-between gap-72">
       {/* left section */}
+      <Toaster position="top-right"/>
         <div className="md:w-1/2 space-y-4">
           <h1 className="text-3xl text-3xl font-semibold text-gray-800">
             Welcome to Session
