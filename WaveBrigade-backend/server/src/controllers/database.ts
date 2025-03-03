@@ -82,15 +82,15 @@ export async function makeDeviceNotAvailable(deviceID: number)
 
 
 
-export async function getPhotoLabInfo(experimentID: number){
+export async function getPhotoLabInfo(experimentID: number): Promise<void>{
 	console.log("Experiment passed in", experimentID);
-
 
 	try{
 		await dbClient.connect();
 		const query = await dbClient.queryObject(`SELECT experiment.experimentid, path, captions, name, description FROM photolab JOIN experiment 
 			ON photolab.experimentid = ${experimentID};`,
 		);
+		
 		console.log("Photo Lab Info: ", query.rows[0]);
 		return query.rows[0];
 	}
