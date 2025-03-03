@@ -35,21 +35,46 @@ export default function JoinPage() {
     }
     
     try{
+      const isValidName = await checkNickName(nickName);
       const isValidRoomCode = await validateRoomCode(StudentInputRoomCode);
-      if (isValidRoomCode) {
+      if (isValidRoomCode && isValidName) {
         toast.success("Room code valid. Password is needed...");
           setTimeout(() => {
             navigateTo('/enter-password')
           }, 2000)
-    }
-    else{
-      toast.error("Connection failed. Looks like we couldn't get you connected. Please check your room code and try again.");
-    }
+      }
+      else if(isValidRoomCode && !isValidName){
+        toast.error("Nickname not acceptable. Please refrain from profane language!");
+      }
+      else{
+        toast.error("Connection failed. Looks like we couldn't get you connected. Please check your room code and try again.");
+      }
     }catch(error){
       console.error("Error verifying code:", error);
       toast.error("Connection failed. Looks like we couldn't get you connected. Please check your room code and try again.")
     }
   };
+
+  const checkNickName = async (nickName: string) => {
+    try{
+      console.log("Checking nickname: ", nickName);
+      const response = await axios.get(`http://localhost:3000/joiner/check-name/${nickName}`);
+      console.log("RESPONSE STATUS RETURNED: ", response.status);
+      if(response.status === 200){
+        console.log("Nickname is valid");
+        return true;
+      }
+    }
+    catch(error){
+      if(error.response.status === 400){
+        console.log("Nickname is not valid");
+      }
+      else{
+        console.log("Could not check nickname", error);
+      }
+      return false;
+    }
+  }
 
   const validateRoomCode = async (StudentInputRoomCode) => {
     try {

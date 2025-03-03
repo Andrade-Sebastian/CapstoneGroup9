@@ -11,6 +11,7 @@ import NavigationBar from "./Components/NavigationBar";
 import { useEffect, useState, useRef } from "react";
 import socket from "./Views/socket.tsx"
 import { useJoinerStore } from "./hooks/stores/useJoinerStore.ts";
+import { disconnect } from "node:process";
 
 function App() {
 
@@ -51,8 +52,6 @@ function App() {
       socket.off("clear-session");
     };
   }, [isSocketAssigned]);  // Dependency on isSocketAssigned to run when it changes
-
-
 
   return (
     <div className="flex flex-col h-screen max-h-screen overflow-auto bg-white">

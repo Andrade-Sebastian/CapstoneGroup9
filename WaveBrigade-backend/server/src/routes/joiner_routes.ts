@@ -4,9 +4,11 @@ import SessionManager from "../sessions_singleton.ts";
 import { addSocketToSession, removeSocket, getSessionBySocket, socketSessionMap } from "../sessionMappings.ts";
 import axios from "axios";
 import {addUserToSession, getUsersFromSession, validateRoomCode, removeUserFromSession, validDeviceSerial, validatePassword, getPhotoLabInfo} from "../controllers/database.ts";
+import {Filter} from "npm:bad-words";
 const app = express();
 const joinerRouter = express.Router();
 joinerRouter.use(express.json());
+const filter = new Filter();
 /*
  .  .  .    .    .  .   .
 .  .   .    .   .      .
@@ -54,6 +56,7 @@ joinerRouter.post("/session/join", async (req: Request, res: Response) => {
             "serialNumberLastFour": serialNumberLastFour,
             "deviceID": deviceID
         });
+        addSocketToSession(socketID, session.joiner_sessionid);
         console.log(session);
         return res.status(200).send(session);
     }
@@ -66,33 +69,67 @@ joinerRouter.post("/session/join", async (req: Request, res: Response) => {
 
 
 
-joinerRouter.get("/room-users/:sessionID", (req: Request, res: Response) => {
+joinerRouter.get("/room-users/:sessionID", async (req: Request, res: Response) => {
     const sessionID = req.params.sessionID;
 
-    try {
-        
-        const users = getUsersFromSession(sessionID);
+    try{
+        const users = await getUsersFromSession(sessionID);
         return res.status(200).send({
             "users": users
         });
-    } catch (error) {
-        if (error instanceof Error) {
-            if (error.name === "SESSION_NOT_FOUND") {
-                return res.status(400).send({
-                    error: error.name,
-                    message: error.message
-                });
-            }
-        }
 
+    }
+    catch(error){
+        if (error instanceof Error && error.name === "SESSION_NOT_FOUND") {
+            return res.status(400).send({
+                error: error.name,
+                message: error.message
+            });
+        }
+    }
+        
+        // getUsersFromSession(sessionID)
+        // .then(users => {
+        //     console.log("/room-users/:sessionID USERS: ", users),
+        //     res.status(200).send({
+        //         "users": users
+        //     })
+        // })
+        // .catch(error => {
+        //     if (error instanceof Error && error.name === "SESSION_NOT_FOUND") {
+        //             res.status(400).send({
+        //                 error: error.name,
+        //                 message: error.message
+        //             });
+        //     }
+        //     res.status(500).send({
+        //         error: "INTERNAL_SERVER_ERROR",
+        //         message: "An unexpected error occurred."
+        //     });
+        // });
         // Fallback error response
         return res.status(500).send({
             error: "INTERNAL_SERVER_ERROR",
             message: "An unexpected error occurred."
         });
-    }
 });
 
+joinerRouter.get("/check-name/:nickName", async (req: Request, res: Response) => {
+    const name = req.params.nickName;
+    console.log("/check-name/:nickName, nickname: ", name);
+    
+    try{
+        const isProfane = filter.isProfane(name);
+        if(!isProfane){
+            return res.status(200).json({success: true})
+        }
+        else{
+            return res.status(400).json({success: false, message: "No profane words allowed!"});
+        }
+    } catch(error){
+        return res.status(500).json({success: false, message: "Internal server error"});
+    }
+})
 joinerRouter.get("/validateRoomCode/:roomCode", async (req: Request, res: Response) => {
     const roomCode = req.params.roomCode;
     console.log("Roomcode: ", roomCode);
@@ -117,10 +154,11 @@ joinerRouter.get("/validateRoomCode/:roomCode", async (req: Request, res: Respon
     
 })
 
-joinerRouter.post("/leave-room/:sessionID/:socketID", (req: Request, res: Response) => {
-    const sessionID = req.params.sessionID;
-    const socketID = req.params.socketID;
-    
+joinerRouter.post("/leave-room", (req: Request, res: Response) => {
+    const {
+        sessionID,
+        socketID
+    } = req.body;
     
     try {
         const users = removeUserFromSession(sessionID, socketID);
@@ -268,7 +306,6 @@ joinerRouter.get("/verify-code/:roomCode", async (req: Request, res: Response) =
             sessionID
         } = await validateRoomCode(roomCode);
 
-        //check the 
         if (isValidRoomCode) {
             return res.status(200).json({ 
                 sessionID: sessionID

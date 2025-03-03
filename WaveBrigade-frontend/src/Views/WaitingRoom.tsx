@@ -49,7 +49,7 @@ export default function WaitingRoom() {
   useEffect(() => {
     const getSessionID = async () => {
       const response = await axios.get(
-        `http://localhost:3000/joiner/validateRoomCode/${roomCode}`
+        `http://localhost:3000/joiner/verify-code/${roomCode}`
       )
       .then((response) => {
           setSessionID(response.data.sessionID);

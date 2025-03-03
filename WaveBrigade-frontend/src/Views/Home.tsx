@@ -20,7 +20,7 @@ export default function Home() {
     socket.on("client-assignment", (data) => {
       console.log("Adding socketID to session storage");
       console.log("sessionStorage operation:", data.socketId);
-
+  
       sessionStorage.setItem("socketID", data.socketId);
       console.log("Current session storage:", sessionStorage.getItem("socketID"));
 
@@ -42,13 +42,13 @@ export default function Home() {
     navigateTo("join");
   }
 
-  function handleHostButtonClick() {
-    navigateTo("host/create");
-  }
+  // function handleHostButtonClick() {
+  //   navigateTo("host/create");
+  // }
 
-  function handleLabButtonClick() {
-    navigateTo("create-lab");
-  }
+  // function handleLabButtonClick() {
+  //   navigateTo("create-lab");
+  // }
 
   return (
     <div className="flex flex-col">
