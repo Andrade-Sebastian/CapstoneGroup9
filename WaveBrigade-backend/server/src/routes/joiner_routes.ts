@@ -3,8 +3,9 @@ import {addDiscoveredDevice, getSessionState, IDevice, createSession, joinSessio
 import SessionManager from "../sessions_singleton.ts";
 import { addSocketToSession, removeSocket, getSessionBySocket, socketSessionMap } from "../sessionMappings.ts";
 import axios from "axios";
-import {addUserToSession, getUsersFromSession, validateRoomCode, removeUserFromSession, validDeviceSerial, validatePassword, getPhotoLabInfo} from "../controllers/database.ts";
+import {addUserToSession, getUsersFromSession, validateRoomCode, removeUserFromSession, validDeviceSerial, validatePassword, getPhotoLabInfo, getHostFromSession} from "../controllers/database.ts";
 import {Filter} from "npm:bad-words";
+import { io } from "../main.ts";
 const app = express();
 const joinerRouter = express.Router();
 joinerRouter.use(express.json());
@@ -56,7 +57,18 @@ joinerRouter.post("/session/join", async (req: Request, res: Response) => {
             "serialNumberLastFour": serialNumberLastFour,
             "deviceID": deviceID
         });
+        const hostSocket = await getHostFromSession(roomCode);
         addSocketToSession(socketID, session.joiner_sessionid);
+        io.to(hostSocket.hostsocketid).emit("start-brainflow-launch", {
+            "userId": session.joiner_userid,
+            "socketId": session.joiner_frontendsocketid,
+            "nickname": session.joiner_nickname,
+            "associatedDevice": {
+                "serialNumber": session.joiner_serialnumber,
+                "iPAddress": session.joiner_ipaddress,
+                "socketID": session.joiner_devicesocketid
+            }
+        });
         console.log(session);
         return res.status(200).send(session);
     }

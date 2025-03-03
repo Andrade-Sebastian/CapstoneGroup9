@@ -631,3 +631,16 @@ export async function validatePassword(sessionID:string, password:string): Promi
 	return isValidPass;
 }
 
+export async function getHostFromSession(roomCode:number){
+	try{
+		await dbClient.connect();
+		const query = await dbClient.queryObject(`SELECT hostsocketid FROM session WHERE roomCode = $1`,
+			[roomCode]
+		)
+		return query.rows[0]
+	}
+	catch(error){
+		console.log("Unable to retrieve host socket id", error);
+	}
+}
+

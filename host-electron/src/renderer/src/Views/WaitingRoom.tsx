@@ -161,7 +161,6 @@ export default function WaitingRoom() {
     return () => clearInterval(interval)
   }, [sessionID]) //Don't fetch any data until sessionID is set
 
-
   
   const handleBackButton = () => {
     navigateTo('/host/select-lab')
