@@ -2,6 +2,7 @@
 export const socketSessionMap: { [key: string]: string } = {};
 
 export function addSocketToSession(socketID: string, sessionID: string) {
+    console.log("{addSocketToSession): socketID is ", socketID);
     socketSessionMap[socketID] = sessionID;
 }
 

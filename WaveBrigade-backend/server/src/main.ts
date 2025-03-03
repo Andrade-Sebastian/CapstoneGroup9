@@ -9,7 +9,7 @@ const ORIGIN_JOINER = "http://localhost:4500";
 const ORIGIN_HOST = "http://localhost:5173";
 
 import grpc from "npm:@grpc/grpc-js";
-import socketSessionMap, { getSessionBySocket, removeSocket } from "./sessionMappings.ts";
+import socketSessionMap, { addSocketToSession, getSessionBySocket, removeSocket } from "./sessionMappings.ts";
 import axios from "npm:axios";
 
 //CHANGE TO RELATIVE PATH
@@ -139,13 +139,17 @@ io.on("connection", (socket) => {
         // console.log(`(main.ts): User Disconnected | socketID: ${socket.id}`);
         // console.log(`(main.ts): Total connections: ${io.engine.clientsCount}`);
 
-
+        console.log("User disconnected: ", socket.id);
+        console.log("Reason: ", data);
         const sessionID = getSessionBySocket(socket.id);
 
         if (sessionID) {
             try {
-                const response = await axios.post(
-                    `http://localhost:3000/leave-room/${sessionID}/${socket.id}`
+                const response = await axios.post(`http://localhost:3000/joiner/leave-room`,
+                    {
+                        sessionID: sessionID,
+                        socketID: socket.id
+                    }
                 );
 
                 // Clean up the mapping

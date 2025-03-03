@@ -30,6 +30,7 @@ import ConnectEmotiBit from "./Views/ConnectEmotiBit.tsx";
 import WaitingRoom from "./Views/WaitingRoom.tsx";
 import ActiveExperiment from "./Views/ActiveExperiment.tsx";
 import React from "react";
+import { disconnect } from "node:process";
 function App() {
   const { setUserSocketId } = useJoinerStore();
   const [isSocketAssigned, setIsSocketAssigned] = useState(false);
@@ -67,7 +68,7 @@ function App() {
       socket.off("client-assignment");
       socket.off("clear-session");
     };
-  }, [isSocketAssigned]); // Dependency on isSocketAssigned to run when it changes
+  }, [isSocketAssigned]);  // Dependency on isSocketAssigned to run when it changes
 
   return (
       <div className="flex flex-col h-screen max-h-screen overflow-auto bg-white">

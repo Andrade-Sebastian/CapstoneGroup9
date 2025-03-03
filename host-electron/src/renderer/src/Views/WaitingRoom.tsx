@@ -36,7 +36,6 @@ export default function WaitingRoom() {
     experimentTitle,
     experimentDesc
   } = useSessionStore()
-  // const {userName, roomCode, labID, name, description, imageUrl } = location.state || {}
   const [nicknames, setNickNames] = useState<string[]>([])
   const [sessionID, setSessionID] = useState('')
   const [experimentType, setExperimentType] = useState<string>('')
@@ -65,32 +64,6 @@ export default function WaitingRoom() {
     }
   }, [experimentId])
 
-  useEffect(() => {
-    if(!sessionId)
-    setSessionId('session_12345')
-  }, [sessionId, setSessionId])
-
-  useEffect(() => {
-    if (!sessionID) return
-
-    const fetchUsers = async () => {
-      try {
-        console.log('Trying to get users from session ' + sessionID)
-        const response = await fetch(`http://localhost:3000/joiner/room-users/${sessionId}`)
-        if (!response.ok) throw new Error('Failed to fetch users')
-        const data = await response.json()
-        setUsers(data.users)
-        }
-        catch(error){
-        console.error('Error fetching users:', error)
-      }
-    }
-
-    fetchUsers()
-    const interval = setInterval(fetchUsers, 5000) //Refresh users every 5 seconds
-
-    return () => clearInterval(interval)
-  }, [sessionID, setUsers]) //Don't fetch any data until sessionID is set
   //Modal Handlers
   const handleOpenModal = () => setIsModalOpen(true)
   const handleCloseModal = () => setIsModalOpen(false)
@@ -155,11 +128,12 @@ export default function WaitingRoom() {
 
 
   useEffect(() => {
-    if (!sessionID) return
+    if (!useSessionStore.getState().sessionId) return
 
+    setSessionID(useSessionStore.getState().sessionId)
     const fetchUsers = async () => {
       try {
-        console.log('Trying to get users from session ' + sessionID)
+        console.log('Trying to get users from session ' + sessionID);
         const response = await axios.get(`http://localhost:3000/joiner/room-users/${sessionID}`)
         const users = response.data.users //Array of IUser objects
 

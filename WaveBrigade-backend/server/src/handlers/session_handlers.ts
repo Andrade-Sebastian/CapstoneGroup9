@@ -72,20 +72,20 @@ export default function session_handlers(_io: Server, _socket: Socket) {
     console.log("------END OF JOIN_WAITING_ROOM EVENT-------");
   });
 
-  _socket.on("disconnect", () => {
-    console.log(`User disconnected: ${_socket.id}`);
-    // Remove user from session
-    const sessions = sessionManager.listSessions();
-    for (const roomCode in sessions) {
-      const session = sessions[roomCode];
-      const userIndex = session.users.findIndex((user) => user.socketId === _socket.id);
-      //CHICKEN
-      if (userIndex !== -1) {
-        session.users.splice(userIndex, 1);
-        sessionManager.addSession(roomCode, session);
-        _io.to(roomCode).emit("receive_names", session.users.map((user) => user.nickname));
-        break;
-      }
-    }
-  });
+  // _socket.on("disconnect", () => {
+  //   console.log(`User disconnected: ${_socket.id}`);
+  //   // Remove user from session
+  //   const sessions = sessionManager.listSessions();
+  //   for (const roomCode in sessions) {
+  //     const session = sessions[roomCode];
+  //     const userIndex = session.users.findIndex((user) => user.socketId === _socket.id);
+  //     //CHICKEN
+  //     if (userIndex !== -1) {
+  //       session.users.splice(userIndex, 1);
+  //       sessionManager.addSession(roomCode, session);
+  //       _io.to(roomCode).emit("receive_names", session.users.map((user) => user.nickname));
+  //       break;
+  //     }
+  //   }
+  // });
 }

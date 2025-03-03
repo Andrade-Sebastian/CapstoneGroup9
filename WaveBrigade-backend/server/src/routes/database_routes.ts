@@ -163,5 +163,31 @@ databaseRouter.post("/gallery-lab", async(req: Request, res: Response) => {
     })
 })
 
+
+databaseRouter.get("/photo-lab/info/:photolabid", async(req: Request, res: Response) => {
+    const photoLabID = req.params.photolabid;
+
+    try{
+        const info = await getPhotoLabInfo(photoLabID);
+        if (info === undefined)
+        {
+            res.status(500).send({
+                "Message": `No info for photolabid=${photoLabID}`
+            })
+        }
+        res.status(200).send(info)
+
+    }
+    catch(error)
+    {
+        res.status(500).send({
+            "Message": `Unable to get information at id=${photoLabID}`,
+            "Error": error
+        })
+    }
+})
+
+
+
 export default databaseRouter;
 
