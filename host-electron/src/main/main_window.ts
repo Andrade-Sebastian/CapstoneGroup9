@@ -14,7 +14,7 @@
      width: 900,
      height: 670,
      show: false,
-     title: 'Echo Server Creator',
+     title: 'WaveBrigade',
      autoHideMenuBar: true,
      ...(process.platform === 'linux' ? { icon } : {}),
      webPreferences: {

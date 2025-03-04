@@ -16,6 +16,7 @@ export type ActivityEvents =
   BRAINFLOW_DESTROY | //closes brainflow
   BRAINFLOW_DESTROY_USER | //user destruction
   "brainflow:launched"|
+  "brainflow:launch"|
   "activity:viewUser"| //host selects student to view
   "brainflow:launchError"| 
   "brainflow:connectingEmotibit"|
@@ -25,6 +26,7 @@ export type ActivityEvents =
 
 
 const activityEventsChannels: Array<ActivityEvents> = [
+  "brainflow:launched",
   "brainflow:launch",
   "brainflow:status",
   "brainflow:destroy",

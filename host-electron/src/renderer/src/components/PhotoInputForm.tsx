@@ -42,8 +42,8 @@ export default function PhotoInputForm(props: IPhotoInputForm) {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [file, setFile] = useState<File | null>(null)
 
-  const [experiment_title, set_experiment_title] = useState("");
-  const [experiment_description, set_experiment_description] = useState("");
+  // const [experiment_title, set_experiment_title] = useState("");
+  // const [experiment_description, set_experiment_description] = useState("");
   const [image_filename, set_image_filename] = useState<string | null>(null);
   
 
@@ -77,8 +77,8 @@ export default function PhotoInputForm(props: IPhotoInputForm) {
   async function handleSubmit(e) {
     
     const data = new FormData();
-    data.append('experimentTitle', experiment_title);
-    data.append('experimentDescription', experiment_description);
+    data.append('experimentTitle', experimentTitle);
+    data.append('experimentDescription', experimentDesc);
     data.append('experimentCaptions', caption);
     data.append('imageBlob', file);
 
@@ -115,8 +115,8 @@ export default function PhotoInputForm(props: IPhotoInputForm) {
       if (response.status === 200) {
         toast.success('Lab was created successfully', { id: loadingToastId })
 
-        set_experiment_title(experimentTitle)
-        set_experiment_description(experimentDesc)
+        setExperimentTitle(experimentTitle)
+        setExperimentDesc(experimentDesc)
         set_image_filename(photoLabImageSource);
         console.log('sending out some experiment data')
         socket.emit("experiment-data", { experimentTitle, experimentDesc, experimentId })
@@ -141,8 +141,8 @@ export default function PhotoInputForm(props: IPhotoInputForm) {
     useEffect(() =>{
         console.log("image source: ", image_filename);
         console.log("caption: ", caption);
-        console.log("experimentTitle: ", experiment_title);
-        console.log("experimentDesc: ", experiment_description);
+        console.log("experimentTitle: ", experimentTitle);
+        console.log("experimentDesc: ", experimentDesc);
         console.log("isFileSelected: " + JSON.stringify(isFileSelected))
         
       }, [[photoLabImageSource, caption, experimentDesc, experimentTitle]])
@@ -196,8 +196,8 @@ export default function PhotoInputForm(props: IPhotoInputForm) {
                         id="experimentTitle"
                         className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
                         //   focus:outline-none focus:ring-2 focus:ring-indigo-500
-                        onChange={(e) => set_experiment_title(e.target.value)}
-                        value={experiment_title}
+                        onChange={(e) => setExperimentTitle(e.target.value)}
+                        value={experimentTitle}
                         placeholder="Provide a title for your experiment"
                     />
                 </div>
@@ -208,8 +208,8 @@ export default function PhotoInputForm(props: IPhotoInputForm) {
                         id="experimentDesc"
                         className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
                         //   focus:outline-none focus:ring-2 focus:ring-indigo-500
-                        onChange={(e) => set_experiment_description(e.target.value)}
-                        value={experiment_description}
+                        onChange={(e) => setExperimentDesc(e.target.value)}
+                        value={experimentDesc}
                         placeholder="Provide a description for your experiment"
                     ></textarea>
                 </div>
@@ -262,8 +262,8 @@ export default function PhotoInputForm(props: IPhotoInputForm) {
                     <button
                         type="button"
                         onClick={handleOpenModal} //create the object 
-                        disabled={!experiment_title.trim() || !isFileSelected}
-                        className={`mt-6 font-semibold py-3 px-6 rounded-md shadow-md transition duration-300 ease-in-out ${experiment_title.trim() && isFileSelected
+                        disabled={!experimentTitle.trim() || !isFileSelected}
+                        className={`mt-6 font-semibold py-3 px-6 rounded-md shadow-md transition duration-300 ease-in-out ${experimentTitle.trim() && isFileSelected
                         ? 'bg-[#7F56D9] hover:bg-violet-500 text-white'
                         : 'bg-gray-400 text-white cursor-not-allowed'
                         }`}
@@ -289,8 +289,8 @@ export default function PhotoInputForm(props: IPhotoInputForm) {
                     id="experimentTitle"
                     className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     disabled
-                    value={experiment_title}
-                    onChange={(e) => set_experiment_title(e.target.value)}
+                    value={experimentTitle}
+                    onChange={(e) => setExperimentTitle(e.target.value)}
                   />
                 </div>
                 <div className="mb-6">
@@ -299,8 +299,8 @@ export default function PhotoInputForm(props: IPhotoInputForm) {
                     id="experimentDesc"
                     className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     //   focus:outline-none focus:ring-2 focus:ring-indigo-500
-                    onChange={(e) => set_experiment_description(e.target.value)}
-                    value={experiment_description}
+                    onChange={(e) => setExperimentDesc(e.target.value)}
+                    value={experimentDesc}
                     disabled
                   ></textarea>
                 </div>
@@ -334,4 +334,3 @@ export default function PhotoInputForm(props: IPhotoInputForm) {
 </>
 );
 }
-

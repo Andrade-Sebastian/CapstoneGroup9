@@ -18,12 +18,12 @@ import { useNavigate } from 'react-router-dom'
 import { useSessionStore } from '../store/useSessionStore.tsx'
 import React from 'react';
 import useBrainflowManager from '../hooks/useBrainflowManager.ts';
+import { io } from 'socket.io-client'
 
 export default function WaitingRoom() {
   const location = useLocation()
   // const { nickName, roomCode, labID, name, description, imageUrl } = location.state || {}
   const { users, roomCode, experimentId, addUser, removeUser, experimentTitle, experimentDesc, hostName } = useSessionStore(); 
-  const { handleUserLeaveSession } = useBrainflowManager();
   const { handleHostEndSession } = useBrainflowManager();
   const [nicknames, setNickNames] = useState<string[]>([])
   const [sessionID, setSessionID] = useState('')
@@ -101,6 +101,8 @@ export default function WaitingRoom() {
   function handleSubmit() {
     handleHostEndSession(); //process destruction for all users 
     console.log('in handle submit')
+    
+    socket.emit("end-experiment")
     setTimeout(() => {
       //-----HARDCODED FOR TESTING-------
       navigateTo('/summary')

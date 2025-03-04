@@ -28,7 +28,7 @@ export default function WaitingRoom() {
     hostName,
     users: emotiBits,
     roomCode,
-    experimentId,
+    experimentType,
     setSessionId,
     setUsers,
     addUser,
@@ -38,7 +38,7 @@ export default function WaitingRoom() {
   } = useSessionStore()
   const [nicknames, setNickNames] = useState<string[]>([])
   const [sessionID, setSessionID] = useState('')
-  const [experimentType, setExperimentType] = useState<string>('')
+  const [experimentTypeName, setExperimentTypeName] = useState<string>('')
   const [serialNumber, setSerialNumber] = useState('')
   const [IPAddress, setIPAddress] = useState('')
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -50,19 +50,19 @@ export default function WaitingRoom() {
   )
   
   useEffect(() => {
-    if (experimentId === '1') {
-      setExperimentType('VideoLab')
+    if (experimentType === 1) {
+      setExperimentTypeName('VideoLab')
       setExperimentIcon(<IoVideocam style={{ fontSize: '20px' }} />)
-    } else if (experimentId === '2') {
-      setExperimentType('PhotoLab')
+    } else if (experimentType === 2) {
+      setExperimentTypeName('PhotoLab')
       setExperimentIcon(<TiCamera style={{ fontSize: '20px' }} />)
-    } else if (experimentId === '3') {
-      setExperimentType('GalleryLab')
+    } else if (experimentType === 3) {
+      setExperimentTypeName('GalleryLab')
       setExperimentIcon(<TfiGallery style={{ fontSize: '20px' }} />)
     } else {
       toast.error('Invalid exerimentId received')
     }
-  }, [experimentId])
+  }, [experimentType])
 
   //Modal Handlers
   const handleOpenModal = () => setIsModalOpen(true)
@@ -164,7 +164,6 @@ export default function WaitingRoom() {
   
   const handleSubmit =() => {
     console.log('in handle submit')
-      //-----HARDCODED FOR TESTING-------
       socket.emit("session-start");
       navigateTo('/activity-room');
 
@@ -195,7 +194,7 @@ export default function WaitingRoom() {
           {/* HARD CODED LAB DESCRIPTION */}
           <WaitingRoomCardComponent
             icon={experimentIcon}
-            labType={experimentType}
+            labType={experimentTypeName}
             labTitle={experimentTitle}
             description={experimentDesc}
           ></WaitingRoomCardComponent>

@@ -129,6 +129,10 @@ io.on("connection", (socket) => {
 
     session_handlers(io, socket, rooms, isHost);
 
+    socket.on('end-experiment', () => {
+        console.log("Ending experiment");
+        io.emit('end-experiment');
+    })
     //console.log("Running Script");
     // socket.on("update", (data) => {
     //     console.log(data);
@@ -151,7 +155,8 @@ io.on("connection", (socket) => {
                         socketID: socket.id
                     }
                 );
-
+                //emit to host that a user disconnected
+                io.emit(response.hostsocketid).emit("destroy-brainflow-launch", "destroy user's brainflow launch");
                 // Clean up the mapping
                 removeSocket(socket.id);
                 console.log(JSON.stringify(socketSessionMap))

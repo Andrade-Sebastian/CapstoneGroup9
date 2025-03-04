@@ -20,7 +20,7 @@ export interface ILab {
 
 export default function HostSelectLabPage() {
   const navigateTo = useNavigate()
-  const { setExperimentId, roomCode } = useSessionStore();
+  const { setExperimentType, roomCode } = useSessionStore();
   const [experimentName, setExperimentName] = useState('')
   const [labDescription, setLabDescription] = useState('')
   const [selectedLab, setSelectedLab] = useState<ILab>()
@@ -61,13 +61,13 @@ export default function HostSelectLabPage() {
     e.preventDefault()
     if (selectedLab) {
       if (selectedLab.id === '1') {
-        setExperimentId('1');
+        setExperimentType('1');
         navigateTo('/host/video-lab')
       } else if (selectedLab.id === '2') {
-        setExperimentId('2');
+        setExperimentType('2');
         navigateTo('/host/photo-lab')
       } else if (selectedLab.id === '3') {
-        setExperimentId('3');
+        setExperimentType('3');
         navigateTo('/host/gallery-lab')
       } else {
         toast.error("Error, select another option.")

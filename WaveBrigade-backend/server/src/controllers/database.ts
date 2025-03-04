@@ -88,7 +88,8 @@ export async function getPhotoLabInfo(experimentID: number): Promise<void>{
 	try{
 		await dbClient.connect();
 		const query = await dbClient.queryObject(`SELECT experiment.experimentid, path, captions, name, description FROM photolab JOIN experiment 
-			ON photolab.experimentid = ${experimentID};`,
+			ON photolab.experimentid = $1 LIMIT 1`,
+			[experimentID]
 		);
 		
 		console.log("Photo Lab Info: ", query.rows[0]);
