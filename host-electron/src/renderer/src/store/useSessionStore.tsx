@@ -18,8 +18,10 @@ interface SessionState{
     experimentId: string;
     experimentTitle: string;
     experimentDesc: string;
+    experimentType: number;
     photoLabImageSource: string | null;
     devices: any[];
+
 
     setSessionId: (id: string) => void;
     setHostName: (name: string) => void;
@@ -30,6 +32,7 @@ interface SessionState{
     setExperimentId: (id: string) => void;
     setExperimentTitle: (experimentTitle: string) => void;
     setExperimentDesc: (experimentDesc: string) => void;
+    setExperimentType: (experimentType: number) => void;
     addDevice: (device: any) => void;
     removeDevice: (device: any)=> void;
 }
@@ -46,6 +49,7 @@ export const useSessionStore = create<SessionState>()(
             experimentDesc: '',
             photoLabImageSource: '',
             devices: [],
+            experimentType: 0,
 
             setSessionId: (id: string): void => set(() => ({ sessionId: id})),
             setHostName: (name: string): void => set(() => ({ hostName: name})),
@@ -58,5 +62,6 @@ export const useSessionStore = create<SessionState>()(
             setExperimentDesc: (desc: string): void => set(() => ({ experimentDesc: desc})),
             setPhotoLabImageSource: (imageSource: string | null): void => set(() => ({ photoLabImageSource: imageSource })),
             addDevice: (device: any): void => set((state) => ({devices: [...state.devices, device]})),
-            removeDevice: (device: any): void => set((state) => ({devices: state.devices.filter((d) => d.deviceId !== device.deviceId)}))
+            removeDevice: (device: any): void => set((state) => ({devices: state.devices.filter((d) => d.deviceId !== device.deviceId)})),
+            setExperimentType: (experimentType: number): void => set(() => ({ experimentType: experimentType}))
         }));
