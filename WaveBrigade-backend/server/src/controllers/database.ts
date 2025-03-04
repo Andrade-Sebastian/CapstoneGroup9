@@ -74,45 +74,40 @@ export interface IUserIdentity{
 }
 
 
-export async function verifyUserExists(userID: number, socketID: string): Promise<IUserIdentity>{
+export async function verifyUserExists(userID: number, socketID: string): Promise<boolean>{
 	await dbClient.connect();
-
+	console.log("Verifying user:", userID, socketID);
 	
 	console.log("Starting query")
 	const query = await dbClient.queryObject(`SELECT * FROM "User" where "User".frontendsocketid=$1 and "User".userid=$2`, [socketID, userID]);
-	console.log(query)
+
+	console.log("Query result: ", query)
 	console.log("[0]",query.rows[0]);
 
-	return new Promise<IUserIdentity>((resolve, reject) => {
+	if (query.rows.length > 0){
+		const userInfo: IUserIdentity = {
+			userID: query.rows[0].userid,
+			nickname: query.rows[0].nickname,
+			deviceID: query.rows[0].device,
+			sessionID: query.rows[0].sessionid,
+			isMasked: query.rows[0].ismasked,
+			frontendSocketID: query.rows[0].frontendsocketid,
+			leftSession: query.rows[0].leftSession,
+			userRole: query.rows[0].userrole,
+			secret: query.rows[0].secret
+		};
+		console.log("Query Result", userInfo)
 
-		if (query.rows.length > 0){
-			const userInfo: IUserIdentity = {
-				userID: query.rows[0].userid,
-				nickname: query.rows[0].nickname,
-				deviceID: query.rows[0].device,
-				sessionID: query.rows[0].sessionid,
-				isMasked: query.rows[0].ismasked,
-				frontendSocketID: query.rows[0].frontendsocketid,
-				leftSession: query.rows[0].leftSession,
-				userRole: query.rows[0].userrole,
-				secret: query.rows[0].secret
-			};
-			console.log("Final object", userInfo)
-
-			resolve(userInfo) //return the info
-			// return userInfo;
-		}
-		else{
-			reject(null)
-			//return null;
-			console.log("error verifying")
-			// throw new Error("Unable to verify the user");
-		}
-	})
-
-	
-	
-
+		//resolve(userInfo) //return the info
+		return true;
+	}
+	else{
+		return false;
+		throw new Error("Unable to verify the user");
+		//reject(null)
+		return null;
+		console.log("error verifying")
+	}
 }
 
 
@@ -154,6 +149,7 @@ export async function getPhotoLabInfo(experimentID: number): Promise<void>{
 		const query = await dbClient.queryObject(`SELECT experiment.experimentid, path, captions, name, description FROM photolab JOIN experiment 
 			ON photolab.experimentid = ${experimentID};`,
 		);
+		
 		
 		console.log("Photo Lab Info: ", query.rows[0]);
 		return query.rows[0];
@@ -638,14 +634,15 @@ export async function removeUserFromSession(sessionID: string, socketID: string)
 }
 
 export async function validDeviceSerial(nickName: string, roomCode:number, serialCode: string){
-	console.log("validDeviceSerial: ", serialCode)
+	//console.log("validDeviceSerial: ", serialCode)
+
 	try{
 		await dbClient.connect();
 		const query = await dbClient.queryObject(`SELECT deviceid FROM device WHERE RIGHT(device.serialnumber, 4) = $1 AND isavailable = $2`,
 			[serialCode, true] 
 		);
 
-		console.log("HERE+++ ", query);
+		//console.log("In validDeviceSerial() ", query);
 		
 		return query.rows[0];
 		

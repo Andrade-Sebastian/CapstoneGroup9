@@ -62,17 +62,18 @@ import LocalStrategy from "npm:passport-local";
 
 
 
-passport.use(new LocalStrategy.Strategy(
-{
-    usernameField: 'userID',
-    passwordField: 'socketID'
-}, function (userID, socketID, done) {
+// passport.use(new LocalStrategy.Strategy(
+// {
+//     usernameField: 'userID',
+//     passwordField: 'socketID'
+// }, async function (userID, socketID, done) {
 
-    return verifyUserExists(userID, socketID).then((user) => done(user)).catch((data) => {
-        done(null);
-    })
-}
-));
+//     console.log("HERE!!!!!!!!!", userID, " ",  socketID);
+//     return verifyUserExists(userID, socketID).then((user) => done(user)).catch((data) => {
+//         done(null);
+//     })
+// }
+// ));
 
 
 const app = express();

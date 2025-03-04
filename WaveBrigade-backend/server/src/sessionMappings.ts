@@ -12,6 +12,7 @@ export function removeSocket(socketID: string) {
 }
 
 export function getSessionBySocket(socketID: string): string | undefined {
+    console.log("all sessions", JSON.stringify(socketSessionMap))
     console.log("(getSessionBySocket): session is " + JSON.stringify(socketSessionMap[socketID]))
     return socketSessionMap[socketID];
 }

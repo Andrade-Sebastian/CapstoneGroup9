@@ -34,7 +34,7 @@ joinerRouter.get("/session/:sessionId", (req: Request, res: Response) => {
 
 
 
-//roomcode, nickname, 
+
 joinerRouter.post("/session/join", async (req: Request, res: Response) => {
     console.log("In /session/join: ", req.body);
     const {
@@ -150,44 +150,139 @@ joinerRouter.post("/leave-room/:sessionID/:socketID", (req: Request, res: Respon
 
 })
 
-//stored procedure
-joinerRouter.post("/verify-serial", async (req: Request, res: Response) => {
+import passport from "npm:passport";
+import jwt from "npm:jsonwebtoken";
+import LocalStrategy from "npm:passport-local";
+import { verifyUserExists } from "../controllers/database.ts";
+
+passport.use(new LocalStrategy.Strategy({
+    usernameField: 'userID',
+    passwordField: 'socketID'
+},
+async function (userID, socketID, done) {
+    console.log("Authenticating user userid=", userID, " socketid=",  socketID);
+
+    try {
+        const user = await verifyUserExists(userID, socketID);
+        console.log("User found: ", user);
+
+        if (user) {
+            console.log("User found");
+            return done(null, user); // ✅ Pass the user object if found
+        } else {
+            console.log("User not found");
+            return done(null, false); // ✅ No user found
+        }
+    } catch (error) {
+        return done(error); // ✅ Handle errors
+    }
+}))
+
+
+import { generateToken } from "../auth.ts";
+
+//stored procedure -- HERE
+joinerRouter.post("/verify-serial", async (req: Request, res: Response, next: Function) => {
     console.log("Request received at /verify-serial:", req.body);
     const {nickName, roomCode, serialCode } = req.body;
-
+    
 
     try{
-    //change this later to the correct serial code implementation
-        const validSerialCode = await validDeviceSerial(nickName, roomCode, serialCode);
-        console.log("Valid serial code: ", validSerialCode);
-        if (validSerialCode){
-            const deviceID = validSerialCode.deviceid;
-            return res.status(200).json({success: true, deviceID: deviceID});
-        }
-        else{
+        // console.log("Before")
+        const validDeviceID = await validDeviceSerial(nickName, roomCode, serialCode);
+        // console.log("After ", validDeviceID)
+
+        if (!validDeviceID){
+            
+            console.log("Invalid code")
             return res.status(400).json({success: false, message: "Invalid code"});
         }
-    }
-    catch(error){
-        console.log("Error occured", error);
-    }
+
+
+        console.log("Valid code, starting authentication", validDeviceID)
+        if (validDeviceID)
+        {
+            // const deviceID = validDeviceID.deviceid;
+            // console.log("Hello um :p Device ID is ", JSON.stringify(deviceID))
+            
+            passport.authenticate("local", { session: false }, async (err: any, user: any) => {
+                //user is a boolean, not a user object
+                console.log("Inside Passport callback -- user object is: ", user);
+        
+                if (err) {
+                    console.error("Authentication error:", err);
+                    return res.status(500).send({ message: "Authentication error" });
+                }
+
+                if (user) {  // If authentication is good, the user will be false.
+                    console.log("User is null");
+                    return res.status(403).send({ message: "Invalid credentials" });
+                }
+
+                await verifyToken(req, res, generateToken);
+                const token = await generateToken(user);
+
+                console.log("token: ", token);
+
+                console.log("User authenticated successfully: ", user);
+                console.log("-----------------");
+
+                return res.status(200).send({
+                    "verified": true,
+                    "token":token
+                });
+                })(req, res, verifyToken);  // Call the function with the request, response, and next middleware
+    
+        }
+
+    }catch(error){
+            console.log("ERROR", error);
+            return res.status(500).json({success: false, message: "Invalid code"});
+        }
 });
 
-//CHICKEN -> store procedure ?
+import { verifyToken } from "../auth.ts";
+
+joinerRouter.get("/protected", verifyToken, (req, res) => {
+    res.json({ message: "You have access!", user: req.user });
+});
+
+    //     //     passport.authenticate("local", {session: false}, (user) => {
+    //     //         if (user === null){
+    //     //             res.status(403).send()
+    //     //         }
+    //     //         else{
+    //     //             req.login(user, {session: false}, (err) => {
+    //     //                 if (err){
+    //     //                     res.send(err)
+    //     //                 }
+    //     //                 // const token = jwt;
+    //     //                 return res.json({success: true, deviceID: deviceID});
+    //     //             })
+    //     //         }
+            
+    //     //     })
+    //     // }
+    //     // else{
+    //     //     return res.status(400).json({success: false, message: "Invalid code"});
+    //     // }
+    // }
+    // catch(error){
+    //     console.log("Error occured", error);
+    // }
+
+
 joinerRouter.get("/debug", (req: Request, res: Response) => {
     console.log("in /debug")
 
-    const sessions = SessionManager.getInstance().listSessions()
-    //console.log("Live sessions: " + JSON.stringify(sessions))
-
     res.status(200).send({
-        message: "in joiner",
-        liveSessions: sessions
+        message: "in joiner"
     })
 })
 
 
 import { Client } from "https://deno.land/x/postgres@v0.17.0/mod.ts";
+import { IUserIdentity } from "../controllers/database.ts";
 export const dbClient = new Client({
   user: "postgres",
   database: "WB_Database",

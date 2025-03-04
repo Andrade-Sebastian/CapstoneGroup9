@@ -34,6 +34,7 @@ export function determineFileExtension(file)
     return detectedFileExtension;
 }
 
+
 export async function getNumberFilesInDirectory(directory: string): Promise<number>
 {
     const directoryExists = fs.existsSync(directory);
