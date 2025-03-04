@@ -8,12 +8,14 @@ import WaitingRoomCardComponent from "../Components/WaitingRoomCardComponent.tsx
 import { useNavigate } from "react-router-dom";
 import { useJoinerStore } from "../hooks/stores/useJoinerStore.ts";
 import React from "react";
+import toast, { Toaster } from "react-hot-toast";
 // -----JOINER=--------------------------//
 export default function WaitingRoom() {
   const [nicknames, setNickNames] = useState<string[]>([]);
   const [sessionID, setSessionID] = useState("");
+  const [experimentID, setExperimentID] = useState(0);
   const navigateTo = useNavigate()
-  const { isConnected, serial, nickname, roomCode, setExperimentId, setExperimentTitle, setExperimentDesc} = useJoinerStore()
+  const { isConnected, serial, nickname, roomCode, setExperimentId, setExperimentTitle, setExperimentDesc, experimentId, experimentTitle,experimentDesc} = useJoinerStore()
 
   // useEffect(() => {
   //   // Emit join waiting room
@@ -86,35 +88,85 @@ export default function WaitingRoom() {
 
     fetchUsers();
     const interval = setInterval(fetchUsers, 5000); // Refresh users every 5 seconds
-
+    
     return () => clearInterval(interval);
   }, [sessionID]); //Don't fetch any data until sessionID is set
 
   useEffect(() => {
     const getExperimentData = async() => {
       try{
-        const response = await axios.get("http://localhost:3000/host/get-experiment");
-        if(response.status == 200){
-          const experimentTitle = response.data.experimentTitle
-          const experimentId = response.data.experimentId
-          const experimentDesc = response.data.experimentDesc
+        const response = await axios.get(`http://localhost:3000/joiner/session/getInfo/${roomCode}`);
+        if(response.status === 200){
+          console.log("EXPERIMENT ID RETURNED: ", response.data.experimentid);
+          setExperimentID(response.data.experimentid);
+        }
+      }
+      catch(error){
+        toast.error("Failed to get experiment id")
+        console.log("Error retrieving experiment id in joiner fe")
+      }
+    }
+    getExperimentData();
+  }, [])
 
+  useEffect(() => {
+    //if(!experimentID) return;
+
+    const getPhotoData = async() => {
+      try{
+        console.log("SENDING TO THE ROUTE EXPERIMENT ID: ", experimentID);
+        const response = await axios.get(`http://localhost:3000/joiner/getPhoto/${experimentID}`);
+        if(response.status == 200){
+          toast.success("Successfully received photolab data.")
+          console.log("RETURNED GET PHOTO DATA: ", response.data);
+          const experimentTitle = response.data.name;
+          const captions = response.data.captions;
+          const experimentDesc = response.data.description;
+          const path = response.data.path;
+
+          console.log("RESPONSE DATA VARIABLES: ", captions, experimentDesc, experimentTitle, path)
+          setExperimentId(experimentID);
           setExperimentTitle(experimentTitle)
-          setExperimentId(experimentId)
           setExperimentDesc(experimentDesc)
         }
       }
       catch(error){
-        console.log("Error receiving experiment data from host: ", error)
-        
+        toast.error("Failed to receive photolab data")
+        console.log("Error receiving photolab data in joiner fe: ", error);
       }
     };
-    getExperimentData();
-  },[])
+    getPhotoData();
+  }, [experimentID])
+  // useEffect(() => {
+  //   const getExperimentData = async() => {
+  //     try{
+  //       const response = await axios.get("http://localhost:3000/host/get-experiment");
+  //       if(response.status == 200){
+  //         const experimentTitle = response.data.experimentTitle
+  //         const experimentId = response.data.experimentId
+  //         const experimentDesc = response.data.experimentDesc
+
+  //         setExperimentTitle(experimentTitle)
+  //         setExperimentId(experimentId)
+  //         setExperimentDesc(experimentDesc)
+  //       }
+  //     }
+  //     catch(error){
+  //       console.log("Error receiving experiment data from host: ", error)
+  //     }
+  //   };
+  //   getExperimentData();
+  // },[])
+
+  //Getting data from PhotoLab experiment.experimentid, path, captions, name, description 
+
+
+
   return (
     <div className="flex flex-col items-center justify-center h-1/2 mx-8">
       <div className="flex flex-col md:flex-row items-start justify-between gap-72">
       {/* left section */}
+      <Toaster position="top-right"/>
         <div className="md:w-1/2 space-y-4">
           <h1 className="text-3xl text-3xl font-semibold text-gray-800">
             Welcome to Session

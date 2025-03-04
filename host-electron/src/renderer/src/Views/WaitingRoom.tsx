@@ -66,7 +66,7 @@ export default function WaitingRoom() {
       setExperimentType('GalleryLab')
       setExperimentIcon(<TfiGallery style={{ fontSize: '20px' }} />)
     } else {
-      toast.error('Invalid exerimentId received')
+      console.log("Invalid experiment type");
     }
   }, [experimentId])
 
@@ -226,11 +226,8 @@ export default function WaitingRoom() {
               <span className="font-semibold"> NICKNAME:</span> {hostName}
             </p>
             <p className="text-base md:text-lg">
-              <span className="font-semibold">SENSOR SERIAL NUMBER:</span> A93KFN2/SJPP2RK401
-            </p>
-            <p className="text-base md:text-lg">
-              <span className="font-semibold">PARTICIPANTS</span>
-              <span className="md:text-sm font-light"> 1</span>
+              <span className="font-semibold">PARTICIPANTS: </span>
+              <span className="md:text-sm font-light">{nicknames.length}</span>
             </p>
           </div>
         </div>

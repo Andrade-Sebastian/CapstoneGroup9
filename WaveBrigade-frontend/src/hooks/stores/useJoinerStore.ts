@@ -45,7 +45,7 @@ interface JoinerState{
     isConnected: boolean;
     serial: string;
     deviceId: string;
-    experimentId: string;
+    experimentId: number;
     experimentTitle: string;
     experimentDesc: string;
     users: Array<IUser>;
@@ -59,7 +59,7 @@ interface JoinerState{
     setIsConnected: (isConnected: boolean) => void;
     setSerial: (serial: string) => void;
     setDeviceId: (deviceid: string) => void;
-    setExperimentId: (id: string) => void;
+    setExperimentId: (id: number) => void;
     setExperimentTitle: (experimentTitle: string) => void;
     setExperimentDesc: (experimentDesc: string) => void;
     setUsers: (users: Array<IUser>) => void;
@@ -76,7 +76,7 @@ export const useJoinerStore = create<JoinerState>()(
         isConnected: false,
         serial: '',
         deviceId: '',
-        experimentId: '',
+        experimentId: 0,
         experimentTitle: '',
         experimentDesc: '',
         users: [],
@@ -90,7 +90,7 @@ export const useJoinerStore = create<JoinerState>()(
         setIsConnected: (isConnected: boolean): void => set(() => ({ isConnected})),
         setSerial: (serial: string): void => set(() => ({serial})),
         setDeviceId: (deviceid: string): void => set(() => ({deviceId: deviceid})),
-        setExperimentId: (id: string): void => set(() => ({experimentId: id})),
+        setExperimentId: (id: number): void => set(() => ({experimentId: id})),
         setExperimentTitle: (title: string): void => set(() => ({ experimentTitle: title})),
         setExperimentDesc: (desc: string): void => set(() => ({ experimentDesc: desc})),
         setSecret: (secret: string): void => set(() => ({secret})),
