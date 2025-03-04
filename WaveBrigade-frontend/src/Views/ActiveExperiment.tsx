@@ -85,9 +85,9 @@ export default function ActiveExperiment() {
         </div>
         <Divider className="my-3" />
         <div className="mt-4 flex justify-between w-full items-center">
-          <p className="font-semibold">Nickname: {nickname} <span className="font-light">Sebastian</span></p>
+          <p className="font-semibold">Nickname: {nickname} <span className="font-light"></span></p>
           <div className="flex space-x-4">
-            <button
+            {/* <button
               className={`text-3xl p-4 rounded-lg ${
                 selectedButton === "heartRate"
                   ? "bg-[#7F56D9] text-white"
@@ -96,7 +96,7 @@ export default function ActiveExperiment() {
               onClick={() => {setSelectedButton("heartRate"); setActiveChart("heartRateChart");}}
             >
               <TbHeartRateMonitor />
-            </button>
+            </button> */}
             <button
               className={`text-3xl p-4 rounded-lg ${
                 selectedButton === "temperature"

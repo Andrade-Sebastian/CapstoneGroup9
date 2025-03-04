@@ -26,12 +26,6 @@ export default function VideoLab() {
     }
   }, [videoSource]);
 
-  useEffect(() => {
-    if(!experimentType){
-      toast.error("No experiment selected.");
-    }
-  }, [experimentType]);
-
   //modal
   const handleOpenModal = () => setIsModalOpen(true);
   const handleCloseModal = () => setIsModalOpen(false);

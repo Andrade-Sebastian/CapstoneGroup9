@@ -61,12 +61,6 @@ export default function PhotoInputForm(props: IPhotoInputForm) {
     handleCloseModal()
   }
 
-  useEffect(() => {
-    if (!experimentId) {
-      toast.error("No experiment selected.");
-    }
-  }, [experimentId]);
-
 
   useEffect(() => {
     if (image_filename) {

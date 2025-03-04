@@ -21,13 +21,6 @@ export default function PhotoLab() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [caption, setCaption] = useState('')
   const [isFileSelected, setIsFileSelected] = useState(false)
-  
-
-  useEffect(() => {
-    if (!experimentType) {
-      toast.error("No experiment selected.");
-    }
-  }, [experimentType]);
 
   useEffect(() => {
     if (photoLabImageSource) {

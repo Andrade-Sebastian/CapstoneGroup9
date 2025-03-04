@@ -43,10 +43,14 @@ export default function ChartComponent(props: IDataType) {
             console.log( "ECG CHART")
         }  
         else if(props.chart_type === 2){
+            min = 80;
+            max = 98;
             current_data = (ancDataFrame.data2 * 1.8) + 32;
             console.log("TEMP CHART: ", current_data);
         }
         else if(props.chart_type === 3){
+            min = 0;
+            max = 2;
             current_data = (ancDataFrame.data1)
             console.log("EDA CHART" , current_data);
         }
@@ -167,7 +171,7 @@ export default function ChartComponent(props: IDataType) {
                     ]}
                     layout = {{
                         width: 1000,
-                        height: 180,
+                        height: 500,
                        // grid: {rows: 1, columns: 2, pattern: 'independent'},
                         //title: 'Temperature over Time',
                         // xaxis: {
