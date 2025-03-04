@@ -20,6 +20,8 @@ import React from 'react';
 import { toNamespacedPath } from 'path';
 import toast, { Toaster } from 'react-hot-toast'
 import { useSessionStore } from '../store/useSessionStore.tsx'
+import { session } from 'electron';
+
 
 export default function WaitingRoom() {
   const navigateTo = useNavigate()
@@ -28,17 +30,21 @@ export default function WaitingRoom() {
     hostName,
     users: emotiBits,
     roomCode,
-    experimentType,
+    experimentId,
     setSessionId,
     setUsers,
+    users,
     addUser,
+    devices,
     removeUser,
+    addDevice,
+    removeDevice,
     experimentTitle,
     experimentDesc
   } = useSessionStore()
   const [nicknames, setNickNames] = useState<string[]>([])
   const [sessionID, setSessionID] = useState('')
-  const [experimentTypeName, setExperimentTypeName] = useState<string>('')
+  const [experimentType, setExperimentType] = useState<string>('')
   const [serialNumber, setSerialNumber] = useState('')
   const [IPAddress, setIPAddress] = useState('')
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -50,19 +56,19 @@ export default function WaitingRoom() {
   )
   
   useEffect(() => {
-    if (experimentType === 1) {
-      setExperimentTypeName('VideoLab')
+    if (experimentId === '1') {
+      setExperimentType('VideoLab')
       setExperimentIcon(<IoVideocam style={{ fontSize: '20px' }} />)
-    } else if (experimentType === 2) {
-      setExperimentTypeName('PhotoLab')
+    } else if (experimentId === '2') {
+      setExperimentType('PhotoLab')
       setExperimentIcon(<TiCamera style={{ fontSize: '20px' }} />)
-    } else if (experimentType === 3) {
-      setExperimentTypeName('GalleryLab')
+    } else if (experimentId === '3') {
+      setExperimentType('GalleryLab')
       setExperimentIcon(<TfiGallery style={{ fontSize: '20px' }} />)
     } else {
       toast.error('Invalid exerimentId received')
     }
-  }, [experimentType])
+  }, [experimentId])
 
   //Modal Handlers
   const handleOpenModal = () => setIsModalOpen(true)
@@ -74,10 +80,18 @@ export default function WaitingRoom() {
   }
 
   //Add EmotiBit Modal
-  const handleOpenModalEmoti = () => setIsModalOpenEmoti(true);
-  const handleCloseModalEmoti = () => setIsModalOpenEmoti(false);
+  const handleOpenModalEmoti = () => {
+    setIsModalOpenEmoti(true);
+
+  }
+
+
+  const handleCloseModalEmoti = () => {
+    console.log("closing modal")
+    setIsModalOpenEmoti(false);
+  }
   
-  const handleConfirmEmoti = () =>{
+  const handleConfirmEmoti = async() =>{
     if(!serialNumber.trim() || !IPAddress.trim()){
       toast.error("Please enter both a Serial Number and an IP Address");
       return
@@ -92,19 +106,49 @@ export default function WaitingRoom() {
           ipAddress: IPAddress
       }
     }
+
+
+    console.log("devices", )
+
+    console.log("------")
+    console.log("sessionID ", sessionID)
+    console.log('Trying to register device with serial number ' + serialNumber + ' and IP Address ' + IPAddress)
+    console.log("socketid", sessionStorage.getItem('socketID'))
+
+    
+    await axios.post(`http://localhost:3000/host/register-device`, {
+      sessionID: sessionID,
+      serialNumber: serialNumber,
+      ipAddress: IPAddress,
+      deviceSocketID: sessionStorage.getItem('socketID')
+    })
+
     addUser(newEmotiBit)
+
+    console.log(users)
     setSerialNumber('');
     setIPAddress('');
     setIsModalOpenEmoti(false);
     }
 
   // Joined EmotiBit Settings Modal
-  const handleRemoveEmoti = () => {
+  const handleRemoveEmoti = async() => {
     if(!selectedEmotiBitId) return;
-    setEmotiBits((prevEmotiBits) =>
-    prevEmotiBits.filter((emotiBit) => emotiBit.userId !== selectedEmotiBitId));
+
+    await axios.post(`http://localhost:3000/host/remove-device`, {
+      serialNumber: serialNumber,
+      ipAddress: IPAddress
+    })
+    
+    console.log("after axios")
+    console.log("removing emotibit")
+
+    removeUser(selectedEmotiBitId);
+
+    // setEmotiBits((prevEmotiBits) =>
+    //   prevEmotiBits.filter((emotiBit) => emotiBit.userId !== selectedEmotiBitId));
     setIsModalOpenSettings(false);
-  }
+  } 
   const handleOpenModalSettings = (userId: string) => {
     setSelectedEmotiBitId(userId);
     setIsModalOpenSettings(true);
@@ -119,10 +163,10 @@ export default function WaitingRoom() {
     console.log("removing user");
     setIsModalOpenSettings(false);
   }
-  const handleUpdate = () => {
-    console.log("updating");
-    setIsModalOpenSettings(false);
-  }
+  // const handleUpdate = () => {
+  //   console.log("updating");
+  //   setIsModalOpenSettings(false);
+  // }
 
   //handleSubmit
 
@@ -164,6 +208,7 @@ export default function WaitingRoom() {
   
   const handleSubmit =() => {
     console.log('in handle submit')
+      //-----HARDCODED FOR TESTING-------
       socket.emit("session-start");
       navigateTo('/activity-room');
 
@@ -194,7 +239,7 @@ export default function WaitingRoom() {
           {/* HARD CODED LAB DESCRIPTION */}
           <WaitingRoomCardComponent
             icon={experimentIcon}
-            labType={experimentTypeName}
+            labType={experimentType}
             labTitle={experimentTitle}
             description={experimentDesc}
           ></WaitingRoomCardComponent>
@@ -257,6 +302,7 @@ export default function WaitingRoom() {
         </div>
         
       </ModalComponent>
+
       <ModalComponent
         onAction={handleConfirmEmoti}
         isOpen={isModalOpenEmoti}
@@ -292,13 +338,13 @@ export default function WaitingRoom() {
       <ModalComponent
         onAction={handleRemoveEmoti}
         onAction2={handleRemoveUser}
-        onAction3={handleUpdate}
+        // onAction3={handleUpdate}
         isOpen={isModalOpenSettings}
         onCancel={handleCloseModalSettings}
         modalTitle="EmotiBit Settings"
         button="Remove EmotiBit"
         button2="Remove User"
-        button3="Update"
+        // button3="Update"
       >
         <div className="mb-6">
           <label htmlFor="serialNumber" className="block text-sm font-medium text-gray-700 mb-2">

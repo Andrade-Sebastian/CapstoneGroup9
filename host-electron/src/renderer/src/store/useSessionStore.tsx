@@ -18,8 +18,10 @@ interface SessionState{
     experimentId: string;
     experimentTitle: string;
     experimentDesc: string;
-    photoLabImageSource: string | null;
     experimentType: number;
+    photoLabImageSource: string | null;
+    devices: any[];
+
 
     setSessionId: (id: string) => void;
     setHostName: (name: string) => void;
@@ -30,8 +32,9 @@ interface SessionState{
     setExperimentId: (id: string) => void;
     setExperimentTitle: (experimentTitle: string) => void;
     setExperimentDesc: (experimentDesc: string) => void;
-    setPhotoLabImageSource: (imageSource: string) => void;
     setExperimentType: (experimentType: number) => void;
+    addDevice: (device: any) => void;
+    removeDevice: (device: any)=> void;
 }
 
 export const useSessionStore = create<SessionState>()(
@@ -45,21 +48,20 @@ export const useSessionStore = create<SessionState>()(
             experimentTitle: '',
             experimentDesc: '',
             photoLabImageSource: '',
+            devices: [],
             experimentType: 0,
 
             setSessionId: (id: string): void => set(() => ({ sessionId: id})),
             setHostName: (name: string): void => set(() => ({ hostName: name})),
-            setUsers: (users: IUser[]): void => set(() => ({ users})),
-            addUser: (user: IUser): void => set((state) => ({ users: [...state.users, user] })),
-            removeUser: (userId: string): void =>
-                set((state) => ({
-                    users: state.users.filter((user) => user.userId !== userId),
-                })),
+            addUser: (user: IUser): void => set((state: SessionState) => ({ users: [...state.users, user] })),
+            removeUser: (userId: string): void => set((state: SessionState) => ({users: state.users.filter((user: IUser) => user.userId !== userId),})),
+            setUsers: (users: IUser[]): void => set(() => ({ users })),
             setRoomCode: (code: string): void => set(() => ({ roomCode: code})),
             setExperimentId: (id: string): void => set(() => ({experimentId: id})),
             setExperimentTitle: (title: string): void => set(() => ({ experimentTitle: title})),
             setExperimentDesc: (desc: string): void => set(() => ({ experimentDesc: desc})),
             setPhotoLabImageSource: (imageSource: string | null): void => set(() => ({ photoLabImageSource: imageSource })),
-            setExperimentType: (experimentType: number): void => set(() => ({experimentType: experimentType}))
-        })
-);
+            addDevice: (device: any): void => set((state) => ({devices: [...state.devices, device]})),
+            removeDevice: (device: any): void => set((state) => ({devices: state.devices.filter((d) => d.deviceId !== device.deviceId)})),
+            setExperimentType: (experimentType: number): void => set(() => ({ experimentType: experimentType}))
+        }));
