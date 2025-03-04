@@ -19,6 +19,7 @@ interface SessionState{
     experimentTitle: string;
     experimentDesc: string;
     photoLabImageSource: string | null;
+    experimentType: number;
 
     setSessionId: (id: string) => void;
     setHostName: (name: string) => void;
@@ -30,6 +31,7 @@ interface SessionState{
     setExperimentTitle: (experimentTitle: string) => void;
     setExperimentDesc: (experimentDesc: string) => void;
     setPhotoLabImageSource: (imageSource: string) => void;
+    setExperimentType: (experimentType: number) => void;
 }
 
 export const useSessionStore = create<SessionState>()(
@@ -43,6 +45,7 @@ export const useSessionStore = create<SessionState>()(
             experimentTitle: '',
             experimentDesc: '',
             photoLabImageSource: '',
+            experimentType: 0,
 
             setSessionId: (id: string): void => set(() => ({ sessionId: id})),
             setHostName: (name: string): void => set(() => ({ hostName: name})),
@@ -57,5 +60,6 @@ export const useSessionStore = create<SessionState>()(
             setExperimentTitle: (title: string): void => set(() => ({ experimentTitle: title})),
             setExperimentDesc: (desc: string): void => set(() => ({ experimentDesc: desc})),
             setPhotoLabImageSource: (imageSource: string | null): void => set(() => ({ photoLabImageSource: imageSource })),
+            setExperimentType: (experimentType: number): void => set(() => ({experimentType: experimentType}))
         })
 );

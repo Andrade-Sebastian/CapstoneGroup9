@@ -18,7 +18,7 @@ export default function VideoLab() {
   const [thumbnail, setThumbnail] = useState<string | null>(null);
   const [videoSource, setVideoSource] = useState<string | null>(null);
   const navigateTo = useNavigate();
-  const {roomCode, experimentId} = useSessionStore();
+  const {roomCode, experimentType} = useSessionStore();
 
   useEffect(() => {
     if(videoSource){
@@ -27,10 +27,10 @@ export default function VideoLab() {
   }, [videoSource]);
 
   useEffect(() => {
-    if(!experimentId){
+    if(!experimentType){
       toast.error("No experiment selected.");
     }
-  }, [experimentId]);
+  }, [experimentType]);
 
   //modal
   const handleOpenModal = () => setIsModalOpen(true);
@@ -60,14 +60,14 @@ export default function VideoLab() {
       //logic for sending code to backend
       //Create the experiment before doing this
       const response = await axios.post('http://localhost:3000/database/video-lab', {
-        experimentID: experimentId,
+        experimentID: experimentType,
         path: videoSource, //null
       })
 
       if (response.status === 200) {
         toast.success('Lab was created successfully', { id: loadingToastId })
         const sessionResponse = await axios.post('http://localhost:3000/host/session/create', {
-          selectedExperimentId: experimentId,
+          selectedExperimentId: experimentType,
           roomCode: roomCode,
           hostSocketId: 'abcd123',
           startTimeStamp: null,
@@ -102,7 +102,7 @@ export default function VideoLab() {
         />
       </div>
       <div className="flex flex-col items-center justify-center w-full md:w-3/5 lg:w-3/5 p-6">
-      <p className="text-lg text-gray-600"> Experiment ID: {experimentId || "None"}</p>
+      <p className="text-lg text-gray-600"> Experiment ID: {experimentType || "None"}</p>
       <p className="text-lg text-gray-600"> Room Code: {roomCode || "None"}</p>
         <form onSubmit={handleSubmit} className="w-full max-w-md">
           <div className="mb-6">

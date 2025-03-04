@@ -11,13 +11,17 @@ import { Divider } from "@heroui/divider";
 import ChartComponent from "../Components/ChartComponent.tsx";
 import { useJoinerStore } from "../hooks/stores/useJoinerStore.ts";
 import React from "react";
+import { stringify } from "postcss";
+import { useNavigate } from "react-router-dom";
 
 export default function ActiveExperiment() {
   const [selectedButton, setSelectedButton] = useState("heartRate");
   const [activeTab, setActiveTab] = useState("images");
   const [activeChart, setActiveChart] = useState("heartRateChart");
   const [recievedData, setRecievedData] = useState<number[]>([]);
-  const { isConnected, serial, nickname, roomCode, experimentId, experimentTitle, experimentDesc} = useJoinerStore()
+  const [photoPath, setPhotoPath] = useState("");
+  const { isConnected, serial, nickname, roomCode, experimentId, experimentTitle, experimentDesc} = useJoinerStore();
+  const navigateTo = useNavigate();
 
   useEffect(() => {
     console.log("Running active experiment");
@@ -26,8 +30,13 @@ export default function ActiveExperiment() {
       const response = await axios.get(`http://localhost:3000/joiner/getPhoto/${experimentId}`)
       .then((response) => {
         console.log("PHOTO LAB RESPONSE RECIEVED: ", response);
+        setPhotoPath(response.data.path);
       })
-    };
+    }
+
+    socket.on("end-experiment", () => {
+      navigateTo('/');
+    });
 
     getPhotoInfo();
 
@@ -41,9 +50,10 @@ export default function ActiveExperiment() {
     //   }
     // });
     return () => {
+      socket.off("end-experiment");
       //socket.off("update");
     };
-  }, [recievedData]);
+  }, []);
 
   return (
     <div className="flex h-screen bg-white p-4">
@@ -51,8 +61,8 @@ export default function ActiveExperiment() {
       <div className="flex flex-col items-center w-3/4 p-auto bg-white shadow-md rounded-lg">
         <div className="flex justify-center w-full">
           <img
-            src="https://www.usatoday.com/gcdn/authoring/authoring-images/2024/08/19/USAT/74862648007-getty-images-2087314411.jpg?crop=1023,576,x0,y53&width=660&height=371&format=pjpg&auto=webp"
-            alt="obama"
+            src={photoPath}
+            alt="a photo"
             className="rounded-lg w-full max-w-lg h-auto"
           />
         </div>

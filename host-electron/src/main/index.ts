@@ -34,7 +34,7 @@ app.whenReady().then(() => {
     type: 'main',
     label: 'main'
   })
-  createMainWindow()
+
   // createProcessWindow("1234", "69")
   // 4343 is the argument that will be passed to the process window
   // createProcessWindow('/process/', '4343')

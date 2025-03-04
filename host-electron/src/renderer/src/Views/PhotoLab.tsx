@@ -12,7 +12,7 @@ import PhotoInputForm from '@renderer/components/PhotoInputForm'
 
 export default function PhotoLab() {
   const { //Global state
-    experimentId,
+    experimentType,
     experimentTitle,
     experimentDesc,
     photoLabImageSource,
@@ -24,10 +24,10 @@ export default function PhotoLab() {
   
 
   useEffect(() => {
-    if (!experimentId) {
+    if (!experimentType) {
       toast.error("No experiment selected.");
     }
-  }, [experimentId]);
+  }, [experimentType]);
 
   useEffect(() => {
     if (photoLabImageSource) {
