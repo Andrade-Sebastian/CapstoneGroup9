@@ -44,19 +44,23 @@ const router = createBrowserRouter([
       },
       {
         path: "enter-password",
-        element: <PrivateRoute><EnterPassword /></PrivateRoute>
+        // element: <PrivateRoute><EnterPassword /></PrivateRoute>
+        element: <EnterPassword/>
       },
       {
         path: "connect-emotibit",
-        element: <PrivateRoute><ConnectEmotiBit /></PrivateRoute>
+        //element: <PrivateRoute><ConnectEmotiBit /></PrivateRoute>
+        element: <ConnectEmotiBit/>
       },
       {
         path: "waiting-room",
-        element: <PrivateRoute><WaitingRoom /></PrivateRoute>
+        //element: <PrivateRoute><WaitingRoom /></PrivateRoute>
+        element: <WaitingRoom/>
       },
       {
         path:"active-experiment",
-        element: <PrivateRoute><ActiveExperiment /></PrivateRoute>
+        // element: <PrivateRoute><ActiveExperiment /></PrivateRoute>
+        element: <ActiveExperiment/>
       },
   ]
       
