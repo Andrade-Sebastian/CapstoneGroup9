@@ -179,7 +179,7 @@ export default function WaitingRoom() {
       setExperimentType('GalleryLab')
       setExperimentIcon(<TfiGallery style={{ fontSize: '20px' }} />)
     } else {
-      toast.error('Invalid experimentid received')
+      console.log("Invalid experiment ID")
     }
   }, [experimentId])
   return (

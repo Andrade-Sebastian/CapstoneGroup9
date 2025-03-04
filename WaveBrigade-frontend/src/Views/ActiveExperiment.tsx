@@ -13,6 +13,7 @@ import { useJoinerStore } from "../hooks/stores/useJoinerStore.ts";
 import React from "react";
 import { stringify } from "postcss";
 import { useNavigate } from "react-router-dom";
+import TabLogo from "../assets/TabLogo.png";
 
 export default function ActiveExperiment() {
   const [selectedButton, setSelectedButton] = useState("heartRate");
@@ -61,8 +62,7 @@ export default function ActiveExperiment() {
       <div className="flex flex-col items-center w-3/4 p-auto bg-white shadow-md rounded-lg">
         <div className="flex justify-center w-full">
           <img
-            src={photoPath}
-            alt="a photo"
+            src={TabLogo}
             className="rounded-lg w-full max-w-lg h-auto"
           />
         </div>

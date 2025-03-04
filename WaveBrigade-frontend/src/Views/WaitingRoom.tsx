@@ -102,7 +102,7 @@ export default function WaitingRoom() {
         }
       }
       catch(error){
-        toast.error("Failed to get experiment id")
+        // toast.error("Failed to get experiment id")
         console.log("Error retrieving experiment id in joiner fe")
       }
     }

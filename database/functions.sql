@@ -365,7 +365,7 @@ BEGIN
 		           usr.frontendsocketid, usr.leftsession, usr.userrole
 		    FROM Device dev
 		    LEFT JOIN "User" usr ON usr.device = dev.deviceid
-		    	WHERE usr.userid = user_id
+		    	WHERE usr.userid = user_id;
 END
 $$ LANGUAGE plpgsql;
 
