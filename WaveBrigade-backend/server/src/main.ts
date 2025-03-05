@@ -41,6 +41,7 @@ import joinerRouter from "./routes/joiner_routes.ts"
 import session_handlers from "./handlers/session_handlers.ts";
 import experimentRouter from "./routes/experiment_routes.ts";
 import databaseRouter from "./routes/database_routes.ts"
+import path from 'path';
 const app = express();
 // app.get('/get-ip', (req, res) => {
 //     const ipAddress = req.headers['x-forwarded-for'] || req.ip;
@@ -57,6 +58,7 @@ app.use("/host", hostRouter);
 app.use("/joiner", joinerRouter); 
 app.use("/database", databaseRouter)
 app.use("/experiment", experimentRouter);
+app.use('/media', express.static(path.join(__dirname, 'media')));
 
 import { Request, Response } from "express";
 

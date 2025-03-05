@@ -16,18 +16,29 @@ import { error } from 'console'
 import toast, { Toaster } from 'react-hot-toast'
 import { useNavigate } from 'react-router-dom'
 import { useSessionStore } from '../store/useSessionStore.tsx'
-import React from 'react';
-import useBrainflowManager from '../hooks/useBrainflowManager.ts';
+import React from 'react'
+import useBrainflowManager from '../hooks/useBrainflowManager.ts'
 import { io } from 'socket.io-client'
 
 export default function WaitingRoom() {
   const location = useLocation()
   // const { nickName, roomCode, labID, name, description, imageUrl } = location.state || {}
-  const { users, roomCode, experimentId, addUser, removeUser, experimentTitle, experimentDesc, hostName } = useSessionStore(); 
-  const { handleHostEndSession } = useBrainflowManager();
+  const {
+    users,
+    roomCode,
+    experimentId,
+    experimentType,
+    setExperimentType,
+    experimentTypeString,
+    addUser,
+    removeUser,
+    experimentTitle,
+    experimentDesc,
+    hostName
+  } = useSessionStore()
+  const { handleHostEndSession } = useBrainflowManager()
   const [nicknames, setNickNames] = useState<string[]>([])
   const [sessionID, setSessionID] = useState('')
-  const [experimentType, setExperimentType] = useState<string>('')
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [serialNumber, setSerialNumber] = useState('')
   const [IPAddress, setIPAddress] = useState('')
@@ -99,10 +110,10 @@ export default function WaitingRoom() {
   }
 
   function handleSubmit() {
-    handleHostEndSession(); //process destruction for all users 
+    handleHostEndSession() //process destruction for all users
     console.log('in handle submit')
-    
-    socket.emit("end-experiment")
+
+    socket.emit('end-experiment')
     setTimeout(() => {
       //-----HARDCODED FOR TESTING-------
       navigateTo('/summary')
@@ -169,19 +180,16 @@ export default function WaitingRoom() {
     return () => clearInterval(interval)
   }, [sessionID]) //Don't fetch any data until sessionID is set
   useEffect(() => {
-    if (experimentId === '1') {
-      setExperimentType('VideoLab')
+    if (experimentType === 1) {
       setExperimentIcon(<IoVideocam style={{ fontSize: '20px' }} />)
-    } else if (experimentId === '2') {
-      setExperimentType('PhotoLab')
+    } else if (experimentType === 2) {
       setExperimentIcon(<TiCamera style={{ fontSize: '20px' }} />)
-    } else if (experimentId === '3') {
-      setExperimentType('GalleryLab')
+    } else if (experimentType === 3) {
       setExperimentIcon(<TfiGallery style={{ fontSize: '20px' }} />)
     } else {
-      console.log("Invalid experiment ID")
+      console.log('Invalid experiment ID')
     }
-  }, [experimentId])
+  }, [experimentType])
   return (
     <div className="flex flex-col items-center justify-center mx-8">
       <Toaster position="top-right" />
@@ -208,14 +216,13 @@ export default function WaitingRoom() {
           {/* HARD CODED LAB DESCRIPTION */}
           <WaitingRoomCardComponent
             icon={experimentIcon}
-            labType={experimentType}
+            labType={experimentTypeString}
             labTitle={experimentTitle}
             description={experimentDesc}
           ></WaitingRoomCardComponent>
         </div>
         <div className="w-full flex flex-col mt-6">
           <h2 className="text-xl lg:text-2xl font-semibold text-gray-800 mb-4">
-            {' '}
             Connected EmotiBits
           </h2>
           <div className="flex-col gap-4 overflow-y-auto max-h-[300px] md:max-h-[400px] p-4 border rounded-md shadow-md ">

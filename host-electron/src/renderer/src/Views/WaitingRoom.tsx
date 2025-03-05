@@ -30,7 +30,9 @@ export default function WaitingRoom() {
     hostName,
     users: emotiBits,
     roomCode,
-    experimentId,
+    experimentType,
+    experimentTypeString,
+    setExperimentTypeString,
     setSessionId,
     setUsers,
     users,
@@ -44,7 +46,6 @@ export default function WaitingRoom() {
   } = useSessionStore()
   const [nicknames, setNickNames] = useState<string[]>([])
   const [sessionID, setSessionID] = useState('')
-  const [experimentType, setExperimentType] = useState<string>('')
   const [serialNumber, setSerialNumber] = useState('')
   const [IPAddress, setIPAddress] = useState('')
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -56,19 +57,19 @@ export default function WaitingRoom() {
   )
   
   useEffect(() => {
-    if (experimentId === '1') {
-      setExperimentType('VideoLab')
+    if (experimentType === 1) {
+      setExperimentTypeString('VideoLab')
       setExperimentIcon(<IoVideocam style={{ fontSize: '20px' }} />)
-    } else if (experimentId === '2') {
-      setExperimentType('PhotoLab')
+    } else if (experimentType === 2) {
+      setExperimentTypeString('PhotoLab')
       setExperimentIcon(<TiCamera style={{ fontSize: '20px' }} />)
-    } else if (experimentId === '3') {
-      setExperimentType('GalleryLab')
+    } else if (experimentType === 3) {
+      setExperimentTypeString('GalleryLab')
       setExperimentIcon(<TfiGallery style={{ fontSize: '20px' }} />)
     } else {
       console.log("Invalid experiment type");
     }
-  }, [experimentId])
+  }, [experimentType])
 
   //Modal Handlers
   const handleOpenModal = () => setIsModalOpen(true)
@@ -236,7 +237,7 @@ export default function WaitingRoom() {
           {/* HARD CODED LAB DESCRIPTION */}
           <WaitingRoomCardComponent
             icon={experimentIcon}
-            labType={experimentType}
+            labType={experimentTypeString}
             labTitle={experimentTitle}
             description={experimentDesc}
           ></WaitingRoomCardComponent>

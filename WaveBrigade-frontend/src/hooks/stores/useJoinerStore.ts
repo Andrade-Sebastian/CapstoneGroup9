@@ -48,6 +48,9 @@ interface JoinerState{
     experimentId: number;
     experimentTitle: string;
     experimentDesc: string;
+    experimentType: number;
+    experimentTypeString: string;
+    experimentPath: string;
     users: Array<IUser>;
     sessionId: string;
     secret: string | undefined;
@@ -62,9 +65,12 @@ interface JoinerState{
     setExperimentId: (id: number) => void;
     setExperimentTitle: (experimentTitle: string) => void;
     setExperimentDesc: (experimentDesc: string) => void;
+    setExperimentType: (experimentType: number) => void;
     setUsers: (users: Array<IUser>) => void;
     setSessionId: (id: string) => void;
     setSecret: (secret: string) => void;
+    setExperimentTypeString: (experimentTypeString: string) => void;
+    setExperimentPath: (experimentPath: string) => void;
 }
 
 export const useJoinerStore = create<JoinerState>()(
@@ -79,9 +85,14 @@ export const useJoinerStore = create<JoinerState>()(
         experimentId: 0,
         experimentTitle: '',
         experimentDesc: '',
+        experimentType: 0,
+        experimentTypeString: '',
+        experimentPath: '',
         users: [],
         sessionId: '',
         secret: undefined,
+        
+        
 
         setJoinerId: (id:string): void => set(() => ({ joinerId: id})),
         setNickname: (nickname: string | null): void => set(() => ({nickname})),
@@ -93,7 +104,11 @@ export const useJoinerStore = create<JoinerState>()(
         setExperimentId: (id: number): void => set(() => ({experimentId: id})),
         setExperimentTitle: (title: string): void => set(() => ({ experimentTitle: title})),
         setExperimentDesc: (desc: string): void => set(() => ({ experimentDesc: desc})),
+        setExperimentType: (type: number): void => set(() =>({experimentType: type})),
         setSecret: (secret: string): void => set(() => ({secret})),
         setUsers: (users: Array<IUser>): void => set(() => ({users: users})),
-        setSessionId: (id: string): void => set(() => ({sessionId: id}))
+        setSessionId: (id: string): void => set(() => ({sessionId: id})),
+        setExperimentTypeString: (experimentTypeString: string): void => set(() => ({experimentTypeString: experimentTypeString})),
+        setExperimentPath: (experimentPath: string): void => set(() => ({experimentPath: experimentPath}))
+        
 }));
