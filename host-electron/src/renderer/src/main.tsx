@@ -82,8 +82,8 @@ const router = createBrowserRouter([
     ]
   },
   {
-    path: "/activity",
-    element: <ActivityRoom/>,
+    path: "/activity/:sessionId/:userId/:experimentType/",
+    element: <ActivityViewer/>,
     children:[
       {
         path: "photo-lab",

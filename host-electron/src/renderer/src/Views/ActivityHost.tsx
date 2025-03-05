@@ -20,6 +20,7 @@ import React from 'react'
 import useBrainflowManager from '../hooks/useBrainflowManager.ts'
 import { io } from 'socket.io-client'
 
+
 export default function ActivityHost() {
   const {
     sessionId,
@@ -49,6 +50,7 @@ export default function ActivityHost() {
   const [isModalOpenEmoti, setIsModalOpenEmoti] = useState(false)
   const [isModalOpenSettings, setIsModalOpenSettings] = useState(false)
   const [selectedEmotiBitId, setSelectedEmotiBitId] = useState<string | null>(null)
+  const [userObjects, setUserObjects] = useState<Array<IUser>>([])
   const navigateTo = useNavigate()
   const [experimentIcon, setExperimentIcon] = useState<JSX.Element>(
     <CiPlay1 style={{ fontSize: '20px' }} />
@@ -61,6 +63,7 @@ export default function ActivityHost() {
     handleSubmit()
     handleCloseModal()
   }
+  const ipc = window.api;
 
   //Add EmotiBit Modal
   const handleOpenModalEmoti = () => setIsModalOpenEmoti(true)
@@ -110,6 +113,10 @@ export default function ActivityHost() {
   const handleUpdate = () => {
     console.log('updating')
     setIsModalOpenSettings(false)
+  }
+
+  const handleViewUser = (userId, experimentType) => {
+    ipc.send("activity:viewUser", sessionId, userId, experimentType)
   }
 
   function handleSubmit() {
@@ -173,6 +180,7 @@ export default function ActivityHost() {
         }
 
         setNickNames(nicknames)
+        setUserObjects(response.data.users)
       } catch (error) {
         console.error('Error fetching users:', error)
       }
@@ -256,11 +264,12 @@ export default function ActivityHost() {
       </div>
       <Divider className="my-6" />
       <div className="flex justify-center space-x-8 text-lg font-medium text-gray-800">
-        <button type='button'>
-        {nicknames.map((name, index) => (
-          <p key={index}>{name}</p>
+        {userObjects.map((user, index) => (
+          <button key={user.userId} onClick={() => handleViewUser(user.userId, experimentType)}>
+          <p>{user.nickname}</p>
+          </button>
         ))}
-        </button>
+        
       </div>
       <div className="flex gap-10 items-center justify-center">
         <button

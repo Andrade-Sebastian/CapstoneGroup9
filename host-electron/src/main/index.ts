@@ -36,7 +36,7 @@ app.whenReady().then(() => {
     label: 'main'
   })
 
-  // createProcessWindow("1234", "69")
+
   // 4343 is the argument that will be passed to the process window
   // createProcessWindow('/process/', '4343')
 
@@ -65,7 +65,7 @@ app.on('window-all-closed', () => {
 })
 
 function handleViewUser(
-  event: Electron.IpcRendererEvent, sessionId: string, userId: string, experimentType: number
+  event: Electron.IpcMainEvent, sessionId: string, userId: string, experimentType: number
 ){
   createProcessWindow(sessionId, userId, experimentType);
 }
@@ -183,4 +183,4 @@ ipcMain.on(
 )
 ipcMain.on('echo-server:destroy-user', processDestroyer);
 ipcMain.on('echo-server:status', processStatus);
-//ipcMain.on('activity:viewUser', )
+ipcMain.on('activity:viewUser', handleViewUser)

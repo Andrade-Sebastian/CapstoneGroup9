@@ -54,7 +54,21 @@ function createProcessWindow(sessionId: string, userId: string, experimentType: 
     return { action: 'deny' }
   })
 
-  const activityRoute = `${process.env['ELECTRON_RENDERER_URL']}/activity/${sessionId}/${userId}`
+  let activityRoute = ""
+
+  if(experimentType === 1){
+    activityRoute = `/activity/${sessionId}/${userId}/video-lab`
+  }
+  else if(experimentType ===2){
+    activityRoute = `/activity/${sessionId}/${userId}/photo-lab`
+  }
+  else if(experimentType === 3){
+    activityRoute = `/activity/${sessionId}/${userId}/gallery-lab`
+  }
+  else{
+    console.log("Invalid experiment type")
+  }
+
   const processWindowURL =
     is.dev && process.env['ELECTRON_RENDERER_URL']
       ? join(process.env['ELECTRON_RENDERER_URL'], activityRoute)
@@ -62,7 +76,7 @@ function createProcessWindow(sessionId: string, userId: string, experimentType: 
   // HMR for renderer base on electron-vite cli.
   // Load the remote URL for development or the local html file for production.
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
-    processWindow.loadURL(activityRoute)
+    processWindow.loadURL(join(process.env['ELECTRON_RENDERER_URL'], activityRoute))
   } else {
     const buildLocation = `file://${join(__dirname, `../renderer/index.html#/${activityRoute}`)}`
     processWindow.loadURL(buildLocation)
