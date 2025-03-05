@@ -3,6 +3,7 @@ import { electronApp, optimizer } from '@electron-toolkit/utils'
 import { spawn } from 'child_process'
 import createMainWindow from './main_window.ts'
 import ActivitySingleton from './activitySingleton.ts'
+import createProcessWindow from './activity_window.ts'
 
 
 export const windows:Array<{
@@ -62,6 +63,12 @@ app.on('window-all-closed', () => {
     app.quit()
   }
 })
+
+function handleViewUser(
+  event: Electron.IpcRendererEvent, sessionId: string, userId: string, experimentType: number
+){
+  createProcessWindow(sessionId, userId, experimentType);
+}
 
 function spawnBrainFlow(
   emotibitIpAddress: string,
@@ -176,3 +183,4 @@ ipcMain.on(
 )
 ipcMain.on('echo-server:destroy-user', processDestroyer);
 ipcMain.on('echo-server:status', processStatus);
+//ipcMain.on('activity:viewUser', )

@@ -54,8 +54,6 @@ export default function ActiveExperiment() {
     });
 
     getPhotoInfo();
-    console.log("PLEAAAAAAAAAAAAAAAASE", photoPath);
-    console.log("Please work", experimentPath)
     setPhotoPath(experimentPath)
     console.log("GOOOOOOO", photoPath)
 
@@ -73,13 +71,29 @@ export default function ActiveExperiment() {
     };
   }, []);
 
+  useEffect(() =>{
+    const fetchStoredPhoto = async () =>{
+      const filename = experimentPath.split("/").pop();
+      try{
+          const response = await axios.get(`http://localhost:3000/get-photo/${filename}`);
+          if(response.status === 200){
+            console.log("Fetched image path:", response.config.url);
+            setPhotoPath(response.config.url);
+          }
+      }
+      catch(error){
+        console.log("Error retrieving image:", error);
+      }
+    };
+    fetchStoredPhoto();
+  },[experimentPath, setPhotoPath]);
+
   return (
     <div className="flex h-screen bg-white p-4">
       {/* picture  */}
       <div className="flex flex-col items-center w-3/4 p-auto bg-white shadow-md rounded-lg">
         <div className="flex justify-center w-full">
-          <p> Bruh</p> <p> {experimentPath}</p>
-          <img src={`../../../WaveBrigade-backend/server/src/media/photo-lab/${experimentPath}`} className="rounded-lg w-full max-w-lg h-auto" />
+          <img src={photoPath} className="rounded-lg w-full max-w-lg h-auto" alt="Experiment Image" />
         </div>
         {/* Chart stuff*/}
         <div className="w-full mt-4 bg-gray-200 h-auto rounded-md flex flex-col items-center justify-center text-gray-500 p-4">

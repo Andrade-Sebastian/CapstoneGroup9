@@ -20,21 +20,25 @@ import React from 'react'
 import useBrainflowManager from '../hooks/useBrainflowManager.ts'
 import { io } from 'socket.io-client'
 
-export default function WaitingRoom() {
-  const location = useLocation()
-  // const { nickName, roomCode, labID, name, description, imageUrl } = location.state || {}
+export default function ActivityHost() {
   const {
-    users,
+    sessionId,
+    hostName,
+    users: emotiBits,
     roomCode,
-    experimentId,
     experimentType,
-    setExperimentType,
     experimentTypeString,
+    setExperimentTypeString,
+    setSessionId,
+    setUsers,
+    users,
     addUser,
+    devices,
     removeUser,
+    addDevice,
+    removeDevice,
     experimentTitle,
-    experimentDesc,
-    hostName
+    experimentDesc
   } = useSessionStore()
   const { handleHostEndSession } = useBrainflowManager()
   const [nicknames, setNickNames] = useState<string[]>([])
@@ -45,7 +49,6 @@ export default function WaitingRoom() {
   const [isModalOpenEmoti, setIsModalOpenEmoti] = useState(false)
   const [isModalOpenSettings, setIsModalOpenSettings] = useState(false)
   const [selectedEmotiBitId, setSelectedEmotiBitId] = useState<string | null>(null)
-  const [emotiBits, setEmotiBits] = useState<IUser[]>(location.state?.emotiBits || [])
   const navigateTo = useNavigate()
   const [experimentIcon, setExperimentIcon] = useState<JSX.Element>(
     <CiPlay1 style={{ fontSize: '20px' }} />
@@ -153,11 +156,12 @@ export default function WaitingRoom() {
   }, [])
 
   useEffect(() => {
-    if (!sessionID) return
+    if (!useSessionStore.getState().sessionId) return
 
+    setSessionID(useSessionStore.getState().sessionId)
     const fetchUsers = async () => {
       try {
-        console.log('Trying to get users from session ' + sessionID)
+        console.log('Trying to get users from session ' + sessionID);
         const response = await axios.get(`http://localhost:3000/joiner/room-users/${sessionID}`)
         const users = response.data.users //Array of IUser objects
 
@@ -179,6 +183,7 @@ export default function WaitingRoom() {
 
     return () => clearInterval(interval)
   }, [sessionID]) //Don't fetch any data until sessionID is set
+
   useEffect(() => {
     if (experimentType === 1) {
       setExperimentIcon(<IoVideocam style={{ fontSize: '20px' }} />)
@@ -251,9 +256,11 @@ export default function WaitingRoom() {
       </div>
       <Divider className="my-6" />
       <div className="flex justify-center space-x-8 text-lg font-medium text-gray-800">
+        <button type='button'>
         {nicknames.map((name, index) => (
           <p key={index}>{name}</p>
         ))}
+        </button>
       </div>
       <div className="flex gap-10 items-center justify-center">
         <button

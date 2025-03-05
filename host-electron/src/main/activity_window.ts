@@ -29,7 +29,7 @@ function loadEchoServerBinary(): string{
   else return //echo_server_binary_x86_64_pc_windows//windows
 }
 
-function createProcessWindow(sessionId: string, userId: string): BrowserWindow {
+function createProcessWindow(sessionId: string, userId: string, experimentType: number): BrowserWindow {
   const processWindow = new BrowserWindow({
     width: 900,
     height: 670,

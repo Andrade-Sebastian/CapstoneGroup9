@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/explicit-function-return-type */
-/* eslint-disable prettier/prettier */
 import { useLocation } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import { CiPlay1 } from 'react-icons/ci'

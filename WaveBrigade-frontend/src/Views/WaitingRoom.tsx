@@ -179,7 +179,7 @@ export default function WaitingRoom() {
     } else {
       console.log("Invalid experiment type");
     }
-  }, [experimentType])
+  }, [experimentType, setExperimentTypeString])
   return (
     <div className="flex flex-col items-center justify-center h-1/2 mx-8">
       <div className="flex flex-col md:flex-row items-start justify-between gap-72">
