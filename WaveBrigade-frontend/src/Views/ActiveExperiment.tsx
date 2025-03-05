@@ -32,6 +32,7 @@ export default function ActiveExperiment() {
       .then((response) => {
         console.log("PHOTO LAB RESPONSE RECIEVED: ", response);
         setPhotoPath(response.data.path);
+        console.log("Photo lab path in activity page:", response.data.path)
       })
     }
 
