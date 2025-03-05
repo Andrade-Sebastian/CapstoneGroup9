@@ -5,7 +5,7 @@ Sends collected data to the backend for manipulation
 
 */
 
-import { BoardIds, BoardShim, BrainFlowInputParams, BrainFlowPresets} from 'brainflow';
+import { BoardIds, BoardShim, BrainFlowInputParams, BrainFlowPresets, DataFilter} from 'brainflow';
 import * as Papa from 'papaparse';
 import * as fs from 'fs';
 import { io, Socket } from 'socket.io-client';
@@ -152,11 +152,10 @@ async function sendData(socket: Socket): Promise<void>
         board.startStream();
         while(true){
             
-            // const passedTime = passedDate.getTime();
-            // console.log("CURRENT: " + currentTime);
-            // console.log("PASSED: " + passedTime);
             const anc_data = board.getBoardData(500, BrainFlowPresets.ANCILLARY_PRESET);
             const aux_data = board.getBoardData(500, BrainFlowPresets.AUXILIARY_PRESET);
+            const heart_rate_data = DataFilter.getHeartRate(aux_data[2], aux_data[1], 500, 8192);
+            console.log("HEART RATE: ", heart_rate_data);
 
             if(anc_data.length !== 0){ //doesn't log data if it is empty
                 ancData = {

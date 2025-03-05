@@ -126,7 +126,7 @@ function prepareBoard() {
 //sends data and operation parameters to backend socket
 function sendData(socket) {
     return __awaiter(this, void 0, void 0, function () {
-        var ancData, auxData, anc_data, aux_data, error_1;
+        var ancData, auxData, anc_data, aux_data, heart_rate_data, error_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -156,6 +156,7 @@ function sendData(socket) {
                     if (!true) return [3 /*break*/, 4];
                     anc_data = board.getBoardData(500, brainflow_1.BrainFlowPresets.ANCILLARY_PRESET);
                     aux_data = board.getBoardData(500, brainflow_1.BrainFlowPresets.AUXILIARY_PRESET);
+                    heart_rate_data = brainflow_1.DataFilter.getHeartRate(aux_data[2], aux_data[1], 500, 8192);
                     if (anc_data.length !== 0) { //doesn't log data if it is empty
                         ancData = {
                             package: anc_data[0][0],
@@ -181,7 +182,7 @@ function sendData(socket) {
                     console.log("DATA :", ancData.data1);
                     //emit to socket an object that holds data and op parameters
                     socket.emit('update', __assign({ ancData: ancData, auxData: auxData }, operationParameters));
-                    return [4 /*yield*/, sleep(100)];
+                    return [4 /*yield*/, sleep(10000)];
                 case 3:
                     _a.sent();
                     return [3 /*break*/, 2];
