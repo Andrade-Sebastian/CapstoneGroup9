@@ -404,6 +404,7 @@ export async function createPhotoLabInDatabase(initializationInfo: IPhotoLabData
 		}
 		
 		console.log("Experiment id", experimentID)
+		return experimentID
 
 
 	}
@@ -411,7 +412,7 @@ export async function createPhotoLabInDatabase(initializationInfo: IPhotoLabData
 		console.log("Error adding photo lab to the database: " + error)
 	}
 
-	return experimentID
+	
 }
 
 export async function createVideoLabInDatabase(initializationInfo: IVideoLabDatabaseInfo): Promise<void>{
@@ -497,7 +498,7 @@ export async function createArticleLabInDatabase(initializationInfo: IArticleLab
 		);
 
 
-		console.log("crcreateExperimentQuery: ", createExperimentQuery.rows[0].experimentid)
+		console.log("createExperimentQuery: ", createExperimentQuery.rows[0].experimentid)
 		experimentID = createExperimentQuery.rows[0].experimentid;
 
 
@@ -505,9 +506,9 @@ export async function createArticleLabInDatabase(initializationInfo: IArticleLab
 		const query = await dbClient.queryObject(`
 			INSERT INTO articlelab ( 
 			experimentid,
-			path, 
+			path
 			) 
-			VALUES ($1, $2, $3);
+			VALUES ($1, $2);
 			`, [
 				experimentID,
 				article,
@@ -543,6 +544,7 @@ export async function createArticleLabInDatabase(initializationInfo: IArticleLab
 		}
 		
 		console.log("Experiment id", experimentID)
+		return experimentID
 
 
 	}
@@ -550,7 +552,7 @@ export async function createArticleLabInDatabase(initializationInfo: IArticleLab
 		console.log("Error adding article lab to the database: " + error)
 	}
 
-	return experimentID
+	
 }
 
 

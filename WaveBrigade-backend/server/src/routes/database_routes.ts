@@ -130,7 +130,8 @@ databaseRouter.post("/photo-lab", upload.single("imageBlob"), async(req: Request
     }
     
     res.status(200).send({
-        "message": "succeess"
+        "message": "succeess",
+        "experimentID": experimentID
     })
 });
         
@@ -253,7 +254,8 @@ databaseRouter.post("/article-lab", upload.single("article"), async(req: Request
     }
     
     res.status(200).send({
-        "message": "succeess"
+        "message": "succeess",
+        "experimentID": experimentID
     })
 })
 
