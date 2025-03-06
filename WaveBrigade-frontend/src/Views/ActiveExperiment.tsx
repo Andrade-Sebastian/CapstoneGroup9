@@ -1,4 +1,3 @@
-import { useLocation } from "react-router-dom";
 import { TbHeartRateMonitor } from "react-icons/tb";
 import { FaThermometerEmpty } from "react-icons/fa";
 import { LuSquareStack } from "react-icons/lu";
@@ -13,8 +12,6 @@ import { useJoinerStore } from "../hooks/stores/useJoinerStore.ts";
 import React from "react";
 import { stringify } from "postcss";
 import { useNavigate } from "react-router-dom";
-import TabLogo from "../assets/TabLogo.png";
-import bruh from "../../../WaveBrigade-backend/server/src/media/photo-lab/"
 
 export default function ActiveExperiment() {
   const [selectedButton, setSelectedButton] = useState("heartRate");

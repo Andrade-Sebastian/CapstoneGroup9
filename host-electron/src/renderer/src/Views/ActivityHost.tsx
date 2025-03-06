@@ -130,27 +130,6 @@ export default function ActivityHost() {
     }, 2000)
   }
 
-  // useEffect(() => {
-  //   // Emit join waiting room
-  //   const userInformation = { nickName, roomCode };
-  //   socket.emit("join_waiting_room", userInformation);
-  //   console.log("Emitting join_waiting_room event with:", JSON.stringify(userInformation));
-
-  //   // Listen for updates to the room's nicknames
-  //   socket.on("receive_names", (names) => {
-  //     if (Array.isArray(names)) {
-  //       console.log("Nicknames received:", names);
-  //       setNickNames(names);
-  //     } else {
-  //       console.error("Did not receive an array of names, received:", names);
-  //     }
-  //   });
-
-  //   return () => {
-  //     socket.off("receive_names");
-  //   };
-  // }, [nickName, roomCode]);
-
   useEffect(() => {
     const getSessionID = async () => {
       const response = await axios.get(`http://localhost:3000/joiner/validateRoomCode/${roomCode}`)
@@ -262,7 +241,8 @@ export default function ActivityHost() {
                  ></EmotiBitList> */}
         </div>
       </div>
-      <Divider className="my-6" />
+      <Divider className="my-10" />
+      <hr></hr>
       <div className="flex justify-center space-x-8 text-lg font-medium text-gray-800">
         {userObjects.map((user, index) => (
           <button key={user.userId} onClick={() => handleViewUser(user.userId, experimentType)}>
@@ -271,7 +251,7 @@ export default function ActivityHost() {
         ))}
         
       </div>
-      <div className="flex gap-10 items-center justify-center">
+      <div className="flex absolute bottom-0 pb-6 gap-10 items-center justify-center">
         <button
           type="button"
           onClick={handleMask}

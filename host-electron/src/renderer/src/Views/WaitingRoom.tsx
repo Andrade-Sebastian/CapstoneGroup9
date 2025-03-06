@@ -267,7 +267,7 @@ export default function WaitingRoom() {
           <p key={index}>{name}</p>
         ))}
       </div>
-      <div className="flex flex-row gap-10 items-center justify-center">
+      <div className="absolute bottom-0 pb-6 flex flex-row gap-10 items-center justify-center">
         <button
           type="button"
           onClick={handleBackButton}

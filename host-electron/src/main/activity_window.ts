@@ -32,9 +32,9 @@ function loadEchoServerBinary(): string{
 function createProcessWindow(sessionId: string, userId: string, experimentType: number): BrowserWindow {
   const processWindow = new BrowserWindow({
     width: 900,
-    height: 670,
+    height: 900,
     show: false,
-    resizable: false,
+    resizable: true,
     title: `SessionID ${sessionId}`,
     autoHideMenuBar: true,
     ...(process.platform === 'linux' ? { icon } : {}),

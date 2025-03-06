@@ -18,6 +18,9 @@ import GalleryLab from './Views/GalleryLab';
 import WaitingRoom from './Views/WaitingRoom';
 import ActivityRoom from './Views/ActivityHost';
 import Summary from './Views/Summary';
+import ActivityHost from './Views/ActivityHost';
+import ActivityStudentView from './Views/ActivityStudentView';
+
 
 const router = createBrowserRouter([
   {
@@ -75,30 +78,25 @@ const router = createBrowserRouter([
         path:"summary",
         element: <Summary/>
       },
-      {
-        path:"activity/:sessionId/:userId",
-        element: <div>"Hello World"</div>
-      },
+    {
+      path: "/activity/:sessionId/:userId/:experimentType/",
+      element: <ActivityStudentView/>,
+      children:[
+        {
+          path: "photo-lab",
+          element: <PhotoLab/>,
+        },
+        {
+          path: "video-lab",
+          element: <VideoLab/>,
+        },
+        {
+          path: "gallery-lab",
+          element: <GalleryLab/>
+        },
     ]
+  },]
   },
-  {
-    path: "/activity/:sessionId/:userId/:experimentType/",
-    element: <ActivityViewer/>,
-    children:[
-      {
-        path: "photo-lab",
-        element: <PhotoLab/>,
-      },
-      {
-        path: "video-lab",
-        element: <VideoLab/>,
-      },
-      {
-        path: "gallery-lab",
-        element: <GalleryLab/>
-      },
-  ]
-},
   {
           path: "create-lab",
           element: <ExperimentCreaterRoot/>,
