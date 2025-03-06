@@ -293,19 +293,6 @@ export default function ArticleInput(props: IArticleInput) {
                     onChange={(e) => set_article_filename(e.target.value)}
                   />
                 </div>
-                <div className="mb-6">
-                  <label htmlFor="caption" className="block text-md font-medium text-gray-700 mb-2">
-                    Caption
-                  </label>
-                  <input
-                    type="text"
-                    id="caption"
-                    className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                    disabled
-                    value={caption}
-                    onChange={(e) => setCaption(e.target.value)}
-                  />
-                </div>
               </ModalComponent>
 </>
 );

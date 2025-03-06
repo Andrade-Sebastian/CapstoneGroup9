@@ -1,7 +1,7 @@
 import React, { ReactElement, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
-import { IoVideocam } from 'react-icons/io5'
+import { IoVideocam, IoNewspaper } from 'react-icons/io5'
 import { RiGalleryFill } from "react-icons/ri";
 import { TiCamera } from 'react-icons/ti'
 import { LiaSatelliteSolid } from 'react-icons/lia'
@@ -51,7 +51,7 @@ export default function HostSelectLabPage() {
       name: 'Article Lab',
       description:
         'Create an article lab experiment. Insert your own pdf or include a link for the experiment.',
-      iconPath: <IoVideocam className="size-8" />
+      iconPath: <IoNewspaper className="size-8" />
     }
   ]
 
@@ -70,7 +70,7 @@ export default function HostSelectLabPage() {
         setExperimentType(3);
         navigateTo('/host/gallery-lab')
       } else if (selectedLab.id === '4'){
-        setExperimentType('4');
+        setExperimentType(4);
         navigateTo('/host/article-lab')
       }else {
         toast.error("Error, select another option.")
