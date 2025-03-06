@@ -2,7 +2,7 @@ import {currentSessions} from "../server.ts";
 import { v4 as uuid} from "npm:uuid";
 import SessionManager from "../sessions_singleton.ts";
 import {client} from "../main.ts";
-import {createSessionInDatabase, getAllSessionIDsFromDB} from "./database.ts";
+import {createSessionInDatabase} from "./database.ts";
 
 let foundDevicesOnNetwork: IDevice[] = [];
 

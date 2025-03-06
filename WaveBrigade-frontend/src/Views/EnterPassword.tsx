@@ -10,6 +10,10 @@ import { eyeOff } from 'react-icons-kit/feather/eyeOff';
 import { eye } from 'react-icons-kit/feather/eye';
 import { Icon } from 'react-icons-kit'
 import toast, { Toaster } from "react-hot-toast";
+import { user } from "@nextui-org/react";
+
+
+
 
 export default function EnterFunction() {
     const navigateTo = useNavigate();
@@ -19,6 +23,8 @@ export default function EnterFunction() {
     const [ password, setPassword]  = useState("");
     const [type, setType] = useState('password')
     const [icon, setIcon] = useState(eyeOff)
+
+    const { userRole, setUserRole} = useJoinerStore();
 
     function handleToggle() {
         //have eye open if text is censored, if not then eye closed
@@ -42,11 +48,24 @@ export default function EnterFunction() {
         //ONCE VALIDATE PASSWORD IS CREATED REMOVE PASSWORD FROM IF STATEMENTS LINES 49 AND 52
         try{
           const isValidPassword = await validatePassword(password);
-          if (isValidPassword) {
-            toast.success("Joining session...");
-            setTimeout(() => {
-              navigateTo('/connect-emotibit')
-            }, 2000)
+          
+          if (isValidPassword === true) {
+            //if the user is a spectator, they will be redirected to the waiting room
+            console.log("User role: ", userRole)
+            if (userRole === "spectator") {
+
+              toast.success("Joining session...");
+              console.log("Joining as spectator...");
+
+              navigateTo('/waiting-room')
+              
+            }
+            else {//Otherwise, navigate to the connect emotibit page
+              toast.success("Joining session...");
+              setTimeout(() => {
+                navigateTo('/connect-emotibit')
+              }, 2000)
+            }
           }
         else{
           toast.error("Connection failed. Looks like we couldn't get you connected. Please check the password and try again.");

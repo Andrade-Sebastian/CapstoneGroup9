@@ -13,15 +13,32 @@ export default function JoinPage() {
   const navigateTo = useNavigate();
   const [sessionID, setSessionID] = useState("")
   const [socketID, setSocketID] = useState("");
-  const { setNickname, setRoomCode, setSessionId} = useJoinerStore();
+  const { userRole,sessionId,
+    setUserRole, setNickname, setRoomCode, setSessionId } = useJoinerStore();
+  
+  
+  const [isJoiningAsSpectator, setisJoiningAsSpectator] = useState(false);
+
+
+  useEffect(() => 
+  {
+    console.log("Joining as spectator? ", isJoiningAsSpectator)
+
+  })
+  useEffect(() => {
+    setUserRole("student"); 
+  }, [])
   //const { launchProcess } = useBrainflowManager();
+
+
 
 	const handleSubmit = async (e) => {
 		setRoomCode(StudentInputRoomCode);
 		e.preventDefault();
 
+    
     // const loadingToastId = toast.loading("Verifying Room Code...");
-  
+    
     if (!StudentInputRoomCode && !nickName) {
       console.error("Please enter both a nickname and a room code...");
       return;
@@ -33,15 +50,41 @@ export default function JoinPage() {
         return;
       }
     }
+  
     
     try{
       const isValidName = await checkNickName(nickName);
       const isValidRoomCode = await validateRoomCode(StudentInputRoomCode);
+
+
       if (isValidRoomCode && isValidName) {
-        toast.success("Room code valid. Password is needed...");
-          setTimeout(() => {
-            navigateTo('/enter-password')
-          }, 2000)
+          if (isJoiningAsSpectator){  
+            toast.success("Room code valid. Password is needed...");
+            //Set global store 'userRole' to 'spectator'
+            setUserRole("spectator");
+            console.log("global user role: ", userRole)
+
+            console.log("before axios call")
+            //check to see if the session allows spectators 
+            console.log("sessionID",sessionID)
+            const response = await axios.get(`http://localhost:3000/joiner/session/allows-spectators/${sessionId}`);
+            console.log("response:" , response.data.allowsSpectators)
+
+            //navigate them to the password page
+            setTimeout(() => {  
+              navigateTo('/enter-password')
+            }
+            , 2000)
+          }
+          else{
+            //when they input the password, navigate to the waiting room 
+            console.log("joiner")
+            setUserRole("student");
+            toast.success("Room code valid. Password is needed...");
+            setTimeout(() => {
+              navigateTo('/enter-password')
+            }, 2000)
+          }
       }
       else if(isValidRoomCode && !isValidName){
         toast.error("Nickname not acceptable. Please refrain from profane language!");
@@ -75,34 +118,40 @@ export default function JoinPage() {
       return false;
     }
   }
-
+  
+  
+  
   const validateRoomCode = async (StudentInputRoomCode) => {
     try {
       console.log("Validating room code..." + StudentInputRoomCode);
       setRoomCode(StudentInputRoomCode); // Store the room code in global state
-
+      
       const response = await axios.get(`http://localhost:3000/joiner/verify-code/${StudentInputRoomCode}`);
       console.log("Session ID: ", response.data.sessionID);
       console.log("Response status: " , response.status)
+
+
       if (response.status === 200) 
-      {
-        console.log("Room code is valid!");
-        setSessionId(response.data.sessionID);  // Store sessionID when room code is valid
-        setRoomCode(StudentInputRoomCode);
-        setNickname(nickName);
-        //launchProcess();
-        console.log("Response from validate room code", response.data)
-        return true;
+        {
+          console.log("Room code is valid!");
+          setSessionId(response.data.sessionID);  // Store sessionID when room code is valid
+          setRoomCode(StudentInputRoomCode);
+          setNickname(nickName);
+          //launchProcess();
+          console.log("Response from validate room code", response.data)
+          return true;
+        }
+        toast.error("Could not validate code due to an API error...")
+        return false;
+      } catch (error) {
+        console.error("Could not validate room code due to an API Error", error);
+        toast.error("Could not validate code due to an API error...")
+        return false;
       }
-      toast.error("Could not validate code due to an API error...")
-      return false;
-    } catch (error) {
-      console.error("Could not validate room code due to an API Error", error);
-      toast.error("Could not validate code due to an API error...")
-      return false;
-    }
-  };
+    };
     
+
+
 
 	return (
 		<div className="flex h-screen">
@@ -114,6 +163,7 @@ export default function JoinPage() {
 					description="We need to know who you are! Enter your name and the room code to get started"
 				/>
 			</div>
+      
 			<div className="flex flex-col items-center justify-center w-2/5">
 				<form onSubmit={handleSubmit} className="w-full max-w-md">
 					<div className="mb-6">
@@ -139,6 +189,16 @@ export default function JoinPage() {
 								value={StudentInputRoomCode}
 							/>
 						</div>
+            <div>
+              <input
+                id="allow-spectators"
+                type="checkbox"
+                className="h-4 w-4"
+                checked={isJoiningAsSpectator}
+                onChange={() => {setisJoiningAsSpectator(!isJoiningAsSpectator); setUserRole(isJoiningAsSpectator ? "spectator" : "student")}}
+              />
+              <label htmlFor="allow-spectators" className=" ml-2 text-sm font-medium text-gray-700 mb-2">Join as Spectator</label> 
+            </div>
 					</div>
 
 					<div className="flex gap-10 items-center justify-center">
