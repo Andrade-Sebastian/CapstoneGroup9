@@ -104,12 +104,12 @@ export default function PhotoInputForm(props: IPhotoInputForm) {
 
       if (response.status === 200) {
         toast.success('Lab was created successfully', { id: loadingToastId })
-
+        const expId = response.data.experimentID
         setExperimentTitle(experimentTitle)
         setExperimentDesc(experimentDesc)
         set_image_filename(photoLabImageSource);
         console.log('sending out some experiment data')
-        socket.emit("experiment-data", { experimentTitle, experimentDesc, experimentId })
+        socket.emit("experiment-data", { experimentTitle, experimentDesc, expId })
         console.log('hopefully sent out some experiment data')
 
         setTimeout(() => {
