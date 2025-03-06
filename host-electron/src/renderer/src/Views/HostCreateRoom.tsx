@@ -138,7 +138,6 @@ export default function HostCreateRoom() {
                 className="w-full p-2 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 onChange={(e) => setPassword(e.target.value)}
                 value={password}
-                placeholder="Password"
               />
 
               <span
@@ -154,7 +153,7 @@ export default function HostCreateRoom() {
               <input
                 type="checkbox"
                 id="allowSpectators"
-                className="h-4 w-4"
+                className="h-4 w-4 accent-[#7F56D9]"
                 checked={allowSpectators}
                 onChange={() => setAllowSpectators(!allowSpectators)}
               />
