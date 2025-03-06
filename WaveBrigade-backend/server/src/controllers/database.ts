@@ -50,6 +50,28 @@ export interface IRegisterDeviceInfo {
 	deviceSocketID: string
 }
 
+interface ISessionCreationParams{
+	hostSocketID: string,
+	isPasswordProtected: boolean | null,
+	password: string | null,
+	isSpectatorsAllowed: boolean | null,
+}
+
+export interface IPhotoLabDatabaseInfo {
+	experimentTitle: string, 
+	experimentDescription: string | null,
+	experimentCaptions: string | null,
+	imageBlob: string,
+	socketID: string
+}
+
+export interface IArticleLabDatabaseInfo{
+	experimentTitle: string,
+	experimentDescription: string | null,
+	article: string,
+	socketID: string
+}
+
 
 export async function makeDeviceAvailable(deviceID: number)
 {
@@ -224,14 +246,6 @@ export async function validateRoomCode(roomCode:string)
 	}
 }
 
-interface ISessionCreationParams{
-	hostSocketID: string,
-	isPasswordProtected: boolean | null,
-	password: string | null,
-	isSpectatorsAllowed: boolean | null,
-}
-
-
 // Author: Emanuelle Pelayo
 // Purpose: Adds a session to the database
 export async function createSessionInDatabase(initializationInfo: ISessionCreationParams): Promise<string> {
@@ -266,14 +280,6 @@ export async function createSessionInDatabase(initializationInfo: ISessionCreati
 		await dbClient.end();
 		//console.log("(Database.ts): finished ending database connection")
 	}
-}
-
-export interface IPhotoLabDatabaseInfo {
-	experimentTitle: string, 
-	experimentDescription: string | null,
-	experimentCaptions: string | null,
-	imageBlob: string;
-	socketID: string;
 }
 
 
@@ -464,6 +470,87 @@ export async function createGalleryLabInDatabase(initializationInfo: IGalleryLab
 	catch(error){
 		console.log("Error adding gallery lab to the database: " + error)
 	}
+}
+
+export async function createArticleLabInDatabase(initializationInfo: IArticleLabDatabaseInfo, sessionID: null | number=null ): Promise<number>{
+	const {
+		experimentTitle,
+		experimentDescription,
+		article,
+		socketID
+	} = initializationInfo;
+
+	console.log(socketID);
+	let experimentID = null;
+
+	try{
+		await dbClient.connect();
+		
+		const createExperimentQuery = await dbClient.queryObject(`
+			INSERT INTO experiment(name, description)
+			VALUES ($1, $2)
+			returning experimentid;`, 
+			[
+				experimentTitle,
+				experimentDescription
+			]
+		);
+
+
+		console.log("crcreateExperimentQuery: ", createExperimentQuery.rows[0].experimentid)
+		experimentID = createExperimentQuery.rows[0].experimentid;
+
+
+		//Add a photo lab 
+		const query = await dbClient.queryObject(`
+			INSERT INTO articlelab ( 
+			experimentid,
+			path, 
+			) 
+			VALUES ($1, $2, $3);
+			`, [
+				experimentID,
+				article,
+				]
+		);
+
+		console.log("CreateGalleryLabInDatabase() -> socketID: ", socketID)
+		//get session id from host socket id 
+		let sessionID = -1
+
+		try{
+			sessionID = await getSessionIDFromSocketID(socketID);
+			
+		}catch(error)
+		{
+			console.log(error);;
+		
+		}
+		console.log()
+		console.log("CreateGalleryLabInDatabase() -> sessionID, experimentID", sessionID, experimentID)
+
+		console.log("Updating session")
+		//relate the experiment to the session		
+		try{
+			await dbClient.connect()
+			const updateSessionQuery = await dbClient.queryObject(`
+				UPDATE session
+				SET experimentid = ${experimentID}
+				WHERE sessionid = ${sessionID}; `)
+		}catch(error)
+		{
+			console.log(error)
+		}
+		
+		console.log("Experiment id", experimentID)
+
+
+	}
+	catch(error){
+		console.log("Error adding article lab to the database: " + error)
+	}
+
+	return experimentID
 }
 
 
