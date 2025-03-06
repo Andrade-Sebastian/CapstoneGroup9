@@ -15,6 +15,7 @@ export default function PhotoLab() {
     experimentType,
     experimentTitle,
     experimentDesc,
+    setExperimentPath,
     photoLabImageSource,
    } = useSessionStore();
 
@@ -41,7 +42,6 @@ export default function PhotoLab() {
       console.error("Error:", error);
     }
   }
-
   async function handleSubmit(e) {
     console.log("image source", photoLabImageSource);
     console.log("caption", caption);

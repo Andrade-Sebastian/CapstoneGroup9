@@ -26,6 +26,7 @@ export default function PhotoInputForm(props: IPhotoInputForm) {
 
   const { //Global state
     experimentId,
+    experimentType,
     roomCode,
     experimentTitle,
     experimentDesc,
@@ -179,7 +180,7 @@ export default function PhotoInputForm(props: IPhotoInputForm) {
   return (
     <>
         <div className="flex flex-col items-center justify-center w-full md:w-3/5 lg:w-3/5 p-6 min-h-[600px] space-y-6 mt-50">
-            <p className="text-lg text-gray-600"> Experiment ID: {experimentId || "None"}</p>
+            <p className="text-lg text-gray-600"> Experiment ID: {experimentType || "None"}</p>
             <p className="text-lg text-gray-600"> Room Code: {roomCode || "None"}</p>
             <form onSubmit={(e) => handleSubmit} className="w-full max-w-md space-y-6" encType='multipart/form-data'>
                 <div className="w-full">

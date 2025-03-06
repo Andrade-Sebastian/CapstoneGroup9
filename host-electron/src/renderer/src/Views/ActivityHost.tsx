@@ -16,25 +16,41 @@ import { error } from 'console'
 import toast, { Toaster } from 'react-hot-toast'
 import { useNavigate } from 'react-router-dom'
 import { useSessionStore } from '../store/useSessionStore.tsx'
-import React from 'react';
-import useBrainflowManager from '../hooks/useBrainflowManager.ts';
+import React from 'react'
+import useBrainflowManager from '../hooks/useBrainflowManager.ts'
 import { io } from 'socket.io-client'
 
-export default function WaitingRoom() {
-  const location = useLocation()
-  // const { nickName, roomCode, labID, name, description, imageUrl } = location.state || {}
-  const { users, roomCode, experimentId, addUser, removeUser, experimentTitle, experimentDesc, hostName } = useSessionStore(); 
-  const { handleHostEndSession } = useBrainflowManager();
+
+export default function ActivityHost() {
+  const {
+    sessionId,
+    hostName,
+    users: emotiBits,
+    roomCode,
+    experimentType,
+    experimentTypeString,
+    setExperimentTypeString,
+    setSessionId,
+    setUsers,
+    users,
+    addUser,
+    devices,
+    removeUser,
+    addDevice,
+    removeDevice,
+    experimentTitle,
+    experimentDesc
+  } = useSessionStore()
+  const { handleHostEndSession } = useBrainflowManager()
   const [nicknames, setNickNames] = useState<string[]>([])
   const [sessionID, setSessionID] = useState('')
-  const [experimentType, setExperimentType] = useState<string>('')
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [serialNumber, setSerialNumber] = useState('')
   const [IPAddress, setIPAddress] = useState('')
   const [isModalOpenEmoti, setIsModalOpenEmoti] = useState(false)
   const [isModalOpenSettings, setIsModalOpenSettings] = useState(false)
   const [selectedEmotiBitId, setSelectedEmotiBitId] = useState<string | null>(null)
-  const [emotiBits, setEmotiBits] = useState<IUser[]>(location.state?.emotiBits || [])
+  const [userObjects, setUserObjects] = useState<Array<IUser>>([])
   const navigateTo = useNavigate()
   const [experimentIcon, setExperimentIcon] = useState<JSX.Element>(
     <CiPlay1 style={{ fontSize: '20px' }} />
@@ -47,6 +63,7 @@ export default function WaitingRoom() {
     handleSubmit()
     handleCloseModal()
   }
+  const ipc = window.api;
 
   //Add EmotiBit Modal
   const handleOpenModalEmoti = () => setIsModalOpenEmoti(true)
@@ -98,37 +115,20 @@ export default function WaitingRoom() {
     setIsModalOpenSettings(false)
   }
 
+  const handleViewUser = (userId, experimentType) => {
+    ipc.send("activity:viewUser", sessionId, userId, experimentType)
+  }
+
   function handleSubmit() {
-    handleHostEndSession(); //process destruction for all users 
+    handleHostEndSession() //process destruction for all users
     console.log('in handle submit')
-    
-    socket.emit("end-experiment")
+
+    socket.emit('end-experiment')
     setTimeout(() => {
       //-----HARDCODED FOR TESTING-------
       navigateTo('/summary')
     }, 2000)
   }
-
-  // useEffect(() => {
-  //   // Emit join waiting room
-  //   const userInformation = { nickName, roomCode };
-  //   socket.emit("join_waiting_room", userInformation);
-  //   console.log("Emitting join_waiting_room event with:", JSON.stringify(userInformation));
-
-  //   // Listen for updates to the room's nicknames
-  //   socket.on("receive_names", (names) => {
-  //     if (Array.isArray(names)) {
-  //       console.log("Nicknames received:", names);
-  //       setNickNames(names);
-  //     } else {
-  //       console.error("Did not receive an array of names, received:", names);
-  //     }
-  //   });
-
-  //   return () => {
-  //     socket.off("receive_names");
-  //   };
-  // }, [nickName, roomCode]);
 
   useEffect(() => {
     const getSessionID = async () => {
@@ -142,11 +142,12 @@ export default function WaitingRoom() {
   }, [])
 
   useEffect(() => {
-    if (!sessionID) return
+    if (!useSessionStore.getState().sessionId) return
 
+    setSessionID(useSessionStore.getState().sessionId)
     const fetchUsers = async () => {
       try {
-        console.log('Trying to get users from session ' + sessionID)
+        console.log('Trying to get users from session ' + sessionID);
         const response = await axios.get(`http://localhost:3000/joiner/room-users/${sessionID}`)
         const users = response.data.users //Array of IUser objects
 
@@ -158,6 +159,7 @@ export default function WaitingRoom() {
         }
 
         setNickNames(nicknames)
+        setUserObjects(response.data.users)
       } catch (error) {
         console.error('Error fetching users:', error)
       }
@@ -168,20 +170,18 @@ export default function WaitingRoom() {
 
     return () => clearInterval(interval)
   }, [sessionID]) //Don't fetch any data until sessionID is set
+
   useEffect(() => {
-    if (experimentId === '1') {
-      setExperimentType('VideoLab')
+    if (experimentType === 1) {
       setExperimentIcon(<IoVideocam style={{ fontSize: '20px' }} />)
-    } else if (experimentId === '2') {
-      setExperimentType('PhotoLab')
+    } else if (experimentType === 2) {
       setExperimentIcon(<TiCamera style={{ fontSize: '20px' }} />)
-    } else if (experimentId === '3') {
-      setExperimentType('GalleryLab')
+    } else if (experimentType === 3) {
       setExperimentIcon(<TfiGallery style={{ fontSize: '20px' }} />)
     } else {
-      console.log("Invalid experiment ID")
+      console.log('Invalid experiment ID')
     }
-  }, [experimentId])
+  }, [experimentType])
   return (
     <div className="flex flex-col items-center justify-center mx-8">
       <Toaster position="top-right" />
@@ -208,14 +208,13 @@ export default function WaitingRoom() {
           {/* HARD CODED LAB DESCRIPTION */}
           <WaitingRoomCardComponent
             icon={experimentIcon}
-            labType={experimentType}
+            labType={experimentTypeString}
             labTitle={experimentTitle}
             description={experimentDesc}
           ></WaitingRoomCardComponent>
         </div>
         <div className="w-full flex flex-col mt-6">
           <h2 className="text-xl lg:text-2xl font-semibold text-gray-800 mb-4">
-            {' '}
             Connected EmotiBits
           </h2>
           <div className="flex-col gap-4 overflow-y-auto max-h-[300px] md:max-h-[400px] p-4 border rounded-md shadow-md ">
@@ -242,13 +241,17 @@ export default function WaitingRoom() {
                  ></EmotiBitList> */}
         </div>
       </div>
-      <Divider className="my-6" />
+      <Divider className="my-10" />
+      <hr></hr>
       <div className="flex justify-center space-x-8 text-lg font-medium text-gray-800">
-        {nicknames.map((name, index) => (
-          <p key={index}>{name}</p>
+        {userObjects.map((user, index) => (
+          <button key={user.userId} onClick={() => handleViewUser(user.userId, experimentType)}>
+          <p>{user.nickname}</p>
+          </button>
         ))}
+        
       </div>
-      <div className="flex gap-10 items-center justify-center">
+      <div className="flex absolute bottom-0 pb-6 gap-10 items-center justify-center">
         <button
           type="button"
           onClick={handleMask}

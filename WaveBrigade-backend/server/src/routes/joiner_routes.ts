@@ -1,14 +1,15 @@
 import express, { Request, Response } from "express";
-import {addDiscoveredDevice, getSessionState, IDevice, createSession, joinSession, joinRoom, leaveRoom} from "../controllers/session_controller.ts";
+import {getSessionState} from "../controllers/session_controller.ts";
 import SessionManager from "../sessions_singleton.ts";
-import { addSocketToSession, removeSocket, getSessionBySocket, socketSessionMap } from "../sessionMappings.ts";
-import axios from "axios";
-import {addUserToSession, getUsersFromSession, validateRoomCode, removeUserFromSession, validDeviceSerial, validatePassword, getPhotoLabInfo} from "../controllers/database.ts";
+import { addSocketToSession } from "../sessionMappings.ts";
+import {addUserToSession, getUsersFromSession, validateRoomCode, removeUserFromSession, validDeviceSerial, validatePassword, getPhotoLabInfo, joinSessionAsSpectator} from "../controllers/database.ts";
 import {Filter} from "npm:bad-words";
 const app = express();
 const joinerRouter = express.Router();
 joinerRouter.use(express.json());
 const filter = new Filter();
+
+
 /*
  .  .  .    .    .  .   .
 .  .   .    .   .      .
@@ -16,6 +17,7 @@ const filter = new Filter();
 .   .  .   .  . .    .  . 
  . . . .  . .  .   .  . . 
 */
+
 
 //stored procedure
 joinerRouter.get("/session/:sessionId", (req: Request, res: Response) => {
@@ -33,6 +35,34 @@ joinerRouter.get("/session/:sessionId", (req: Request, res: Response) => {
         }
     }
 })
+
+joinerRouter.get("/session/allows-spectators/:sessionId", async (req: Request, res: Response) => {
+    const sessionID = req.params.sessionId;
+
+    try{
+        await dbClient.connect()
+
+        const query = await dbClient.queryObject(`SELECT isspectatorsallowed FROM SESSION WHERE sessionid = '${sessionID}'`);
+
+        if(query.rows.length === 0){
+            return res.status(400).send({
+                "message": "Session not found for sessionID: " + sessionID
+            })
+        }
+
+    }catch(error){
+        console.log(error);
+        return res.status(500).send(error);
+    }
+    finally{    
+        await dbClient.end();
+    }
+    
+    return res.status(200).send({
+        "allowsSpectators": true
+    });
+})
+
 
 
 
@@ -64,8 +94,7 @@ joinerRouter.post("/session/join", async (req: Request, res: Response) => {
         console.log("Unable to add user ", error)
     }
 
-}
-)
+})
 
 
 
@@ -211,35 +240,24 @@ joinerRouter.post("/verify-serial", async (req: Request, res: Response) => {
     }
 });
 
-//CHICKEN -> store procedure ?
-joinerRouter.get("/debug", (req: Request, res: Response) => {
-    console.log("in /debug")
-
-    const sessions = SessionManager.getInstance().listSessions()
-    //console.log("Live sessions: " + JSON.stringify(sessions))
-
-    res.status(200).send({
-        message: "in joiner",
-        liveSessions: sessions
-    })
-})
 
 
 import { Client } from "https://deno.land/x/postgres@v0.17.0/mod.ts";
+import { join } from "node:path";
 export const dbClient = new Client({
-  user: "postgres",
-  database: "WB_Database",
-  password: "postgres",
-  hostname: "wb-backend-database",
-  port: 5432,
+    user: "postgres",
+    database: "WB_Database",
+    password: "postgres",
+    hostname: "wb-backend-database",
+    port: 5432,
 });
 
 //change to function
 joinerRouter.get("/session/getInfo/:roomCode", async (req: Request, res: Response) => {
     console.log("In joiner/session/getInfo/:roomCode")
-
+    
     const roomCode = req.params.roomCode;
-
+    
     try{
         await dbClient.connect()
         
@@ -254,40 +272,40 @@ joinerRouter.get("/session/getInfo/:roomCode", async (req: Request, res: Respons
             endtimestamp
             FROM SESSION WHERE roomcode = '${roomCode}'`);
             
-        const result = query.rows[0] as {
-            experimentid: string,
-            roomcode: string,
-            hostsocketid: string,
-            starttimestamp: string,
-            ispasswordprotected: boolean,
-            isspectatorsallowed: boolean,
-            endtimestamp: string | null
-        };
-
-        return res.status(200).send(result)
-
-    } 
-    catch(error: unknown)
-    {
-        console.log(error);
-        return res.status(500).send(error);
-    }
-    finally 
-    {
-        await dbClient.end();
-    }
-
-})
-
+            const result = query.rows[0] as {
+                experimentid: string,
+                roomcode: string,
+                hostsocketid: string,
+                starttimestamp: string,
+                ispasswordprotected: boolean,
+                isspectatorsallowed: boolean,
+                endtimestamp: string | null
+            };
+            
+            return res.status(200).send(result)
+            
+        } 
+        catch(error: unknown)
+        {
+            console.log(error);
+            return res.status(500).send(error);
+        }
+        finally 
+        {
+            await dbClient.end();
+        }
+        
+    })
+    
 joinerRouter.get("/getPhoto/:experimentID", async (req: Request, res: Response) => {
     console.log("In joiner/getPhoto/:experimentID", req.body);
-
+    
     const experimentID = req.params.experimentID;
-
+    
     try{
         const photoInfo = await getPhotoLabInfo(experimentID);
         return res.status(200).send(photoInfo);
-
+        
     }
     catch(error){
         console.log(error);
@@ -298,18 +316,18 @@ joinerRouter.get("/getPhoto/:experimentID", async (req: Request, res: Response) 
 joinerRouter.get("/verify-code/:roomCode", async (req: Request, res: Response) => {
     const roomCode  = req.params.roomCode;
     console.log("Room Code: ", roomCode);
-
-
+    
+    
     try {
         const {
             isValidRoomCode,
             sessionID
         } = await validateRoomCode(roomCode);
-
+        
         if (isValidRoomCode) {
             return res.status(200).json({ 
                 sessionID: sessionID
-             })
+            })
         }
     } catch (error) {
         return res.status(400).json({ error: error });
@@ -319,7 +337,7 @@ joinerRouter.get("/verify-code/:roomCode", async (req: Request, res: Response) =
 joinerRouter.post("/validatePassword", async (req: Request, res: Response) => {
     console.log("In /validatePassword", req.body);
     const {sessionID, password} = req.body;
-
+    
     try{
         const isValidPassword = await validatePassword(sessionID, password);
         if(isValidPassword){
@@ -330,6 +348,68 @@ joinerRouter.post("/validatePassword", async (req: Request, res: Response) => {
         return res.status(400).json({success: false, message: "Invalid password"});
     }
 });
+
+
+joinerRouter.post("/join-as-spectator", async (req: Request, res: Response) => {
+    const {
+        socketID,
+        nickname,
+        roomCode,
+    } = req.body;
+
+    let spectatorInfo = null
+
+    try{
+        const {
+            isValidRoomCode,
+            sessionID
+        } = await validateRoomCode(roomCode);
+        
+        
+        if(isValidRoomCode){
+
+            try{
+                spectatorInfo = await joinSessionAsSpectator(socketID, nickname, roomCode);
+
+            }catch(error){
+                console.log("Error adding user to the session", error)
+            }
+            
+        }
+        else{
+            console.log("(joiner_routes.ts): Invalid room code");
+            
+            res.status(500).send({
+                "message": "Could not add Spectator to the session",
+                "reason": "Invalid Room Code"
+            })
+        }
+
+    }catch(error){
+        console.log(error);
+        res.status(500).send({
+            "message": "Could not add Spectator to the session"
+        })
+    }
+
+
+    res.status(200).send(spectatorInfo);
+})
+
+
+
+
+joinerRouter.get("/debug", (req: Request, res: Response) => {
+
+    res.status(200).send({
+        message: "in joiner"
+    })
+
+})
+
+
+
+
 
 export default joinerRouter;
 

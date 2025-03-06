@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/explicit-function-return-type */
-/* eslint-disable prettier/prettier */
 import { useLocation } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import { CiPlay1 } from 'react-icons/ci'
@@ -30,7 +28,9 @@ export default function WaitingRoom() {
     hostName,
     users: emotiBits,
     roomCode,
-    experimentId,
+    experimentType,
+    experimentTypeString,
+    setExperimentTypeString,
     setSessionId,
     setUsers,
     users,
@@ -44,7 +44,6 @@ export default function WaitingRoom() {
   } = useSessionStore()
   const [nicknames, setNickNames] = useState<string[]>([])
   const [sessionID, setSessionID] = useState('')
-  const [experimentType, setExperimentType] = useState<string>('')
   const [serialNumber, setSerialNumber] = useState('')
   const [IPAddress, setIPAddress] = useState('')
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -56,19 +55,19 @@ export default function WaitingRoom() {
   )
   
   useEffect(() => {
-    if (experimentId === '1') {
-      setExperimentType('VideoLab')
+    if (experimentType === 1) {
+      setExperimentTypeString('VideoLab')
       setExperimentIcon(<IoVideocam style={{ fontSize: '20px' }} />)
-    } else if (experimentId === '2') {
-      setExperimentType('PhotoLab')
+    } else if (experimentType === 2) {
+      setExperimentTypeString('PhotoLab')
       setExperimentIcon(<TiCamera style={{ fontSize: '20px' }} />)
-    } else if (experimentId === '3') {
-      setExperimentType('GalleryLab')
+    } else if (experimentType === 3) {
+      setExperimentTypeString('GalleryLab')
       setExperimentIcon(<TfiGallery style={{ fontSize: '20px' }} />)
     } else {
       console.log("Invalid experiment type");
     }
-  }, [experimentId])
+  }, [experimentType])
 
   //Modal Handlers
   const handleOpenModal = () => setIsModalOpen(true)
@@ -200,7 +199,16 @@ export default function WaitingRoom() {
     return () => clearInterval(interval)
   }, [sessionID]) //Don't fetch any data until sessionID is set
 
-
+  const handleEmptyWaitingRoom = () => {
+    if(nicknames.length === 0){
+      toast.error("Cannot begin experiment. There is no one in the waiting room!")
+      return;
+    }
+    else{
+      toast.success("Beginning experiment...")
+      navigateTo('/activity-room');
+    }
+  }
   
   const handleBackButton = () => {
     navigateTo('/host/select-lab')
@@ -209,9 +217,8 @@ export default function WaitingRoom() {
   const handleSubmit =() => {
     console.log('in handle submit')
       //-----HARDCODED FOR TESTING-------
-      socket.emit("session-start");
-      navigateTo('/activity-room');
-
+    socket.emit("session-start");
+    handleEmptyWaitingRoom();
   }
   return (
     <div className="flex flex-col items-center justify-center px-4 mx:px-8 w-full">
@@ -236,7 +243,7 @@ export default function WaitingRoom() {
           {/* HARD CODED LAB DESCRIPTION */}
           <WaitingRoomCardComponent
             icon={experimentIcon}
-            labType={experimentType}
+            labType={experimentTypeString}
             labTitle={experimentTitle}
             description={experimentDesc}
           ></WaitingRoomCardComponent>
@@ -268,7 +275,7 @@ export default function WaitingRoom() {
           <p key={index}>{name}</p>
         ))}
       </div>
-      <div className="flex flex-row gap-10 items-center justify-center">
+      <div className="absolute bottom-0 pb-6 flex flex-row gap-10 items-center justify-center">
         <button
           type="button"
           onClick={handleBackButton}

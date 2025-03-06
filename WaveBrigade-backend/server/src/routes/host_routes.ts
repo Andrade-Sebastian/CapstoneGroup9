@@ -1,8 +1,7 @@
 import express, { Request, Response } from "npm:express";
-import { createSessionInDatabase, registerDevice, IRegisterDeviceInfo, assignExperimentToSession} from "../controllers/database.ts";
-import { red } from "https://deno.land/std@0.160.0/fmt/colors.ts";
-import { Message } from "https://deno.land/x/postgres@v0.17.0/connection/message.ts";
+import { createSessionInDatabase, registerDevice } from "../controllers/database.ts";
 import { Client } from "https://deno.land/x/postgres@v0.17.0/mod.ts";
+
 const dbClient = new Client({
   user: "postgres",
   database: "WB_Database",
@@ -12,8 +11,10 @@ const dbClient = new Client({
 });
 
 const hostRouter = express.Router();
-hostRouter.use(express.json());
 let experimentData = {}
+
+hostRouter.use(express.json());
+
 
 
 //Author: Emanuelle Pelayo 
@@ -39,15 +40,17 @@ hostRouter.post("/session/create", async (req: Request, res: Response) => {
 })
 
 
+//Purpose: Debugging route to check if the server is running
+//Returns: A message to let the user know that the server is running
 hostRouter.get("/debug", async (req: Request, res: Response) => {
     console.log("At debug | recieved: " + JSON.stringify(req.body));
     
-    return res.status(200).send({
-        message: "Connected to express server"})
+    return res.status(200).send({message: "Connected to express server"});
 })
 
 
-//done
+//Purpose: Register a device in the database
+//Returns: A message to let the user know that the device was registered
 hostRouter.post("/register-device", async(req: Request, res: Response) => {
     const {
         sessionID, 
@@ -61,15 +64,20 @@ hostRouter.post("/register-device", async(req: Request, res: Response) => {
             message: "Missing required fields"
         });
     }
-    registerDevice(req.body);
+
+    await registerDevice(req.body);
     
 
     return res.status(200).send({
-        "message": "In /host/register-device"
+        "message": "In /host/register-device",
+        "created": true
     })
 })
 
 
+//Purpose: Removes a device from the database
+//Returns: A boolean value to let the user know if the device was removed. 
+//True if the device was removed, false if the device was not removed
 hostRouter.post("/remove-device", async (req: Request, res: Response) => {
     const {
         serialNumber,
@@ -108,10 +116,9 @@ hostRouter.post("/remove-device", async (req: Request, res: Response) => {
 })
 
 
-
-
 //Author: Sebastian Andrade
 //Purpose: sending experiment data between host and joiner
+//Returns: A boolean value to let the user know if the experiment data was sent.
 hostRouter.post("/send-experiment", (req: Request, res: Response) => {
     try{
         experimentData = req.body
@@ -127,6 +134,9 @@ hostRouter.post("/send-experiment", (req: Request, res: Response) => {
 
 })
 
+
+//Purpose: Get the experiment data
+//Returns: The experiment data (JSON)
 hostRouter.get("/get-experiment", (req: Request, res:Response) =>{
     try{
         console.log("Here is the request body", req.body)
@@ -137,6 +147,8 @@ hostRouter.get("/get-experiment", (req: Request, res:Response) =>{
         return res.status(400).send({success: false, message: "Error sending data"})
     }
 })
+
+
 export default hostRouter;
 
 

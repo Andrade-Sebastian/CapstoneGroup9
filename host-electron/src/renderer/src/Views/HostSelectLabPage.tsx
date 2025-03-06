@@ -61,13 +61,13 @@ export default function HostSelectLabPage() {
     e.preventDefault()
     if (selectedLab) {
       if (selectedLab.id === '1') {
-        setExperimentType('1');
+        setExperimentType(1);
         navigateTo('/host/video-lab')
       } else if (selectedLab.id === '2') {
-        setExperimentType('2');
+        setExperimentType(2);
         navigateTo('/host/photo-lab')
       } else if (selectedLab.id === '3') {
-        setExperimentType('3');
+        setExperimentType(3);
         navigateTo('/host/gallery-lab')
       } else {
         toast.error("Error, select another option.")

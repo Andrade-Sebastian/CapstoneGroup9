@@ -18,23 +18,8 @@ import GalleryLab from './Views/GalleryLab';
 import WaitingRoom from './Views/WaitingRoom';
 import ActivityRoom from './Views/ActivityHost';
 import Summary from './Views/Summary';
-
-// import { StrictMode } from 'react'
-// import { createRoot } from 'react-dom/client'
-// import App from './App.tsx'
-// import './index.css'
-// //Routes are defined here
-// import{createBrowserRouter, RouterProvider } from "react-router-dom";
-
-// import HostView from './Views/HostView.tsx';
-// import Home from "./Views/Home.tsx"
-// import JoinPage from './Views/JoinPage.tsx';
-// import HostCreateRoom from './Views/HostCreateRoom.tsx';
-// import SelectMedia from './Views/SelectMedia.tsx';
-// import WaitingRoom from './Views/WaitingRoom.tsx';
-// import Carousel from 'react-bootstrap/Carousel';
-// import ExampleCarouselImage from 'components/ExampleCarouselImage';
-// import ConnectEmotiBit from './Views/ConnectEmotiBit.tsx';
+import ActivityHost from './Views/ActivityHost';
+import ActivityStudentView from './Views/ActivityStudentView';
 
 
 const router = createBrowserRouter([
@@ -93,61 +78,25 @@ const router = createBrowserRouter([
         path:"summary",
         element: <Summary/>
       },
-      {
-        path:"activity/:sessionId/:userId",
-        element: <div>"Hello World"</div>
-      }
-   
-
-
+    {
+      path: "/activity/:sessionId/:userId/:experimentType/",
+      element: <ActivityStudentView/>,
+      children:[
+        {
+          path: "photo-lab",
+          element: <PhotoLab/>,
+        },
+        {
+          path: "video-lab",
+          element: <VideoLab/>,
+        },
+        {
+          path: "gallery-lab",
+          element: <GalleryLab/>
+        },
     ]
-    
-
-    
+  },]
   },
-  // {
-  //   path:"/activity",
-  //   element: <ActivityRoot/>,
-  //   children: [
-  //     {
-
-  //     }]
-
-  // }
-  // {
-  //   path: "host",
-  //     element: <HostRoot/>,
-  //     children: [
-  //       {
-  //         path: "create",
-  //         element: <HostCreateRoom/>,
-  //       },
-  //       {
-  //         path: "select-lab",
-  //         element: <HostSelectLabPage/>,
-  //       },
-  //       {
-  //         path: ":room",
-  //         element: <HostView/>,
-  //       },
-  //       {
-  //         path: "select-media",
-  //         element: <SelectMedia/>,
-  //       },
-  //       {
-  //         path: "photo-lab",
-  //         element: <PhotoLab/>,
-  //       },
-  //       {
-  //         path: "video-lab",
-  //         element: <VideoLab/>,
-  //       },
-  //       {
-  //         path: "gallery-lab",
-  //         element: <GalleryLab/>
-  //       }
-  //     ]
-  // },
   {
           path: "create-lab",
           element: <ExperimentCreaterRoot/>,
@@ -162,60 +111,8 @@ const router = createBrowserRouter([
             }]
     }])
 
-
-//  {
-//       path: "/",
-//       element: <HostCreateRoom/>,
-//     },
-//     {
-//       path: "host",
-//       element: <HostRoot/>,
-//       children: [
-//         {
-//           path: "create",
-//           element: <HostCreateRoom/>,
-//         },
-//         {
-//           path: "select-lab",
-//           element: <HostSelectLabPage/>,
-//         },
-//         {
-//           path: ":room",
-//           element: <HostView/>,
-//         },
-//         {
-//           path: "select-media",
-//           element: <SelectMedia/>,
-//         },
-//       ],
-//     },
-//     {
-//       path: "create-lab",
-//       element: <ExperimentCreaterRoot/>,
-//       children: [
-//         {
-//           path: "select-lab",
-//           element: <HostSelectLabPage/>,
-//         },
-//         {
-//           index: true,
-//           element: <PreviouslyMadeExperiments/>,
-//         },
-//       ],
-//     },
-
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <RouterProvider router={router} />
   </StrictMode>
 );
-
-//OLD CODE
-
-
-// createRoot(document.getElementById('root')!).render(
-//   <StrictMode>
-//     <RouterProvider router={router} />
-//   </StrictMode>,
-// )
-

@@ -1,6 +1,9 @@
 import { Navigate, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { CiPlay1 } from "react-icons/ci";
+import { TfiGallery } from 'react-icons/tfi'
+import { TiCamera } from 'react-icons/ti'
+import { IoVideocam } from 'react-icons/io5'
 import socket from "./socket.tsx";
 import axios from "axios";
 import { Divider } from "@heroui/divider";
@@ -14,8 +17,30 @@ export default function WaitingRoom() {
   const [nicknames, setNickNames] = useState<string[]>([]);
   const [sessionID, setSessionID] = useState("");
   const [experimentID, setExperimentID] = useState(0);
-  const navigateTo = useNavigate()
-  const { isConnected, serial, nickname, roomCode, setExperimentId, setExperimentTitle, setExperimentDesc, experimentId, experimentTitle,experimentDesc} = useJoinerStore()
+  const [isSpectator, setIsSpectator] = useState(false);
+  const [experimentIcon, setExperimentIcon] = useState<JSX.Element>(
+    <CiPlay1 style={{ fontSize: '20px' }} />
+  )
+  const navigateTo = useNavigate();
+  const {
+    isConnected,
+    serial,
+    nickname,
+    roomCode,
+    userRole,
+    setExperimentId,
+    setExperimentTitle,
+    setExperimentDesc,
+    experimentTypeString,
+    setExperimentTypeString,
+    setExperimentPath,
+    experimentId,
+    experimentType,
+    setExperimentType,
+    setUserRole,
+    experimentTitle,
+    experimentDesc,
+  } = useJoinerStore();
 
   // useEffect(() => {
   //   // Emit join waiting room
@@ -38,26 +63,29 @@ export default function WaitingRoom() {
   //   };
   // }, [nickName, roomCode]);
   useEffect(() => {
-    socket.on("session-start", () =>
-    {
-      console.log("joiner - ONsession start")
-      navigateTo('/active-experiment')
+    socket.on("session-start", () => {
+      console.log("joiner - ONsession start");
+      navigateTo("/active-experiment");
     });
     return () => {
       socket.off("session-start");
     };
   }, [navigateTo]);
-  
+
   useEffect(() => {
     const getSessionID = async () => {
-      const response = await axios.get(
-        `http://localhost:3000/joiner/verify-code/${roomCode}`
-      )
-      .then((response) => {
+      const response = await axios
+        .get(`http://localhost:3000/joiner/verify-code/${roomCode}`)
+        .then((response) => {
           setSessionID(response.data.sessionID);
-      });
-      
-    };
+        });
+    }; 
+
+
+    setIsSpectator(userRole === "spectator");
+    console.log("SPECTATOR AHH: ", isSpectator);
+
+    
 
     getSessionID();
   }, []);
@@ -88,85 +116,84 @@ export default function WaitingRoom() {
 
     fetchUsers();
     const interval = setInterval(fetchUsers, 5000); // Refresh users every 5 seconds
-    
+
     return () => clearInterval(interval);
   }, [sessionID]); //Don't fetch any data until sessionID is set
 
   useEffect(() => {
-    const getExperimentData = async() => {
-      try{
-        const response = await axios.get(`http://localhost:3000/joiner/session/getInfo/${roomCode}`);
-        if(response.status === 200){
+    const getExperimentData = async () => {
+      try {
+        const response = await axios.get(
+          `http://localhost:3000/joiner/session/getInfo/${roomCode}`
+        );
+        if (response.status === 200) {
           console.log("EXPERIMENT ID RETURNED: ", response.data.experimentid);
           setExperimentID(response.data.experimentid);
         }
-      }
-      catch(error){
+      } catch (error) {
         // toast.error("Failed to get experiment id")
-        console.log("Error retrieving experiment id in joiner fe")
+        console.log("Error retrieving experiment id in joiner fe", error);
       }
-    }
+    };
     getExperimentData();
-  }, [])
+  }, []);
 
   useEffect(() => {
     //if(!experimentID) return;
 
-    const getPhotoData = async() => {
-      try{
+    const getPhotoData = async () => {
+      try {
         console.log("SENDING TO THE ROUTE EXPERIMENT ID: ", experimentID);
-        const response = await axios.get(`http://localhost:3000/joiner/getPhoto/${experimentID}`);
-        if(response.status == 200){
-          toast.success("Successfully received photolab data.")
+        const response = await axios.get(
+          `http://localhost:3000/joiner/getPhoto/${experimentID}`
+        );
+        if (response.status == 200) {
+          toast.success("Successfully received photolab data.");
           console.log("RETURNED GET PHOTO DATA: ", response.data);
           const experimentTitle = response.data.name;
           const captions = response.data.captions;
           const experimentDesc = response.data.description;
           const path = response.data.path;
-
-          console.log("RESPONSE DATA VARIABLES: ", captions, experimentDesc, experimentTitle, path)
+          //NEED THE EXPERIMENT TYPE
+          console.log(
+            "RESPONSE DATA VARIABLES: ",
+            captions,
+            experimentDesc,
+            experimentTitle,
+            path
+          );
           setExperimentId(experimentID);
-          setExperimentTitle(experimentTitle)
-          setExperimentDesc(experimentDesc)
+          setExperimentTitle(experimentTitle);
+          setExperimentDesc(experimentDesc);
+          setExperimentPath(path);
         }
-      }
-      catch(error){
-        toast.error("Failed to receive photolab data")
+      } catch (error) {
+        toast.error("Failed to receive photolab data");
         console.log("Error receiving photolab data in joiner fe: ", error);
       }
     };
     getPhotoData();
-  }, [experimentID])
-  // useEffect(() => {
-  //   const getExperimentData = async() => {
-  //     try{
-  //       const response = await axios.get("http://localhost:3000/host/get-experiment");
-  //       if(response.status == 200){
-  //         const experimentTitle = response.data.experimentTitle
-  //         const experimentId = response.data.experimentId
-  //         const experimentDesc = response.data.experimentDesc
+  }, [experimentID, setExperimentDesc, setExperimentId, setExperimentTitle, setExperimentPath]);
 
-  //         setExperimentTitle(experimentTitle)
-  //         setExperimentId(experimentId)
-  //         setExperimentDesc(experimentDesc)
-  //       }
-  //     }
-  //     catch(error){
-  //       console.log("Error receiving experiment data from host: ", error)
-  //     }
-  //   };
-  //   getExperimentData();
-  // },[])
-
-  //Getting data from PhotoLab experiment.experimentid, path, captions, name, description 
-
-
-
+  useEffect(() => {
+    if (experimentType === 1) {
+      setExperimentTypeString('VideoLab')
+      setExperimentIcon(<IoVideocam style={{ fontSize: '20px' }} />)
+    } else if (experimentType === 2) {
+      setExperimentTypeString('PhotoLab')
+      setExperimentIcon(<TiCamera style={{ fontSize: '20px' }} />)
+    } else if (experimentType === 3) {
+      setExperimentTypeString('GalleryLab')
+      setExperimentIcon(<TfiGallery style={{ fontSize: '20px' }} />)
+    } else {
+      console.log("Invalid experiment type");
+    }
+  }, [experimentType, setExperimentTypeString])
   return (
     <div className="flex flex-col items-center justify-center h-1/2 mx-8">
       <div className="flex flex-col md:flex-row items-start justify-between gap-72">
-      {/* left section */}
-      <Toaster position="top-right"/>
+        {/* left section */}
+        <Toaster position="top-right" />
         <div className="md:w-1/2 space-y-4">
           <h1 className="text-3xl text-3xl font-semibold text-gray-800">
             Welcome to Session
@@ -176,28 +203,33 @@ export default function WaitingRoom() {
             <p className="text-lg">
               <span className="font-semibold"> NICKNAME:</span> {nickname}
             </p>
-            <p className="text-lg">
-              <span className="font-semibold">SENSOR SERIAL NUMBER:</span>
-              {serial}
-            </p>
-            <p className="text-lg">
-              <span className="font-semibold">SENSOR STATUS:</span>
-              <div>
-                {isConnected ? (
-                  <span className="text-green-500 font-bold"> CONNECTED</span>
-                ): (
-                  <span className="text-red-500 font-bold"> NOT CONNECTED</span>
-                )}
-              </div>
-            </p>
+            {!isSpectator && ( 
+            
+              <>
+              <p className="text-lg">
+                <span className="font-semibold">SENSOR SERIAL NUMBER:</span>
+                {serial}
+              </p>
+              <p className="text-lg">
+                <span className="font-semibold">SENSOR STATUS:</span>
+                <div>
+                  {isConnected ? (
+                    <span className="text-green-500 font-bold"> CONNECTED</span>
+                  ) : (
+                    <span className="text-red-500 font-bold"> NOT CONNECTED</span>
+                  )}
+                </div>
+              </p>
+              </>
+            )}
           </div>
         </div>
         {/* right section */}
         <div className="md:w-1/2">
           {/* HARD CODED LAB DESCRIPTION */}
           <WaitingRoomCardComponent
-            icon={<CiPlay1 style={{ fontSize: "20px" }} />}
-            labType={experimentId}
+            icon={experimentIcon}
+            labType={experimentTypeString}
             labTitle={experimentTitle}
             description={experimentDesc}
           ></WaitingRoomCardComponent>
@@ -209,7 +241,6 @@ export default function WaitingRoom() {
           <p key={index}>{name}</p>
         ))}
       </div>
-      
     </div>
   );
 }
