@@ -226,6 +226,7 @@ export default function WaitingRoom() {
     console.log('in handle submit')
       //-----HARDCODED FOR TESTING-------
     socket.emit("session-start");
+    navigateTo('/activity-room');
   }
   return (
     <div className="flex flex-col items-center justify-center px-4 mx:px-8 w-full">
