@@ -16,13 +16,6 @@ interface ISessionCreationParams{
 	isSpectatorsAllowed: boolean | null,
 }
 
-interface ISessionCreationParams{
-	hostSocketID: string,
-	isPasswordProtected: boolean | null,
-	password: string | null,
-	isSpectatorsAllowed: boolean | null,
-}
-
 export interface IPhotoLabDatabaseInfo {
 	experimentTitle: string, 
 	experimentDescription: string | null,
@@ -55,21 +48,6 @@ export interface IAddUserToSessionInfo {
 	roomCode: string | null;
 	serialNumberLastFour: string | null;
 	deviceID: number;
-}
-
-interface ISessionCreationParams{
-	hostSocketID: string,
-	isPasswordProtected: boolean | null,
-	password: string | null,
-	isSpectatorsAllowed: boolean | null,
-}
-
-export interface IPhotoLabDatabaseInfo {
-	experimentTitle: string, 
-	experimentDescription: string | null,
-	experimentCaptions: string | null,
-	imageBlob: string,
-	socketID: string
 }
 
 export interface IArticleLabDatabaseInfo{

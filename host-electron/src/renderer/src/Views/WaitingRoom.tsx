@@ -207,16 +207,16 @@ export default function WaitingRoom() {
     return () => clearInterval(interval)
   }, [sessionID]) //Don't fetch any data until sessionID is set
 
-  const handleEmptyWaitingRoom = () => {
-    if(nicknames.length === 0){
-      toast.error("Cannot begin experiment. There is no one in the waiting room!")
-      return;
-    }
-    else{
-      toast.success("Beginning experiment...")
-      navigateTo('/activity-room');
-    }
-  }
+  // const handleEmptyWaitingRoom = () => {
+  //   if(nicknames.length === 0){
+  //     toast.error("Cannot begin experiment. There is no one in the waiting room!")
+  //     return;
+  //   }
+  //   else{
+  //     toast.success("Beginning experiment...")
+  //     navigateTo('/activity-room');
+  //   }
+  // }
   
   const handleBackButton = () => {
     navigateTo('/host/select-lab')
@@ -226,7 +226,6 @@ export default function WaitingRoom() {
     console.log('in handle submit')
       //-----HARDCODED FOR TESTING-------
     socket.emit("session-start");
-    handleEmptyWaitingRoom();
   }
   return (
     <div className="flex flex-col items-center justify-center px-4 mx:px-8 w-full">
