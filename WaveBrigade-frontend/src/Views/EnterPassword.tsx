@@ -49,17 +49,16 @@ export default function EnterFunction() {
         try{
           const isValidPassword = await validatePassword(password);
           
-          if (isValidPassword) {
+          if (isValidPassword === true) {
             //if the user is a spectator, they will be redirected to the waiting room
             console.log("User role: ", userRole)
-            if (userRole == "spectator") {
+            if (userRole === "spectator") {
 
               toast.success("Joining session...");
               console.log("Joining as spectator...");
 
-              setTimeout(() => {
-                navigateTo('/waiting-room')
-              }, 2000)
+              navigateTo('/waiting-room')
+              
             }
             else {//Otherwise, navigate to the connect emotibit page
               toast.success("Joining session...");

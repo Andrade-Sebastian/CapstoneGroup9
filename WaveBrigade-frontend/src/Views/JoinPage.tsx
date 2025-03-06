@@ -23,7 +23,11 @@ export default function JoinPage() {
   useEffect(() => 
   {
     console.log("Joining as spectator? ", isJoiningAsSpectator)
+
   })
+  useEffect(() => {
+    setUserRole("student"); 
+  }, [])
   //const { launchProcess } = useBrainflowManager();
 
 
@@ -55,7 +59,7 @@ export default function JoinPage() {
 
       if (isValidRoomCode && isValidName) {
           if (isJoiningAsSpectator){  
-
+            toast.success("Room code valid. Password is needed...");
             //Set global store 'userRole' to 'spectator'
             setUserRole("spectator");
             console.log("global user role: ", userRole)
@@ -75,11 +79,12 @@ export default function JoinPage() {
           else{
             //when they input the password, navigate to the waiting room 
             console.log("joiner")
+            setUserRole("student");
+            toast.success("Room code valid. Password is needed...");
+            setTimeout(() => {
+              navigateTo('/enter-password')
+            }, 2000)
           }
-          toast.success("Room code valid. Password is needed...");
-          setTimeout(() => {
-            navigateTo('/enter-password')
-          }, 2000)
       }
       else if(isValidRoomCode && !isValidName){
         toast.error("Nickname not acceptable. Please refrain from profane language!");
@@ -190,7 +195,7 @@ export default function JoinPage() {
                 type="checkbox"
                 className="h-4 w-4"
                 checked={isJoiningAsSpectator}
-                onChange={() => setisJoiningAsSpectator(!isJoiningAsSpectator)}
+                onChange={() => {setisJoiningAsSpectator(!isJoiningAsSpectator); setUserRole(isJoiningAsSpectator ? "spectator" : "student")}}
               />
               <label htmlFor="allow-spectators" className=" ml-2 text-sm font-medium text-gray-700 mb-2">Join as Spectator</label> 
             </div>

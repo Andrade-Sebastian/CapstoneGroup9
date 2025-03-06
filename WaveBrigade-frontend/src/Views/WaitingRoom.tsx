@@ -17,6 +17,7 @@ export default function WaitingRoom() {
   const [nicknames, setNickNames] = useState<string[]>([]);
   const [sessionID, setSessionID] = useState("");
   const [experimentID, setExperimentID] = useState(0);
+  const [isSpectator, setIsSpectator] = useState(false);
   const [experimentIcon, setExperimentIcon] = useState<JSX.Element>(
     <CiPlay1 style={{ fontSize: '20px' }} />
   )
@@ -26,6 +27,7 @@ export default function WaitingRoom() {
     serial,
     nickname,
     roomCode,
+    userRole,
     setExperimentId,
     setExperimentTitle,
     setExperimentDesc,
@@ -35,6 +37,7 @@ export default function WaitingRoom() {
     experimentId,
     experimentType,
     setExperimentType,
+    setUserRole,
     experimentTitle,
     experimentDesc,
   } = useJoinerStore();
@@ -76,7 +79,13 @@ export default function WaitingRoom() {
         .then((response) => {
           setSessionID(response.data.sessionID);
         });
-    };
+    }; 
+
+
+    setIsSpectator(userRole === "spectator");
+    console.log("SPECTATOR AHH: ", isSpectator);
+
+    
 
     getSessionID();
   }, []);
@@ -194,20 +203,25 @@ export default function WaitingRoom() {
             <p className="text-lg">
               <span className="font-semibold"> NICKNAME:</span> {nickname}
             </p>
-            <p className="text-lg">
-              <span className="font-semibold">SENSOR SERIAL NUMBER:</span>
-              {serial}
-            </p>
-            <p className="text-lg">
-              <span className="font-semibold">SENSOR STATUS:</span>
-              <div>
-                {isConnected ? (
-                  <span className="text-green-500 font-bold"> CONNECTED</span>
-                ) : (
-                  <span className="text-red-500 font-bold"> NOT CONNECTED</span>
-                )}
-              </div>
-            </p>
+            {!isSpectator && ( 
+            
+              <>
+              <p className="text-lg">
+                <span className="font-semibold">SENSOR SERIAL NUMBER:</span>
+                {serial}
+              </p>
+              <p className="text-lg">
+                <span className="font-semibold">SENSOR STATUS:</span>
+                <div>
+                  {isConnected ? (
+                    <span className="text-green-500 font-bold"> CONNECTED</span>
+                  ) : (
+                    <span className="text-red-500 font-bold"> NOT CONNECTED</span>
+                  )}
+                </div>
+              </p>
+              </>
+            )}
           </div>
         </div>
         {/* right section */}
