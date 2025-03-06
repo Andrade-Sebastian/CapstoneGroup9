@@ -30,6 +30,11 @@ export function determineFileExtension(file)
     {
         detectedFileExtension = ".jpeg"
     }
+    if(file.mimetype === "application/pdf")
+    {
+        detectedFileExtension = ".pdf";
+        console.log("PDF File Detected");
+    }
 
     return detectedFileExtension;
 }

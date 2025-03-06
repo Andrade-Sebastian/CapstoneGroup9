@@ -148,7 +148,7 @@ export default function WaitingRoom() {
           `http://localhost:3000/joiner/getPhoto/${experimentID}`
         );
         if (response.status == 200) {
-          toast.success("Successfully received photolab data.");
+          //toast.success("Successfully received photolab data.");
           console.log("RETURNED GET PHOTO DATA: ", response.data);
           const experimentTitle = response.data.name;
           const captions = response.data.captions;
