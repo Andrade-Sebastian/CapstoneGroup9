@@ -1,10 +1,13 @@
 --Author: Emanuelle Pelayo
 --Procedures & Functions for the following database functions:
 	-- 1. Checking if a session is available
-	-- 2. Getting a Session with its users
+	-- 2. Getting a Session instance with its users
 	-- 3. Updating the availability status of a device
 	-- 4. Getting all users in a session
 	-- 5. Getting the state of a session
+    -- 6. Joining a session as a student 
+    -- 7. Joining a session as a spectator (without an EmotiBit)
+
 
 -- Drop existing functions if they exist
 DROP FUNCTION IF EXISTS Check_Session_Availability(VARCHAR(100));
@@ -171,6 +174,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+
 -- Join_Session_Without_EmotiBit
 CREATE OR REPLACE FUNCTION Join_Session_Without_EmotiBit(
     param_nickname VARCHAR(100), 
@@ -185,7 +189,8 @@ RETURNS TABLE (
     joiner_ismasked BOOL,
     joiner_frontendsocketid VARCHAR(100),
     joiner_leftsession TIMESTAMP,
-    joiner_userrole VARCHAR(100)
+    joiner_userrole VARCHAR(100),
+    joiner_deviceid INT
 ) AS $$
 DECLARE 
     found_session_id INT;
@@ -202,16 +207,17 @@ BEGIN
 
     -- Create a User without an associated device
     INSERT INTO "User" (
-        nickname, device, sessionid, ismasked, frontendsocketid, leftsession, userrole, secret
+        nickname, device, sessionid, ismasked, frontendsocketid, leftsession, userrole
     ) 
     VALUES (
-        param_nickname, NULL, found_session_id, FALSE, socket_id, NULL, user_role, 'secret'
+        param_nickname, NULL, found_session_id, FALSE, socket_id, NULL, user_role
     ) RETURNING userid INTO user_id;
 
     -- Return user data
     RETURN QUERY 
     SELECT "User".userid, "User".nickname, "User".sessionid, "User".ismasked, 
-           "User".frontendsocketid, "User".leftsession, "User".userrole
+           "User".frontendsocketid, "User".leftsession, "User".userrole, 
+        "User".device
     FROM "User" WHERE "User".userid = user_id;
 END;
 $$ LANGUAGE plpgsql;
