@@ -74,8 +74,13 @@ export default function WaitingRoom() {
   const handleCloseModal = () => setIsModalOpen(false)
   const handleAction = () => {
     console.log('Creating lobby...')
-    handleSubmit()
-    handleCloseModal()
+    if(nicknames.length != 0){
+      handleSubmit()
+      handleCloseModal()
+    }
+    else{
+      toast.error("Please wait for people to join");
+    }
   }
 
   //Add EmotiBit Modal
