@@ -118,3 +118,10 @@ CREATE TABLE IF NOT EXISTS GalleryLab
     TimeShown INTEGER,
     ImageOrder INTEGER
 );
+
+CREATE TABLE IF NOT EXISTS ArticleLab
+(
+    ArticleLabID serial PRIMARY KEY,
+    ExperimentID int REFERENCES Experiment(ExperimentID),
+    Path varchar(100) NOT NULL
+);

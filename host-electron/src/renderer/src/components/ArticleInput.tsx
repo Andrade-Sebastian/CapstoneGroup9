@@ -9,16 +9,16 @@ import React from 'react'
 
 
 
-interface IPhotoInputForm {
+interface IArticleInput {
   width: number;
   height: number;
   onFileSelected: (isFileSelected: boolean) => void;
-  imageSource: string | undefined;
+  articleSource: string | undefined;
 
 }
 
 
-export default function PhotoInputForm(props: IPhotoInputForm) {
+export default function ArticleInput(props: IArticleInput) {
   const inputRef = React.useRef<HTMLInputElement>(null); //access to file input when the host clicks choose image button
   const [source, setSource] = React.useState<string | null>(null); //URL of the file that is selected is stored here.
   const [error, setError] = React.useState<string | null>(null); //need this just in case user doesn't select an image or another error comes up
@@ -26,14 +26,13 @@ export default function PhotoInputForm(props: IPhotoInputForm) {
 
   const { //Global state
     experimentId,
-    experimentType,
     roomCode,
     experimentTitle,
     experimentDesc,
-    photoLabImageSource,
     setExperimentTitle,
     setExperimentDesc,
-    setPhotoLabImageSource } = useSessionStore();
+    setExperimentId
+    } = useSessionStore();
 
 
 
@@ -45,7 +44,7 @@ export default function PhotoInputForm(props: IPhotoInputForm) {
 
   // const [experiment_title, set_experiment_title] = useState("");
   // const [experiment_description, set_experiment_description] = useState("");
-  const [image_filename, set_image_filename] = useState<string | null>(null);
+  const [article_filename, set_article_filename] = useState<string | null>(null);
   
 
   const navigateTo = useNavigate()
@@ -64,19 +63,19 @@ export default function PhotoInputForm(props: IPhotoInputForm) {
 
 
   useEffect(() => {
-    if (image_filename) {
+    if (article_filename) {
       setIsFileSelected(true)
     }
-  }, [image_filename])
+  }, [article_filename])
 
   async function handleSubmit(e) {
     
     const data = new FormData();
-    data.append('labType', 'photo-lab');
+    data.append('labType', 'article-lab');
     data.append('experimentTitle', experimentTitle);
     data.append('experimentDescription', experimentDesc);
-    data.append('experimentCaptions', caption);
-    data.append('imageBlob', file);
+    data.append('article', file);
+
 
     if (file) {
     } else {
@@ -97,19 +96,19 @@ export default function PhotoInputForm(props: IPhotoInputForm) {
     
     try {
       
-      //create a photo lab
-      console.log("Sending data", JSON.stringify(data))
-      const response = await axios.post('http://localhost:3000/database/photo-lab', data, { headers: { "Content-Type": "multipart/form-data" } });
-        console.log("After /photo-lab, ", JSON.stringify(response.data))
+      //create a article lab
+      console.log("Sending data", [...data])
+      const response = await axios.post('http://localhost:3000/database/article-lab', data, { headers: { "Content-Type": "multipart/form-data" } });
+        console.log("After /article-lab, ", JSON.stringify(response.data))
 
       if (response.status === 200) {
         toast.success('Lab was created successfully', { id: loadingToastId })
         const expId = response.data.experimentID
+        setExperimentId(response.data.experimentID)
         setExperimentTitle(experimentTitle)
         setExperimentDesc(experimentDesc)
-        set_image_filename(photoLabImageSource);
         console.log('sending out some experiment data')
-        socket.emit("experiment-data", { experimentTitle, experimentDesc, expId })
+        socket.emit("experiment-data", { experimentTitle, experimentDesc, expId})
         console.log('hopefully sent out some experiment data')
 
         setTimeout(() => {
@@ -129,13 +128,12 @@ export default function PhotoInputForm(props: IPhotoInputForm) {
 
     //debug
     useEffect(() =>{
-        console.log("image source: ", image_filename);
-        console.log("caption: ", caption);
+        console.log("article source: ", article_filename);
         console.log("experimentTitle: ", experimentTitle);
         console.log("experimentDesc: ", experimentDesc);
         console.log("isFileSelected: " + JSON.stringify(isFileSelected))
         
-      }, [[photoLabImageSource, caption, experimentDesc, experimentTitle]])
+      }, [[caption, experimentDesc, experimentTitle]])
 
 
     
@@ -153,14 +151,14 @@ export default function PhotoInputForm(props: IPhotoInputForm) {
         return;
     }
 
-    if (!file.type.startsWith("image/")) { //makes sure that the file is an image
-      setError("Please upload a valid image file.");
+    if (file.type !== ("application/pdf")) { //makes sure that the file is an pdf
+      setError("Please upload a valid pdf file.");
       props.onFileSelected(false); //no file selected. set to false so host cannot continue without selecting an image
       return;
     }
     setError(null);
     const url = URL.createObjectURL(file); //a temp url is generated for the selected file which is stored in the source state for previewing the image
-    set_image_filename(url);
+    set_article_filename(url);
     props.onFileSelected(true); //file is selected, host can now continue
 
   };
@@ -175,7 +173,7 @@ export default function PhotoInputForm(props: IPhotoInputForm) {
   return (
     <>
         <div className="flex flex-col items-center justify-center w-full md:w-3/5 lg:w-3/5 p-6 min-h-[600px] space-y-6 mt-50">
-            <p className="text-lg text-gray-600"> Experiment ID: {experimentType || "None"}</p>
+            <p className="text-lg text-gray-600"> Experiment ID: {experimentId || "None"}</p>
             <p className="text-lg text-gray-600"> Room Code: {roomCode || "None"}</p>
             <form onSubmit={(e) => handleSubmit} className="w-full max-w-md space-y-6" encType='multipart/form-data'>
                 <div className="w-full">
@@ -206,46 +204,34 @@ export default function PhotoInputForm(props: IPhotoInputForm) {
 
                 <div className="w-full">
                 
-                    <label htmlFor="addImage" className="block text-sm font-medium text-gray-700 mb-2"> Add Image <span className="text-purple-500"> *</span></label>
+                    <label htmlFor="addArticle" className="block text-sm font-medium text-gray-700 mb-2"> Add Article <span className="text-purple-500"> *</span></label>
                     <div className="flex flex-col justify-center items-center border p-4 rounded-md shadow-md size-">
                         <input
                             ref={inputRef}
                             className="flex flex-col justify-center items-center border"
                             type="file"
                             onChange={(e) => { handleFileChange(e);   setFile(e.target.files?.[0] || null); }}
-                            accept="image/jpg, image/jpeg, image/png" //restricts just these image files
+                            accept=".pdf" //restricts just these image files
                         />
 
                         {error && <p className="text-red-500 text-sm mt-2"> {error}</p>}
                         {/* image Preview */}
-                        {props.imageSource && (
+                        {props.articleSource && (
                             <div className="mt-4">
                             <img
                                 width={props.width}
                                 height={props.height}
-                                src={props.imageSource}
+                                src={props.articleSource}
                                 alt="Selected"
                                 className="rounded-md shadow-md"
                             />
                             </div>
                         )}
                         <div className="mt-4 text-sm text-gray-600">
-                            {source ? "Image selected" : " Please select an image"} 
+                            {source ? "Article selected" : " Please select an article"} 
                             {/* show url or if there isn't anything, then just show nothing selected text */}
                         </div>
                     </div>
-                </div>
-
-                <div className="w-full">
-                    <label htmlFor="caption" className="block text-sm font-medium text-gray-700 mb-2">Enter a Caption<span className="text-purple-500"> *</span></label>
-                    <input
-                        type="text"
-                        id="caption"
-                        className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                        //   focus:outline-none focus:ring-2 focus:ring-indigo-500
-                        onChange={(e) => setCaption(e.target.value)}
-                        value={caption}
-                    />
                 </div>
 
                 <div className="flex gap-10 items-center justify-center">
@@ -303,21 +289,8 @@ export default function PhotoInputForm(props: IPhotoInputForm) {
                     id="experimentImage"
                     className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     disabled
-                    value={JSON.stringify(image_filename)}
-                    onChange={(e) => setPhotoLabImageSource(e.target.value)}
-                  />
-                </div>
-                <div className="mb-6">
-                  <label htmlFor="caption" className="block text-md font-medium text-gray-700 mb-2">
-                    Caption
-                  </label>
-                  <input
-                    type="text"
-                    id="caption"
-                    className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                    disabled
-                    value={caption}
-                    onChange={(e) => setCaption(e.target.value)}
+                    value={JSON.stringify(article_filename)}
+                    onChange={(e) => set_article_filename(e.target.value)}
                   />
                 </div>
               </ModalComponent>

@@ -1,7 +1,7 @@
 import { useLocation } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import { CiPlay1 } from 'react-icons/ci'
-import { TfiGallery } from 'react-icons/tfi'
+import { TfiGallery, TfiFile } from 'react-icons/tfi'
 import { TiCamera } from 'react-icons/ti'
 import { IoVideocam } from 'react-icons/io5'
 import socket from './socket'
@@ -64,6 +64,9 @@ export default function WaitingRoom() {
     } else if (experimentType === 3) {
       setExperimentTypeString('GalleryLab')
       setExperimentIcon(<TfiGallery style={{ fontSize: '20px' }} />)
+    } else if (experimentType === 4){
+      setExperimentTypeString('ArticleLab')
+      setExperimentIcon(<TfiFile style={{ fontSize: '20px' }} />)
     } else {
       console.log("Invalid experiment type");
     }
@@ -74,8 +77,13 @@ export default function WaitingRoom() {
   const handleCloseModal = () => setIsModalOpen(false)
   const handleAction = () => {
     console.log('Creating lobby...')
-    handleSubmit()
-    handleCloseModal()
+    if(nicknames.length != 0){
+      handleSubmit()
+      handleCloseModal()
+    }
+    else{
+      toast.error("Please wait for people to join");
+    }
   }
 
   //Add EmotiBit Modal
@@ -199,16 +207,16 @@ export default function WaitingRoom() {
     return () => clearInterval(interval)
   }, [sessionID]) //Don't fetch any data until sessionID is set
 
-  const handleEmptyWaitingRoom = () => {
-    if(nicknames.length === 0){
-      toast.error("Cannot begin experiment. There is no one in the waiting room!")
-      return;
-    }
-    else{
-      toast.success("Beginning experiment...")
-      navigateTo('/activity-room');
-    }
-  }
+  // const handleEmptyWaitingRoom = () => {
+  //   if(nicknames.length === 0){
+  //     toast.error("Cannot begin experiment. There is no one in the waiting room!")
+  //     return;
+  //   }
+  //   else{
+  //     toast.success("Beginning experiment...")
+  //     navigateTo('/activity-room');
+  //   }
+  // }
   
   const handleBackButton = () => {
     navigateTo('/host/select-lab')
@@ -218,8 +226,7 @@ export default function WaitingRoom() {
     console.log('in handle submit')
       //-----HARDCODED FOR TESTING-------
     socket.emit("session-start");
-    socket.emit("session-start-spectator");
-    handleEmptyWaitingRoom();
+    navigateTo('/activity-room');
   }
   return (
     <div className="flex flex-col items-center justify-center px-4 mx:px-8 w-full">

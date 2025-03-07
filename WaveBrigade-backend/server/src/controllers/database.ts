@@ -16,13 +16,6 @@ interface ISessionCreationParams{
 	isSpectatorsAllowed: boolean | null,
 }
 
-interface ISessionCreationParams{
-	hostSocketID: string,
-	isPasswordProtected: boolean | null,
-	password: string | null,
-	isSpectatorsAllowed: boolean | null,
-}
-
 export interface IPhotoLabDatabaseInfo {
 	experimentTitle: string, 
 	experimentDescription: string | null,
@@ -55,6 +48,13 @@ export interface IAddUserToSessionInfo {
 	roomCode: string | null;
 	serialNumberLastFour: string | null;
 	deviceID: number;
+}
+
+export interface IArticleLabDatabaseInfo{
+	experimentTitle: string,
+	experimentDescription: string | null,
+	article: string,
+	socketID: string
 }
 
 
@@ -96,7 +96,6 @@ export async function joinSessionAsSpectator(socketID: string, nickname: string,
 
 
 
-
 export async function makeDeviceAvailable(deviceID: number)
 {
 	try{
@@ -133,8 +132,8 @@ export async function getPhotoLabInfo(experimentID: number): Promise<void>{
 
 	try{
 		await dbClient.connect();
-		const query = await dbClient.queryObject(`SELECT experiment.experimentid, path, captions, name, description FROM photolab JOIN experiment 
-			ON photolab.experimentid = $1 LIMIT 1`,
+		const query = await dbClient.queryObject(`SELECT photolab.experimentid, path, captions, name, description FROM photolab JOIN experiment 
+			ON photolab.experimentid = experiment.experimentid WHERE photolab.experimentid = $1 LIMIT 1`,
 			[experimentID]
 		);
 		
@@ -378,6 +377,7 @@ export async function createPhotoLabInDatabase(initializationInfo: IPhotoLabData
 		}
 		
 		console.log("Experiment id", experimentID)
+		return experimentID
 
 
 	}
@@ -385,7 +385,7 @@ export async function createPhotoLabInDatabase(initializationInfo: IPhotoLabData
 		console.log("Error adding photo lab to the database: " + error)
 	}
 
-	return experimentID
+	
 }
 
 
@@ -447,8 +447,90 @@ export async function createGalleryLabInDatabase(initializationInfo: IGalleryLab
 	}
 }
 
+export async function createArticleLabInDatabase(initializationInfo: IArticleLabDatabaseInfo, sessionID: null | number=null ): Promise<number>{
+	const {
+		experimentTitle,
+		experimentDescription,
+		article,
+		socketID
+	} = initializationInfo;
 
-//Joining as a Student
+	console.log(socketID);
+	let experimentID = null;
+
+	try{
+		await dbClient.connect();
+		
+		const createExperimentQuery = await dbClient.queryObject(`
+			INSERT INTO experiment(name, description)
+			VALUES ($1, $2)
+			returning experimentid;`, 
+			[
+				experimentTitle,
+				experimentDescription
+			]
+		);
+
+
+		console.log("createExperimentQuery: ", createExperimentQuery.rows[0].experimentid)
+		experimentID = createExperimentQuery.rows[0].experimentid;
+
+
+		//Add a photo lab 
+		const query = await dbClient.queryObject(`
+			INSERT INTO articlelab ( 
+			experimentid,
+			path
+			) 
+			VALUES ($1, $2);
+			`, [
+				experimentID,
+				article,
+				]
+		);
+
+		console.log("CreateGalleryLabInDatabase() -> socketID: ", socketID)
+		//get session id from host socket id 
+		let sessionID = -1
+
+		try{
+			sessionID = await getSessionIDFromSocketID(socketID);
+			
+		}catch(error)
+		{
+			console.log(error);;
+		
+		}
+		console.log()
+		console.log("CreateGalleryLabInDatabase() -> sessionID, experimentID", sessionID, experimentID)
+
+		console.log("Updating session")
+		//relate the experiment to the session		
+		try{
+			await dbClient.connect()
+			const updateSessionQuery = await dbClient.queryObject(`
+				UPDATE session
+				SET experimentid = ${experimentID}
+				WHERE sessionid = ${sessionID}; `)
+		}catch(error)
+		{
+			console.log(error)
+		}
+		
+		console.log("Experiment id", experimentID)
+		return experimentID
+
+
+	}
+	catch(error){
+		console.log("Error adding article lab to the database: " + error)
+	}
+
+	
+}
+
+
+//assuming the user is a joiner.
 export async function addUserToSession(initializationInfo: IAddUserToSessionInfo): Promise<void>{
 	console.log("(database.ts): addUserToSession() ", initializationInfo)
 	const {
