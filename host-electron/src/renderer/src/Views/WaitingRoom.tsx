@@ -226,6 +226,7 @@ export default function WaitingRoom() {
     console.log('in handle submit')
       //-----HARDCODED FOR TESTING-------
     socket.emit("session-start");
+    socket.emit("session-start-spectator")
     navigateTo('/activity-room');
   }
   return (
