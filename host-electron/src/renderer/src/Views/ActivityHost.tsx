@@ -152,14 +152,17 @@ export default function ActivityHost() {
         const users = response.data.users //Array of IUser objects
 
         const nicknames = [] //holds only the nicknames of those IUser Objects
-
+        
+        setNickNames(nicknames)
+        
+        setUserObjects(response.data.users)
+        
         // initialize nicknames array
         for (let i = 0; i < users.length; i++) {
           nicknames.push(users[i].nickname)
         }
+        
 
-        setNickNames(nicknames)
-        setUserObjects(response.data.users)
       } catch (error) {
         console.error('Error fetching users:', error)
       }
@@ -182,6 +185,8 @@ export default function ActivityHost() {
       console.log('Invalid experiment ID')
     }
   }, [experimentType])
+
+
   return (
     <div className="flex flex-col items-center justify-center mx-8">
       <Toaster position="top-right" />
@@ -244,8 +249,8 @@ export default function ActivityHost() {
       <Divider className="my-10" />
       <hr></hr>
       <div className="flex justify-center space-x-8 text-lg font-medium text-gray-800">
-        {userObjects.map((user, index) => (
-          <button key={user.userId} onClick={() => handleViewUser(user.userId, experimentType)}>
+        {(userObjects || []).map((user, index) => (
+          <button key={index} onClick={() => handleViewUser(user.userid, experimentType)}>
           <p>{user.nickname}</p>
           </button>
         ))}
