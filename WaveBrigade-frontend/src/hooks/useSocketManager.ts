@@ -19,6 +19,9 @@ export function useSocketManager(){
         socket.on("session-start", () => {
            console.log("in session-start");
         });
+        socket.on("session-start-spectator", () => {
+           console.log("in session-start");
+        });
         
         socket.on("experiment-data", () => {
            console.log("in experiment-data in useSocketManager");
@@ -39,6 +42,7 @@ export function useSocketManager(){
             socket.off("initialization:socketAssigment");
             socket.off("session-start");
             socket.off("experiment-data");
+            socket.off("session-start-spectator")
             socket.disconnect();
         };
     }, []);
