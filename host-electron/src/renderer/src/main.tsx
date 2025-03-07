@@ -85,7 +85,7 @@ const router = createBrowserRouter([
         element: <Summary/>
       },
     {
-      path: "/activity/:sessionId/:userId/:experimentType/*",
+      path: "/activity/:sessionId/:userId/:experimentType/",
       element: <ActivityStudentView/>,
       children:[
         {
