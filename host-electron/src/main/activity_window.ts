@@ -65,6 +65,9 @@ function createProcessWindow(sessionId: string, userId: string, experimentType: 
   else if(experimentType === 3){
     activityRoute = `/activity/${sessionId}/${userId}/gallery-lab`
   }
+  else if(experimentType === 4){
+    activityRoute = `activity/${sessionId}/${userId}/article-lab`
+  }
   else{
     console.log("Invalid experiment type")
   }
@@ -81,8 +84,11 @@ function createProcessWindow(sessionId: string, userId: string, experimentType: 
     const buildLocation = `file://${join(__dirname, `../renderer/index.html#/${activityRoute}`)}`
     processWindow.loadURL(buildLocation)
   }
+  console.log("URL: ", processWindowURL);
   return processWindow
 }
+
+
 
 function createEchoServerProcesses(event, BrainFlowProcess, windows, userID, socketID): void {
   const instance = spawn(loadEchoServerBinary(), [BrainFlowProcess, windows, userID, socketID])

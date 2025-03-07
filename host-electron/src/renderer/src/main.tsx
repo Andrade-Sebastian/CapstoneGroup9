@@ -15,6 +15,7 @@ import PreviouslyMadeExperiments from './Views/PreviouslyMadeExperiments';
 import PhotoLab from './Views/PhotoLab';
 import VideoLab from './Views/VideoLab';
 import GalleryLab from './Views/GalleryLab';
+import ArticleLab from './Views/ArticleLab';
 import WaitingRoom from './Views/WaitingRoom';
 import ActivityRoom from './Views/ActivityHost';
 import Summary from './Views/Summary';
@@ -60,6 +61,10 @@ const router = createBrowserRouter([
               element: <GalleryLab/>
             },
             {
+              path: "article-lab",
+              element: <ArticleLab/>
+            },
+            {
               path:"past-experiments",
               element: <PreviouslyMadeExperiments/>
             }
@@ -79,7 +84,7 @@ const router = createBrowserRouter([
         element: <Summary/>
       },
     {
-      path: "/activity/:sessionId/:userId/:experimentType/",
+      path: "/activity/:sessionId/:userId/:experimentType/*",
       element: <ActivityStudentView/>,
       children:[
         {
@@ -94,6 +99,10 @@ const router = createBrowserRouter([
           path: "gallery-lab",
           element: <GalleryLab/>
         },
+        {
+          path: "article-lab",
+          element: <ArticleLab/>
+        }
     ]
   },]
   },
