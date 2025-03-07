@@ -281,7 +281,7 @@ export default function WaitingRoom() {
       <Divider className="my-6" />
       <div className="flex justify-center flex-wrap gap-4 space-x-8 text-lg font-medium text-gray-800">
         {nicknames.map((name, index) => (
-          <p key={index}>{name}</p>
+          <p className='border-black rounded-md bg-[#E6E6E6] p-3 text-black font-light cursor-pointer hover:bg-[#CECECE]' key={index}>{name}</p>
         ))}
       </div>
       <div className="absolute bottom-0 pb-6 flex flex-row gap-10 items-center justify-center">
