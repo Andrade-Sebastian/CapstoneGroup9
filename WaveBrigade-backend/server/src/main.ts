@@ -132,6 +132,10 @@ io.on("connection", (socket) => {
     console.log("In session-create");
     io.emit("session-start");
   });
+  socket.on("session-start-spectator", () => {
+    console.log("In session-create");
+    io.emit("session-start-spectator");
+  });
   socket.on("experiment-data", (data) => {
     console.log("In experiment-data in main.ts, here is the data", data);
     io.emit("experiment-data", data);

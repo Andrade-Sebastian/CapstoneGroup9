@@ -25,6 +25,7 @@ export default function WaitingRoom() {
   const {
     isConnected,
     serial,
+    setSessionId,
     nickname,
     roomCode,
     userRole,
@@ -63,6 +64,7 @@ export default function WaitingRoom() {
   //   };
   // }, [nickName, roomCode]);
   useEffect(() => {
+    if(userRole === "student"){
     socket.on("session-start", () => {
       console.log("joiner - ONsession start");
       navigateTo("/active-experiment");
@@ -70,7 +72,17 @@ export default function WaitingRoom() {
     return () => {
       socket.off("session-start");
     };
-  }, [navigateTo]);
+  }
+  else{
+    socket.on("session-start-spectator", () => {
+      console.log("spectator in waiting room");
+      navigateTo("/active-experiment-spectator")
+    })
+    return () => {
+      socket.off("session-start-spectator");
+    };
+  }
+  }, [navigateTo, userRole]);
 
   useEffect(() => {
     const getSessionID = async () => {
@@ -78,6 +90,7 @@ export default function WaitingRoom() {
         .get(`http://localhost:3000/joiner/verify-code/${roomCode}`)
         .then((response) => {
           setSessionID(response.data.sessionID);
+          setSessionId(sessionID)
         });
     }; 
 

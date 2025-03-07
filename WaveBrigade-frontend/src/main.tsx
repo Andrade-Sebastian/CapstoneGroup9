@@ -19,6 +19,7 @@ import Carousel from 'react-bootstrap/Carousel';
 import ExampleCarouselImage from 'components/ExampleCarouselImage';
 import ConnectEmotiBit from './Views/ConnectEmotiBit.tsx';
 import ActiveExperiment from './Views/ActiveExperiment.tsx';
+import SpectatorActiveExperiment from './Views/SpectatorActiveExperiment.tsx';
 import About from './Views/About.tsx';
 import React from 'react';
 import EnterPassword from './Views/EnterPassword.tsx';
@@ -61,6 +62,11 @@ const router = createBrowserRouter([
         path:"active-experiment",
         // element: <PrivateRoute><ActiveExperiment /></PrivateRoute>
         element: <ActiveExperiment/>
+      },
+      {
+        path:"active-experiment-spectator",
+        // element: <PrivateRoute><ActiveExperiment /></PrivateRoute>
+        element: <SpectatorActiveExperiment/>
       },
   ]
       
