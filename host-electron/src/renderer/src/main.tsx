@@ -21,6 +21,7 @@ import ActivityRoom from './Views/ActivityHost';
 import Summary from './Views/Summary';
 import ActivityHost from './Views/ActivityHost';
 import ActivityStudentView from './Views/ActivityStudentView';
+import ArticleLab from './Views/ArticleLab.tsx';
 
 
 const router = createBrowserRouter([
