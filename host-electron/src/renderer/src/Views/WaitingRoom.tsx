@@ -26,14 +26,13 @@ export default function WaitingRoom() {
   const {
     sessionId,
     hostName,
-    users: emotiBits,
+    users,
     roomCode,
     experimentType,
     experimentTypeString,
     setExperimentTypeString,
     setSessionId,
     setUsers,
-    users,
     addUser,
     devices,
     removeUser,
@@ -104,15 +103,15 @@ export default function WaitingRoom() {
       return
     }
 
-    const newEmotiBit = {
-        userId: `user${emotiBits.length + 1}`,
-        socketId: `socket${Math.floor(Math.random() * 10000)}`,
-        nickname: `Joiner ${emotiBits.length + 1}`,
-        associatedDevice: {
-          serialNumber: serialNumber,
-          ipAddress: IPAddress
-      }
-    }
+    // const newEmotiBit = {
+    //     userId: `user${emotiBits.length + 1}`,
+    //     socketId: `socket${Math.floor(Math.random() * 10000)}`,
+    //     nickname: `Joiner ${emotiBits.length + 1}`,
+    //     associatedDevice: {
+    //       serialNumber: serialNumber,
+    //       ipAddress: IPAddress
+    //   }
+    // }
 
 
     console.log("devices", )
@@ -130,7 +129,7 @@ export default function WaitingRoom() {
       deviceSocketID: sessionStorage.getItem('socketID')
     })
 
-    addUser(newEmotiBit)
+    //addUser(newEmotiBit)
 
     console.log(users)
     setSerialNumber('');
@@ -195,7 +194,9 @@ export default function WaitingRoom() {
           nicknames.push(users[i].nickname)
         }
 
+
         setNickNames(nicknames)
+        setUsers(users);
       } catch (error) {
         console.error('Error fetching users:', error)
       }
@@ -206,17 +207,6 @@ export default function WaitingRoom() {
 
     return () => clearInterval(interval)
   }, [sessionID]) //Don't fetch any data until sessionID is set
-
-  // const handleEmptyWaitingRoom = () => {
-  //   if(nicknames.length === 0){
-  //     toast.error("Cannot begin experiment. There is no one in the waiting room!")
-  //     return;
-  //   }
-  //   else{
-  //     toast.success("Beginning experiment...")
-  //     navigateTo('/activity-room');
-  //   }
-  // }
   
   const handleBackButton = () => {
     navigateTo('/host/select-lab')
@@ -260,9 +250,9 @@ export default function WaitingRoom() {
         <div className="w-full flex flex-col mt-6">
           <h2 className="text-xl lg:text-2xl font-semibold text-gray-800 mb-4"> Connected EmotiBits</h2>
           <div className="flex-col gap-4 overflow-y-auto max-h-[300px] md:max-h-[400px] p-4 border rounded-md shadow-md ">
-            {emotiBits.map((user) => (
+            {/* {emotiBits.map((user) => (
               <EmotiBitList key={user.userId} user={user} isConnected={true} onAction={() => handleOpenModalSettings(user.userId)} />
-            ))}
+            ))} */}
           </div>
           <button
             onClick={handleOpenModalEmoti}

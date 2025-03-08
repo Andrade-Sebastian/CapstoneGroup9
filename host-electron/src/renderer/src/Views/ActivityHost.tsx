@@ -25,14 +25,12 @@ export default function ActivityHost() {
   const {
     sessionId,
     hostName,
-    users: emotiBits,
+    users,
     roomCode,
     experimentType,
     experimentTypeString,
     setExperimentTypeString,
     setSessionId,
-    setUsers,
-    users,
     addUser,
     devices,
     removeUser,
@@ -50,7 +48,24 @@ export default function ActivityHost() {
   const [isModalOpenEmoti, setIsModalOpenEmoti] = useState(false)
   const [isModalOpenSettings, setIsModalOpenSettings] = useState(false)
   const [selectedEmotiBitId, setSelectedEmotiBitId] = useState<string | null>(null)
-  const [userObjects, setUserObjects] = useState<Array<IUser>>([])
+  const [userObjects, setUserObjects] = useState<Array<{
+    "device": number,
+    "deviceId": number,
+    "deviceSocketId": string,
+    "frontendSocketId": string,
+    "ipAddress": string,
+    "isAvailable": boolean,
+    "isConnected": boolean,
+    "isMasked": boolean,
+    "leftSession": null,
+    "nickname": string,
+    "samplingFrequency": number,
+    "secret": string,
+    "serialNumber": string,
+    "sessionId": number,
+    "userId": string,
+    "userRole": string
+  }>>([])
   const navigateTo = useNavigate()
   const [experimentIcon, setExperimentIcon] = useState<JSX.Element>(
     <CiPlay1 style={{ fontSize: '20px' }} />
@@ -73,19 +88,19 @@ export default function ActivityHost() {
       toast.error('Please enter both a Serial Number and an IP Address')
       return
     }
-    const newEmotiBit: IUser = {
-      userId: `user${emotiBits.length + 1}`,
-      socketId: `socket${Math.floor(Math.random() * 10000)}`,
-      nickname: `Joiner ${emotiBits.length + 1}`,
-      associatedDevice: {
-        serialNumber: serialNumber,
-        ipAddress: IPAddress
-      }
-    }
-    setEmotiBits((prevEmotiBits) => [...prevEmotiBits, newEmotiBit])
-    setSerialNumber('')
-    setIPAddress('')
-    setIsModalOpenEmoti(false)
+    // const newEmotiBit: IUser = {
+    //   userId: `user${emotiBits.length + 1}`,
+    //   socketId: `socket${Math.floor(Math.random() * 10000)}`,
+    //   nickname: `Joiner ${emotiBits.length + 1}`,
+    //   associatedDevice: {
+    //     serialNumber: serialNumber,
+    //     ipAddress: IPAddress
+    //   }
+    // }
+    //setEmotiBits((prevEmotiBits) => [...prevEmotiBits, newEmotiBit])
+    // setSerialNumber('')
+    // setIPAddress('')
+    // setIsModalOpenEmoti(false)
   }
 
   // Joined EmotiBit Settings Modal
@@ -99,13 +114,13 @@ export default function ActivityHost() {
     setSelectedEmotiBitId(null)
   }
 
-  const handleRemoveEmoti = () => {
-    if (!selectedEmotiBitId) return
-    setEmotiBits((prevEmotiBits) =>
-      prevEmotiBits.filter((emotiBit) => emotiBit.userId !== selectedEmotiBitId)
-    )
-    setIsModalOpenSettings(false)
-  }
+  // const handleRemoveEmoti = () => {
+  //   if (!selectedEmotiBitId) return
+  //   setEmotiBits((prevEmotiBits) =>
+  //     prevEmotiBits.filter((emotiBit) => emotiBit.userId !== selectedEmotiBitId)
+  //   )
+  //   setIsModalOpenSettings(false)
+  // }
   const handleRemoveUser = () => {
     console.log('removing user')
     setIsModalOpenSettings(false)
@@ -141,38 +156,58 @@ export default function ActivityHost() {
     getSessionID()
   }, [])
 
-  useEffect(() => {
-    if (!useSessionStore.getState().sessionId) return
+  // useEffect(() => {
+  //   if (!useSessionStore.getState().sessionId) return
 
-    setSessionID(useSessionStore.getState().sessionId)
-    const fetchUsers = async () => {
-      try {
-        console.log('Trying to get users from session ' + sessionID);
-        const response = await axios.get(`http://localhost:3000/joiner/room-users/${sessionID}`)
-        const users = response.data.users //Array of IUser objects
+  //   setSessionID(useSessionStore.getState().sessionId)
+  //   const fetchUsers = async () => {
+  //     try {
+  //       console.log('Trying to get users from session ' + sessionID);
+  //       const response = await axios.get(`http://localhost:3000/joiner/room-users/${sessionID}`)
+  //       const users = response.data.users //Array of IUser objects
 
-        const nicknames = [] //holds only the nicknames of those IUser Objects
+  //       const nicknames = [] //holds only the nicknames of those IUser Objects
         
-        setNickNames(nicknames)
+  //       setNickNames(nicknames)
+
+  //       setUserObjects((prevUsers) => {
+  //         console.log("PREV USERS: ", prevUsers);
+  //         console.log("USERS: ", users);
         
-        setUserObjects(response.data.users)
+  //         const newUsers = users ?? []; // More concise nullish coalescing
+        
+  //         // Merge arrays and remove duplicates based on a unique property like 'userid'
+  //         const mergedUsers = [...prevUsers, ...newUsers];
+  //         const dedupedUsers = Array.from(
+  //           new Map(mergedUsers.map(user => [user.userid, user])).values()
+  //         );
+        
+  //         return dedupedUsers;
+  //       });
+        
+  //       console.log("USER OBJECT SET AS: ", userObjects);
+  //       console.log("USER OBJECT SET AS: ", userObjects);
+
+        
         
         // initialize nicknames array
-        for (let i = 0; i < users.length; i++) {
-          nicknames.push(users[i].nickname)
-        }
+        // if (users !== undefined) {
+        //   for (let i = 0; i < users.length; i++) {
+        //     nicknames.push(users[i].nickname)
+        //   }
+        // }
         
 
-      } catch (error) {
-        console.error('Error fetching users:', error)
-      }
-    }
+  //     } catch (error) {
+  //       console.error('Error fetching users:', error)
+  //     }
+  //   }
 
-    fetchUsers()
-    const interval = setInterval(fetchUsers, 5000) // Refresh users every 5 seconds
+  //   fetchUsers()
+  //   const interval = setInterval(fetchUsers, 5000) // Refresh users every 5 seconds
 
-    return () => clearInterval(interval)
-  }, [sessionID]) //Don't fetch any data until sessionID is set
+  //   return () => clearInterval(interval)
+  // }, [sessionID]) //Don't fetch any data until sessionID is set
 
   useEffect(() => {
     if (experimentType === 1) {
@@ -186,6 +221,23 @@ export default function ActivityHost() {
     }
   }, [experimentType])
 
+  function launchProcesses(){
+    for(let i = 0; i < users.length; i++){
+      ipc.send("brainflow:launch", 
+        users[i].ipAddress,
+        users[i].serialNumber,
+        "http://localhost:3000",
+        users[i].userId,
+        users[i].frontendSocketId,
+        users[i].sessionId
+      )
+    }
+    
+  }
+
+  useEffect(() => {
+    if (users.length > 0) launchProcesses()
+  }, [users, launchProcesses]);
 
   return (
     <div className="flex flex-col items-center justify-center mx-8">
@@ -223,14 +275,14 @@ export default function ActivityHost() {
             Connected EmotiBits
           </h2>
           <div className="flex-col gap-4 overflow-y-auto max-h-[300px] md:max-h-[400px] p-4 border rounded-md shadow-md ">
-            {emotiBits.map((user) => (
+            {/* {emotiBits.map((user) => (
               <EmotiBitList
                 key={user.userId}
                 user={user}
                 isConnected={true}
                 onAction={() => handleOpenModalSettings(user.userId)}
               />
-            ))}
+            ))} */}
           </div>
           <button
             onClick={handleOpenModalEmoti}
@@ -249,8 +301,8 @@ export default function ActivityHost() {
       <Divider className="my-10" />
       <hr></hr>
       <div className="flex justify-center space-x-8 text-lg font-medium text-gray-800">
-        {(userObjects || []).map((user, index) => (
-          <button key={index} onClick={() => handleViewUser(user.userid, experimentType)}>
+        {(users || []).map((user) => (
+          <button key={user.userId} onClick={() => handleViewUser(user.userId, experimentType)}>
           <p>{user.nickname}</p>
           </button>
         ))}
@@ -319,7 +371,7 @@ export default function ActivityHost() {
         </div>
       </ModalComponent>
       <ModalComponent
-        onAction={handleRemoveEmoti}
+        //onAction={handleRemoveEmoti}
         onAction2={handleRemoveUser}
         onAction3={handleUpdate}
         isOpen={isModalOpenSettings}

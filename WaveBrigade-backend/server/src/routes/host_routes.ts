@@ -149,12 +149,13 @@ hostRouter.get("/get-experiment", (req: Request, res:Response) =>{
 })
 
 
-hostRouter.get("/get-user-experiment/:sessionID/:experimentType", async (req: Request, res: Response) => {
+hostRouter.get("/get-user-experiment/:sessionID/:userID/:experimentType", async (req: Request, res: Response) => {
     const sessionID = req.params.sessionID;
+    const userID = req.params.userID;
     const experimentType = req.params.experimentType;
 
     try{
-        const info = await getUserExperimentData(sessionID, experimentType);
+        const info = await getUserExperimentData(sessionID, userID, experimentType);
         console.log("INFO BEING SENT OUT", info);
         return res.status(200).send(info);
 

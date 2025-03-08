@@ -1,19 +1,28 @@
 import { create } from 'zustand'
 
-interface IUser {
-  userId: string
-  socketId: string
-  nickname: string | null
-  associatedDevice: {
-    serialNumber: string
-    ipAddress: string
-  } | null
+interface IUserInfo {
+  device: number,
+  deviceId: number,
+  deviceSocketId: string,
+  frontendSocketId: string,
+  ipAddress: string,
+  isAvailable: boolean,
+  isConnected: boolean,
+  isMasked: boolean,
+  leftSession: null,
+  nickname: string,
+  samplingFrequency: number,
+  secret: string,
+  serialNumber: string,
+  sessionId: number,
+  userId: string,
+  userRole: string
 }
 
 interface SessionState{
     sessionId: string;
     hostName: string;
-    users: IUser[];
+    users: IUserInfo[];
     roomCode: string;
     experimentId: number;
     experimentTitle: string;
@@ -26,8 +35,8 @@ interface SessionState{
 
     setSessionId: (id: string) => void;
     setHostName: (name: string) => void;
-    setUsers: (users: IUser[]) => void;
-    addUser: (user: IUser) => void;
+    setUsers: (users: IUserInfo[]) => void;
+    addUser: (user: IUserInfo) => void;
     removeUser: (userId: string) => void;
     setRoomCode: (code: string) => void;
     setExperimentId: (id: number) => void;
@@ -56,9 +65,9 @@ export const useSessionStore = create<SessionState>()(
 
             setSessionId: (id: string): void => set(() => ({ sessionId: id})),
             setHostName: (name: string): void => set(() => ({ hostName: name})),
-            addUser: (user: IUser): void => set((state: SessionState) => ({ users: [...state.users, user] })),
-            removeUser: (userId: string): void => set((state: SessionState) => ({users: state.users.filter((user: IUser) => user.userId !== userId),})),
-            setUsers: (users: IUser[]): void => set(() => ({ users })),
+            addUser: (user: IUserInfo): void => set((state: SessionState) => ({ users: [...state.users, user] })),
+            removeUser: (userId: string): void => set((state: SessionState) => ({users: state.users.filter((user: IUserInfo) => user.userId !== userId),})),
+            setUsers: (users: IUserInfo[]): void => set(() => ({ users })),
             setRoomCode: (code: string): void => set(() => ({ roomCode: code})),
             setExperimentId: (id: number): void => set(() => ({experimentId: id})),
             setExperimentTitle: (title: string): void => set(() => ({ experimentTitle: title})),

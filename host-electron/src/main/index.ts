@@ -89,7 +89,6 @@ function spawnBrainFlow(
     frontEndSocketId
   ])
   activity[userId] = {
-    browserWindow: undefined,
     brainflowProcess: instance,
     ipAddress: emotibitIpAddress,
     serialNumber: serialNumber,

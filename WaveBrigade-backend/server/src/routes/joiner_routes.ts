@@ -104,7 +104,7 @@ joinerRouter.get("/room-users/:sessionID", async (req: Request, res: Response) =
     try{
         const users = await getUsersFromSession(sessionID);
         return res.status(200).send({
-            "users": users
+            "users":users
         });
 
     }

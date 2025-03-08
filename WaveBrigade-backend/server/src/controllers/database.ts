@@ -608,7 +608,9 @@ export async function registerDevice(initializationInfo: IRegisterDeviceInfo){
 export async function getUsersFromSession(sessionID: string){
 	try{
 		await dbClient.connect();
-		const query = await dbClient.queryObject(`SELECT * FROM Get_Session_Users($1)`,
+		const query = await dbClient.queryObject(`SELECT * FROM "User" 
+			JOIN device ON "User".device = device.deviceid
+			WHERE "User".sessionid = $1`,
 			[sessionID]
 		);
 		console.log("Users retrieved from ", sessionID, query);
@@ -695,16 +697,15 @@ export async function validatePassword(sessionID:string, password:string): Promi
 	return isValidPass;
 }
 
-export async function getUserExperimentData(sessionID: string, experimentType: string){
+export async function getUserExperimentData(sessionID: string, userID: number, experimentType: string){
 	try{
 		await dbClient.connect();
 		switch(experimentType){
 		case "photo-lab":
-			const userInfo = await dbClient.queryObject(`SELECT "User".nickname, photolab.path FROM "User"
-				JOIN session ON session.sessionid = "User".sessionid
-				JOIN photolab ON photolab.experimentid = session.experimentid
-				WHERE session.sessionid = $1`,
-				[sessionID]
+			const userInfo = await dbClient.queryObject(`SELECT * FROM "User"
+				JOIN device ON "User".device = device.deviceid
+				WHERE "User".userid = $1`,
+				[userID]
 			);
 			return userInfo.rows[0];
 		}

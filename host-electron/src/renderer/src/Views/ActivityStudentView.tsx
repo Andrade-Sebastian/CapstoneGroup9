@@ -33,11 +33,11 @@ export default function ActivityStudentView(): ReactElement{
     useEffect(() => {
       const getUserData = async () => {
         try{
-          const response = await axios.get(`http://localhost:3000/host/get-user-experiment/${sessionId}/${experimentType}`);
+          const response = await axios.get(`http://localhost:3000/host/get-user-experiment/${sessionId}/${userId}/${experimentType}`);
           console.log("RESPONSE RECIEVED IN ACTIVITYSTUDENTVIEW", response.data);
           if(response.status === 200){
             setCurrentUser(response.data.nickname);
-            setFileName(response.data.path);
+            //setFileName(response.data.path);
           }
         }
         catch(error){
