@@ -250,7 +250,7 @@ export default function ActivityHost() {
       <hr></hr>
       <div className="flex justify-center space-x-8 text-lg font-medium text-gray-800">
         {(userObjects || []).map((user, index) => (
-          <button key={index} onClick={() => handleViewUser(user.userid, experimentType)}>
+          <button type="button" key={index} onClick={() => handleViewUser(user.userid, experimentType)}>
           <p>{user.nickname}</p>
           </button>
         ))}

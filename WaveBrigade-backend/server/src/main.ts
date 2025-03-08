@@ -52,7 +52,9 @@ import multer from "multer";
 import path from "node:path";
 import fs from "node:fs";
 import { fileURLToPath } from "node:url";
+
 const app = express();
+
 // app.get('/get-ip', (req, res) => {
 //     const ipAddress = req.headers['x-forwarded-for'] || req.ip;
 //     res.send({
@@ -120,6 +122,7 @@ app.get("/get-photo/:filename", (req: Request, res: Response) => {
 });
 
 io.on("connection", (socket) => {
+  
   // console.log("(main.ts): User Connected | socketID: " + socket.id)
   // console.log(`(main.ts): Total connections: ${io.engine.clientsCount}`);
 
@@ -141,6 +144,26 @@ io.on("connection", (socket) => {
     io.emit("experiment-data", data);
     console.log("hopefully emitted");
   });
+
+  socket.on("kick", async (nicknameSocketID) => {
+    console.log("(main.ts): Received socket ID:", nicknameSocketID);
+    console.log("(main.ts): Current socketSessionMap:", socketSessionMap);
+
+    const targetSocket = io.sockets.sockets.get(nicknameSocketID);
+    
+    if (targetSocket) {
+        targetSocket.disconnect(true); // Ensures a forced disconnect
+        console.log(`(main.ts): Successfully disconnected socket ${nicknameSocketID}`);
+    } else {
+        console.log(`(main.ts): No socket found with ID ${nicknameSocketID}`);
+    }
+    
+    io.to(nicknameSocketID).emit("kick", nicknameSocketID); 
+    // io.emit("kick", nicknameSocketID);
+
+    // io.emit("kick", socketID);
+
+  })
 
   //send socket Id to brainflow
   socket.on("brainflow-assignment", () => {
@@ -198,10 +221,10 @@ io.on("connection", (socket) => {
           }
         );
         //emit to host that a user disconnected
-        io.emit(response.hostsocketid).emit(
-          "destroy-brainflow-launch",
-          "destroy user's brainflow launch"
-        );
+        // io.emit(response.hostsocketid).emit(
+        //   "destroy-brainflow-launch",
+        //   "destroy user's brainflow launch"
+        // );
         // Clean up the mapping
         removeSocket(socket.id);
         console.log(JSON.stringify(socketSessionMap));

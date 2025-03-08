@@ -12,6 +12,7 @@ import { useNavigate } from "react-router-dom";
 import { useJoinerStore } from "../hooks/stores/useJoinerStore.ts";
 import React from "react";
 import toast, { Toaster } from "react-hot-toast";
+import { user } from "@heroui/react";
 // -----JOINER=--------------------------//
 export default function WaitingRoom() {
   const [nicknames, setNickNames] = useState<string[]>([]);
@@ -29,6 +30,7 @@ export default function WaitingRoom() {
     nickname,
     roomCode,
     userRole,
+    socketId,
     setExperimentId,
     setExperimentTitle,
     setExperimentDesc,
@@ -52,7 +54,7 @@ export default function WaitingRoom() {
   //   // Listen for updates to the room's nicknames
   //   socket.on("receive_names", (names) => {
   //     if (Array.isArray(names)) {
-  //       console.log("Nicknames received:", names);
+  //       console.log("Nicknames received:" , names);
   //       setNickNames(names);
   //     } else {
   //       console.error("Did not receive an array of names, received:", names);
@@ -63,26 +65,57 @@ export default function WaitingRoom() {
   //     socket.off("receive_names");
   //   };
   // }, [nickName, roomCode]);
+  function kickUser(socketId: string)
+  {
+
+    console.log("before, socketid: ", socketId);
+
+    navigateTo("/");
+    console.log("after ")
+  }
+
+
   useEffect(() => {
+    console.log("userRole: ", userRole);
+    socket.on("kick", kickUser);
+    console.log("After socketio kick")
     if(userRole === "student"){
-    socket.on("session-start", () => {
-      console.log("joiner - ONsession start");
-      navigateTo("/active-experiment");
-    });
+      socket.on("session-start", () => {
+        console.log("joiner - on session start");
+        navigateTo("/active-experiment");
+      });
+
+      //removes user from database
+      console.log("(socketio): Session id in 'kick': ", socketId);
+      axios.post('http://localhost:3000/joiner/leave-room', {
+        sessionID: sessionID,
+        socketID: socketId
+      });
+
+      console.log("Before the navigateTo");
+      // navigateTo("/");
+      console.log("After the navigateTo");
+    }
+
     return () => {
+      socket.off("kick", kickUser);
       socket.off("session-start");
     };
-  }
-  else{
+
+  }, [navigateTo, userRole, kickUser]);
+
+  useEffect(() => {
+    const navigateTo = useNavigate();
     socket.on("session-start-spectator", () => {
       console.log("spectator in waiting room");
       navigateTo("/active-experiment-spectator")
     })
     return () => {
       socket.off("session-start-spectator");
+
     };
-  }
-  }, [navigateTo, userRole]);
+
+  }, [navigateTo, kickUser]);
 
   useEffect(() => {
     const getSessionID = async () => {
@@ -109,6 +142,7 @@ export default function WaitingRoom() {
     const fetchUsers = async () => {
       try {
         console.log("Trying to get users from session " + sessionID);
+        console.log("Socket ID: ", socketId);
         const response = await axios.get(
           `http://localhost:3000/joiner/room-users/${sessionID}`
         );
@@ -132,6 +166,7 @@ export default function WaitingRoom() {
 
     return () => clearInterval(interval);
   }, [sessionID]); //Don't fetch any data until sessionID is set
+
 
   useEffect(() => {
     const getExperimentData = async () => {
