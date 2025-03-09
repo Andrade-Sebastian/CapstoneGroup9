@@ -146,19 +146,19 @@ io.on("connection", (socket) => {
   });
 
   socket.on("kick", async (nicknameSocketID) => {
-    console.log("(main.ts): Received socket ID:", nicknameSocketID);
+    console.log("Received kick event for", nicknameSocketID);
     console.log("(main.ts): Current socketSessionMap:", socketSessionMap);
 
     const targetSocket = io.sockets.sockets.get(nicknameSocketID);
     
     if (targetSocket) {
-        targetSocket.disconnect(true); // Ensures a forced disconnect
-        console.log(`(main.ts): Successfully disconnected socket ${nicknameSocketID}`);
+      io.to(nicknameSocketID).emit("kick", nicknameSocketID);
+      console.log("(main.ts) Emitted kick event.")
+      targetSocket.disconnect(true); // Ensures a forced disconnect
+      console.log(`(main.ts): Successfully disconnected socket ${nicknameSocketID}`);
     } else {
         console.log(`(main.ts): No socket found with ID ${nicknameSocketID}`);
     }
-    
-    io.to(nicknameSocketID).emit("kick", nicknameSocketID); 
     // io.emit("kick", nicknameSocketID);
 
     // io.emit("kick", socketID);

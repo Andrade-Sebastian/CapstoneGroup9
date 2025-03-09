@@ -203,13 +203,16 @@ export default function WaitingRoom() {
       const nicknameSocketID = theUserMap.get(focusedUser);
       console.log("Kicking user with socket ID: ", nicknameSocketID);
       console.log("HERE IS THE USER MAP BEFORE EMIT KICKING", theUserMap)
-      
-      
+      if(!nicknameSocketID){
+        console.log("Cannot kick user: there is no socket id found.")
+        return;
+      }
+      console.log("Kicking user with socketID:", nicknameSocketID);
+
       socket.emit("kick", nicknameSocketID);
       
       console.log("Emitted kick event");
     
-      // Create a new map instance to trigger state update
       setTheUserMap(prevMap => {
         const newMap = new Map(prevMap);
         newMap.delete(focusedUser);
@@ -217,13 +220,12 @@ export default function WaitingRoom() {
       })
     
       console.log("Updated user map:", theUserMap);
-      setIsModalOpenKick(false);
       
       console.log("Kicking user...")
     
       console.log("HERE IS THE USER MAP AFTER RESETING THE MAP", theUserMap)
-      
       setIsModalOpenKick(false);
+      
     }
 
   useEffect(() => {
@@ -246,9 +248,11 @@ export default function WaitingRoom() {
           frontendSocketIDs.push(users[i].frontendsocketid)
         }
 
-        for(let i = 0; i < users.length; i++){
-          userMap.set(nicknames[i], frontendSocketIDs[i]);
-        }
+
+        users.forEach(user => {
+          userMap.set(user.nickname, user.frontendsocketid);
+        });
+
         console.log(userMap)
         setTheUserMap(userMap);
   

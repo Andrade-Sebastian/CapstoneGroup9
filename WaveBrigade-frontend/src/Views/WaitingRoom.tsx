@@ -65,57 +65,51 @@ export default function WaitingRoom() {
   //     socket.off("receive_names");
   //   };
   // }, [nickName, roomCode]);
-  function kickUser(socketId: string)
-  {
-
-    console.log("before, socketid: ", socketId);
-
-    navigateTo("/");
-    console.log("after ")
-  }
-
+  
 
   useEffect(() => {
-    console.log("userRole: ", userRole);
-    socket.on("kick", kickUser);
-    console.log("After socketio kick")
-    if(userRole === "student"){
-      socket.on("session-start", () => {
-        console.log("joiner - on session start");
-        navigateTo("/active-experiment");
-      });
-
+    function kickUser()
+    {
+      console.log("Kick event received. Here is the socketID and sessionID", socketId, sessionID)
       //removes user from database
-      console.log("(socketio): Session id in 'kick': ", socketId);
       axios.post('http://localhost:3000/joiner/leave-room', {
         sessionID: sessionID,
         socketID: socketId
-      });
-
-      console.log("Before the navigateTo");
-      // navigateTo("/");
-      console.log("After the navigateTo");
+      })
+      .then(() =>{
+        console.log("Successfully removed from database");
+        navigateTo("/");
+      })
+      .catch(error =>{
+        console.log("Error removing user from database", error)
+      })
     }
-
+    socket.on("kick", kickUser);
+    console.log("Listening for 'kick event");
     return () => {
       socket.off("kick", kickUser);
-      socket.off("session-start");
-    };
-
-  }, [navigateTo, userRole, kickUser]);
+  }}, []);
 
   useEffect(() => {
-    const navigateTo = useNavigate();
+    if(userRole === "student"){
+    socket.on("session-start", () => {
+      console.log("joiner - ONsession start");
+      navigateTo("/active-experiment");
+    });
+    return () => {
+      socket.off("session-start");
+    };
+  }
+  else{
     socket.on("session-start-spectator", () => {
       console.log("spectator in waiting room");
       navigateTo("/active-experiment-spectator")
     })
     return () => {
       socket.off("session-start-spectator");
-
     };
-
-  }, [navigateTo, kickUser]);
+  }
+  }, [navigateTo, userRole]);
 
   useEffect(() => {
     const getSessionID = async () => {
@@ -292,3 +286,11 @@ export default function WaitingRoom() {
     </div>
   );
 }
+
+function then(arg0: () => void) {
+  throw new Error("Function not implemented.");
+}
+
+
+//PROBLEM: SO THE FIRST JOINER GETS KICKED CORRECTLY AND GETS SENT TO THE JOIN PAGE. HOWEVER, WHEN I TRY TO JOIN AS A NEW
+//JOINER, THE BACKEND REMEMBERS AN OLD SOCKETID, THE ONE THAT WAS ALREADY KICKED, AND TRIES TO DISCONNECT THAT ONE INSTEAD OF THE NEW GUY
