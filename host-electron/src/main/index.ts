@@ -4,6 +4,7 @@ import { spawn } from 'child_process'
 import createMainWindow from './main_window.ts'
 import ActivitySingleton from './activitySingleton.ts'
 import createProcessWindow from './activity_window.ts'
+import { IActivityInstance } from './activitySingleton.ts'
 
 
 export const windows:Array<{
@@ -100,6 +101,14 @@ function spawnBrainFlow(
   return instance
 }
 
+function verifyEmotiBitUsage(ipAddress: string): IActivityInstance | undefined {
+  const activity = ActivitySingleton.getInstance().activityInstances;
+    return Object.values(activity).find(
+      (instance) => instance.ipAddress === ipAddress
+    )
+}
+ 
+
 function processDestroyer(event, userId: string): void{
   //const process = echoServers[userId]
   const activitySingleton = ActivitySingleton.getInstance()
@@ -152,6 +161,7 @@ ipcMain.on(
     frontEndSocketId: string,
     sessionId: string
   ) => {
+    if(verifyEmotiBitUsage(emotibitIpAddress) !== undefined) return 
     const activitySingleton = ActivitySingleton.getInstance()
     const brainflowInstance = spawnBrainFlow(emotibitIpAddress, serialNumber, backendIp, userId, frontEndSocketId, sessionId)
 
@@ -178,6 +188,14 @@ ipcMain.on(
       console.log("(main/index.ts): Error in Brainflow script")
     })
     event.reply("brainflow:launched", { sessionId, status: "success"});
+
+    brainflowInstance.stdout.on("data", (message) =>{
+      console.log("INSIDE STDOUT: ", brainflowInstance.pid, message.toString());
+    })
+
+    brainflowInstance.stderr.on("data", (message) => {
+      console.log("INSIDE STDERR: ", brainflowInstance.pid, message.toString());
+    })
   }
 )
 ipcMain.on('echo-server:destroy-user', processDestroyer);
