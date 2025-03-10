@@ -13,6 +13,8 @@ interface IModalComponent {
   button2?: string;
   button3?: string;
   children: ReactElement | Array<ReactElement>;
+  isButtonDisabled?: boolean;
+  isButton1Disabled?: boolean;
 }
 
 interface photoLabData {
@@ -44,8 +46,9 @@ export default function ModalComponent(props: IModalComponent, photoLabData: pho
           {props.button && (
             <button
               type="button"
-              className="mt-6 font-semibold py-3 px-6 rounded-md shadow-md transition duration-300 ease-in-out bg-[#7F56D9] hover:bg-violet-500 text-white"
+              className="mt-6 font-semibold py-3 px-6 rounded-md shadow-md transition duration-300 ease-in-out bg-[#7F56D9] hover:bg-violet-500 text-white disabled:bg-gray-400 disabled:cursor-not-allowed" 
               onClick={props.onAction}
+              disabled={props.isButton1Disabled}
             >
             {props.button}
           </button>
@@ -55,8 +58,9 @@ export default function ModalComponent(props: IModalComponent, photoLabData: pho
 
           <button
             type="button"
-            className="mt-6 font-semibold py-3 px-6 rounded-md shadow-md transition duration-300 ease-in-out bg-[#7F56D9] hover:bg-violet-500 text-white"
-            onClick={props.onAction}
+            className="mt-6 font-semibold py-3 px-6 rounded-md shadow-md transition duration-300 ease-in-out bg-[#7F56D9] hover:bg-violet-500 text-white disabled:bg-gray-400 disabled:cursor-not-allowed"
+            onClick={props.onAction2}
+            disabled={props.isButtonDisabled}
           >
             {props.button2}
           </button>
@@ -66,7 +70,7 @@ export default function ModalComponent(props: IModalComponent, photoLabData: pho
           <button
             type="button"
             className="mt-6 font-semibold py-3 px-6 rounded-md shadow-md transition duration-300 ease-in-out bg-[#7F56D9] hover:bg-violet-500 text-white"
-            onClick={props.onAction}
+            onClick={props.onAction3}
           >
             {props.button3}
           </button>

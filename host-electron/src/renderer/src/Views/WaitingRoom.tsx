@@ -19,6 +19,7 @@ import { toNamespacedPath } from 'path';
 import toast, { Toaster } from 'react-hot-toast'
 import { useSessionStore } from '../store/useSessionStore.tsx'
 import { session } from 'electron';
+import { isDeepStrictEqual } from 'util';
 
 
 export default function WaitingRoom() {
@@ -41,6 +42,8 @@ export default function WaitingRoom() {
     experimentTitle,
     experimentDesc
   } = useSessionStore()
+  const [ isBeginDisabled, setIsBeginDisabled] = useState(false);
+  const [ isConnectEmotibitDisabled, setIsConnectEmotibitDisabled] = useState(false);
   const [nicknames, setNickNames] = useState<string[]>([])
   const [sessionID, setSessionID] = useState('')
   const [serialNumber, setSerialNumber] = useState('')
@@ -72,7 +75,12 @@ export default function WaitingRoom() {
   }, [experimentType])
 
   //Modal Handlers
-  const handleOpenModal = () => setIsModalOpen(true)
+  const handleOpenModal = () => {
+    setIsModalOpen(true);
+    setIsBeginDisabled(true);
+    setIsConnectEmotibitDisabled(false);
+    console.log(`[HandleOpenModal]Begin is ${isBeginDisabled} and ConnectEmotibitDisabled is ${isConnectEmotibitDisabled}`)
+  }
   const handleCloseModal = () => setIsModalOpen(false)
   const handleAction = () => {
     console.log('Creating lobby...')
@@ -84,11 +92,16 @@ export default function WaitingRoom() {
       toast.error("Please wait for people to join");
     }
   }
+  const handleConnectEmotibit = () => {
+    //Insert logic here to run script...
+    setIsBeginDisabled(false);
+    setIsConnectEmotibitDisabled(true);
+    console.log(`[HandleConnectEmotibit]Begin is ${isBeginDisabled} and ConnectEmotibitDisabled is ${isConnectEmotibitDisabled}`)
+  }
 
   //Add EmotiBit Modal
   const handleOpenModalEmoti = () => {
     setIsModalOpenEmoti(true);
-
   }
 
 
@@ -292,15 +305,19 @@ export default function WaitingRoom() {
         {/*This will redirect to Media Page */}
       </div>
       <ModalComponent
-        onAction={handleAction}
+        onAction={handleConnectEmotibit}
+        onAction2={handleAction}
         isOpen={isModalOpen}
         onCancel={handleCloseModal}
-        modalTitle="Begin Experiment"
-        button="Begin"
+        modalTitle="Connect Emotibits"
+        button="Connect Emotibits"
+        button2="Begin"
+        isButtonDisabled={isBeginDisabled}
+        isButton1Disabled={isConnectEmotibitDisabled}
       >
         <div className="mb-6">
           <h1 className="text-md text-gray-700 mb-2">
-            Are you sure you want to begin the experiment?
+            Before beginning the experiment, please connect Emotibits first.
           </h1>
         </div>
         
