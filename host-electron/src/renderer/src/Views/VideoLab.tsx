@@ -1,9 +1,6 @@
 import { TbUfo } from "react-icons/tb";
 import SideComponent from "../components/SideComponent";
 import React, { useEffect, useState } from "react";
-import VideoInput from "../components/VideoInput.js";
-import ModalComponent from "../components/ModalComponent.js";
-import { useNavigate } from "react-router-dom";
 import toast, { Toaster } from 'react-hot-toast'
 import socket from './socket';
 import axios from 'axios'
