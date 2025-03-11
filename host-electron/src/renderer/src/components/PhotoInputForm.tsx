@@ -79,6 +79,7 @@ export default function PhotoInputForm(props: IPhotoInputForm) {
     data.append('imageBlob', file);
 
     if (file) {
+      console.log("File selected")
     } else {
       console.log("No file selected.");
       return;
@@ -160,7 +161,8 @@ export default function PhotoInputForm(props: IPhotoInputForm) {
     }
     setError(null);
     const url = URL.createObjectURL(file); //a temp url is generated for the selected file which is stored in the source state for previewing the image
-    set_image_filename(url);
+    set_image_filename(file.name);
+    setPhotoLabImageSource(url)
     props.onFileSelected(true); //file is selected, host can now continue
 
   };
@@ -175,8 +177,8 @@ export default function PhotoInputForm(props: IPhotoInputForm) {
   return (
     <>
         <div className="flex flex-col items-center justify-center w-full md:w-3/5 lg:w-3/5 p-6 min-h-[600px] space-y-6 mt-50">
-            <p className="text-lg text-gray-600"> Experiment ID: {experimentType || "None"}</p>
-            <p className="text-lg text-gray-600"> Room Code: {roomCode || "None"}</p>
+            {/* <p className="text-lg text-gray-600"> Experiment ID: {experimentType || "None"}</p>
+            <p className="text-lg text-gray-600"> Room Code: {roomCode || "None"}</p> */}
             <form onSubmit={(e) => handleSubmit} className="w-full max-w-md space-y-6" encType='multipart/form-data'>
                 <div className="w-full">
 
@@ -218,13 +220,13 @@ export default function PhotoInputForm(props: IPhotoInputForm) {
 
                         {error && <p className="text-red-500 text-sm mt-2"> {error}</p>}
                         {/* image Preview */}
-                        {props.imageSource && (
+                        {photoLabImageSource && (
                             <div className="mt-4">
                             <img
                                 width={props.width}
                                 height={props.height}
-                                src={props.imageSource}
-                                alt="Selected"
+                                src={photoLabImageSource}
+                                alt="Selected Preview"
                                 className="rounded-md shadow-md"
                             />
                             </div>
