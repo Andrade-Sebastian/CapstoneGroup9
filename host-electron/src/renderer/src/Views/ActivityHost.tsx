@@ -221,23 +221,23 @@ export default function ActivityHost() {
     }
   }, [experimentType])
 
-  function launchProcesses(){
-    for(let i = 0; i < users.length; i++){
-      ipc.send("brainflow:launch", 
-        users[i].ipAddress,
-        users[i].serialNumber,
-        "http://localhost:3000",
-        users[i].userId,
-        users[i].frontendSocketId,
-        users[i].sessionId
-      )
-    }
+  // function launchProcesses(){
+  //   for(let i = 0; i < users.length; i++){
+  //     ipc.send("brainflow:launch", 
+  //       users[i].ipAddress,
+  //       users[i].serialNumber,
+  //       "http://localhost:3000",
+  //       users[i].userId,
+  //       users[i].frontendSocketId,
+  //       users[i].sessionId
+  //     )
+  //   }
     
-  }
+  // }
 
-  useEffect(() => {
-    if (users.length > 0) launchProcesses()
-  }, [users, launchProcesses]);
+  // useEffect(() => {
+  //   if (users.length > 0) launchProcesses()
+  // }, [users, launchProcesses]);
 
   return (
     <div className="flex flex-col items-center justify-center mx-8">

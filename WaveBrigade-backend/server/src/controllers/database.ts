@@ -700,18 +700,49 @@ export async function validatePassword(sessionID:string, password:string): Promi
 export async function getUserExperimentData(sessionID: string, userID: number, experimentType: string){
 	try{
 		await dbClient.connect();
-		switch(experimentType){
-		case "photo-lab":
-			const userInfo = await dbClient.queryObject(`SELECT * FROM "User"
-				JOIN device ON "User".device = device.deviceid
-				WHERE "User".userid = $1`,
-				[userID]
-			);
-			return userInfo.rows[0];
-		}
+		const userInfo = await dbClient.queryObject(`SELECT * FROM "User"
+			JOIN device ON "User".device = device.deviceid
+			WHERE "User".userid = $1`,
+			[userID]
+		);
+		return userInfo.rows[0];
 	}
 	catch(error){
 		console.log("Data is not available", error);
 	}
+}
+
+export async function updateDeviceConnection(serialNumber: string, isConnected: boolean){
+	try{
+		await dbClient.connect();
+		const query = await dbClient.queryObject(`UPDATE device
+			SET isconnected = $1
+			WHERE serialnumber = $2`,
+			[isConnected, serialNumber]
+		);
+		return true;
+	}
+	catch(error){
+		console.log("Unable to update isconnected in database", error);
+		return false;
+	}
+}
+
+export async function getSessionDevices(sessionId: string){
+	try{
+		await dbClient.connect();
+		const query = await dbClient.queryObject(`SELECT device.id, device.isconnected 
+			FROM "User"
+			JOIN session ON "User".sessionid = session.sessionid
+			JOIN device ON "User".device = device.deviceid
+			WHERE session.id = $1`,
+			[sessionId]
+		);
+		return query.rows
+	}
+	catch(error){
+		console.log("Unable to get devices in session", error);
+	}
+
 }
 

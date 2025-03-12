@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 
-interface IUserInfo {
+export interface IUserInfo {
   device: number,
   deviceId: number,
   deviceSocketId: string,

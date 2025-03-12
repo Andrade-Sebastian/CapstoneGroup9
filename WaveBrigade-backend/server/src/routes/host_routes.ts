@@ -1,5 +1,5 @@
 import express, { Request, Response } from "npm:express";
-import { createSessionInDatabase, registerDevice, getUserExperimentData } from "../controllers/database.ts";
+import { createSessionInDatabase, registerDevice, getUserExperimentData, updateDeviceConnection } from "../controllers/database.ts";
 import { Client } from "https://deno.land/x/postgres@v0.17.0/mod.ts";
 
 const dbClient = new Client({
@@ -165,5 +165,35 @@ hostRouter.get("/get-user-experiment/:sessionID/:userID/:experimentType", async 
         return res.status(400).send({message: "Error getting data"});
     }
 })
+
+//update connection flag for given device
+hostRouter.post("/update-device-connection", async (req: Request, res: Response) => {
+    const serialNumber = req.params.serial;
+    const isConnected = req.params.connection;
+
+    try{
+        const result = await updateDeviceConnection(serialNumber, isConnected);
+        if(result){
+            return res.status(200).send({success: true});
+        }
+    }
+    catch(error){
+        console.error("Error updating device connection")
+        return res.status(400).send({success: false});
+    }
+});
+
+hostRouter.get("/check-connected-devices/:sessionId", async (req: Request, res: Response) => {
+    const sessionId = req.params.sessionId;
+
+    try{
+        const result = await getSessionDevices(sessionId);
+        return res.status(200).send({success: true, devices: result});
+    }
+    catch(error){
+        console.error("Error checking devices in session");
+        return res.status(400).send({success: false});
+    }
+});
 
 export default hostRouter;

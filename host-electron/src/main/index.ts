@@ -5,6 +5,7 @@ import createMainWindow from './main_window.ts'
 import ActivitySingleton from './activitySingleton.ts'
 import createProcessWindow from './activity_window.ts'
 import { IActivityInstance } from './activitySingleton.ts'
+import axios from 'axios'
 
 
 export const windows:Array<{
@@ -152,7 +153,7 @@ function processStatus(event, userId: string): void{
 
 ipcMain.on(
   "brainflow:launch",
-  (
+  async (
     event: Electron.IpcMainEvent,
     emotibitIpAddress: string,
     serialNumber: string,
@@ -174,25 +175,42 @@ ipcMain.on(
     brainflowInstance.on("message", (message) => {
       console.log("Process Message: " , message)
     })
-
     
     brainflowInstance.on("close", (code) => {
       console.log("CODE: ", code)
       if (code !== 0 )
       {
         console.log("(main/index.ts): Closing this shit, brainflow broken as shi")
+        brainflowInstance.kill();
       }
     })
 
     brainflowInstance.on("error", () => {
-      console.log("(main/index.ts): Error in Brainflow script")
+      console.log("(main/index.ts): Error in Brainflow script");
+      brainflowInstance.kill();
     })
-    event.reply("brainflow:launched", { sessionId, status: "success"});
 
+    //attempt to update each device's isConnected flag 
+    try {
+      await axios.post(`http://localhost:3000/host/update-device-connection`,
+        {
+          serial: serialNumber,
+          connection: true
+        }
+      )
+      event.reply("brainflow:launched", { sessionId, status: "success"});
+    }
+    catch(error){
+      console.error("Failed to update device status", error);
+      event.reply("brainflow:launched", { sessionId, status: "error" });
+    }
+
+    //check if data is being recieved
     brainflowInstance.stdout.on("data", (message) =>{
       console.log("INSIDE STDOUT: ", brainflowInstance.pid, message.toString());
     })
 
+    //log any errors from brainflow script
     brainflowInstance.stderr.on("data", (message) => {
       console.log("INSIDE STDERR: ", brainflowInstance.pid, message.toString());
     })

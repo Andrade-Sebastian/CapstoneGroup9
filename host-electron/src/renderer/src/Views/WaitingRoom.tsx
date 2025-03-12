@@ -20,6 +20,7 @@ import toast, { Toaster } from 'react-hot-toast'
 import { useSessionStore } from '../store/useSessionStore.tsx'
 import { session } from 'electron';
 import { isDeepStrictEqual } from 'util';
+import { IUserInfo } from "../store/useSessionStore";
 
 
 export default function WaitingRoom() {
@@ -55,6 +56,9 @@ export default function WaitingRoom() {
   const [experimentIcon, setExperimentIcon] = useState<JSX.Element>(
     <CiPlay1 style={{ fontSize: '20px' }} />
   )
+  const [currentUsers, setCurrentUsers] = useState<IUserInfo[]>([]);
+  const [sessionDevices, setSessionDevices] = useState<string[]>([]);
+  const ipc = window.api;
   
   useEffect(() => {
     if (experimentType === 1) {
@@ -92,11 +96,39 @@ export default function WaitingRoom() {
       toast.error("Please wait for people to join");
     }
   }
-  const handleConnectEmotibit = () => {
+  const handleConnectEmotibit = async () => {
     //Insert logic here to run script...
-    setIsBeginDisabled(false);
+    setIsBeginDisabled(true);
     setIsConnectEmotibitDisabled(true);
-    console.log(`[HandleConnectEmotibit]Begin is ${isBeginDisabled} and ConnectEmotibitDisabled is ${isConnectEmotibitDisabled}`)
+    
+    if(currentUsers.length > 0){
+      
+      await launchProcesses();
+      try{
+        const connectedDevices = await axios.get(`http://localhost:3000/host/check-connected-devices/${sessionId}`)
+        if(connectedDevices.data.success){
+          const allDeviceConnected = connectedDevices.data.devices.every(device => device.isConnected);
+          if(allDeviceConnected){
+            console.log("All devices are connected");
+            toast.success("All devices are connected!");
+            setIsBeginDisabled(false);
+          }
+          else{
+            console.log("Not all devices are connected");
+            toast.error("There was a problem connecting devices. Please try again.");
+            setIsConnectEmotibitDisabled(false);
+          }
+        }
+      }
+      catch(error){
+        console.error("Error trying to start brainflow for devices");
+        toast.error("There was a problem connecting devices. Please try again.");
+      }
+      finally{
+        setIsConnectEmotibitDisabled(false);
+        console.log(`[HandleConnectEmotibit]Begin is ${isBeginDisabled} and ConnectEmotibitDisabled is ${isConnectEmotibitDisabled}`)
+      }
+    } 
   }
 
   //Add EmotiBit Modal
@@ -187,8 +219,24 @@ export default function WaitingRoom() {
   //   setIsModalOpenSettings(false);
   // }
 
-  //handleSubmit
+  //function to start a brainflow process for each emotibit
+  async function launchProcesses(){
+    console.log("INSIDE LAUNCH PROCESS");
+    for(let i = 0; i < users.length; i++){
+      ipc.send("brainflow:launch", 
+        users[i].ipAddress,
+        users[i].serialNumber,
+        "http://localhost:3000",
+        users[i].userId,
+        users[i].frontendSocketId,
+        users[i].sessionId
+      )
+      setSessionDevices([...sessionDevices, users[i].serialNumber]);
 
+    }
+
+    
+  }
 
   useEffect(() => {
     if (!useSessionStore.getState().sessionId) return
@@ -210,6 +258,7 @@ export default function WaitingRoom() {
 
         setNickNames(nicknames)
         setUsers(users);
+        setCurrentUsers(users);
       } catch (error) {
         console.error('Error fetching users:', error)
       }
