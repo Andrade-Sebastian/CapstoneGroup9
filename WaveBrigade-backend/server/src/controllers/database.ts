@@ -1,4 +1,5 @@
 import { Client } from "https://deno.land/x/postgres@v0.17.0/mod.ts"; //for database functionality
+import e, { query } from "express";
 
 export const dbClient = new Client({
   user: "postgres",
@@ -611,7 +612,6 @@ export async function getUsersFromSession(sessionID: string){
 		const query = await dbClient.queryObject(`SELECT * FROM Get_Session_Users($1)`,
 			[sessionID]
 		);
-		console.log("Users retrieved from ", sessionID, query);
 		return query.rows;
 	}
 	catch(error){
@@ -693,5 +693,71 @@ export async function validatePassword(sessionID:string, password:string): Promi
 	}
 
 	return isValidPass;
+}
+
+/*
+	Basic Idea: 
+		if the username is unique in the session, return true
+		otherwise return false
+
+	Steps:
+	1.find the sessionid for the session@ room code
+    2.use that sessionID to check the session for all nicknames
+    3.Remember to trim em
+*/
+export async function isUniqueNickname(roomcode: string, nickname: string): Promise<boolean>{
+	if (!roomcode) return false;
+	let sessionID = null;
+	
+	const roomCode = roomcode.trim();
+	const nickName = nickname.trim()
+
+	try{
+		await dbClient.connect()
+		
+		//find the sessionid for the session @ room code
+		const query = await dbClient.queryObject(`SELECT sessionid FROM session WHERE roomcode = '${roomCode}'`)
+
+		if (query.rows.length === 0) //if there is no session for the provided room code
+		{
+			console.log("HEY! This MF got an invalid room code");
+			await dbClient.end();
+
+			return false;
+		}
+		else
+		{
+			console.log("HEY! Bro has a valid room code");
+			sessionID = query.rows[0].sessionid
+		}
+	
+	}catch(error){
+		await dbClient.end()
+		throw new Error("Error validating finding session for roomcode provided: ", error)
+	}
+
+	//this only executes if the room code is for a valid session
+	try{
+		
+		//get number of users in the session with the nickname provided. If it is zero, continue. Otherwize, deny the joiner 
+		const query = await dbClient.queryObject(`SELECT COUNT(userid) FROM "User" WHERE sessionid=${sessionID} AND "User".nickname='${nickName}'`)
+		console.log(`(database.ts): Number of users in session with roomcode ${roomCode}: `, JSON.stringify(Number(query.rows[0].count)))
+		const numberOfPeopleWithSameName = Number(query.rows[0].count);
+
+		if (numberOfPeopleWithSameName === 0){
+			console.log("Nickname is not a duplicate")
+			return true
+		}else{
+			console.log("Nickname is a duplicate")
+			return false
+		}
+
+	}catch(error){
+		console.log(error);
+		throw Error("An error occured while checking for duplicate nickname: ", error)
+	}finally {
+		await dbClient.end()
+	}
+
 }
 

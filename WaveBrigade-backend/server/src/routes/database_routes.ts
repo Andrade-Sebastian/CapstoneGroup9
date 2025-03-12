@@ -1,6 +1,6 @@
 import express from "express";
 import type { Request, Response } from "express";
-import { createPhotoLabInDatabase, createVideoLabInDatabase, createGalleryLabInDatabase, getSessionIDFromSocketID, addUserToSession, IUserDatabaseInfo, getSessionState, getPhotoLabInfo, assignExperimentToSession, createArticleLabInDatabase} from "../controllers/database.ts";
+import { createPhotoLabInDatabase, createVideoLabInDatabase, createGalleryLabInDatabase, getSessionIDFromSocketID, addUserToSession, IUserDatabaseInfo, getSessionState, getPhotoLabInfo, assignExperimentToSession, createArticleLabInDatabase, isUniqueNickname} from "../controllers/database.ts";
 import multer from "multer";
 import fs from 'node:fs';
 import { determineFileExtension, getNumberFilesInDirectory } from "../controllers/photolab_controller.ts";
@@ -286,6 +286,8 @@ databaseRouter.get("/photo-lab/info/:photolabid", async(req: Request, res: Respo
 })
 
 
+
+
 databaseRouter.get("/get-device-info/:deviceid", async(req: Request, res: Response) => {
     const deviceID = req.params.deviceid;
 
@@ -346,6 +348,46 @@ databaseRouter.get("/get-device-info/:deviceid", async(req: Request, res: Respon
     }
 
 })
+
+
+databaseRouter.get("/", (req: Request, res: Response) => {
+    console.log("In database/")
+
+    return res.status(200).send({
+        "message": "In /database"
+    });
+
+})
+
+
+//Use this to check unique nicknames upon nickname submission
+databaseRouter.get("/validate-unique-nickname/:roomcode/:nickname", async(req: Request, res: Response) =>{
+    const roomCode = req.params.roomcode;
+    const nickname = req.params.nickname;
+
+    
+    try{
+        //check the db to see if the nickname is unique
+        const nicknameIsUnique = await isUniqueNickname(roomCode, nickname)
+        console.log("(database_routes.ts): Query successfully executed")
+        if(nicknameIsUnique)
+        {
+            return res.status(200).send({
+                "isUniqueNickname": true
+            })
+        }else{
+            return res.status(409).send({
+                "isUniqueNickname": false
+            })
+        }
+    }
+    catch(error){
+        console.log(error)
+        throw new Error("(database_routes.ts): Error checking for duplicate nickname", error)
+    }
+})
+
+
 
 export default databaseRouter;
 
