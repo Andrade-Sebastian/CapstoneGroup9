@@ -64,6 +64,7 @@ export default function ActivityStudentView(): ReactElement{
       };
       fetchStoredPhoto();
     },[setCurrentPath]);
+
     
 
     return(
@@ -99,7 +100,7 @@ export default function ActivityStudentView(): ReactElement{
        <div className="w-1/3 flex flex-col gap-4">
           <div className="bg-white shadow-md rounded-lg p-4">
             <p className="text-lg font-semibold">ECG Chart - 33 BPM Average</p>
-            <ChartComponent chart_type={1} chart_name="BPM" chart_color="rgb(255,0,0)"/>
+            {/* <ChartComponent chart_type={1} chart_name="BPM" chart_color="rgb(255,0,0)"/> */}
           </div>
           <div className="bg-white shadow-md rounded-lg p-4">
           <p className="text-lg font-semibold">Thermister (BodyTemperature) - 98°F Average</p>
@@ -107,7 +108,7 @@ export default function ActivityStudentView(): ReactElement{
           </div>
           <div className="bg-white shadow-md rounded-lg p-4">
           <p className="text-lg font-semibold">Galvanic Skin Response (GSR) - 3.4 μS Average</p>
-            <ChartComponent chart_type={2} chart_name="EDA" chart_color="rgb(75,0,130)"/>
+            {/* <ChartComponent chart_type={2} chart_name="EDA" chart_color="rgb(75,0,130)"/> */}
           </div>
         </div>
     </div>

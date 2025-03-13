@@ -1,5 +1,5 @@
 import express, { Request, Response } from "npm:express";
-import { createSessionInDatabase, registerDevice, getUserExperimentData, updateDeviceConnection } from "../controllers/database.ts";
+import { createSessionInDatabase, registerDevice, getUserExperimentData, updateDeviceConnection, getSessionDevices } from "../controllers/database.ts";
 import { Client } from "https://deno.land/x/postgres@v0.17.0/mod.ts";
 
 const dbClient = new Client({
@@ -168,11 +168,10 @@ hostRouter.get("/get-user-experiment/:sessionID/:userID/:experimentType", async 
 
 //update connection flag for given device
 hostRouter.post("/update-device-connection", async (req: Request, res: Response) => {
-    const serialNumber = req.params.serial;
-    const isConnected = req.params.connection;
+    const { serial, connection } = req.body; 
 
     try{
-        const result = await updateDeviceConnection(serialNumber, isConnected);
+        const result = await updateDeviceConnection(serial, connection);
         if(result){
             return res.status(200).send({success: true});
         }

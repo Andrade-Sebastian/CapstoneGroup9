@@ -717,9 +717,11 @@ export async function updateDeviceConnection(serialNumber: string, isConnected: 
 		await dbClient.connect();
 		const query = await dbClient.queryObject(`UPDATE device
 			SET isconnected = $1
-			WHERE serialnumber = $2`,
+			WHERE serialnumber = $2
+			RETURNING *`,
 			[isConnected, serialNumber]
 		);
+		console.log("Updated device to connected in database: ", query.rows[0]);
 		return true;
 	}
 	catch(error){
@@ -731,13 +733,14 @@ export async function updateDeviceConnection(serialNumber: string, isConnected: 
 export async function getSessionDevices(sessionId: string){
 	try{
 		await dbClient.connect();
-		const query = await dbClient.queryObject(`SELECT device.id, device.isconnected 
+		const query = await dbClient.queryObject(`SELECT device.deviceid, device.isconnected 
 			FROM "User"
 			JOIN session ON "User".sessionid = session.sessionid
 			JOIN device ON "User".device = device.deviceid
-			WHERE session.id = $1`,
+			WHERE session.sessionid = $1`,
 			[sessionId]
 		);
+		console.log("DEVICES IN SESSION: ", query.rows);
 		return query.rows
 	}
 	catch(error){

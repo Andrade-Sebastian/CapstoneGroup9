@@ -191,19 +191,21 @@ ipcMain.on(
     })
 
     //attempt to update each device's isConnected flag 
-    try {
-      await axios.post(`http://localhost:3000/host/update-device-connection`,
-        {
-          serial: serialNumber,
-          connection: true
-        }
-      )
-      event.reply("brainflow:launched", { sessionId, status: "success"});
-    }
-    catch(error){
-      console.error("Failed to update device status", error);
-      event.reply("brainflow:launched", { sessionId, status: "error" });
-    }
+    // try {
+    //   await axios.post(`http://localhost:3000/host/update-device-connection`,
+    //     {
+    //       serial: serialNumber,
+    //       connection: true
+    //     }
+    //   )
+    //   event.reply("brainflow:launched", { sessionId, status: "success"});
+    // }
+    // catch(error){
+    //   console.error("Failed to update device status", error);
+    //   event.reply("brainflow:launched", { sessionId, status: "error" });
+    // }
+
+    event.reply("brainflow:launched", { sessionId, status: "success"});
 
     //check if data is being recieved
     brainflowInstance.stdout.on("data", (message) =>{

@@ -100,17 +100,20 @@ export default function WaitingRoom() {
     //Insert logic here to run script...
     setIsBeginDisabled(true);
     setIsConnectEmotibitDisabled(true);
-    
+
     if(currentUsers.length > 0){
       
       await launchProcesses();
+      await setDeviceConnected();
       try{
         const connectedDevices = await axios.get(`http://localhost:3000/host/check-connected-devices/${sessionId}`)
+        console.log("CONNECTED DEVICES RESPONSE DATA: ", connectedDevices.data);
         if(connectedDevices.data.success){
-          const allDeviceConnected = connectedDevices.data.devices.every(device => device.isConnected);
+          const allDeviceConnected = connectedDevices.data.devices.every(device => device.isconnected);
           if(allDeviceConnected){
             console.log("All devices are connected");
             toast.success("All devices are connected!");
+            setIsConnectEmotibitDisabled(true);
             setIsBeginDisabled(false);
           }
           else{
@@ -236,6 +239,25 @@ export default function WaitingRoom() {
     }
 
     
+  }
+
+  async function setDeviceConnected(){
+    try {
+      const requests = users.map(user => 
+          axios.post(`http://localhost:3000/host/update-device-connection`,
+          {
+            serial: user.serialnumber,
+            connection: true
+          }
+        )
+      )
+      await Promise.all(requests);
+      console.log("All devices successfully updated");
+    }
+
+      catch(error){
+        console.error("Failed to update device status", error);
+      }
   }
 
   useEffect(() => {
