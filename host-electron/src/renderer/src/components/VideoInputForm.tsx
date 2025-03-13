@@ -6,6 +6,7 @@ import ModalComponent from '../components/ModalComponent'
 import axios from 'axios'
 import socket from '../Views/socket'
 import React from 'react'
+import ReactPlayer from 'react-player'
 
 interface IVideoInputForm {
   width: number
@@ -30,12 +31,15 @@ export default function VideoInputForm(props: IVideoInputForm) {
     videoLabSource,
     setExperimentTitle,
     setExperimentDesc,
-    setVideoLabSource
+    setVideoLabSource,
+    setVideoURL,
+    videoURL
   } = useSessionStore()
 
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isFileSelected, setIsFileSelected] = useState(false)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  // const [isValidURL, setIsValidURL] = useState(true)
   const [file, setFile] = useState<File | null>(null)
 
   // const [experiment_title, set_experiment_title] = useState("");
@@ -52,6 +56,30 @@ export default function VideoInputForm(props: IVideoInputForm) {
     handleSubmit(e)
     handleCloseModal()
   }
+
+  useEffect(() => {
+    console.log("HERE IS THE VIDEO URL RN", videoURL)
+    if(videoURL.includes("https://www.youtube.com/")){
+      const VID_REGEX =
+/(?:youtube(?:-nocookie)?\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
+      const match = videoURL.match(VID_REGEX);
+      console.log("Here is the match", match);
+      if (match && match[1]){
+        console.log("HERE IS THE VIDEO ID HOPEFULLY",match[1])
+        return setVideoURL(match[1]);
+      }
+      console.log("LOOOOOOOOOOOOOOOOOOL")
+      return undefined;
+    }
+    else{
+      console.log("Only accepts youtube videos");
+      console.log(videoURL)
+      toast.error("URL is not a YouTube link.");
+    }
+
+  }, [videoURL])
+  //https://www.youtube.com/embed/feZCSrOzhss?si=i9JF8UYCzJLNene5
+  //https://www.youtube.com/watch?v=feZCSrOzhss&ab_channel=CBSSportsGolazo
 
   useEffect(() => {
     if (video_filename) {
@@ -80,6 +108,15 @@ export default function VideoInputForm(props: IVideoInputForm) {
     if (isSubmitting) return
 
     setIsSubmitting(true)
+
+    // useEffect(() => {
+    //   if(!videoURL){
+    //     console.log("There is no link to preview...")
+    //   }
+    //   else{
+    //     setIsValidURL(ReactPlayer.canPlay(videoURL))
+    //   }
+    // }, videoURL)
 
     try {
       //create a photo lab
@@ -132,7 +169,7 @@ export default function VideoInputForm(props: IVideoInputForm) {
     if (!file) {
       setError('No file selected.')
       props.onFileSelected(false) //no file is selected. setting to false so that host cannot continue without selecting an image
-      return;
+      return
     }
 
     if (!file.type.startsWith('video/')) {
@@ -200,10 +237,23 @@ export default function VideoInputForm(props: IVideoInputForm) {
           </div>
 
           <div className="w-full">
-            <label htmlFor="addImage" className="block text-sm font-medium text-gray-700 mb-2">
-              {' '}
+            <label htmlFor="addVideo" className="block text-sm font-medium text-gray-700 mb-2">
               Add a Video <span className="text-purple-500"> *</span>
             </label>
+            <label htmlFor="video-url" className="block text-sm font-medium text-gray-700 mb-2">
+              Enter YouTube Link
+            </label>
+            <input
+              type="text"
+              id="video-url"
+              className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              onChange={(e) => setVideoURL(e.target.value)}
+              placeholder="Paste YouTube link here..."
+            ></input>
+            <div className="flex justify-center mt-4">
+            <iframe width="560" height="315" src={`https://www.youtube.com/embed/${videoURL}`} title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+            </div>
+            <p> or...</p>
             <div className="flex flex-col justify-center items-center border p-4 rounded-md shadow-md size-">
               <input
                 ref={inputRef}
@@ -235,8 +285,6 @@ export default function VideoInputForm(props: IVideoInputForm) {
               </div>
             </div>
           </div>
-
-          
 
           <div className="flex gap-10 items-center justify-center">
             <button

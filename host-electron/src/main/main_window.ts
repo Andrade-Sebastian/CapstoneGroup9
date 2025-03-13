@@ -20,7 +20,10 @@
      webPreferences: {
        preload: join(__dirname, '../preload/index.js'),
        sandbox: false,
-       contextIsolation: true
+       contextIsolation: true,
+       nodeIntegration: false, // Disable Node.js integration
+       webSecurity: false, // Allows embedding YouTube videos
+       allowRunningInsecureContent: true // Prevents CSP blocking
      }
    })
  

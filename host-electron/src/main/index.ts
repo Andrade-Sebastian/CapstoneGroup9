@@ -30,6 +30,24 @@ app.whenReady().then(() => {
     optimizer.watchWindowShortcuts(window)
   })
 
+  app.on('ready', () => {
+    session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
+      callback({
+        responseHeaders: {
+          ...details.responseHeaders,
+          "Content-Security-Policy": [
+            "default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: filesystem: gap:;",
+            "script-src 'self' 'unsafe-inline' https://www.youtube.com https://www.youtube-nocookie.com;",
+            "connect-src 'self' https://www.youtube.com https://www.youtube-nocookie.com;",
+            "frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com;",
+            "child-src 'self' https://www.youtube.com https://www.youtube-nocookie.com;"
+          ]
+        }
+      });
+    });
+  });
+  
+
   windows.push({
     instance: createMainWindow('/main'),
     type: 'main',
