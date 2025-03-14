@@ -98,6 +98,17 @@ export default function WaitingRoom() {
     setIsModalOpenEmoti(false);
   }
   
+  // const fetchDeviceData = async (deviceID: string) =>{
+  //   try{
+  //     const response = await axios.get(`http://localhost:3000/database/get-device-info/${deviceID}`)
+  //     const deviceID = req.body.deviceID;
+  //     const joiner = req.body.user_nickname;
+  //   }catch(error){
+  //     console.log(error)
+  //   }
+
+  // }
+
   const handleConfirmEmoti = async() =>{
     if(!serialNumber.trim() || !IPAddress.trim()){
       toast.error("Please enter both a Serial Number and an IP Address");
@@ -129,6 +140,7 @@ export default function WaitingRoom() {
       ipAddress: IPAddress,
       deviceSocketID: sessionStorage.getItem('socketID')
     })
+
 
     addUser(newEmotiBit)
 
