@@ -7,6 +7,12 @@ import axios from 'axios'
 import socket from '../Views/socket'
 import React from 'react'
 import ReactPlayer from 'react-player'
+import { eventNames } from 'process';
+import { clear } from 'console';
+
+//youtube links to test
+//https://www.youtube.com/embed/feZCSrOzhss?si=i9JF8UYCzJLNene5
+//https://www.youtube.com/watch?v=feZCSrOzhss&ab_channel=CBSSportsGolazo
 
 interface IVideoInputForm {
   width: number
@@ -33,14 +39,17 @@ export default function VideoInputForm(props: IVideoInputForm) {
     setExperimentDesc,
     setVideoLabSource,
     setVideoURL,
-    videoURL
+    videoURL,
+    setVideoID,
+    videoID
   } = useSessionStore()
 
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [isFileSelected, setIsFileSelected] = useState(false)
-  const [isModalOpen, setIsModalOpen] = useState(false)
-  // const [isValidURL, setIsValidURL] = useState(true)
-  const [file, setFile] = useState<File | null>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isFileSelected, setIsFileSelected] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isValidURL, setIsValidURL] = useState(false);
+  const [usingLink, setUsingLink] = useState(false);
+  const [file, setFile] = useState<File | null>(null);
 
   // const [experiment_title, set_experiment_title] = useState("");
   // const [experiment_description, set_experiment_description] = useState("");
@@ -57,29 +66,74 @@ export default function VideoInputForm(props: IVideoInputForm) {
     handleCloseModal()
   }
 
-  useEffect(() => {
-    console.log("HERE IS THE VIDEO URL RN", videoURL)
-    if(videoURL.includes("https://www.youtube.com/")){
-      const VID_REGEX =
-/(?:youtube(?:-nocookie)?\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
-      const match = videoURL.match(VID_REGEX);
-      console.log("Here is the match", match);
-      if (match && match[1]){
-        console.log("HERE IS THE VIDEO ID HOPEFULLY",match[1])
-        return setVideoURL(match[1]);
-      }
-      console.log("LOOOOOOOOOOOOOOOOOOL")
-      return undefined;
-    }
-    else{
-      console.log("Only accepts youtube videos");
-      console.log(videoURL)
-      toast.error("URL is not a YouTube link.");
-    }
+  const clearFileSelection =() => {
+    setFile(null)
+    set_video_filename(null)
+    setVideoLabSource('')
+    setIsFileSelected(false)
+  }
 
-  }, [videoURL])
-  //https://www.youtube.com/embed/feZCSrOzhss?si=i9JF8UYCzJLNene5
-  //https://www.youtube.com/watch?v=feZCSrOzhss&ab_channel=CBSSportsGolazo
+  const clearVideoLinks= () => {
+    setVideoURL('')
+    setVideoID(null)
+    setIsValidURL(false)
+  }
+  //YOUTUBE LINKS LOGIC
+  //Constantly checking whether the host is using a link or not
+  useEffect(() => {
+    console.log("Checking whether host is typing a YouTube link")
+    if(!videoURL){
+      console.log("Host is NOT typing a link...")
+      setUsingLink(false);
+    }
+    console.log("Host is typing a link....")
+    setUsingLink(true);
+  },[videoURL])
+
+  useEffect(() =>{
+    if(!videoURL.trim()){
+      console.log("YouTube link was cleared, allowing for file upload.");
+      setVideoID(null);
+      setIsValidURL(false);
+      setUsingLink(false);
+    }
+  }, [videoURL]);
+
+  useEffect(() => {
+    if(videoID && videoLabSource){
+      toast.error("Detected both a video and file. Please choose one.")
+      clearFileSelection();
+    }
+  }, [videoID, videoLabSource])
+
+  function convertLinkToVideoID(url: string){
+    const VID_REGEX = /(?:youtube(?:-nocookie)?\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
+    const match = url.match(VID_REGEX);
+    if (match && match[1]){
+      console.log("HERE IS THE VIDEO ID HOPEFULLY",match[1])
+      setIsValidURL(true);
+      setUsingLink(true);
+      console.log("IS the url valid rn?", isValidURL)
+      return setVideoID(match[1]);
+    }else{
+      toast.error("Invalid YouTube URL format.")
+    }
+  }
+
+  const handleLinkSubmission = (event) =>{
+    if(event.key === 'Enter' || event.type ==="click"){
+      const isTheURLValid = ReactPlayer.canPlay(videoURL)
+      if(isTheURLValid){
+        toast.success("Your link is valid!")
+       convertLinkToVideoID(videoURL);
+       clearFileSelection();
+      }
+      else{
+        setIsValidURL(false);
+        toast.error("URL is not a YouTube link.");
+      }
+    }
+  }
 
   useEffect(() => {
     if (video_filename) {
@@ -88,19 +142,31 @@ export default function VideoInputForm(props: IVideoInputForm) {
   }, [video_filename])
 
   async function handleSubmit(e) {
+    e.preventDefault();
     const data = new FormData()
-    data.append('labType', 'photo-lab')
+    data.append('labType', 'video-lab')
     data.append('experimentTitle', experimentTitle)
     data.append('experimentDescription', experimentDesc)
-    data.append('videoBlob', file)
 
-    if (file) {
-      console.log('File selected')
-    } else {
-      console.log('No file selected.')
-      return
+    if(usingLink && isValidURL){
+      data.append('videoID', videoID);
+      data.append('socketID', JSON.stringify(sessionStorage.getItem('socketID')))
     }
-    data.append('socketID', JSON.stringify(sessionStorage.getItem('socketID')))
+    else if(file){
+      data.append('videoBlob', file)
+      data.append('socketID', JSON.stringify(sessionStorage.getItem('socketID')))
+    }
+    else{
+      toast.error("Please provide a valid YouTube link or upload a video file.");
+      return;
+    }
+
+    // if (file) {
+    //   console.log('File selected')
+    // } else {
+    //   console.log('No file selected. RETURNINGGGGGG')
+    //   return
+    // }
 
     //axios.post('http://httpbin.org/anything', data).then((res) => {console.log("Step 1 RES:", JSON.stringify(res.data));}).catch((err) => {console.log(err);});
 
@@ -108,15 +174,6 @@ export default function VideoInputForm(props: IVideoInputForm) {
     if (isSubmitting) return
 
     setIsSubmitting(true)
-
-    // useEffect(() => {
-    //   if(!videoURL){
-    //     console.log("There is no link to preview...")
-    //   }
-    //   else{
-    //     setIsValidURL(ReactPlayer.canPlay(videoURL))
-    //   }
-    // }, videoURL)
 
     try {
       //create a photo lab
@@ -129,9 +186,11 @@ export default function VideoInputForm(props: IVideoInputForm) {
       if (response.status === 200) {
         toast.success('Lab was created successfully', { id: loadingToastId })
         const expId = response.data.experimentID
-        setExperimentTitle(experimentTitle)
-        setExperimentDesc(experimentDesc)
-        set_video_filename(videoLabSource)
+        // setExperimentTitle(experimentTitle)
+        // setExperimentDesc(experimentDesc)
+        // console.log("THIS IS INSIDE THE RESPONSE.STATUS BEEEEFOOOOORE THE VIDEO FILENAME IS SET,", videoLabSource);
+        // set_video_filename(videoLabSource)
+        // console.log("THIS IS INSIDE THE RESPONSE.STATUS AFTEEEEEER THE VIDEO FILENAME IS SET,", videoLabSource);
         console.log('sending out some experiment data')
         socket.emit('experiment-data', { experimentTitle, experimentDesc, expId })
         console.log('hopefully sent out some experiment data')
@@ -169,20 +228,24 @@ export default function VideoInputForm(props: IVideoInputForm) {
     if (!file) {
       setError('No file selected.')
       props.onFileSelected(false) //no file is selected. setting to false so that host cannot continue without selecting an image
-      return
+      return;
     }
 
     if (!file.type.startsWith('video/')) {
       //makes sure that the file is an image
       setError('Please upload a valid video file.')
+      toast.error('Please upload a valid video file.')
       props.onFileSelected(false) //no file selected. set to false so host cannot continue without selecting an image
-      return
+      return;
     }
+    clearVideoLinks();
+    setFile(file)
     setError(null)
     const url = URL.createObjectURL(file) //a temp url is generated for the selected file which is stored in the source state for previewing the image
     set_video_filename(file.name)
     setVideoLabSource(url)
     props.onFileSelected(true) //file is selected, host can now continue
+
   }
   const handleChoose = () => {
     inputRef.current?.click()
@@ -237,23 +300,31 @@ export default function VideoInputForm(props: IVideoInputForm) {
           </div>
 
           <div className="w-full">
-            <label htmlFor="addVideo" className="block text-sm font-medium text-gray-700 mb-2">
-              Add a Video <span className="text-purple-500"> *</span>
+            <label htmlFor="addVideo" className="block text-lg font-semibold text-gray-700 mb-2">
+              Add a Video<span className="text-purple-500"> *</span>
             </label>
             <label htmlFor="video-url" className="block text-sm font-medium text-gray-700 mb-2">
-              Enter YouTube Link
+              Enter YouTube Link (Press Enter to Confirm)
             </label>
+            <div className='flex flex-row'>
             <input
               type="text"
               id="video-url"
               className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
               onChange={(e) => setVideoURL(e.target.value)}
+              onKeyDown={handleLinkSubmission}
               placeholder="Paste YouTube link here..."
             ></input>
-            <div className="flex justify-center mt-4">
-            <iframe width="560" height="315" src={`https://www.youtube.com/embed/${videoURL}`} title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+
+            {/* <button className='ml-2 font-semibold py-1 px-3 rounded-md shadow-md transition duration-300 ease-in-out bg-[#7F56D9] hover:bg-violet-500 text-white' onClick={handleLinkSubmission}>Submit</button> */}
             </div>
-            <p> or...</p>
+            <div className="flex justify-center mt-4">
+            {/* <iframe width="560" height="315" src={`https://www.youtube.com/embed/${videoURL}`} title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe> */}
+            {isValidURL && usingLink ? (
+              <div>
+                <ReactPlayer url={`https://www.youtube.com/embed/${videoID}`} controls={true}/>
+                </div>
+            ) :(
             <div className="flex flex-col justify-center items-center border p-4 rounded-md shadow-md size-">
               <input
                 ref={inputRef}
@@ -280,19 +351,21 @@ export default function VideoInputForm(props: IVideoInputForm) {
                 </div>
               )}
               <div className="mt-4 text-sm text-gray-600">
-                {source ? 'Video selected' : ' Please select a video'}
+                {videoLabSource ? 'Video selected' : ' Please select a video'}
                 {/* show url or if there isn't anything, then just show nothing selected text */}
               </div>
             </div>
+            )
+            }
+            </div>
           </div>
-
           <div className="flex gap-10 items-center justify-center">
             <button
               type="button"
               onClick={handleOpenModal} //create the object
-              disabled={!experimentTitle.trim() || !isFileSelected}
-              className={`mt-6 font-semibold py-3 px-6 rounded-md shadow-md transition duration-300 ease-in-out ${
-                experimentTitle.trim() && isFileSelected
+              disabled={(!experimentTitle.trim() || !isFileSelected) && (!experimentTitle.trim() || !isValidURL) || (isFileSelected && isValidURL)}
+              className={`mt-6 font-semibold py-3 px-6 rounded-md shadow-md transition duration-300 ease-in-out cursor-pointer ${
+                (experimentTitle.trim() && isFileSelected) || (experimentTitle.trim() && isValidURL) && !(isFileSelected && isValidURL)
                   ? 'bg-[#7F56D9] hover:bg-violet-500 text-white'
                   : 'bg-gray-400 text-white cursor-not-allowed'
               }`}
@@ -341,14 +414,18 @@ export default function VideoInputForm(props: IVideoInputForm) {
           <label htmlFor="experimentVideo" className="block text-md font-medium text-gray-700 mb-2">
             File Upload
           </label>
-          <input
-            type="text"
-            id="experimentImage"
-            className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            disabled
-            value={JSON.stringify(video_filename)}
-            onChange={(e) => setVideoLabSource(e.target.value)}
-          />
+          {isValidURL && usingLink ? (
+            <input type="text" id="video-url" className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" disabled value={videoURL}/>
+          ) : (
+            <input
+              type="text"
+              id="experimentImage"
+              className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              disabled
+              value={JSON.stringify(video_filename)}
+              onChange={(e) => setVideoLabSource(e.target.value)}
+            />
+          )}
         </div>
       </ModalComponent>
     </>

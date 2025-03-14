@@ -22,6 +22,7 @@ import { useSessionStore } from '../store/useSessionStore.tsx'
 import React from 'react'
 import useBrainflowManager from '../hooks/useBrainflowManager.ts'
 import { io } from 'socket.io-client'
+import ReactPlayer from 'react-player'
 
 export default function ActivityHost() {
   const {
@@ -41,6 +42,7 @@ export default function ActivityHost() {
     addDevice,
     removeDevice,
     videoLabSource,
+    videoID,
     photoLabImageSource,
     experimentTitle,
     experimentDesc
@@ -53,6 +55,7 @@ export default function ActivityHost() {
   const [IPAddress, setIPAddress] = useState('')
   const [isModalUserOptionsOpen, setIsModalUserOptionsOpen] = useState(false)
   const [selectedEmotiBitId, setSelectedEmotiBitId] = useState<string | null>(null)
+  const [isMediaAFile, setIsMediaAFile] = useState(false)
   const [userObjects, setUserObjects] = useState<Array<IUser>>([])
   const navigateTo = useNavigate()
   const [experimentIcon, setExperimentIcon] = useState<JSX.Element>(
@@ -92,6 +95,20 @@ export default function ActivityHost() {
       //-----HARDCODED FOR TESTING-------
       navigateTo('/summary')
     }, 2000)
+  }
+
+  const checkVideoMediaType = () =>{
+    console.log("CheckVideo media is running... HERE ARE THE VALUES videolabsource ",videoLabSource,"hereis videoID", videoID)
+    if(videoLabSource && videoLabSource.trim() !==""){
+      console.log("Detected video as a file")
+      setIsMediaAFile(true)
+      return;
+    }
+    if(videoID && videoID.trim() !== ""){
+      console.log("Detected video as a YouTube link.")
+      setIsMediaAFile(false)
+      return;
+    }
   }
 
   useEffect(() => {
@@ -138,6 +155,8 @@ export default function ActivityHost() {
 
   useEffect(() => {
     if (experimentType === 1) {
+      console.log("ExperimentType is:", experimentType)
+      checkVideoMediaType();
       setExperimentIcon(<IoVideocam style={{ fontSize: '20px' }} />)
     } else if (experimentType === 2) {
       setExperimentIcon(<TiCamera style={{ fontSize: '20px' }} />)
@@ -146,7 +165,7 @@ export default function ActivityHost() {
     } else {
       console.log('Invalid experiment ID')
     }
-  }, [experimentType])
+  }, [experimentType, videoLabSource, videoID])
 
   return (
     <div className="flex flex-col w-full px-8 pt-6">
@@ -195,14 +214,21 @@ export default function ActivityHost() {
                 </div> */}
         <div className="w-full md:w-2/3 flex justify-center items-center min-w-0">
         <div className="relative flex justify-center items-center rounded-xl">
-          {experimentType == 1 ? (
-            <video
-              src={videoLabSource}
-              width="70%"
-              height="auto"
-              controls
-              className="rounded-lg shadow-lg max-w-2xl w-[60%] md:w-[70%] lg:w-50%"
-            ></video>
+          {experimentType == 1 && isMediaAFile ? (
+            <div>
+            <ReactPlayer url={videoLabSource} controls />
+            </div>
+            // <video
+            //   src={videoLabSource}
+            //   width="70%"
+            //   height="auto"
+            //   controls
+            //   className="rounded-lg shadow-lg max-w-2xl w-[60%] md:w-[70%] lg:w-50%"
+            // ></video>
+          ) : experimentType == 1 && !isMediaAFile ?(
+            <div>
+            <ReactPlayer url={`https://www.youtube.com/embed/${videoID}`} controls/>
+            </div>
           ) : experimentType == 2 ? (
             <img
               src={photoLabImageSource}

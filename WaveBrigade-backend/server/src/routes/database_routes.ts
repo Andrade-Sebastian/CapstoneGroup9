@@ -140,68 +140,103 @@ databaseRouter.post("/photo-lab", upload.single("imageBlob"), async(req: Request
 
 databaseRouter.post("/video-lab", upload.single("videoBlob"), async(req: Request, res: Response) => {
     
-    const experimentTitle = req.body.experimentTitle;
-    const experimentDescription = req.body.experimentDescription;
-    const videoBlob = req.body.videoBlob;
-    const socketID = req.body.socketID;
+    // const experimentTitle = req.body.experimentTitle;
+    // const experimentDescription = req.body.experimentDescription;
+    // const videoID = req.body.videoID;
+    // const videoBlob = req.body.videoBlob;
+    // const socketID = req.body.socketID;
 
-    //giving the file a new name ex. (#).mp4
-    let fileNumber = await getNumberFilesInDirectory(videoLabMediaDirectory);
-    let detectedFileExtension = determineFileExtension(req.file) 
-    const fileName = fileNumber + detectedFileExtension
-    
-    if (req.file) //if a file was provided
-    {
-        console.log("There do be a file")
-        console.log("Uploaded file: ", req.file)
-    }
-    else //if no file was provided
-    {
-        console.log("No file provided");
-        return res.status(500).send("No file provided");
-    }
+    const {experimentTitle, experimentDescription, videoID, socketID } = req.body;
 
-    let experimentID = null
-    console.log("New Filename, ", fileName)
-
-    //change the req.file.name to filename
-    console.log("File path", req.file.path);
-
- 
-    //adding file to appropriate directory
-    try{
-        await fsPromises.rename(req.file.path, `/app/backend/server/src/media/video-lab/${fileName}`);
-    }
-    catch(error){
-        console.log("Error moving file: ", error);
-        return res.status(500).send("Error moving file.");
-    };
-
-    //add the video lab to the database
+    let experimentID = null;
     let sessionID = -1;
 
     try{
         sessionID = await getSessionIDFromSocketID(socketID);
-
-        console.log("Session id--", sessionID)
-        experimentID = await createVideoLabInDatabase({
-            experimentTitle: experimentTitle, 
-            experimentDescription: experimentDescription,
-            videoBlob: fileName,
-            socketID: socketID
-        }, sessionID)
-    } 
-    catch (error) {
-        res.status(500).send({
-            "message": "Could not add video lab to database",
-            "error": error
-        });
+        console.log("In DB Route of /video-lab. SessionID:", sessionID);
+        if(videoID){
+            experimentID = await createVideoLabInDatabase({
+                experimentTitle: experimentTitle, 
+                experimentDescription: experimentDescription,
+                videoID: `https://youtube.com/embed/${videoID}`,
+                socketID: socketID
+            }, sessionID)
+        }
+        else if(req.file){
+            console.log("There do be a file, uploaded file:", req.file)
+            let fileNumber = await getNumberFilesInDirectory(videoLabMediaDirectory);
+            let detectedFileExtension = determineFileExtension(req.file) 
+            const fileName = fileNumber + detectedFileExtension
+            //adding file to appropriate directory
+            try{
+                await fsPromises.rename(req.file.path, `/app/backend/server/src/media/video-lab/${fileName}`);
+                experimentID = await createVideoLabInDatabase({
+                    experimentTitle: experimentTitle, 
+                    experimentDescription: experimentDescription,
+                    videoBlob: fileName,
+                    socketID: socketID
+                }, sessionID)
+            }
+            catch(error){
+                console.log("Error moving file: ", error);
+                return res.status(500).send("Error moving file.");
+            };
+        }
+        else{
+            return res.status(400).send({message: "No video file or URL provided..."})
+        }
+        res.status(200).send({message: "Success", experimentID})
+    }catch(error){
+        console.log(error)
+        res.status(500).send({message:"Could not add video lab to database", error})
     }
+
+    // //giving the file a new name ex. (#).mp4
     
-    res.status(200).send({
-        "message": "succeess",
-        "experimentID": experimentID
-    })
+    // if (req.file) //if a file was provided
+    // {
+    //     console.log("There do be a file")
+    //     console.log("Uploaded file: ", req.file)
+    // }
+    // else //if no file was provided
+    // {
+    //     console.log("No file provided");
+    //     return res.status(500).send("No file provided");
+    // }
+
+    // let experimentID = null
+    // console.log("New Filename, ", fileName)
+
+    // //change the req.file.name to filename
+    // console.log("File path", req.file.path);
+
+ 
+
+    // //add the video lab to the database
+    // let sessionID = -1;
+
+    // try{
+    //     sessionID = await getSessionIDFromSocketID(socketID);
+
+    //     console.log("Session id--", sessionID)
+    //     experimentID = await createVideoLabInDatabase({
+    //         experimentTitle: experimentTitle, 
+    //         experimentDescription: experimentDescription,
+    //         videoBlob: fileName,
+    //         socketID: socketID
+    //     }, sessionID)
+    // } 
+    // catch (error) {
+    //     res.status(500).send({
+    //         "message": "Could not add video lab to database",
+    //         "error": error
+    //     });
+    // }
+    
+    // res.status(200).send({
+    //     "message": "succeess",
+    //     "experimentID": experimentID
+    // })
 });
 
 

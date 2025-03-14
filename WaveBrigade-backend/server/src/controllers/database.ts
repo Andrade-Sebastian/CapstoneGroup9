@@ -436,7 +436,7 @@ export async function createVideoLabInDatabase(initializationInfo: IVideoLabData
 
 	//add a video lab
 	const query = await dbClient.queryObject(`
-		INSERT INTO articlelab ( 
+		INSERT INTO videolab ( 
 		experimentid,
 		path
 		) 
