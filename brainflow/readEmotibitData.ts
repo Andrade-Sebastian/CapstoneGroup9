@@ -149,6 +149,7 @@ async function sendData(socket: Socket): Promise<void>
 
     try{
         prepareBoard();
+        successfulLaunch(socket);
         board.startStream();
         while(true){
             
@@ -191,6 +192,8 @@ async function sendData(socket: Socket): Promise<void>
     }
     catch(error){
         console.error(error);
+        console.log("An error in brainflow has occured: ", error.exitCode);
+        process.exit(error.exitCode);
     }
     finally{
         await sleep (3000);
@@ -200,7 +203,12 @@ async function sendData(socket: Socket): Promise<void>
     }
 }
 
-async function main(): Promise<string>{
+function successfulLaunch(socket: Socket){
+    console.log("Brainflow has launched successfully");
+    socket.emit("successful-brainflow-launch", socket.id);
+}
+
+async function main(): Promise<number>{
     let connectionSuccessful: null | string = null;
     const socket = io(`http://localhost:3000`);
     try{
@@ -219,7 +227,7 @@ async function main(): Promise<string>{
         sendData(socket);
     }
 
-    return "0"; 
+    return 0; 
 }
 
 main();

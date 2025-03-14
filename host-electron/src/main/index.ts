@@ -76,7 +76,7 @@ function spawnBrainFlow(
   emotibitIpAddress: string,
   serialNumber: string,
   backendIp: string,
-  userId: string,
+  userId: number,
   frontEndSocketId: string,
   sessionId: string
 ) {
@@ -87,7 +87,7 @@ function spawnBrainFlow(
     emotibitIpAddress,
     serialNumber,
     backendIp,
-    userId,
+    String(userId),
     frontEndSocketId
   ])
   activity[userId] = {
@@ -158,7 +158,7 @@ ipcMain.on(
     emotibitIpAddress: string,
     serialNumber: string,
     backendIp: string,
-    userId: string,
+    userId: number,
     frontEndSocketId: string,
     sessionId: string
   ) => {
@@ -178,9 +178,16 @@ ipcMain.on(
     
     brainflowInstance.on("close", (code) => {
       console.log("CODE: ", code)
-      if (code !== 0 )
+      if (code === 7)
       {
         console.log("(main/index.ts): Closing this shit, brainflow broken as shi")
+        const activity = ActivitySingleton.getInstance().activityInstances;
+        const foundInstance = Object.entries(activity).find(
+          ([userID, instance]) => instance.brainflowProcess.pid === brainflowInstance.pid
+        )
+        if(foundInstance){
+          delete activity[foundInstance[1].userId];
+        }
         brainflowInstance.kill();
       }
     })

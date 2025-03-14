@@ -100,7 +100,7 @@ export default function ChartComponent(props: IDataType) {
         
 
         return () => {
-            socket.off("update", onUpdate);
+            socket.off('update', onUpdate);
             //clearInterval(intervalId);
             //clearInterval(interval);
         };

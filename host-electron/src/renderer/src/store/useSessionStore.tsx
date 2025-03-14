@@ -15,7 +15,7 @@ export interface IUserInfo {
   secret: string,
   serialNumber: string,
   sessionId: number,
-  userId: string,
+  userId: number,
   userRole: string
 }
 

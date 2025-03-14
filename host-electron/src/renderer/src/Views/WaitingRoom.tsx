@@ -12,7 +12,7 @@ import { IUser } from '@renderer/hooks/useSessionState'
 import EmotiBitList from '../components/EmotiBitList'
 import ModalComponent from '../components/ModalComponent.js'
 import { CiCircleCheck } from 'react-icons/ci'
-import { error } from 'console'
+import { count, error } from 'console'
 import { useNavigate } from "react-router-dom";
 import React from 'react';
 import { toNamespacedPath } from 'path';
@@ -58,6 +58,8 @@ export default function WaitingRoom() {
   )
   const [currentUsers, setCurrentUsers] = useState<IUserInfo[]>([]);
   const [sessionDevices, setSessionDevices] = useState<string[]>([]);
+  const [counter, setCounter] = useState(0);
+  const [allDevicesConnected, setAllDevicesConnected] = useState(false);
   const ipc = window.api;
   
   useEffect(() => {
@@ -100,39 +102,65 @@ export default function WaitingRoom() {
     //Insert logic here to run script...
     setIsBeginDisabled(true);
     setIsConnectEmotibitDisabled(true);
+    setCounter(0);
 
     if(currentUsers.length > 0){
       
       await launchProcesses();
-      await setDeviceConnected();
-      try{
-        const connectedDevices = await axios.get(`http://localhost:3000/host/check-connected-devices/${sessionId}`)
-        console.log("CONNECTED DEVICES RESPONSE DATA: ", connectedDevices.data);
-        if(connectedDevices.data.success){
-          const allDeviceConnected = connectedDevices.data.devices.every(device => device.isconnected);
-          if(allDeviceConnected){
-            console.log("All devices are connected");
-            toast.success("All devices are connected!");
-            setIsConnectEmotibitDisabled(true);
-            setIsBeginDisabled(false);
+    }
+  }
+
+  useEffect(() => {
+    let isChecking = false;
+
+    const checkDevices = async () => {
+      if (isChecking || counter >= 10) {
+        clearInterval(intervalId);
+        return;
+      }
+      isChecking = true;
+
+        try{
+          const connectedDevices = await axios.get(`http://localhost:3000/host/check-connected-devices/${sessionId}`)
+          console.log("CONNECTED DEVICES RESPONSE DATA: ", connectedDevices.data);
+          if(connectedDevices.data.success){
+              setAllDevicesConnected(connectedDevices.data.devices.every(device => device.isconnected));
           }
-          else{
-            console.log("Not all devices are connected");
-            toast.error("There was a problem connecting devices. Please try again.");
-            setIsConnectEmotibitDisabled(false);
+          if (allDevicesConnected) {
+            clearInterval(intervalId); // Stop checking if all devices are connected
           }
         }
-      }
-      catch(error){
-        console.error("Error trying to start brainflow for devices");
-        toast.error("There was a problem connecting devices. Please try again.");
-      }
-      finally{
-        setIsConnectEmotibitDisabled(false);
-        console.log(`[HandleConnectEmotibit]Begin is ${isBeginDisabled} and ConnectEmotibitDisabled is ${isConnectEmotibitDisabled}`)
-      }
-    } 
-  }
+        catch(error){
+          console.error("Error trying to start brainflow for devices");
+          toast.error("There was a problem connecting devices. Please try again.");
+        }
+
+        setCounter(prev => prev += 1);
+        isChecking = false;
+    }
+
+    const intervalId = setInterval(checkDevices, 2000)
+
+    return () => clearInterval(intervalId)
+    
+  }, [setAllDevicesConnected, allDevicesConnected, sessionId, counter, setCounter])
+
+  useEffect(() => {
+
+        if(allDevicesConnected){
+          console.log("All devices are connected");
+          toast.success("All devices are connected!");
+          setIsConnectEmotibitDisabled(true);
+          setIsBeginDisabled(false);
+        }
+        else if (counter >= 10){
+          console.log("Not all devices are connected");
+          toast.error("There was a problem connecting devices. Please try again.");
+          setIsConnectEmotibitDisabled(false);
+          setIsBeginDisabled(true);
+        }
+  }, [allDevicesConnected, setIsConnectEmotibitDisabled, setIsBeginDisabled, counter])
+      
 
   //Add EmotiBit Modal
   const handleOpenModalEmoti = () => {
@@ -226,15 +254,16 @@ export default function WaitingRoom() {
   async function launchProcesses(){
     console.log("INSIDE LAUNCH PROCESS");
     for(let i = 0; i < users.length; i++){
+      console.log("CURRENT USER PASSED INTO IPC: ", users[i]);
       ipc.send("brainflow:launch", 
-        users[i].ipAddress,
-        users[i].serialNumber,
+        users[i].ipaddress,
+        users[i].serialnumber,
         "http://localhost:3000",
-        users[i].userId,
-        users[i].frontendSocketId,
-        users[i].sessionId
+        users[i].userid,
+        users[i].frontendsocketid,
+        users[i].sessionid
       )
-      setSessionDevices([...sessionDevices, users[i].serialNumber]);
+      setSessionDevices([...sessionDevices, users[i].serialnumber]);
 
     }
 

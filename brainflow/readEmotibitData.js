@@ -150,6 +150,7 @@ function sendData(socket) {
                 case 1:
                     _a.trys.push([1, 5, 6, 8]);
                     prepareBoard();
+                    successfulLaunch(socket);
                     board.startStream();
                     _a.label = 2;
                 case 2:
@@ -181,7 +182,7 @@ function sendData(socket) {
                     console.log("DATA :", ancData.data1);
                     //emit to socket an object that holds data and op parameters
                     socket.emit('update', __assign({ ancData: ancData, auxData: auxData }, operationParameters));
-                    return [4 /*yield*/, sleep(100)];
+                    return [4 /*yield*/, sleep(10000)];
                 case 3:
                     _a.sent();
                     return [3 /*break*/, 2];
@@ -189,6 +190,8 @@ function sendData(socket) {
                 case 5:
                     error_1 = _a.sent();
                     console.error(error_1);
+                    console.log("An error in brainflow has occured: ", error_1.exitCode);
+                    process.exit(error_1.exitCode);
                     return [3 /*break*/, 8];
                 case 6: return [4 /*yield*/, sleep(3000)];
                 case 7:
@@ -200,6 +203,10 @@ function sendData(socket) {
             }
         });
     });
+}
+function successfulLaunch(socket) {
+    console.log("Brainflow has launched successfully");
+    socket.emit("successful-brainflow-launch", socket.id);
 }
 function main() {
     return __awaiter(this, void 0, void 0, function () {
@@ -229,7 +236,7 @@ function main() {
                         // prepareBoard();
                         sendData(socket);
                     }
-                    return [2 /*return*/, "0"];
+                    return [2 /*return*/, 0];
             }
         });
     });
