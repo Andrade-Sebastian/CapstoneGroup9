@@ -5,34 +5,60 @@ import { PiPlanetLight } from "react-icons/pi";
 import toast, { Toaster } from "react-hot-toast";
 import axios from "axios";
 import SideComponent from "../Components/SideComponent.tsx";
+import socket from "./socket.tsx";
 // import useBrainflowManager from "../../../host-electron/src/renderer/src/hooks/useBrainflowManager.ts";
+import {io} from "socket.io-client";
+
+// const SERVER_URL = "http://localhost:3000";
+// const newSocket = io(SERVER_URL);
 
 export default function JoinPage() {
   const [nickName, setNickName] = useState("");
   const [StudentInputRoomCode, setStudentInputRoomCode] = useState("");
   const navigateTo = useNavigate();
   const [sessionID, setSessionID] = useState("");
-  const [socketID, setSocketID] = useState("");
+  const [isJoiningAsSpectator, setisJoiningAsSpectator] = useState(false);
   const {
     userRole,
     sessionId,
+	wasKicked,
+    socketId,
     setUserRole,
+    setSessionId,
     setNickname,
     setRoomCode,
-    setSessionId,
+	setUserSocketId,
   } = useJoinerStore();
 
-  const [isJoiningAsSpectator, setisJoiningAsSpectator] = useState(false);
 
   useEffect(() => {
-    console.log("Joining as spectator? ", isJoiningAsSpectator);
-  });
-  useEffect(() => {
+	socket.connect()
+
     setUserRole("student");
+	console.log("Global wasKicked variable: ", wasKicked)
+
+	if(wasKicked){
+		console.log("JoinPage.tsx: User was kicked")
+		toast.error("You were kicked from the room")
+	}
+
+	socket.emit("client-assignment", );
+
+    socket.on("client-assignment", async (data) => {
+		console.log(new Date().toLocaleTimeString(), "(JoinPage.tsx): got a client-assignment event in JoinPage.tsx, recieved: ", data)
+		await setUserSocketId(data.socketId);
+		
+		return () => {
+			socket.off("client-assignment")
+		}
+  	})
   }, []);
+
+
   //const { launchProcess } = useBrainflowManager();
 
   const handleSubmit = async (e) => {
+	console.log(new Date().toLocaleTimeString(), "Current socketID in Zustand: ", socketId)
     setRoomCode(StudentInputRoomCode);
     e.preventDefault();
 

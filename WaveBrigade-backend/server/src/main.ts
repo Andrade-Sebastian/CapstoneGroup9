@@ -48,11 +48,12 @@ import session_handlers from "./handlers/session_handlers.ts";
 import experimentRouter from "./routes/experiment_routes.ts";
 import databaseRouter from "./routes/database_routes.ts";
 import { Request, Response } from "express";
-import multer from "multer";
 import path from "node:path";
 import fs from "node:fs";
 import { fileURLToPath } from "node:url";
+
 const app = express();
+
 // app.get('/get-ip', (req, res) => {
 //     const ipAddress = req.headers['x-forwarded-for'] || req.ip;
 //     res.send({
@@ -75,7 +76,7 @@ app.use("/experiment", experimentRouter);
 export const io = new Server(server, {
   cors: {
     origin: [ORIGIN_HOST, ORIGIN_JOINER],
-  },
+  }, 
 });
 
 const rooms: { [key: string]: any } = {};
@@ -120,11 +121,13 @@ app.get("/get-photo/:filename", (req: Request, res: Response) => {
 });
 
 io.on("connection", (socket) => {
+  
   // console.log("(main.ts): User Connected | socketID: " + socket.id)
   // console.log(`(main.ts): Total connections: ${io.engine.clientsCount}`);
 
   socket.on("client-assignment", () => {
-    //console.log("(main.ts): Emitting client-assignment with socketId:", socket.id);
+    console.log("(main.ts): Emitting client-assignment with socketId:", socket.id);
+    
     socket.emit("client-assignment", { socketId: socket.id });
   }); // Send socket ID to the client
 
@@ -141,6 +144,26 @@ io.on("connection", (socket) => {
     io.emit("experiment-data", data);
     console.log("hopefully emitted");
   });
+
+  socket.on("kick", async (nicknameSocketID) => {
+    console.log("Received kick event for", nicknameSocketID);
+    console.log("(main.ts): Current socketSessionMap:", socketSessionMap);
+
+    const targetSocket = io.sockets.sockets.get(nicknameSocketID);
+    
+    if (targetSocket) {
+      io.to(nicknameSocketID).emit("kick", nicknameSocketID);
+      console.log("(main.ts) Emitted kick event.")
+      targetSocket.disconnect(true); // Ensures a forced disconnect
+      console.log(`(main.ts): Successfully disconnected socket ${nicknameSocketID}`);
+    } else {
+        console.log(`(main.ts): No socket found with ID ${nicknameSocketID}`);
+    }
+    // io.emit("kick", nicknameSocketID);
+
+    // io.emit("kick", socketID);
+
+  })
 
   //send socket Id to brainflow
   socket.on("brainflow-assignment", () => {
@@ -198,10 +221,10 @@ io.on("connection", (socket) => {
           }
         );
         //emit to host that a user disconnected
-        io.emit(response.hostsocketid).emit(
-          "destroy-brainflow-launch",
-          "destroy user's brainflow launch"
-        );
+        // io.emit(response.hostsocketid).emit(
+        //   "destroy-brainflow-launch",
+        //   "destroy user's brainflow launch"
+        // );
         // Clean up the mapping
         removeSocket(socket.id);
         console.log(JSON.stringify(socketSessionMap));
