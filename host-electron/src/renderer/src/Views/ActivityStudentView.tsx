@@ -13,6 +13,7 @@ import ChartComponent from "../Components/ChartComponent.tsx";
 import { useJoinerStore } from "../hooks/stores/useJoinerStore.ts";
 import { stringify } from "postcss";
 import { useNavigate } from "react-router-dom";
+import { session } from "electron";
 
 
 export default function ActivityStudentView(): ReactElement{
@@ -21,23 +22,66 @@ export default function ActivityStudentView(): ReactElement{
     const [activeTab, setActiveTab] = useState("images");
     const [activeChart, setActiveChart] = useState("heartRateChart");
     const [recievedData, setRecievedData] = useState<number[]>([]);
+    const [currentUser, setCurrentUser] = useState("");
+    const [currentPath, setCurrentPath] = useState("");
+    const [fileName, setFileName] = useState("");
     const { users } = useSessionStore()
+
+    const {sessionId, userId, experimentType} = useParams();
+    console.log("PARAMS RECIEVED: ", sessionId, userId, experimentType);
+
+    useEffect(() => {
+      const getUserData = async () => {
+        try{
+          const response = await axios.get(`http://localhost:3000/host/get-user-experiment/${sessionId}/${experimentType}`);
+          console.log("RESPONSE RECIEVED IN ACTIVITYSTUDENTVIEW", response.data);
+          if(response.status === 200){
+            setCurrentUser(response.data.nickname);
+            setFileName(response.data.path);
+          }
+        }
+        catch(error){
+          console.error("Error retrieving user data", error);
+        }
+      }
+
+      getUserData()
+    }, [sessionId, experimentType, userId]);
+
+    useEffect(() =>{
+      const fetchStoredPhoto = async () =>{
+        //const filename = experimentPath.split("/").pop();
+        try{
+            const response = await axios.get(`http://localhost:3000/get-photo/${fileName}`);
+            if(response.status === 200){
+              console.log("Fetched image path:", response.config.url);
+              setCurrentPath(response.config.url);
+            }
+        }
+        catch(error){
+          console.log("Error retrieving image:", error);
+        }
+      };
+      fetchStoredPhoto();
+    },[setCurrentPath]);
+    
+
     return(
       <div className="flex flex-row h-screen w-full bg-white p-6 gap-6">
       {/* picture  */}
       <div className="flex flex-col w-2/3 bg-white shadow-md rounded-lg p-4">
         <div className="relative w-full flex-grow">
           <img
-            src="https://www.usatoday.com/gcdn/authoring/authoring-images/2024/08/19/USAT/74862648007-getty-images-2087314411.jpg?crop=1023,576,x0,y53&width=660&height=371&format=pjpg&auto=webp"
+            src={currentPath}
             alt="Profile"
-            className="w-full rounded-lg"
+            className="rounded-lg w-full max-w-lg h-auto"
           />
           <p className="absolute top-2 left-2 bg-white text-black px-2 py-1 text-sm rounded-md">
-            PUT FILE NAME HERE
+            {fileName}
           </p>
         </div>
         <div className="flex justify-between items-center mt-auto py-4">
-          <p className="font-semibold">Viewing Joiner: <span className="font-light">ENTER JOINER NAME HERE</span></p>
+          <p className="font-semibold">Viewing Joiner: <span className="font-light">{currentUser}</span></p>
           <div className="flex space-x-4">
             <button
               className="bg-[#7F56D9] hover:bg-violet text-3xl p-4 rounded-lg text-white cursor-pointer"

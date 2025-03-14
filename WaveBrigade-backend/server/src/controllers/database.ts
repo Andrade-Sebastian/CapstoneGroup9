@@ -695,3 +695,22 @@ export async function validatePassword(sessionID:string, password:string): Promi
 	return isValidPass;
 }
 
+export async function getUserExperimentData(sessionID: string, experimentType: string){
+	try{
+		await dbClient.connect();
+		switch(experimentType){
+		case "photo-lab":
+			const userInfo = await dbClient.queryObject(`SELECT "User".nickname, photolab.path FROM "User"
+				JOIN session ON session.sessionid = "User".sessionid
+				JOIN photolab ON photolab.experimentid = session.experimentid
+				WHERE session.sessionid = $1`,
+				[sessionID]
+			);
+			return userInfo.rows[0];
+		}
+	}
+	catch(error){
+		console.log("Data is not available", error);
+	}
+}
+
