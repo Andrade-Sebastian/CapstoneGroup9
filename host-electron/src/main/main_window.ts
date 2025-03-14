@@ -22,8 +22,8 @@
        sandbox: false,
        contextIsolation: true,
        nodeIntegration: false, // Disable Node.js integration
-       webSecurity: false, // Allows embedding YouTube videos
-       allowRunningInsecureContent: true // Prevents CSP blocking
+      //  webSecurity: true, 
+      //  allowRunningInsecureContent: true // Prevents CSP blocking
      }
    })
  

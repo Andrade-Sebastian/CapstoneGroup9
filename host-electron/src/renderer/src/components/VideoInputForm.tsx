@@ -322,7 +322,7 @@ export default function VideoInputForm(props: IVideoInputForm) {
             {/* <iframe width="560" height="315" src={`https://www.youtube.com/embed/${videoURL}`} title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe> */}
             {isValidURL && usingLink ? (
               <div>
-                <ReactPlayer url={`https://www.youtube.com/embed/${videoID}`} controls={true}/>
+                <ReactPlayer url={`https://www.youtube.com/embed/${videoID}&origin=http://localhost:5173/`} controls={true}/>
                 </div>
             ) :(
             <div className="flex flex-col justify-center items-center border p-4 rounded-md shadow-md size-">

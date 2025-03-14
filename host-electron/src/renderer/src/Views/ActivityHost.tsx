@@ -218,13 +218,6 @@ export default function ActivityHost() {
             <div>
             <ReactPlayer url={videoLabSource} controls />
             </div>
-            // <video
-            //   src={videoLabSource}
-            //   width="70%"
-            //   height="auto"
-            //   controls
-            //   className="rounded-lg shadow-lg max-w-2xl w-[60%] md:w-[70%] lg:w-50%"
-            // ></video>
           ) : experimentType == 1 && !isMediaAFile ?(
             <div>
             <ReactPlayer url={`https://www.youtube.com/embed/${videoID}`} controls/>

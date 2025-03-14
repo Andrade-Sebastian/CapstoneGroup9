@@ -36,9 +36,9 @@ app.whenReady().then(() => {
         responseHeaders: {
           ...details.responseHeaders,
           "Content-Security-Policy": [
-            "default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: filesystem: gap:;",
-            "script-src 'self' 'unsafe-inline' https://www.youtube.com https://www.youtube-nocookie.com;",
-            "connect-src 'self' https://www.youtube.com https://www.youtube-nocookie.com;",
+            "default-src 'self' 'unsafe-eval' data: blob: filesystem: gap:;",
+            "script-src 'self' https://www.youtube.com https://www.youtube-nocookie.com;",
+            "connect-src 'self' https://www.youtube.com https://www.youtube-nocookie.com http://localhost:3000;",
             "frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com;",
             "child-src 'self' https://www.youtube.com https://www.youtube-nocookie.com;"
           ]
