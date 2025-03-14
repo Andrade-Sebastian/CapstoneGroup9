@@ -620,6 +620,7 @@ export async function getUsersFromSession(sessionID: string){
 }
 
 export async function removeUserFromSession(sessionID: string, socketID: string){
+	console.log("in removeUserFromSession, sessionID is ", sessionID, "socketID is ", socketID);
 	try{
 		await dbClient.connect();
 		const getDevice = await dbClient.queryObject(`SELECT device FROM "User" WHERE sessionID = $1 AND frontendsocketid = $2 AND userrole = $3`,
@@ -630,10 +631,11 @@ export async function removeUserFromSession(sessionID: string, socketID: string)
 		);
 		console.log("Deleted user");
 		const deviceID = getDevice.rows[0]
+		console.log("(LoOk HeRe): device id is", deviceID.device )
 		await makeDeviceAvailable(deviceID.device);
 	}
 	catch(error){
-		console.log("Unable to delete user");
+		console.log("Unable to delete user", error);
 	}
 	finally{
 		await dbClient.end();

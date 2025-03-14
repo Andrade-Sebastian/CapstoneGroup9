@@ -13,6 +13,8 @@ import { useJoinerStore } from "../hooks/stores/useJoinerStore.ts";
 import React from "react";
 import toast, { Toaster } from "react-hot-toast";
 import { user } from "@heroui/react";
+
+
 // -----JOINER=--------------------------//
 export default function WaitingRoom() {
   const [nicknames, setNickNames] = useState<string[]>([]);
@@ -27,6 +29,7 @@ export default function WaitingRoom() {
     isConnected,
     serial,
     setSessionId,
+    sessionId,
     nickname,
     roomCode,
     userRole,
@@ -73,15 +76,20 @@ export default function WaitingRoom() {
     function kickUser()
     {
 
-      console.log("Socket id before kickingm", socketId);
       //Global store that keeps track of whether the user has been previously kicked or not
       setWasKicked(true);
-      console.log("socket id after kicking", socketId);
-      console.log("In kick function, set was kicked to:", wasKicked);
-      console.log("Kick function. Here is the socketID and sessionID", socketId, sessionID)
+      console.log("Kick function. Here is the socketID and sessionID", socketId, sessionId)
       //removes user from database
+      
+
+      //sessionid is empty when making this request. Thats causing the bug
+      console.log("Kicking user from database in sessionID: ", sessionId);
+      //is sessionID the global one? or a useState?
+
+
+
       axios.post('http://localhost:3000/joiner/leave-room', {
-        sessionID: sessionID,
+        sessionID: sessionId,
         socketID: socketId
       })
       .then(() =>{
