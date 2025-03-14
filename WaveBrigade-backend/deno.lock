@@ -10,6 +10,7 @@
     "npm:@types/node@*": "22.5.4",
     "npm:axios@*": "1.7.9",
     "npm:axios@^1.7.9": "1.7.9",
+    "npm:bad-words@*": "4.0.0",
     "npm:bad-words@4": "4.0.0",
     "npm:cors@*": "2.8.5",
     "npm:cors@^2.8.5": "2.8.5",

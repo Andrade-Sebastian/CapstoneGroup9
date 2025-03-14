@@ -681,7 +681,7 @@ export async function getUsersFromSession(sessionID: string){
 		const query = await dbClient.queryObject(`SELECT * FROM Get_Session_Users($1)`,
 			[sessionID]
 		);
-		console.log("Users retrieved from ", sessionID, query);
+		// console.log("Users retrieved from ", sessionID, query);
 		return query.rows;
 	}
 	catch(error){
@@ -763,5 +763,24 @@ export async function validatePassword(sessionID:string, password:string): Promi
 	}
 
 	return isValidPass;
+}
+
+export async function getUserExperimentData(sessionID: string, experimentType: string){
+	try{
+		await dbClient.connect();
+		switch(experimentType){
+		case "photo-lab":
+			const userInfo = await dbClient.queryObject(`SELECT "User".nickname, photolab.path FROM "User"
+				JOIN session ON session.sessionid = "User".sessionid
+				JOIN photolab ON photolab.experimentid = session.experimentid
+				WHERE session.sessionid = $1`,
+				[sessionID]
+			);
+			return userInfo.rows[0];
+		}
+	}
+	catch(error){
+		console.log("Data is not available", error);
+	}
 }
 

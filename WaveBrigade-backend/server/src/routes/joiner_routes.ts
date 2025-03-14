@@ -188,6 +188,7 @@ joinerRouter.post("/leave-room", (req: Request, res: Response) => {
         sessionID,
         socketID
     } = req.body;
+    console.log("In /leave-room, recieved", req.body)
     
     try {
         const users = removeUserFromSession(sessionID, socketID);
@@ -343,9 +344,12 @@ joinerRouter.post("/validatePassword", async (req: Request, res: Response) => {
         if(isValidPassword){
             return res.status(200).json({success: true})
         }
+        else{
+            return res.status(400).json({success: false})
+        }
     }
     catch(error){
-        return res.status(400).json({success: false, message: "Invalid password"});
+        return res.status(401).json({success: false, message: "Invalid password"});
     }
 });
 

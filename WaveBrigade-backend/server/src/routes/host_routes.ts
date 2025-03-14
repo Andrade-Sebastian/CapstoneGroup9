@@ -1,5 +1,5 @@
 import express, { Request, Response } from "npm:express";
-import { createSessionInDatabase, registerDevice } from "../controllers/database.ts";
+import { createSessionInDatabase, registerDevice, getUserExperimentData } from "../controllers/database.ts";
 import { Client } from "https://deno.land/x/postgres@v0.17.0/mod.ts";
 
 const dbClient = new Client({
@@ -149,8 +149,20 @@ hostRouter.get("/get-experiment", (req: Request, res:Response) =>{
 })
 
 
+hostRouter.get("/get-user-experiment/:sessionID/:experimentType", async (req: Request, res: Response) => {
+    const sessionID = req.params.sessionID;
+    const experimentType = req.params.experimentType;
+
+    try{
+        const info = await getUserExperimentData(sessionID, experimentType);
+        console.log("INFO BEING SENT OUT", info);
+        return res.status(200).send(info);
+
+    }
+    catch(error){
+        console.error("Error getting experiment data for user")
+        return res.status(400).send({message: "Error getting data"});
+    }
+})
+
 export default hostRouter;
-
-
-
-

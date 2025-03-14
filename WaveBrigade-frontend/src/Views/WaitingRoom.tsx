@@ -12,6 +12,7 @@ import { useNavigate } from "react-router-dom";
 import { useJoinerStore } from "../hooks/stores/useJoinerStore.ts";
 import React from "react";
 import toast, { Toaster } from "react-hot-toast";
+import { user } from "@heroui/react";
 // -----JOINER=--------------------------//
 export default function WaitingRoom() {
   const [nicknames, setNickNames] = useState<string[]>([]);
@@ -29,12 +30,15 @@ export default function WaitingRoom() {
     nickname,
     roomCode,
     userRole,
+    socketId,
     setExperimentId,
     setExperimentTitle,
     setExperimentDesc,
     experimentTypeString,
     setExperimentTypeString,
     setExperimentPath,
+    setWasKicked,
+    wasKicked,
     experimentId,
     experimentType,
     setExperimentType,
@@ -52,7 +56,7 @@ export default function WaitingRoom() {
   //   // Listen for updates to the room's nicknames
   //   socket.on("receive_names", (names) => {
   //     if (Array.isArray(names)) {
-  //       console.log("Nicknames received:", names);
+  //       console.log("Nicknames received:" , names);
   //       setNickNames(names);
   //     } else {
   //       console.error("Did not receive an array of names, received:", names);
@@ -63,6 +67,37 @@ export default function WaitingRoom() {
   //     socket.off("receive_names");
   //   };
   // }, [nickName, roomCode]);
+  
+
+  useEffect(() => {
+    function kickUser()
+    {
+
+      console.log("Socket id before kickingm", socketId);
+      //Global store that keeps track of whether the user has been previously kicked or not
+      setWasKicked(true);
+      console.log("socket id after kicking", socketId);
+      console.log("In kick function, set was kicked to:", wasKicked);
+      console.log("Kick function. Here is the socketID and sessionID", socketId, sessionID)
+      //removes user from database
+      axios.post('http://localhost:3000/joiner/leave-room', {
+        sessionID: sessionID,
+        socketID: socketId
+      })
+      .then(() =>{
+        console.log("Successfully removed from database");
+        navigateTo("/");
+      })
+      .catch(error =>{
+        console.log("Error removing user from database", error)
+      })
+    }
+    socket.on("kick", kickUser);
+    console.log("Listening for 'kick event");
+    return () => {
+      socket.off("kick", kickUser);
+  }}, []);
+
   useEffect(() => {
     if(userRole === "student"){
     socket.on("session-start", () => {
@@ -109,6 +144,7 @@ export default function WaitingRoom() {
     const fetchUsers = async () => {
       try {
         console.log("Trying to get users from session " + sessionID);
+        console.log("Socket ID: ", socketId);
         const response = await axios.get(
           `http://localhost:3000/joiner/room-users/${sessionID}`
         );
@@ -132,6 +168,7 @@ export default function WaitingRoom() {
 
     return () => clearInterval(interval);
   }, [sessionID]); //Don't fetch any data until sessionID is set
+
 
   useEffect(() => {
     const getExperimentData = async () => {
@@ -257,3 +294,11 @@ export default function WaitingRoom() {
     </div>
   );
 }
+
+function then(arg0: () => void) {
+  throw new Error("Function not implemented.");
+}
+
+
+//PROBLEM: SO THE FIRST JOINER GETS KICKED CORRECTLY AND GETS SENT TO THE JOIN PAGE. HOWEVER, WHEN I TRY TO JOIN AS A NEW
+//JOINER, THE BACKEND REMEMBERS AN OLD SOCKETID, THE ONE THAT WAS ALREADY KICKED, AND TRIES TO DISCONNECT THAT ONE INSTEAD OF THE NEW GUY

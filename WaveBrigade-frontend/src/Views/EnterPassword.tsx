@@ -84,9 +84,14 @@ export default function EnterFunction() {
               password: password
             }
           );
-          if (response.data.success) {
+          console.log("RESPONSE RECIEVED: ", response.data.success);
+          if (response.status === 200) {
             console.log("Password is valid");
             return true;
+          }
+          else if(response.status === 400){
+            console.log("Password is invalid");
+            return false;
           }
         } catch (error) {
           console.error("Could not validate password due to an API Error", error);
