@@ -101,6 +101,17 @@ export default function WaitingRoom() {
     setIsModalOpenEmoti(false);
   }
   
+  // const fetchDeviceData = async (deviceID: string) =>{
+  //   try{
+  //     const response = await axios.get(`http://localhost:3000/database/get-device-info/${deviceID}`)
+  //     const deviceID = req.body.deviceID;
+  //     const joiner = req.body.user_nickname;
+  //   }catch(error){
+  //     console.log(error)
+  //   }
+
+  // }
+
   const handleConfirmEmoti = async() =>{
     if(!serialNumber.trim() || !IPAddress.trim()){
       toast.error("Please enter both a Serial Number and an IP Address");
@@ -132,6 +143,7 @@ export default function WaitingRoom() {
       ipAddress: IPAddress,
       deviceSocketID: sessionStorage.getItem('socketID')
     })
+
 
     addUser(newEmotiBit)
 
@@ -339,7 +351,7 @@ export default function WaitingRoom() {
       <div className="flex justify-center flex-wrap gap-4 space-x-8 text-lg font-medium text-gray-800">
         {nicknames.map((name, index) => (
           <button type="button" key={index} onClick={(e) => handleOpenModalKick(e)}>
-          <p key={index}>{name}</p>
+          <p className='border-black rounded-md bg-[#E6E6E6] p-3 text-black font-light' key={index}>{name}</p>
           </button>
         ))}
       </div>
