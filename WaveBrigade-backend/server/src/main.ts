@@ -48,7 +48,6 @@ import session_handlers from "./handlers/session_handlers.ts";
 import experimentRouter from "./routes/experiment_routes.ts";
 import databaseRouter from "./routes/database_routes.ts";
 import { Request, Response } from "express";
-import multer from "multer";
 import path from "node:path";
 import fs from "node:fs";
 import { fileURLToPath } from "node:url";
@@ -77,7 +76,7 @@ app.use("/experiment", experimentRouter);
 export const io = new Server(server, {
   cors: {
     origin: [ORIGIN_HOST, ORIGIN_JOINER],
-  },
+  }, 
 });
 
 const rooms: { [key: string]: any } = {};
@@ -127,7 +126,8 @@ io.on("connection", (socket) => {
   // console.log(`(main.ts): Total connections: ${io.engine.clientsCount}`);
 
   socket.on("client-assignment", () => {
-    //console.log("(main.ts): Emitting client-assignment with socketId:", socket.id);
+    console.log("(main.ts): Emitting client-assignment with socketId:", socket.id);
+    
     socket.emit("client-assignment", { socketId: socket.id });
   }); // Send socket ID to the client
 

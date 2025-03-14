@@ -37,6 +37,8 @@ export default function WaitingRoom() {
     experimentTypeString,
     setExperimentTypeString,
     setExperimentPath,
+    setWasKicked,
+    wasKicked,
     experimentId,
     experimentType,
     setExperimentType,
@@ -70,7 +72,13 @@ export default function WaitingRoom() {
   useEffect(() => {
     function kickUser()
     {
-      console.log("Kick event received. Here is the socketID and sessionID", socketId, sessionID)
+
+      console.log("Socket id before kickingm", socketId);
+      //Global store that keeps track of whether the user has been previously kicked or not
+      setWasKicked(true);
+      console.log("socket id after kicking", socketId);
+      console.log("In kick function, set was kicked to:", wasKicked);
+      console.log("Kick function. Here is the socketID and sessionID", socketId, sessionID)
       //removes user from database
       axios.post('http://localhost:3000/joiner/leave-room', {
         sessionID: sessionID,
