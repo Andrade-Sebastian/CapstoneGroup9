@@ -288,7 +288,7 @@ export default function WaitingRoom() {
       <Divider className="my-6" />
       <div className="flex justify-center space-x-8 text-lg font-medium text-gray-800">
         {nicknames.map((name, index) => (
-          <p className='border-black rounded-md bg-[#E6E6E6] p-3 text-black font-light' key={index}>{name}</p>
+          <p className='flex items-center border-black font-medium rounded-md bg-[#E6E6E6] px-4 py-1.5 text-black font-light gap-2.5' key={index}>{name}</p>
         ))}
       </div>
     </div>

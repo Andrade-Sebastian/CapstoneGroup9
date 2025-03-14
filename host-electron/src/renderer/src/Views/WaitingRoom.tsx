@@ -4,6 +4,7 @@ import { CiPlay1 } from 'react-icons/ci'
 import { TfiGallery, TfiFile } from 'react-icons/tfi'
 import { TiCamera } from 'react-icons/ti'
 import { IoVideocam } from 'react-icons/io5'
+import { FaUserXmark } from "react-icons/fa6";
 import socket from './socket'
 import axios from 'axios'
 import { Divider } from '@heroui/divider'
@@ -351,7 +352,7 @@ export default function WaitingRoom() {
       <div className="flex justify-center flex-wrap gap-4 space-x-8 text-lg font-medium text-gray-800">
         {nicknames.map((name, index) => (
           <button type="button" key={index} onClick={(e) => handleOpenModalKick(e)}>
-          <p className='border-black rounded-md bg-[#E6E6E6] p-3 text-black font-light' key={index}>{name}</p>
+          <p className='flex items-center border-black font-medium rounded-md bg-[#E6E6E6] hover:bg-[#CECECE] px-4 py-1.5 text-black font-light cursor-pointer gap-2.5' key={index}> <FaUserXmark style={{ fontSize: '20px'}}/>{name}</p>
           </button>
         ))}
       </div>
