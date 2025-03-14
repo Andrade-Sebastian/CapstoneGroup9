@@ -4,6 +4,9 @@ import { CiPlay1 } from 'react-icons/ci'
 import { TfiGallery } from 'react-icons/tfi'
 import { TiCamera } from 'react-icons/ti'
 import { IoVideocam } from 'react-icons/io5'
+import { PiCrownSimpleThin } from 'react-icons/pi'
+import { HiOutlineSignal } from 'react-icons/hi2'
+import { CiUser } from 'react-icons/ci'
 import socket from './socket'
 import axios from 'axios'
 import { Divider } from '@heroui/divider'
@@ -19,7 +22,7 @@ import { useSessionStore } from '../store/useSessionStore.tsx'
 import React from 'react'
 import useBrainflowManager from '../hooks/useBrainflowManager.ts'
 import { io } from 'socket.io-client'
-
+import ReactPlayer from 'react-player'
 
 export default function ActivityHost() {
   const {
@@ -38,6 +41,9 @@ export default function ActivityHost() {
     removeUser,
     addDevice,
     removeDevice,
+    videoLabSource,
+    videoID,
+    photoLabImageSource,
     experimentTitle,
     experimentDesc
   } = useSessionStore()
@@ -47,9 +53,9 @@ export default function ActivityHost() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [serialNumber, setSerialNumber] = useState('')
   const [IPAddress, setIPAddress] = useState('')
-  const [isModalOpenEmoti, setIsModalOpenEmoti] = useState(false)
-  const [isModalOpenSettings, setIsModalOpenSettings] = useState(false)
+  const [isModalUserOptionsOpen, setIsModalUserOptionsOpen] = useState(false)
   const [selectedEmotiBitId, setSelectedEmotiBitId] = useState<string | null>(null)
+  const [isMediaAFile, setIsMediaAFile] = useState(false)
   const [userObjects, setUserObjects] = useState<Array<IUser>>([])
   const navigateTo = useNavigate()
   const [experimentIcon, setExperimentIcon] = useState<JSX.Element>(
@@ -63,60 +69,21 @@ export default function ActivityHost() {
     handleSubmit()
     handleCloseModal()
   }
-  const ipc = window.api;
+  const ipc = window.api
 
   //Add EmotiBit Modal
-  const handleOpenModalEmoti = () => setIsModalOpenEmoti(true)
-  const handleCloseModalEmoti = () => setIsModalOpenEmoti(false)
-  const handleConfirmEmoti = () => {
-    if (!serialNumber.trim() || !IPAddress.trim()) {
-      toast.error('Please enter both a Serial Number and an IP Address')
-      return
-    }
-    const newEmotiBit: IUser = {
-      userId: `user${emotiBits.length + 1}`,
-      socketId: `socket${Math.floor(Math.random() * 10000)}`,
-      nickname: `Joiner ${emotiBits.length + 1}`,
-      associatedDevice: {
-        serialNumber: serialNumber,
-        ipAddress: IPAddress
-      }
-    }
-    setEmotiBits((prevEmotiBits) => [...prevEmotiBits, newEmotiBit])
-    setSerialNumber('')
-    setIPAddress('')
-    setIsModalOpenEmoti(false)
+  const handleOpenModalUserOptions = () => setIsModalUserOptionsOpen(true)
+  const handleCloseModalUserOptions = () => setIsModalUserOptionsOpen(false)
+  const handleUserOptions = () => {
+    handleCloseModalUserOptions()
   }
 
-  // Joined EmotiBit Settings Modal
-  const handleOpenModalSettings = (userId: string) => {
-    setSelectedEmotiBitId(userId)
-    setIsModalOpenSettings(true)
+  const handleUserKick = () => {
+    //insert socket logic to kick user here
+    console.log('Kicking user...')
   }
-
-  const handleCloseModalSettings = () => {
-    setIsModalOpenSettings(false)
-    setSelectedEmotiBitId(null)
-  }
-
-  const handleRemoveEmoti = () => {
-    if (!selectedEmotiBitId) return
-    setEmotiBits((prevEmotiBits) =>
-      prevEmotiBits.filter((emotiBit) => emotiBit.userId !== selectedEmotiBitId)
-    )
-    setIsModalOpenSettings(false)
-  }
-  const handleRemoveUser = () => {
-    console.log('removing user')
-    setIsModalOpenSettings(false)
-  }
-  const handleUpdate = () => {
-    console.log('updating')
-    setIsModalOpenSettings(false)
-  }
-
   const handleViewUser = (userId, experimentType) => {
-    ipc.send("activity:viewUser", sessionId, userId, experimentType)
+    ipc.send('activity:viewUser', sessionId, userId, experimentType)
   }
 
   function handleSubmit() {
@@ -128,6 +95,20 @@ export default function ActivityHost() {
       //-----HARDCODED FOR TESTING-------
       navigateTo('/summary')
     }, 2000)
+  }
+
+  const checkVideoMediaType = () =>{
+    console.log("CheckVideo media is running... HERE ARE THE VALUES videolabsource ",videoLabSource,"hereis videoID", videoID)
+    if(videoLabSource && videoLabSource.trim() !==""){
+      console.log("Detected video as a file")
+      setIsMediaAFile(true)
+      return;
+    }
+    if(videoID && videoID.trim() !== ""){
+      console.log("Detected video as a YouTube link.")
+      setIsMediaAFile(false)
+      return;
+    }
   }
 
   useEffect(() => {
@@ -147,22 +128,20 @@ export default function ActivityHost() {
     setSessionID(useSessionStore.getState().sessionId)
     const fetchUsers = async () => {
       try {
-        console.log('Trying to get users from session ' + sessionID);
+        console.log('Trying to get users from session ' + sessionID)
         const response = await axios.get(`http://localhost:3000/joiner/room-users/${sessionID}`)
         const users = response.data.users //Array of IUser objects
 
         const nicknames = [] //holds only the nicknames of those IUser Objects
-        
+
         setNickNames(nicknames)
-        
+
         setUserObjects(response.data.users)
-        
+
         // initialize nicknames array
         for (let i = 0; i < users.length; i++) {
           nicknames.push(users[i].nickname)
         }
-        
-
       } catch (error) {
         console.error('Error fetching users:', error)
       }
@@ -176,6 +155,8 @@ export default function ActivityHost() {
 
   useEffect(() => {
     if (experimentType === 1) {
+      console.log("ExperimentType is:", experimentType)
+      checkVideoMediaType();
       setExperimentIcon(<IoVideocam style={{ fontSize: '20px' }} />)
     } else if (experimentType === 2) {
       setExperimentIcon(<TiCamera style={{ fontSize: '20px' }} />)
@@ -184,94 +165,117 @@ export default function ActivityHost() {
     } else {
       console.log('Invalid experiment ID')
     }
-  }, [experimentType])
-
+  }, [experimentType, videoLabSource, videoID])
 
   return (
-    <div className="flex flex-col items-center justify-center mx-8">
+    <div className="flex flex-col w-full px-8 pt-6">
       <Toaster position="top-right" />
-      <div className="flex flex-col md:flex-row items-start justify-between gap-72">
+      <div className="flex flex-row md:flex-no-wrap items-start justify-between">
         {/* left section */}
-        <div className="md:w-1/2 space-y-4">
-          <h1 className="text-3xl text-3xl font-semibold text-gray-800">Welcome to Session</h1>
-          <p className="text-6xl font-bold text-[#894DD6]">{roomCode}</p>
+        <div className=" w-full space-y-4 md:w-1/3 min-w-0">
+          <p className="text-6xl font-medium text-[#894DD6]">{roomCode}</p>
           <div className="space-y-2">
-            <p className="text-lg">
-              <span className="font-semibold"> NICKNAME:</span> {hostName}
-            </p>
-            <p className="text-lg">
-              <span className="font-semibold">SENSOR SERIAL NUMBER:</span> A93KFN2/SJPP2RK401
-            </p>
-            <p className="text-lg">
-              <span className="font-semibold">SENSOR STATUS:</span>{' '}
-              <span className="text-green-500 font-bold">CONNECTED</span>
-            </p>
+            <div className="flex items-center space-x-2 text-lg">
+              <PiCrownSimpleThin size={24} />
+              <span className="font-semibold text-[#894DD6] "> NICKNAME </span>{' '}
+              <span>{hostName}</span>
+            </div>
+            <div className="flex items-center space-x-2 text-lg">
+              <HiOutlineSignal size={24} />
+              <p className="text-lg">
+                <span className="font-semibold text-[#894DD6]">SOCKET</span> A93KFN2/SJPP2RK401
+              </p>
+            </div>
+            <div className="flex items-center space-x-2 text-lg">
+              <CiUser size={24} />
+              <p className="text-lg">
+                <span className="font-semibold text-[#894DD6]">PARTICIPANTS</span>{' '}
+                <span>{nicknames.length}</span>
+              </p>
+            </div>
+            <div className="flex flex-col items-start mt-8 gap-2 max-w-[400px] bg-white ">
+              <h1 className='text-lg font-bold'> Experiment Description</h1>
+              <div className="flex items-center px-3 py-1 rounded-full bg-[#894DD6] text-white">
+                <div className="text-sm">{experimentIcon}</div>
+                <p className="ml-2 text-sm font-medium">{experimentTypeString}</p>
+              </div>
+              <h1 className="text-lg font-bold"> {experimentTitle}</h1>
+              <p className="ml-2 text-wrap text-md text-gray-600">{experimentDesc}</p>
+            </div>
           </div>
         </div>
-        {/* right section */}
-        <div className="md:w-1/2">
-          {/* HARD CODED LAB DESCRIPTION */}
-          <WaitingRoomCardComponent
-            icon={experimentIcon}
-            labType={experimentTypeString}
-            labTitle={experimentTitle}
-            description={experimentDesc}
-          ></WaitingRoomCardComponent>
-        </div>
-        <div className="w-full flex flex-col mt-6">
-          <h2 className="text-xl lg:text-2xl font-semibold text-gray-800 mb-4">
-            Connected EmotiBits
-          </h2>
-          <div className="flex-col gap-4 overflow-y-auto max-h-[300px] md:max-h-[400px] p-4 border rounded-md shadow-md ">
-            {emotiBits.map((user) => (
-              <EmotiBitList
-                key={user.userId}
-                user={user}
-                isConnected={true}
-                onAction={() => handleOpenModalSettings(user.userId)}
-              />
-            ))}
+        <Divider orientation="vertical" className="mx-1" />
+        {/* <div>
+                  {isConnected ? (
+                    <span className="text-green-500 font-bold"> CONNECTED</span>
+                  ) : (
+                    <span className="text-red-500 font-bold"> NOT CONNECTED</span>
+                  )}
+                </div> */}
+        <div className="w-full md:w-2/3 flex justify-center items-center min-w-0">
+        <div className="relative flex justify-center items-center rounded-xl">
+          {experimentType == 1 && isMediaAFile ? (
+            <div>
+            <ReactPlayer url={videoLabSource} controls />
+            </div>
+          ) : experimentType == 1 && !isMediaAFile ?(
+            <div>
+            <ReactPlayer url={`https://www.youtube.com/embed/${videoID}`} controls/>
+            </div>
+          ) : experimentType == 2 ? (
+            <img
+              src={photoLabImageSource}
+              className='rounded-lg shadow-lg max-w-2xl w-[60%] md:w-[70%] lg:w-50%'
+              alt="Exeriment Image"
+            >
+            </img>
+          ) : experimentType == 3 ? (
+            <div> 
+              <p> 
+                Gallery Lab Images here
+              </p>
+            </div>
+          ) : (
+            <div>
+              <p>
+                Article Lab here
+              </p>
+            </div>
+          )}  
           </div>
-          <button
-            onClick={handleOpenModalEmoti}
-            className="mt-4 bg-[#7F56D9] hover:bg-violet-500 text-white font-semibold py-3 px-6 rounded-md shadow-md transition duration-300 ease-in-out md:w-auto"
-          >
-            Add EmotiBit
-          </button>
-          {/* <EmotiBitList
-                   icon={<CiCircleCheck style={{ fontSize: '20px' }} />}
-                   joiner="Joanna"
-                   serial="AS8FD90G9DD0GD9F"
-                   ip="123.456.78"
-                 ></EmotiBitList> */}
         </div>
       </div>
-      <Divider className="my-10" />
+      <Divider className="my-6" />
       <hr></hr>
-      <div className="flex justify-center space-x-8 text-lg font-medium text-gray-800">
-        {(userObjects || []).map((user, index) => (
-          <button type="button" key={index} onClick={() => handleViewUser(user.userid, experimentType)}>
-          <p>{user.nickname}</p>
+      <div className="flex flex-col items-center">
+        <div className="flex space-x-4 mt-2">
+          {(userObjects || []).map((user, index) => (
+            <button
+              key={index}
+              onClick={() => handleViewUser(user.userid, experimentType)}
+              className="flex items-center px-6 py-2 rounded-md cursor-pointer text-lg shadow-md font-medium border bg-[#E6E6E6] hover:bg-[#CECECE]"
+            >
+              <p>{user.nickname}</p>
+            </button>
+          ))}
+        </div>
+        <div className="absolute bottom-2 flex space-x-6 mt-6">
+          <button
+            type="button"
+            onClick={handleMask}
+            className="mt-6 font-semibold py-3 px-6 rounded-3xl shadow-md transition duration-300 ease-in-out bg-[#7F56D9] hover:bg-violet-500 text-white transition duration-300"
+          >
+            Mask
           </button>
-        ))}
-        
-      </div>
-      <div className="flex absolute bottom-0 pb-6 gap-10 items-center justify-center">
-        <button
-          type="button"
-          onClick={handleMask}
-          className="mt-6 font-semibold py-3 px-6 rounded-md shadow-md transition duration-300 ease-in-out bg-[#7F56D9] hover:bg-violet-500 text-white"
-        >
-          Mask
-        </button>
-        <button
-          type="button"
-          onClick={handleOpenModal}
-          className="mt-6 font-semibold py-3 px-6 rounded-md shadow-md transition duration-300 ease-in-out bg-[#F31260] hover:bg-red-600 text-white"
-        >
-          Stop
-        </button>
-        {/*This will redirect to Media Page */}
+          <button
+            type="button"
+            onClick={handleOpenModal}
+            className="mt-6 font-semibold py-3 px-6 rounded-3xl shadow-md transition duration-300 ease-in-out bg-[#F31260] hover:bg-red-600 text-white transition duration-300"
+          >
+            Stop
+          </button>
+          {/*This will redirect to Media Page */}
+        </div>
       </div>
       <ModalComponent
         onAction={handleAction}
@@ -287,71 +291,17 @@ export default function ActivityHost() {
         </div>
       </ModalComponent>
       <ModalComponent
-        onAction={handleConfirmEmoti}
-        isOpen={isModalOpenEmoti}
-        onCancel={handleCloseModalEmoti}
-        modalTitle="Add an EmotiBit"
-        button="Add EmotiBit"
+        onAction={handleUserOptions}
+        onAction2={handleViewUser}
+        onAction3={handleUserKick}
+        isOpen={isModalUserOptionsOpen}
+        onCancel={handleCloseModalUserOptions}
+        modalTitle="View Joiner?"
+        button="View"
+        button2="Kick"
       >
         <div className="mb-6">
-          <label htmlFor="serialNumber" className="block text-sm font-medium text-gray-700 mb-2">
-            Serial Number
-          </label>
-          <input
-            type="text"
-            id="serialNumber"
-            className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            value={serialNumber}
-            onChange={(e) => setSerialNumber(e.target.value)}
-          />
-        </div>
-        <div className="mb-6">
-          <label htmlFor="ipAddress" className="block text-sm font-medium text-gray-700 mb-2">
-            IP Address
-          </label>
-          <input
-            type="text"
-            id="ipAddress"
-            className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            value={IPAddress}
-            onChange={(e) => setIPAddress(e.target.value)}
-          />
-        </div>
-      </ModalComponent>
-      <ModalComponent
-        onAction={handleRemoveEmoti}
-        onAction2={handleRemoveUser}
-        onAction3={handleUpdate}
-        isOpen={isModalOpenSettings}
-        onCancel={handleCloseModalSettings}
-        modalTitle="EmotiBit Settings"
-        button="Remove EmotiBit"
-        button2="Remove User"
-        button3="Update"
-      >
-        <div className="mb-6">
-          <label htmlFor="serialNumber" className="block text-sm font-medium text-gray-700 mb-2">
-            Serial Number
-          </label>
-          <input
-            type="text"
-            id="serialNumber"
-            className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            value={serialNumber}
-            onChange={(e) => setSerialNumber(e.target.value)}
-          />
-        </div>
-        <div className="mb-6">
-          <label htmlFor="ipAddress" className="block text-sm font-medium text-gray-700 mb-2">
-            IP Address
-          </label>
-          <input
-            type="text"
-            id="ipAddress"
-            className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            value={IPAddress}
-            onChange={(e) => setIPAddress(e.target.value)}
-          />
+          <h1 className="text-md text-gray-700 mb-2">Do you want to view or kick the joiner?</h1>
         </div>
       </ModalComponent>
     </div>

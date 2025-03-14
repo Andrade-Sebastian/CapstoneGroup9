@@ -1,14 +1,11 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { PiShootingStarThin } from 'react-icons/pi'
 import { useSessionStore } from '../store/useSessionStore'
 import toast, { Toaster } from 'react-hot-toast'
 import SideComponent from '../components/SideComponent'
-import PhotoInput from '../components/PhotoInput'
-import ModalComponent from '../components/ModalComponent'
 import axios from 'axios'
 import socket from './socket'
-import PhotoInputForm from '@renderer/components/PhotoInputForm'
+import PhotoInputForm from '../components/PhotoInputForm.tsx'
 
 export default function PhotoLab() {
   const { //Global state
