@@ -6,6 +6,8 @@ import { determineFileExtension, getNumberFilesInDirectory } from "../controller
 import axios from 'axios';
 
 import fsPromises from 'node:fs/promises';
+import { dbClient } from "../routes/joiner_routes.ts";
+
 
 const labDirectories = {
     "photo-lab": "/app/backend/server/src/media/photo-lab",
@@ -281,6 +283,37 @@ databaseRouter.get("/photo-lab/info/:photolabid", async(req: Request, res: Respo
             "Error": error
         })
     }
+})
+
+
+// Returns device ID based on user's socketID
+databaseRouter.get("/device-id/:socketID", async (req: Request, res: Response) => {
+
+    const socketID = req.params.socketID;
+    let deviceID = null;
+
+    try{
+        await dbClient.connect();
+
+        //get device id assigned to the user at socket id 
+        const query = await dbClient.queryObject(`select device from "User" where frontendsocketid='${socketID}'`)
+
+        if(query.rows.length === 0){
+            res.status(404).send({
+                "message": "Either the device was not found, or is not associated to the user"
+            })
+        }else{
+            deviceID = query.rows[0].device
+        }
+
+    }catch(error){
+        console.log(error)
+        res.status(500).send({"Error": error})
+    }finally{
+        await dbClient.end()
+    }
+    
+    res.status(200).send({"deviceID": deviceID})
 })
 
 
