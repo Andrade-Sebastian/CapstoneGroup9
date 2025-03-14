@@ -71,6 +71,7 @@ export default function ConnectEmotiBit() {
 
   const joinRoom = async (device: number) => {
     try{
+      
       const response = await axios.post(`http://localhost:3000/joiner/session/join/`, {
         socketID: socketId,
         nickname: nickname,

@@ -49,7 +49,11 @@ export default function WaitingRoom() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isModalOpenEmoti, setIsModalOpenEmoti] = useState(false)
   const [isModalOpenSettings, setIsModalOpenSettings] = useState(false)
+  const [isModalOpenKick, setIsModalOpenKick] = useState(false)
   const [selectedEmotiBitId, setSelectedEmotiBitId] = useState<string | null>(null);
+  const [socketID, setSocketID] = useState('');
+  const [theUserMap, setTheUserMap] = useState(new Map());
+  const [focusedUser, setFocusedUser] = useState('')
   const [experimentIcon, setExperimentIcon] = useState<JSX.Element>(
     <CiPlay1 style={{ fontSize: '20px' }} />
   )
@@ -86,12 +90,11 @@ export default function WaitingRoom() {
     }
   }
 
-  //Add EmotiBit Modal
+  //Add EmotiBit Modals
   const handleOpenModalEmoti = () => {
     setIsModalOpenEmoti(true);
 
   }
-
 
   const handleCloseModalEmoti = () => {
     console.log("closing modal")
@@ -161,22 +164,69 @@ export default function WaitingRoom() {
     setIsModalOpenSettings(true);
   };
 
+
   const handleCloseModalSettings = () => {
     setIsModalOpenSettings(false);
     setSelectedEmotiBitId(null);
   };
 
   const handleRemoveUser = () => {
+
+    console.log("Socket ID: ", socketID);
+    //getUserIDfromSocketID(socketID);
+    
     console.log("removing user");
     setIsModalOpenSettings(false);
+    navigateTo('/joiner')
   }
+  
+  
   // const handleUpdate = () => {
-  //   console.log("updating");
-  //   setIsModalOpenSettings(false);
-  // }
+    //   console.log("updating");
+    //   setIsModalOpenSettings(false);
+    // }
+    
+    //handleSubmit
+    
+    //Handling kicking a user
+  const handleOpenModalKick = (e) => {
+    console.log("HANDLE KICK", e.target.textContent)
+    setIsModalOpenKick(true)
+    setFocusedUser(e.target.textContent)
 
-  //handleSubmit
+  }
+    const handleCloseModalKick = () => {setIsModalOpenKick(false)}
+    
+    
+    const handleKickUser = () => {
 
+      const nicknameSocketID = theUserMap.get(focusedUser);
+      console.log("Kicking user with socket ID: ", nicknameSocketID);
+      console.log("HERE IS THE USER MAP BEFORE EMIT KICKING", theUserMap)
+      if(!nicknameSocketID){
+        console.log("Cannot kick user: there is no socket id found.")
+        return;
+      }
+      console.log("Kicking user with socketID:", nicknameSocketID);
+
+      socket.emit("kick", nicknameSocketID);
+      
+      console.log("Emitted kick event");
+    
+      setTheUserMap(prevMap => {
+        const newMap = new Map(prevMap);
+        newMap.delete(focusedUser);
+        return newMap;
+      })
+    
+      console.log("Updated user map:", theUserMap);
+      
+      console.log("Kicking user...")
+    
+      console.log("HERE IS THE USER MAP AFTER RESETING THE MAP", theUserMap)
+      setIsModalOpenKick(false);
+      
+    }
 
   useEffect(() => {
     if (!useSessionStore.getState().sessionId) return
@@ -184,18 +234,30 @@ export default function WaitingRoom() {
     setSessionID(useSessionStore.getState().sessionId)
     const fetchUsers = async () => {
       try {
-        console.log('Trying to get users from session ' + sessionID);
+        // console.log('Trying to get users from session ' + sessionID);
         const response = await axios.get(`http://localhost:3000/joiner/room-users/${sessionID}`)
         const users = response.data.users //Array of IUser objects
-
+        console.log("Users", JSON.stringify(users))
+        
         const nicknames = [] //holds only the nicknames of those IUser Objects
-
+        const frontendSocketIDs = []
+        const userMap = new Map();
         // initialize nicknames array
         for (let i = 0; i < users.length; i++) {
           nicknames.push(users[i].nickname)
+          frontendSocketIDs.push(users[i].frontendsocketid)
         }
 
-        setNickNames(nicknames)
+
+        users.forEach(user => {
+          userMap.set(user.nickname, user.frontendsocketid);
+        });
+
+        console.log(userMap)
+        setTheUserMap(userMap);
+  
+        setNickNames(nicknames);
+        setSocketID(socketID);
       } catch (error) {
         console.error('Error fetching users:', error)
       }
@@ -229,6 +291,7 @@ export default function WaitingRoom() {
     socket.emit("session-start-spectator")
     navigateTo('/activity-room');
   }
+  
   return (
     <div className="flex flex-col items-center justify-center px-4 mx:px-8 w-full">
       <div className="flex flex-col md:flex-row items-start justify-between w-full max-w-6xl gap-8">
@@ -270,18 +333,14 @@ export default function WaitingRoom() {
           >
             Add EmotiBit
           </button>
-          {/* <EmotiBitList
-            icon={<CiCircleCheck style={{ fontSize: '20px' }} />}
-            joiner="Joanna"
-            serial="AS8FD90G9DD0GD9F"
-            ip="123.456.78"
-          ></EmotiBitList> */}
         </div>
       </div>
       <Divider className="my-6" />
       <div className="flex justify-center flex-wrap gap-4 space-x-8 text-lg font-medium text-gray-800">
         {nicknames.map((name, index) => (
+          <button type="button" key={index} onClick={(e) => handleOpenModalKick(e)}>
           <p key={index}>{name}</p>
+          </button>
         ))}
       </div>
       <div className="absolute bottom-0 pb-6 flex flex-row gap-10 items-center justify-center">
@@ -327,6 +386,7 @@ export default function WaitingRoom() {
           <label htmlFor="serialNumber" className="block text-sm font-medium text-gray-700 mb-2">
             Serial Number
           </label>
+          
           <input
             type="text"
             id="serialNumber"
@@ -384,6 +444,19 @@ export default function WaitingRoom() {
           />
         </div>
       </ModalComponent>
+      <ModalComponent
+        onAction={handleKickUser}
+        isOpen={isModalOpenKick}
+        onCancel={handleCloseModalKick}
+        modalTitle="Kick this Joiner?"
+        button="Remove Joiner"
+        >
+        <div className="mb-6">
+          <h1 className="text-md text-gray-700 mb-2">
+            Are you sure you want to kick this joiner?
+          </h1>
+        </div>
+        </ModalComponent>
     </div>
   )
 }

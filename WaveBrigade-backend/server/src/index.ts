@@ -215,7 +215,6 @@ io.on("connection", (socket) => {
     socket.on("disconnect", () =>{})
 });
 
-//TODO: Disconnect feature, two users, if one user disconnects, their name should be gone from the other user's device
 
 server.listen(3002, () => {
     console.log("Server is running on port 3002...");

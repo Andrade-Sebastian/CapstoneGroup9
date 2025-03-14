@@ -188,6 +188,7 @@ joinerRouter.post("/leave-room", (req: Request, res: Response) => {
         sessionID,
         socketID
     } = req.body;
+    console.log("In /leave-room, recieved", req.body)
     
     try {
         const users = removeUserFromSession(sessionID, socketID);

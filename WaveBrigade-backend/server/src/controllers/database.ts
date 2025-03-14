@@ -611,7 +611,7 @@ export async function getUsersFromSession(sessionID: string){
 		const query = await dbClient.queryObject(`SELECT * FROM Get_Session_Users($1)`,
 			[sessionID]
 		);
-		console.log("Users retrieved from ", sessionID, query);
+		// console.log("Users retrieved from ", sessionID, query);
 		return query.rows;
 	}
 	catch(error){

@@ -55,6 +55,7 @@ interface JoinerState{
     sessionId: string;
     secret: string | undefined;
     userRole: string;
+    wasKicked: boolean;
 
     setJoinerId: (id: string) => void;
     setNickname: (nickname: string | null) => void;
@@ -73,6 +74,7 @@ interface JoinerState{
     setExperimentTypeString: (experimentTypeString: string) => void;
     setExperimentPath: (experimentPath: string) => void;
     setUserRole: (role: string) => void;
+    setWasKicked: (wasKicked: boolean) => void;
 }
 
 export const useJoinerStore = create<JoinerState>()(
@@ -94,6 +96,7 @@ export const useJoinerStore = create<JoinerState>()(
         sessionId: '',
         secret: undefined,
         userRole: '',
+        wasKicked: false,
         
         
 
@@ -113,6 +116,7 @@ export const useJoinerStore = create<JoinerState>()(
         setSessionId: (id: string): void => set(() => ({sessionId: id})),
         setExperimentTypeString: (experimentTypeString: string): void => set(() => ({experimentTypeString: experimentTypeString})),
         setExperimentPath: (experimentPath: string): void => set(() => ({experimentPath: experimentPath})),
-        setUserRole: (role: string): void => set(() => ({userRole: role}))
+        setUserRole: (role: string): void => set(() => ({userRole: role})),
+        setWasKicked: (wasKicked: boolean): void => set(() => ({wasKicked: wasKicked})),
         
 }));
