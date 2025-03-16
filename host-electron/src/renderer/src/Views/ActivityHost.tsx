@@ -253,7 +253,7 @@ export default function ActivityHost() {
             <button
               key={index}
               onClick={() => handleViewUser(user.userid, experimentType)}
-              className="flex items-center px-6 py-2 rounded-md cursor-pointer text-lg shadow-md font-medium border bg-[#E6E6E6] hover:bg-[#CECECE]"
+              className="flex items-center border-black font-medium rounded-md bg-[#E6E6E6] hover:bg-[#CECECE] px-4 py-1.5 text-black font-light cursor-pointer gap-2.5"
             >
               <p>{user.nickname}</p>
             </button>

@@ -69,6 +69,44 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 
+databaseRouter.get("/device-info/:lastFourSerial", async(req: Request, res: Response) => {
+    const lastFourSerial = req.params.lastFourSerial;
+    console.log("Last four serial: ", lastFourSerial);
+
+    try{    
+        await dbClient.connect();
+
+        const query = await dbClient.queryObject(`SELECT * FROM DEVICE WHERE RIGHT(serialnumber, 4) = $1;`, [lastFourSerial]);
+
+        if (query.rows.length === 0)
+        {
+            console.log("No device found with last four serial=", lastFourSerial);
+            res.status(404).send({
+                "Message": "No device found with last four serial provided"
+            });
+        }else{
+            res.status(200).send(query.rows);
+        }
+
+    }catch(error){
+        console.log("error:" ,error);
+        res.status(500).send({
+            "Error": JSON.stringify(error)
+        });
+    }finally{
+        await dbClient.end();
+    }
+});
+
+
+
+
+
+
+
+
+
+
 databaseRouter.post("/photo-lab", upload.single("imageBlob"), async(req: Request, res: Response) => {
 
     const experimentTitle = req.body.experimentTitle;
