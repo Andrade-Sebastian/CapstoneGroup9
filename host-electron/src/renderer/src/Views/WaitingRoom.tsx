@@ -112,46 +112,51 @@ export default function WaitingRoom() {
 
   // }
 
-  const handleConfirmEmoti = async() =>{
+  const handleConfirmEmoti = async () =>{
     if(!serialNumber.trim() || !IPAddress.trim()){
       toast.error("Please enter both a Serial Number and an IP Address");
       return
     }
 
-    const newEmotiBit = {
-        userId: `user${emotiBits.length + 1}`,
-        socketId: `socket${Math.floor(Math.random() * 10000)}`,
-        nickname: `Joiner ${emotiBits.length + 1}`,
-        associatedDevice: {
+    const emotiBits = {
+        serialNumber,
+        ipAddress: IPAddress,
+        joinerNickname: null,
+        joinerSocketID: null,
+      };
+      try{
+
+        await axios.post(`http://localhost:3000/host/register-device`, {
+          sessionID: sessionID,
           serialNumber: serialNumber,
-          ipAddress: IPAddress
+          ipAddress: IPAddress,
+          deviceSocketID: sessionStorage.getItem('socketID')
+        });
+
+        addUser(emotiBits);
+        socket.emit("new-device-registered", emotiBits);
+        toast.success("Device registered successfully");
+      } catch(error){
+        console.error("Error registering device:", error);
+        toast.error("Failed to register device");
       }
-    }
-
-
-    console.log("devices", )
-
-    console.log("------")
-    console.log("sessionID ", sessionID)
-    console.log('Trying to register device with serial number ' + serialNumber + ' and IP Address ' + IPAddress)
-    console.log("socketid", sessionStorage.getItem('socketID'))
-
-    
-    await axios.post(`http://localhost:3000/host/register-device`, {
-      sessionID: sessionID,
-      serialNumber: serialNumber,
-      ipAddress: IPAddress,
-      deviceSocketID: sessionStorage.getItem('socketID')
-    })
-
-
-    addUser(newEmotiBit)
-
-    console.log(users)
-    setSerialNumber('');
-    setIPAddress('');
-    setIsModalOpenEmoti(false);
-    }
+      
+          console.log("devices", )
+      
+          console.log("------")
+          console.log("sessionID ", sessionID)
+          console.log('Trying to register device with serial number ' + serialNumber + ' and IP Address ' + IPAddress)
+          console.log("socketid", sessionStorage.getItem('socketID'))
+      
+          
+      
+      
+          
+          console.log(users)
+      setSerialNumber('');
+      setIPAddress('');
+      setIsModalOpenEmoti(false);
+    };
 
   // Joined EmotiBit Settings Modal
   const handleRemoveEmoti = async() => {
@@ -239,6 +244,46 @@ export default function WaitingRoom() {
       setIsModalOpenKick(false);
       
     }
+
+  
+  useEffect(() => {
+    socket.on("joiner-connected", async ({ socketID, nickname, lastFourSerial }) => {
+      try{
+        const response = await axios.get(`http://localhost:3000/database/....${lastFourSerial}`);
+        const deviceData = response.data;
+
+        if(deviceData){
+          const updatedDevices = emotiBits.map(device => {
+            if(device.serialNumber.endsWith(lastFourSerial)){
+              return{
+                ...device,
+                joinerNickname: nickname,
+                joinerSocketID: socketID
+              };
+            }
+            return device;
+          });
+          setUsers((prevUsers) => [
+            ...prevUsers.filter((user) => user.socketId !== socketID),
+            { socketId: socketID, nickname: nickname, associatedDevice: deviceData}
+          ]);
+          setTheUserMap((prevMap) => {
+            const newMap = new Map(prevMap);
+            newMap.set(nickname, socketID);
+            return newMap;
+          });
+
+          toast.success(`${nickname} connected to EmotiBit ${deviceData.serialNumber}`);
+        }
+      }catch(error){
+        console.error("Error fetching device data:", error);
+
+      }
+    });
+    return () => {
+      socket.off("joiner-connected");
+    };
+  }, [emotiBits]);
 
   useEffect(() => {
     if (!useSessionStore.getState().sessionId) return
