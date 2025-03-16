@@ -37,6 +37,7 @@ export default function SpectatorActiveExperiment() {
   const {
     nickname,
     roomCode,
+    socketId,
     sessionId,
     setSessionId,
     experimentId,
@@ -46,7 +47,10 @@ export default function SpectatorActiveExperiment() {
   } = useJoinerStore();
   const navigateTo = useNavigate();
 
-  const handleOpenModal = () => setIsModalOpen(true)
+  const handleOpenModal = () => {
+    setIsModalOpen(true)
+    console.log()
+  }
   const handleCloseModal = () => setIsModalOpen(false)
   const handleAction = () => {
         console.log('Creating lobby...')
@@ -58,8 +62,15 @@ export default function SpectatorActiveExperiment() {
   const handleSubmit =() => {
         console.log('in handle submit')
         toast.success("NOW NEED TO GO TO THIS JOINER'S LAB")
-        
       }
+
+  useEffect(() => {
+      setTimeout(() => {
+        console.log(new Date().toLocaleTimeString(), "Socket ID: ", socketId)
+      }, 1000)
+    },[]);
+
+
   useEffect(() => {
     console.log("Running active experiment");
     console.log("Experiment ID in store w/o getState", experimentId)
@@ -290,7 +301,7 @@ export default function SpectatorActiveExperiment() {
                 icon={<FaRegCircleUser className="text-2xl" />}
                 fileName="experiment.jpeg"
                 isSelected={selectedJoiner?.id === joiner.id}
-                onSelect={() => {setSelectedJoiner(joiner); handleOpenModal();}}
+                onSelect={() => {setSelectedJoiner(joiner); console.log("joiner object: " , JSON.stringify(joiner)); handleOpenModal();}}
               />)))}
             </div>
            ): (

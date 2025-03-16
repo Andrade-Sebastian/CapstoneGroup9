@@ -22,6 +22,7 @@ export default function ActiveExperiment() {
   const {
     isConnected,
     serial,
+    socketId,
     nickname,
     roomCode,
     experimentId,
@@ -30,6 +31,12 @@ export default function ActiveExperiment() {
     experimentDesc,
   } = useJoinerStore();
   const navigateTo = useNavigate();
+
+  useEffect(() => {
+        setTimeout(() => {
+          console.log(new Date().toLocaleTimeString(), "Socket ID: ", socketId)
+        }, 1000)
+      },[]);
 
   useEffect(() => {
     console.log("Running active experiment");

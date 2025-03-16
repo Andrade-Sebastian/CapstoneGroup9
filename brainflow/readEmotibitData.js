@@ -179,9 +179,9 @@ function sendData(socket) {
                     }
                     ;
                     console.log("DATA :", ancData.data1);
+                    console.log("DATA :", ancData.data2);
                     //emit to socket an object that holds data and op parameters
                     socket.emit('update', __assign({ ancData: ancData, auxData: auxData }, operationParameters));
-                    return [4 /*yield*/, sleep(100)];
                 case 3:
                     _a.sent();
                     return [3 /*break*/, 2];
@@ -215,7 +215,6 @@ function main() {
                     return [4 /*yield*/, requestSocketID(socket)];
                 case 2:
                     connectionSuccessful = _a.sent();
-                    console.log("Stored SocketID:", operationParameters.assignSocketId);
                     return [3 /*break*/, 4];
                 case 3:
                     error_2 = _a.sent();

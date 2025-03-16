@@ -90,6 +90,7 @@ function requestSocketID(socket: Socket): Promise<string>
             socket.emit('brainflow-assignment');
             console.log("Emitting brainflow-assignment");
             socket.on('brainflow-assignment', (messageObject) => {
+
                 operationParameters.assignSocketId = messageObject.socketId;
                 console.log("Message object ", JSON.stringify(messageObject));
             });
@@ -129,6 +130,7 @@ function prepareBoard(){
 //sends data and operation parameters to backend socket
 async function sendData(socket: Socket): Promise<void>
 {
+    console.log("Sending data to socketID: ", socket.id)
     let ancData = {
         package: 0,
         data1: 0,
@@ -179,14 +181,14 @@ async function sendData(socket: Socket): Promise<void>
                     };
             };
             
-            console.log("DATA :", ancData.data1);
+            console.log("DATA :", ancData.data2);
                 //emit to socket an object that holds data and op parameters
                 socket.emit('update', {
                     ancData: ancData,
                     auxData: auxData,
                     ...operationParameters
                 });
-                await sleep(10000);
+                await sleep(1000);
             }
     }
     catch(error){
@@ -205,7 +207,7 @@ async function main(): Promise<string>{
     const socket = io(`http://localhost:3000`);
     try{
        connectionSuccessful = await requestSocketID(socket);
-        console.log("Stored SocketID:", operationParameters.assignSocketId);
+        console.log("Stored SocketID in brainflow:", operationParameters.assignSocketId);
     } 
     catch (error){
         console.error("Error fetching SocketID: ", error);
