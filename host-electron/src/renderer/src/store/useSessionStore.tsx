@@ -10,6 +10,12 @@ interface IUser {
   } | null
 }
 
+interface IDevice {
+  deviceId: string;
+  serialNumber: string;
+  ipAddress: string;
+  deviceSocketId: string;
+}
 interface SessionState{
     sessionId: string;
     hostName: string;
@@ -23,7 +29,7 @@ interface SessionState{
     videoLabSource: string | null;
     videoURL: string | null;
     videoID: string | null;
-    devices: any[];
+    devices: IDevice[];
     experimentTypeString: string;
 
 
@@ -41,8 +47,8 @@ interface SessionState{
     setVideoLabSource: (videoSource: string) => void;
     setVideoURL: (videoURL: string) => void;
     setVideoID: (videoID: string) => void;
-    addDevice: (device: any) => void;
-    removeDevice: (device: any)=> void;
+    addDevice: (device: IDevice) => void;
+    removeDevice: (deviceId: string)=> void;
     setExperimentTypeString: (experimentTypeString: string) => void;
 }
 
@@ -67,9 +73,13 @@ export const useSessionStore = create<SessionState>()(
 
             setSessionId: (id: string): void => set(() => ({ sessionId: id})),
             setHostName: (name: string): void => set(() => ({ hostName: name})),
-            addUser: (user: IUser): void => set((state: SessionState) => ({ users: [...state.users, user] })),
+            addUser: (newUser: IUser): void => set((state) => ({
+              users: [...(Array.isArray(state.users) ? state.users : []), newUser],
+            })),
             removeUser: (userId: string): void => set((state: SessionState) => ({users: state.users.filter((user: IUser) => user.userId !== userId),})),
-            setUsers: (users: IUser[]): void => set(() => ({ users })),
+            setUsers: (users: IUser[] | undefined): void => set((state) => ({
+              users: Array.isArray(users) ? [...users] : [...state.users],
+            })),
             setRoomCode: (code: string): void => set(() => ({ roomCode: code})),
             setExperimentId: (id: number): void => set(() => ({experimentId: id})),
             setExperimentTitle: (title: string): void => set(() => ({ experimentTitle: title})),
@@ -78,7 +88,9 @@ export const useSessionStore = create<SessionState>()(
             setVideoLabSource: (videoSource: string | null): void => set(() => ({ videoLabSource: videoSource })),
             setVideoURL: (videoURL: string): void => set(() => ({videoURL: videoURL})),
             setVideoID: (videoID: string): void => set(() => ({videoID: videoID})),
-            addDevice: (device: any): void => set((state) => ({devices: [...state.devices, device]})),
+            addDevice: (device: IDevice): void => set((state) => ({
+              devices: [...state.devices, device], // ✅ Ensures new devices are added safely
+            })),
             removeDevice: (device: any): void => set((state) => ({devices: state.devices.filter((d) => d.deviceId !== device.deviceId)})),
             setExperimentType: (experimentType: number): void => set(() => ({ experimentType: experimentType})),
             setExperimentTypeString: (experimentTypeString: string): void => set(() => ({experimentTypeString: experimentTypeString}))

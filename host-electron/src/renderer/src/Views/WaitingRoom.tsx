@@ -27,15 +27,12 @@ export default function WaitingRoom() {
   const {
     sessionId,
     hostName,
-    users: emotiBits,
     roomCode,
     experimentType,
     experimentTypeString,
     setExperimentTypeString,
     setSessionId,
-    setUsers,
     users,
-    addUser,
     devices,
     removeUser,
     addDevice,
@@ -58,6 +55,9 @@ export default function WaitingRoom() {
   const [experimentIcon, setExperimentIcon] = useState<JSX.Element>(
     <CiPlay1 style={{ fontSize: '20px' }} />
   )
+  const emotiBits = useSessionStore((state) => state.users);
+  const setUsers = useSessionStore((state) => state.setUsers);
+  const addUser = useSessionStore ((state) => state.addUser);
   
   useEffect(() => {
     if (experimentType === 1) {
@@ -120,10 +120,13 @@ export default function WaitingRoom() {
     }
 
     const emotiBits = {
-        serialNumber,
-        ipAddress: IPAddress,
-        joinerNickname: null,
-        joinerSocketID: null,
+        userId: `device-${serialNumber}`,
+        socketId: null,
+        nickname: null,
+        associatedDevice: {
+          serialNumber,
+          ipAddress: IPAddress
+        }
       };
       try{
 
@@ -208,21 +211,29 @@ export default function WaitingRoom() {
     
     //Handling kicking a user
   const handleOpenModalKick = (e) => {
-    console.log("HANDLE KICK", e.target.textContent)
-    setIsModalOpenKick(true)
-    setFocusedUser(e.target.textContent)
+    const clickedNickname = e.target.textContent.trim();
+    console.log("HANDLE KICK - clicked name", clickedNickname);
+    setFocusedUser(clickedNickname);
+    setIsModalOpenKick(true);
 
-  }
-    const handleCloseModalKick = () => {setIsModalOpenKick(false)}
+  };
+    const handleCloseModalKick = () => {setIsModalOpenKick(false)};
     
     
     const handleKickUser = () => {
-
+      console.log("!!ATTEMPTING TO KICK USER!!")
+      if(!focusedUser){
+        console.log("No user selected for kicking.")
+        return;
+      }
+      console.log("User Map at Kick Time:", theUserMap);
+      console.log("Focused User at Kick Time:", focusedUser);
       const nicknameSocketID = theUserMap.get(focusedUser);
       console.log("Kicking user with socket ID: ", nicknameSocketID);
-      console.log("HERE IS THE USER MAP BEFORE EMIT KICKING", theUserMap)
+      console.log("HERE IS THE USER MAP BEFORE EMIT KICKING", theUserMap);
+
       if(!nicknameSocketID){
-        console.log("Cannot kick user: there is no socket id found.")
+        console.log("Cannot kick user: there is no socket id found.", focusedUser)
         return;
       }
       console.log("Kicking user with socketID:", nicknameSocketID);
@@ -235,56 +246,71 @@ export default function WaitingRoom() {
         const newMap = new Map(prevMap);
         newMap.delete(focusedUser);
         return newMap;
-      })
+      });
+      console.log("Here is the usermap after kicking", theUserMap);
+
+      useSessionStore.setState((state) => {
+        const updatedUsers = state.users.map((user) => {
+          if(user.nickname === focusedUser){
+            console.log(`Detaching ${focusedUser} from EmotiBit ${user.associatedDevice?. serialNumber}`);
+            return {...user, nickname: null, socketId: null};
+          }
+          return user;
+        });
+        console.log("Zustand usersafter kick", updatedUsers)
+        return { users: updatedUsers};
+      });
+
+      console.log("Updated zustand users after kick...", useSessionStore.getState().users);
     
-      console.log("Updated user map:", theUserMap);
-      
-      console.log("Kicking user...")
-    
-      console.log("HERE IS THE USER MAP AFTER RESETING THE MAP", theUserMap)
       setIsModalOpenKick(false);
       
-    }
+    };
 
-  
+  useEffect(() => {
+    console.log("Component re-rendered, emotibits,", emotiBits);
+  }, [emotiBits]);
+
   useEffect(() => {
     socket.on("joiner-connected", async ({ socketID, nickname, lastFourSerial }) => {
+      console.log(`Joiner Connected Event received: Joiner-${nickname}, SocketID-${socketID}, Last Four of Serial ${lastFourSerial}`);
       try{
-        const response = await axios.get(`http://localhost:3000/database/....${lastFourSerial}`);
+        const response = await axios.get(`http://localhost:3000/database/device-info/${lastFourSerial}`);
         const deviceData = response.data;
-
-        if(deviceData){
-          const updatedDevices = emotiBits.map(device => {
-            if(device.serialNumber.endsWith(lastFourSerial)){
-              return{
-                ...device,
-                joinerNickname: nickname,
-                joinerSocketID: socketID
-              };
+        console.log("Device data received:", deviceData)
+        
+        useSessionStore.setState((state) => {
+          const updatedUsers = state.users.map((user) => {
+            if(user.associatedDevice?.serialNumber.endsWith(lastFourSerial)){
+              console.log(`Updating user ${user.userId} with nickname: ${nickname}... and ${socketID}`);
+              return {...user, nickname, socketId: socketID};
             }
-            return device;
+            return user;
           });
-          setUsers((prevUsers) => [
-            ...prevUsers.filter((user) => user.socketId !== socketID),
-            { socketId: socketID, nickname: nickname, associatedDevice: deviceData}
-          ]);
-          setTheUserMap((prevMap) => {
-            const newMap = new Map(prevMap);
-            newMap.set(nickname, socketID);
-            return newMap;
-          });
+          console.log("Zustand users after update:", updatedUsers);
+          return {users: updatedUsers};
+        });
+        console.log("Zustand users after update", useSessionStore.getState().users);
 
-          toast.success(`${nickname} connected to EmotiBit ${deviceData.serialNumber}`);
-        }
-      }catch(error){
+        setTheUserMap((prevMap) => {
+          const newMap = new Map(prevMap);
+          newMap.set(nickname, socketID);
+          return newMap;
+        });
+        console.log("Updated usermap.. ", useSessionStore.getState().users);
+
+        const serialNumber = Array.isArray(deviceData) ? deviceData[0]?.serialnumber : deviceData?.serialnumber;
+        toast.success(`${nickname} connected to EmotiBit ${serialNumber}`);
+      } catch(error){
         console.error("Error fetching device data:", error);
+        toast.error("Error fetching device data:");
 
       }
     });
     return () => {
       socket.off("joiner-connected");
     };
-  }, [emotiBits]);
+  }, [setUsers, setTheUserMap]);
 
   useEffect(() => {
     if (!useSessionStore.getState().sessionId) return
@@ -381,9 +407,14 @@ export default function WaitingRoom() {
         <div className="w-full flex flex-col mt-6">
           <h2 className="text-xl lg:text-2xl font-semibold text-gray-800 mb-4"> Connected EmotiBits</h2>
           <div className="flex-col gap-4 overflow-y-auto max-h-[300px] md:max-h-[400px] p-4 border rounded-md shadow-md ">
-            {emotiBits.map((user) => (
-              <EmotiBitList key={user.userId} user={user} isConnected={true} onAction={() => handleOpenModalSettings(user.userId)} />
-            ))}
+            {Array.isArray(emotiBits) && emotiBits.length > 0 ? (
+              emotiBits.map((user) => (
+                <EmotiBitList key={user.userId} user={user} isConnected={true} onAction={() => handleOpenModalSettings(user.userId)} />
+
+            )) 
+          ) : ( 
+          <p> No EmotiBits connected yet.</p> 
+        )}
           </div>
           <button
             onClick={handleOpenModalEmoti}
