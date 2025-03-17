@@ -408,10 +408,12 @@ export default function WaitingRoom() {
           <h2 className="text-xl lg:text-2xl font-semibold text-gray-800 mb-4"> Connected EmotiBits</h2>
           <div className="flex-col gap-4 overflow-y-auto max-h-[300px] md:max-h-[400px] p-4 border rounded-md shadow-md ">
             {Array.isArray(emotiBits) && emotiBits.length > 0 ? (
-              emotiBits.map((user) => (
-                <EmotiBitList key={user.userId} user={user} isConnected={true} onAction={() => handleOpenModalSettings(user.userId)} />
-
-            )) 
+              emotiBits.map((user) => {
+                const isConnected = !!user.nickname && !!user.socketId; //if both of these exists
+                return(
+                  <EmotiBitList key={user.userId} user={user} isConnected={isConnected} onAction={() => handleOpenModalSettings(user.userId)} />
+                );
+              })
           ) : ( 
           <p> No EmotiBits connected yet.</p> 
         )}

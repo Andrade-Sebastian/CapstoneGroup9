@@ -11,7 +11,7 @@ interface IEmotiBitList {
 }
 
 export default function EmotiBitList(props: IEmotiBitList) {
-  const shownIcon = props.isConnected ? (<CiCircleCheck className='text-green-500 text-xl'/>) :( <CiCircleQuestion className='text-gray-500 text-xl'/>)
+  const shownIcon = props.isConnected ? (<CiCircleCheck className='text-green-500 ' size={35}/>) :( <CiCircleQuestion className='text-gray-500 text-xl' size={35}/>)
   return (
     <Card onPress={props.onClick} className="border shadow-lg rounded-lg max-w-[400px] bg-white">
       <CardHeader className="flex items-center justify-between p-4 ">
