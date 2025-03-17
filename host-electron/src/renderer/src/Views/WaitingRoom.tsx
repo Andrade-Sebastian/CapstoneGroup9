@@ -369,7 +369,13 @@ export default function WaitingRoom() {
   }
   
   const handleSubmit =() => {
-    console.log('in handle submit')
+    console.log('Attempting to start experiment...');
+    const allEmotiBitsConnected = emotiBits.every((user) => user.nickname && user.socketId);
+    if(!allEmotiBitsConnected){
+      toast.error("Cannot start experiment. Not all EmotiBits are connected!");
+      return;
+    }
+    console.log("Starting experiment...")
       //-----HARDCODED FOR TESTING-------
     socket.emit("session-start");
     socket.emit("session-start-spectator")
