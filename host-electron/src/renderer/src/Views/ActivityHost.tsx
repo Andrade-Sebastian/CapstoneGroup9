@@ -131,7 +131,7 @@ export default function ActivityHost() {
   }
 
   const handleViewUser = (userId, experimentType) => {
-    ipc.send("activity:viewUser", sessionId, userId, experimentType)
+    ipc.send("activity:viewUser", sessionId, String(userId), experimentType)
   }
 
   function handleSubmit() {
@@ -302,7 +302,7 @@ export default function ActivityHost() {
       <hr></hr>
       <div className="flex justify-center space-x-8 text-lg font-medium text-gray-800">
         {(users || []).map((user) => (
-          <button key={user.userId} onClick={() => handleViewUser(user.userId, experimentType)}>
+          <button key={user.userid} onClick={() => handleViewUser(user.userid, experimentType)}>
           <p>{user.nickname}</p>
           </button>
         ))}

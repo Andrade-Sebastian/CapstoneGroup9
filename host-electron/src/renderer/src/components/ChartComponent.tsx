@@ -1,6 +1,7 @@
 import Plot from 'react-plotly.js';
 import React, {useState, useEffect} from 'react';
 import socket from '../Views/socket.tsx';
+import { ipcRenderer, session } from 'electron';
 
 //Chart Types
 //ECG Heart Rate - 1
@@ -21,6 +22,8 @@ export default function ChartComponent(props: IDataType) {
     const [plotState, acceptPlotDataState] = useState<Array<number>>([]);
     const [timeState, acceptTimeState] = useState<Array<number>>([]);
     //const [edaState, acceptEdaDataState] = useState<Array<number>>([]);
+    const [currentUser, setCurrentUser] = useState('');
+    const ipc = window.api;
 
     function addDataPoint(ancDataFrame, auxDataFrame, timeStamp: number){
         
@@ -91,18 +94,22 @@ export default function ChartComponent(props: IDataType) {
     }
 
     useEffect(() => {
-
+        const getUser = async (event, data) => {
+            const {userId} = data;
+            setCurrentUser(userId);
+        }
         function onUpdate(payload){
             const {ancData, auxData, ipAddress, serialNumber, backendIp, hostSessionId, userId, frontEndSocketId, assignSocketId} = payload;
-            addDataPoint(ancData, auxData, ancData.timestamp);
+            if(currentUser === userId){
+                addDataPoint(ancData, auxData, ancData.timestamp);
+            }
         }
+        const cleanUp = ipc.receive("activity:viewUser", onUpdate);
         socket.on('update', onUpdate);
-        
 
         return () => {
+            cleanUp()
             socket.off('update', onUpdate);
-            //clearInterval(intervalId);
-            //clearInterval(interval);
         };
     }, [addDataPoint, timeState]);
 

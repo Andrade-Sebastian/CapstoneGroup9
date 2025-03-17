@@ -37,7 +37,7 @@ export default function ActivityStudentView(): ReactElement{
           console.log("RESPONSE RECIEVED IN ACTIVITYSTUDENTVIEW", response.data);
           if(response.status === 200){
             setCurrentUser(response.data.nickname);
-            //setFileName(response.data.path);
+            setFileName(response.data.path);
           }
         }
         catch(error){
@@ -50,7 +50,7 @@ export default function ActivityStudentView(): ReactElement{
 
     useEffect(() =>{
       const fetchStoredPhoto = async () =>{
-        //const filename = experimentPath.split("/").pop();
+        // const filename = experimentPath.split("/").pop();
         try{
             const response = await axios.get(`http://localhost:3000/get-photo/${fileName}`);
             if(response.status === 200){
@@ -108,7 +108,7 @@ export default function ActivityStudentView(): ReactElement{
           </div>
           <div className="bg-white shadow-md rounded-lg p-4">
           <p className="text-lg font-semibold">Galvanic Skin Response (GSR) - 3.4 μS Average</p>
-            {/* <ChartComponent chart_type={2} chart_name="EDA" chart_color="rgb(75,0,130)"/> */}
+            <ChartComponent chart_type={3} chart_name="EDA" chart_color="rgb(75,0,130)"/>
           </div>
         </div>
     </div>

@@ -101,7 +101,8 @@ export async function makeDeviceAvailable(deviceID: number)
 	try{
 		await dbClient.connect();
 		const query = await dbClient.queryObject(`UPDATE device
-		SET isavailable = true
+		SET isavailable = true,
+		devicesocketid = ' '
 		WHERE deviceid = $1 `,
 		[deviceID]);
 		console.log("Device made available");
@@ -700,26 +701,34 @@ export async function validatePassword(sessionID:string, password:string): Promi
 export async function getUserExperimentData(sessionID: string, userID: number, experimentType: string){
 	try{
 		await dbClient.connect();
-		const userInfo = await dbClient.queryObject(`SELECT * FROM "User"
-			JOIN device ON "User".device = device.deviceid
-			WHERE "User".userid = $1`,
-			[userID]
-		);
-		return userInfo.rows[0];
+		switch(experimentType){
+			case "photo-lab":
+				const userInfo = await dbClient.queryObject(`SELECT "User".*, device.*, photolab.path FROM "User"
+					LEFT JOIN session ON "User".sessionid = session.sessionid
+					LEFT JOIN experiment ON session.experimentid = experiment.experimentid
+					LEFT JOIN photolab ON experiment.experimentid = photolab.experimentid
+					JOIN device ON "User".device = device.deviceid
+					WHERE "User".userid = $1`,
+					[userID]
+				);
+				return userInfo.rows[0];
+				break;
+		}
+		
 	}
 	catch(error){
 		console.log("Data is not available", error);
 	}
 }
 
-export async function updateDeviceConnection(socketId: string){
+export async function updateDeviceConnection(serialNumber: string, socketId: string, connection: true){
 	try{
 		await dbClient.connect();
 		const query = await dbClient.queryObject(`UPDATE device
 			SET isconnected = $1
-			WHERE devicesocketid = $2
+			WHERE serialnumber = $2
 			RETURNING *`,
-			[true, socketId]
+			[connection, serialNumber]
 		);
 		console.log("Updated device to connected in database: ", query.rows[0]);
 		return true;
