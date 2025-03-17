@@ -15,7 +15,7 @@ export default function ConnectEmotiBit() {
   const [device, setDevice] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigateTo = useNavigate();
-  const { setExperimentId, setExperimentTitle, setExperimentDesc, setIsConnected, setSerial, setDeviceId, nickname, roomCode, socketId, serial, deviceId} = useJoinerStore()
+  const { setExperimentId, setExperimentTitle, setExperimentDesc, setIsConnected, setSerial, setDeviceId, nickname, roomCode, socketId, serial, deviceId, setSessionId} = useJoinerStore()
 
   const handleComplete = (code: string) => {
     console.log("Serial Code Entered:", code);
@@ -80,6 +80,7 @@ export default function ConnectEmotiBit() {
         deviceID: device,
       });
       if(response.status === 200){
+        setSessionId(response.data.joiner_sessionid);
         console.log("Added user to session!");
         return true;
       }
