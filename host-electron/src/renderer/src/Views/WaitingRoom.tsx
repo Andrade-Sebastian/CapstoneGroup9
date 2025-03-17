@@ -203,9 +203,9 @@ export default function WaitingRoom() {
     
     //Handling kicking a user
   const handleOpenModalKick = (e) => {
-    console.log("HANDLE KICK", e.target.textContent)
+    console.log("HANDLE KICK", e.target.closest('button').querySelector('p').textContent);
     setIsModalOpenKick(true)
-    setFocusedUser(e.target.textContent)
+    setFocusedUser(e.target.closest('button').querySelector('p').textContent.trim());
 
   }
     const handleCloseModalKick = () => {setIsModalOpenKick(false)}
