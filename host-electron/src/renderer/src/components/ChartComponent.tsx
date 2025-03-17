@@ -7,22 +7,22 @@ import { ipcRenderer, session } from 'electron';
 //ECG Heart Rate - 1
 //Body Temperature - 2
 //Skin Response - 3
-interface IDataType {
+interface IUserDataType {
     chart_type: number;
     chart_name: string;
     chart_color: string;
+    user_id: number;
 }
 let max = 98;
 let min = 93;
 const now: Date = new Date();
 
-export default function ChartComponent(props: IDataType) {
+export default function ChartComponent(props: IUserDataType) {
     let lastDataType = 0;
     
     const [plotState, acceptPlotDataState] = useState<Array<number>>([]);
     const [timeState, acceptTimeState] = useState<Array<number>>([]);
     //const [edaState, acceptEdaDataState] = useState<Array<number>>([]);
-    const [currentUser, setCurrentUser] = useState('');
     const ipc = window.api;
 
     function addDataPoint(ancDataFrame, auxDataFrame, timeStamp: number){
@@ -94,21 +94,15 @@ export default function ChartComponent(props: IDataType) {
     }
 
     useEffect(() => {
-        const getUser = async (event, data) => {
-            const {userId} = data;
-            setCurrentUser(userId);
-        }
         function onUpdate(payload){
             const {ancData, auxData, ipAddress, serialNumber, backendIp, hostSessionId, userId, frontEndSocketId, assignSocketId} = payload;
-            if(currentUser === userId){
+            if(props.user_id === Number(userId)){
                 addDataPoint(ancData, auxData, ancData.timestamp);
             }
         }
-        const cleanUp = ipc.receive("activity:viewUser", onUpdate);
         socket.on('update', onUpdate);
 
         return () => {
-            cleanUp()
             socket.off('update', onUpdate);
         };
     }, [addDataPoint, timeState]);

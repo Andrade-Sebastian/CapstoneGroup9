@@ -197,22 +197,7 @@ ipcMain.on(
       console.log("(main/index.ts): Error in Brainflow script");
       brainflowInstance.kill();
     })
-
-
-    //attempt to update each device's isConnected flag 
-    // try {
-    //   await axios.post(`http://localhost:3000/host/update-device-connection`,
-    //     {
-    //       serial: serialNumber,
-    //       connection: true
-    //     }
-    //   )
-    //   event.reply("brainflow:launched", { sessionId, status: "success"});
-    // }
-    // catch(error){
-    //   console.error("Failed to update device status", error);
-    //   event.reply("brainflow:launched", { sessionId, status: "error" });
-    // }
+    
     event.reply("brainflow:launched", { sessionId, serialNumber, status: "success"});
 
     //check if data is being recieved

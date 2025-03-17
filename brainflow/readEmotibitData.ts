@@ -17,9 +17,9 @@ const operationParameters = {
     ipAddress: process.argv[2],
     serialNumber: process.argv[3],
     backendIp: process.argv[4],
-    hostSessionId: process.argv[5],
-    userId: process.argv[6],
-    frontEndSocketId: process.argv[7],
+    userId: process.argv[5],
+    frontEndSocketId: process.argv[6],
+    sessionId: process.argv[7],
     assignSocketId: null
 }
 
@@ -187,7 +187,7 @@ async function sendData(socket: Socket): Promise<void>
                     auxData: auxData,
                     ...operationParameters
                 });
-                await sleep(1000);
+                await sleep(900);
             }
     }
     catch(error){
