@@ -18,7 +18,7 @@ import React from 'react';
 import { toNamespacedPath } from 'path';
 import toast, { Toaster } from 'react-hot-toast'
 import { useSessionStore } from '../store/useSessionStore.tsx'
-import { session } from 'electron';
+import { ipcRenderer, session } from 'electron';
 import { isDeepStrictEqual } from 'util';
 import { IUserInfo } from "../store/useSessionStore";
 
@@ -128,6 +128,7 @@ export default function WaitingRoom() {
           }
           if (allDevicesConnected) {
             clearInterval(intervalId); // Stop checking if all devices are connected
+            setAllDevicesConnected(false);
           }
         }
         catch(error){
@@ -143,10 +144,9 @@ export default function WaitingRoom() {
 
     return () => clearInterval(intervalId)
     
-  }, [setAllDevicesConnected, allDevicesConnected, sessionId, counter, setCounter])
+  }, [allDevicesConnected, sessionId, counter, setAllDevicesConnected, setCounter])
 
   useEffect(() => {
-
         if(allDevicesConnected){
           console.log("All devices are connected");
           toast.success("All devices are connected!");
@@ -159,7 +159,7 @@ export default function WaitingRoom() {
           setIsConnectEmotibitDisabled(false);
           setIsBeginDisabled(true);
         }
-  }, [allDevicesConnected, setIsConnectEmotibitDisabled, setIsBeginDisabled, counter])
+  }, [allDevicesConnected, counter, setIsConnectEmotibitDisabled, setIsBeginDisabled])
       
 
   //Add EmotiBit Modal
@@ -270,24 +270,67 @@ export default function WaitingRoom() {
     
   }
 
-  async function setDeviceConnected(){
-    try {
-      const requests = users.map(user => 
-          axios.post(`http://localhost:3000/host/update-device-connection`,
-          {
-            serial: user.serialnumber,
-            connection: true
+// ipc.recieve("brainflow:launched", (event, data) => {
+//     const {sessionID, serialNumber, status} = data;
+//     if(status === "sucess"){
+//       try {
+//             axios.post(`http://localhost:3000/host/update-device-connection`,
+//             {
+//               serial: serialNumber,
+//               connection: true
+//             }
+//           )
+//         console.log("All devices successfully updated");
+//       }
+//         catch(error){
+//           console.error("Failed to update device status", error);
+//         }
+//     }
+//   });
+  useEffect(() => {
+    const setDeviceConnection = async (event, data) => {
+        const {sessionID, serialNumber, status} = data;
+        console.log("IPC RECIEVE STATUS: ", status);
+        if(status === "success"){
+          try {
+                await axios.post(`http://localhost:3000/host/update-device-connection`,
+                {
+                  serial: serialNumber,
+                  socket: sessionStorage.getItem('socketID'),
+                  connection: true
+                }
+              )
+            console.log("All devices successfully updated");
           }
-        )
-      )
-      await Promise.all(requests);
-      console.log("All devices successfully updated");
-    }
+          catch(error){
+            console.error("Failed to update device status", error);
+          }
+        }
+      };
 
-      catch(error){
-        console.error("Failed to update device status", error);
+    const cleanUp = ipc.receive("brainflow:launched", setDeviceConnection);
+      
+      return () => {
+        cleanUp()
       }
-  }
+  }, [launchProcesses])
+  //   try {
+  //     const requests = users.map(user => 
+  //         axios.post(`http://localhost:3000/host/update-device-connection`,
+  //         {
+  //           serial: user.serialnumber,
+  //           connection: true
+  //         }
+  //       )
+  //     )
+  //     await Promise.all(requests);
+  //     console.log("All devices successfully updated");
+  //   }
+
+  //     catch(error){
+  //       console.error("Failed to update device status", error);
+  //     }
+  // }
 
   useEffect(() => {
     if (!useSessionStore.getState().sessionId) return

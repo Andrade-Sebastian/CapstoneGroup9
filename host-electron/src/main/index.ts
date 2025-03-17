@@ -70,6 +70,7 @@ function handleViewUser(
   event: Electron.IpcMainEvent, sessionId: string, userId: string, experimentType: number
 ){
   createProcessWindow(sessionId, userId, experimentType);
+  event.reply("activity:viewUser", {userId: userId});
 }
 
 function spawnBrainFlow(
@@ -197,6 +198,7 @@ ipcMain.on(
       brainflowInstance.kill();
     })
 
+
     //attempt to update each device's isConnected flag 
     // try {
     //   await axios.post(`http://localhost:3000/host/update-device-connection`,
@@ -211,8 +213,7 @@ ipcMain.on(
     //   console.error("Failed to update device status", error);
     //   event.reply("brainflow:launched", { sessionId, status: "error" });
     // }
-
-    event.reply("brainflow:launched", { sessionId, status: "success"});
+    event.reply("brainflow:launched", { sessionId, serialNumber, status: "success"});
 
     //check if data is being recieved
     brainflowInstance.stdout.on("data", (message) =>{
@@ -227,4 +228,4 @@ ipcMain.on(
 )
 ipcMain.on('echo-server:destroy-user', processDestroyer);
 ipcMain.on('echo-server:status', processStatus);
-ipcMain.on('activity:viewUser', handleViewUser)
+ipcMain.on('activity:viewUser', handleViewUser);

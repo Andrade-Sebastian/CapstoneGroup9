@@ -153,9 +153,10 @@ hostRouter.get("/get-user-experiment/:sessionID/:userID/:experimentType", async 
     const sessionID = req.params.sessionID;
     const userID = req.params.userID;
     const experimentType = req.params.experimentType;
+    const user = Number(userID);
 
     try{
-        const info = await getUserExperimentData(sessionID, userID, experimentType);
+        const info = await getUserExperimentData(sessionID, user, experimentType);
         console.log("INFO BEING SENT OUT", info);
         return res.status(200).send(info);
 
@@ -168,10 +169,10 @@ hostRouter.get("/get-user-experiment/:sessionID/:userID/:experimentType", async 
 
 //update connection flag for given device
 hostRouter.post("/update-device-connection", async (req: Request, res: Response) => {
-    const { serial, connection } = req.body; 
-
+    const { serial, socket, connection } = req.body; 
+    console.log("/update-device-connection: ", req.body);
     try{
-        const result = await updateDeviceConnection(serial, connection);
+        const result = await updateDeviceConnection(serial, socket, connection);
         if(result){
             return res.status(200).send({success: true});
         }
@@ -187,7 +188,13 @@ hostRouter.get("/check-connected-devices/:sessionId", async (req: Request, res: 
 
     try{
         const result = await getSessionDevices(sessionId);
-        return res.status(200).send({success: true, devices: result});
+        console.log("RETURNED RESULT IN /check-connected-devices/sessionId: ", result.length);
+        if(result.length !== 0){
+            return res.status(200).send({success: true, devices: result});
+        }
+        else{
+            return res.status(200).send({success: false});
+        }
     }
     catch(error){
         console.error("Error checking devices in session");

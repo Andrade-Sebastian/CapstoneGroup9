@@ -187,7 +187,7 @@ async function sendData(socket: Socket): Promise<void>
                     auxData: auxData,
                     ...operationParameters
                 });
-                await sleep(10000);
+                await sleep(1000);
             }
     }
     catch(error){
