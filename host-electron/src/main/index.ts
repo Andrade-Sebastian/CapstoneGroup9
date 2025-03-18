@@ -4,6 +4,8 @@ import { spawn } from 'child_process'
 import createMainWindow from './main_window.ts'
 import ActivitySingleton from './activitySingleton.ts'
 import createProcessWindow from './activity_window.ts'
+import { IActivityInstance } from './activitySingleton.ts'
+import axios from 'axios'
 
 
 export const windows:Array<{
@@ -86,13 +88,14 @@ function handleViewUser(
   event: Electron.IpcMainEvent, sessionId: string, userId: string, experimentType: number
 ){
   createProcessWindow(sessionId, userId, experimentType);
+  event.reply("activity:viewUser", {userId: userId});
 }
 
 function spawnBrainFlow(
   emotibitIpAddress: string,
   serialNumber: string,
   backendIp: string,
-  userId: string,
+  userId: number,
   frontEndSocketId: string,
   sessionId: string
 ) {
@@ -103,11 +106,10 @@ function spawnBrainFlow(
     emotibitIpAddress,
     serialNumber,
     backendIp,
-    userId,
+    String(userId),
     frontEndSocketId
   ])
   activity[userId] = {
-    browserWindow: undefined,
     brainflowProcess: instance,
     ipAddress: emotibitIpAddress,
     serialNumber: serialNumber,
@@ -118,6 +120,14 @@ function spawnBrainFlow(
   }
   return instance
 }
+
+function verifyEmotiBitUsage(ipAddress: string): IActivityInstance | undefined {
+  const activity = ActivitySingleton.getInstance().activityInstances;
+    return Object.values(activity).find(
+      (instance) => instance.ipAddress === ipAddress
+    )
+}
+ 
 
 function processDestroyer(event, userId: string): void{
   //const process = echoServers[userId]
@@ -162,15 +172,16 @@ function processStatus(event, userId: string): void{
 
 ipcMain.on(
   "brainflow:launch",
-  (
+  async (
     event: Electron.IpcMainEvent,
     emotibitIpAddress: string,
     serialNumber: string,
     backendIp: string,
-    userId: string,
+    userId: number,
     frontEndSocketId: string,
     sessionId: string
   ) => {
+    if(verifyEmotiBitUsage(emotibitIpAddress) !== undefined) return 
     const activitySingleton = ActivitySingleton.getInstance()
     const brainflowInstance = spawnBrainFlow(emotibitIpAddress, serialNumber, backendIp, userId, frontEndSocketId, sessionId)
 
@@ -183,22 +194,41 @@ ipcMain.on(
     brainflowInstance.on("message", (message) => {
       console.log("Process Message: " , message)
     })
-
     
     brainflowInstance.on("close", (code) => {
       console.log("CODE: ", code)
-      if (code !== 0 )
+      if (code === 7)
       {
         console.log("(main/index.ts): Closing this shit, brainflow broken as shi")
+        const activity = ActivitySingleton.getInstance().activityInstances;
+        const foundInstance = Object.entries(activity).find(
+          ([userID, instance]) => instance.brainflowProcess.pid === brainflowInstance.pid
+        )
+        if(foundInstance){
+          delete activity[foundInstance[1].userId];
+        }
+        brainflowInstance.kill();
       }
     })
 
     brainflowInstance.on("error", () => {
-      console.log("(main/index.ts): Error in Brainflow script")
+      console.log("(main/index.ts): Error in Brainflow script");
+      brainflowInstance.kill();
     })
-    event.reply("brainflow:launched", { sessionId, status: "success"});
+    
+    event.reply("brainflow:launched", { sessionId, serialNumber, status: "success"});
+
+    //check if data is being recieved
+    brainflowInstance.stdout.on("data", (message) =>{
+      console.log("INSIDE STDOUT: ", brainflowInstance.pid, message.toString());
+    })
+
+    //log any errors from brainflow script
+    brainflowInstance.stderr.on("data", (message) => {
+      console.log("INSIDE STDERR: ", brainflowInstance.pid, message.toString());
+    })
   }
 )
 ipcMain.on('echo-server:destroy-user', processDestroyer);
 ipcMain.on('echo-server:status', processStatus);
-ipcMain.on('activity:viewUser', handleViewUser)
+ipcMain.on('activity:viewUser', handleViewUser);

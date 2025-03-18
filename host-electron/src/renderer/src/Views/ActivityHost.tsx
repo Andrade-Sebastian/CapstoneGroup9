@@ -28,14 +28,12 @@ export default function ActivityHost() {
   const {
     sessionId,
     hostName,
-    users: emotiBits,
+    users,
     roomCode,
     experimentType,
     experimentTypeString,
     setExperimentTypeString,
     setSessionId,
-    setUsers,
-    users,
     addUser,
     devices,
     removeUser,
@@ -56,7 +54,24 @@ export default function ActivityHost() {
   const [isModalUserOptionsOpen, setIsModalUserOptionsOpen] = useState(false)
   const [selectedEmotiBitId, setSelectedEmotiBitId] = useState<string | null>(null)
   const [isMediaAFile, setIsMediaAFile] = useState(false)
-  const [userObjects, setUserObjects] = useState<Array<IUser>>([])
+  const [userObjects, setUserObjects] = useState<Array<{
+    "device": number,
+    "deviceId": number,
+    "deviceSocketId": string,
+    "frontendSocketId": string,
+    "ipAddress": string,
+    "isAvailable": boolean,
+    "isConnected": boolean,
+    "isMasked": boolean,
+    "leftSession": null,
+    "nickname": string,
+    "samplingFrequency": number,
+    "secret": string,
+    "serialNumber": string,
+    "sessionId": number,
+    "userId": string,
+    "userRole": string
+  }>>([])
   const navigateTo = useNavigate()
   const [experimentIcon, setExperimentIcon] = useState<JSX.Element>(
     <CiPlay1 style={{ fontSize: '20px' }} />
@@ -83,7 +98,7 @@ export default function ActivityHost() {
     console.log('Kicking user...')
   }
   const handleViewUser = (userId, experimentType) => {
-    ipc.send('activity:viewUser', sessionId, userId, experimentType)
+    ipc.send("activity:viewUser", sessionId, String(userId), experimentType)
   }
 
   function handleSubmit() {
@@ -122,8 +137,8 @@ export default function ActivityHost() {
     getSessionID()
   }, [])
 
-  useEffect(() => {
-    if (!useSessionStore.getState().sessionId) return
+  // useEffect(() => {
+  //   if (!useSessionStore.getState().sessionId) return
 
     setSessionID(useSessionStore.getState().sessionId)
     const fetchUsers = async () => {
@@ -147,11 +162,11 @@ export default function ActivityHost() {
       }
     }
 
-    fetchUsers()
-    const interval = setInterval(fetchUsers, 5000) // Refresh users every 5 seconds
+  //   fetchUsers()
+  //   const interval = setInterval(fetchUsers, 5000) // Refresh users every 5 seconds
 
-    return () => clearInterval(interval)
-  }, [sessionID]) //Don't fetch any data until sessionID is set
+  //   return () => clearInterval(interval)
+  // }, [sessionID]) //Don't fetch any data until sessionID is set
 
   useEffect(() => {
     if (experimentType === 1) {

@@ -23,6 +23,7 @@ export default function ActivityStudentView(): ReactElement{
     const [activeChart, setActiveChart] = useState("heartRateChart");
     const [recievedData, setRecievedData] = useState<number[]>([]);
     const [currentUser, setCurrentUser] = useState("");
+    const [currentUserId, setCurrentUserId] = useState(0);
     const [currentPath, setCurrentPath] = useState("");
     const [fileName, setFileName] = useState("");
     const { users } = useSessionStore()
@@ -33,11 +34,12 @@ export default function ActivityStudentView(): ReactElement{
     useEffect(() => {
       const getUserData = async () => {
         try{
-          const response = await axios.get(`http://localhost:3000/host/get-user-experiment/${sessionId}/${experimentType}`);
+          const response = await axios.get(`http://localhost:3000/host/get-user-experiment/${sessionId}/${userId}/${experimentType}`);
           console.log("RESPONSE RECIEVED IN ACTIVITYSTUDENTVIEW", response.data);
           if(response.status === 200){
             setCurrentUser(response.data.nickname);
             setFileName(response.data.path);
+            setCurrentUserId(response.data.userid);
           }
         }
         catch(error){
@@ -50,7 +52,7 @@ export default function ActivityStudentView(): ReactElement{
 
     useEffect(() =>{
       const fetchStoredPhoto = async () =>{
-        //const filename = experimentPath.split("/").pop();
+        // const filename = experimentPath.split("/").pop();
         try{
             const response = await axios.get(`http://localhost:3000/get-photo/${fileName}`);
             if(response.status === 200){
@@ -64,6 +66,7 @@ export default function ActivityStudentView(): ReactElement{
       };
       fetchStoredPhoto();
     },[setCurrentPath]);
+
     
 
     return(
@@ -99,15 +102,15 @@ export default function ActivityStudentView(): ReactElement{
        <div className="w-1/3 flex flex-col gap-4">
           <div className="bg-white shadow-md rounded-lg p-4">
             <p className="text-lg font-semibold">ECG Chart - 33 BPM Average</p>
-            <ChartComponent chart_type={1} chart_name="BPM" chart_color="rgb(255,0,0)"/>
+            {/* <ChartComponent chart_type={1} chart_name="BPM" chart_color="rgb(255,0,0)"/> */}
           </div>
           <div className="bg-white shadow-md rounded-lg p-4">
           <p className="text-lg font-semibold">Thermister (BodyTemperature) - 98°F Average</p>
-            <ChartComponent chart_type={2} chart_name="°F" chart_color="rgb(0,0,255)"/>
+            <ChartComponent chart_type={2} chart_name="°F" chart_color="rgb(0,0,255)" user_id={currentUserId}/>
           </div>
           <div className="bg-white shadow-md rounded-lg p-4">
           <p className="text-lg font-semibold">Galvanic Skin Response (GSR) - 3.4 μS Average</p>
-            <ChartComponent chart_type={2} chart_name="EDA" chart_color="rgb(75,0,130)"/>
+            <ChartComponent chart_type={3} chart_name="EDA" chart_color="rgb(75,0,130)" user_id={currentUserId}/>
           </div>
         </div>
     </div>

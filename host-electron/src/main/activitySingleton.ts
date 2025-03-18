@@ -7,13 +7,14 @@ export interface IActivityInstance {
   serialNumber: string
   backendIp: string
   sessionId: string
-  userId: string
+  userId: number
   frontEndSocketId: string
 }
 
 export default class ActivitySingleton {
   private static _instance: ActivitySingleton
-  activityInstances: Record<string, IActivityInstance> = {}
+  //string key is assumed to be user id
+  activityInstances: Record<number, IActivityInstance> = {}
 
   private constructor() {
     this.activityInstances = {}
