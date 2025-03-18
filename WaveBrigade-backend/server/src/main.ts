@@ -119,7 +119,24 @@ app.get("/get-photo/:filename", (req: Request, res: Response) => {
     res.status(404).json({ success: false, message: "Image not found" });
   }
 });
+//Getting video logic to show for the joiner, the get is in video fe active experiment
+app.get("/get-videoFile/:filename", (req: Request, res: Response) => {
+  const { filename } = req.params;
+  if (filename.includes("..")) {
+    return res
+    .status(400)
+    .json({ success: false, message: "Invalid Filename" });
+  }
+  const filePath = path.join(__dirname, "/media/video-lab/", filename);
+  
+  if (fs.existsSync(filePath)) {
+    res.sendFile(filePath);
+  } else {
+    res.status(404).json({ success: false, message: "Video not found" });
+  }
+});
 
+let latestExperimentType = null;
 io.on("connection", (socket) => {
   
   // console.log("(main.ts): User Connected | socketID: " + socket.id)
@@ -172,6 +189,19 @@ io.on("connection", (socket) => {
       socket.id
     );
     socket.emit("brainflow-assignment", { socketId: socket.id });
+  });
+  
+  socket.on("experiment-type", (data) => {
+    console.log("Event received: experiment-type in BE", data);
+    latestExperimentType = data;
+    io.emit("experiment-type", data)
+  });
+
+  socket.on("join-room", () => {
+    console.log("User joined, latest experiment:", latestExperimentType)
+    if(latestExperimentType !== null){
+      socket.emit("experiment-type", latestExperimentType);
+    }
   });
 
   //recieve emotibit data

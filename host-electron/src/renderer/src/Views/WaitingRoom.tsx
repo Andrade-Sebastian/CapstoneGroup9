@@ -58,7 +58,15 @@ export default function WaitingRoom() {
   const [experimentIcon, setExperimentIcon] = useState<JSX.Element>(
     <CiPlay1 style={{ fontSize: '20px' }} />
   )
-  
+
+  useEffect(() =>{
+    setTimeout(()=>{
+
+      console.log("Sending experiment type to users");
+      socket.emit("experiment-type", experimentType);
+    }, 500);
+  }, [])
+
   useEffect(() => {
     if (experimentType === 1) {
       setExperimentTypeString('VideoLab')

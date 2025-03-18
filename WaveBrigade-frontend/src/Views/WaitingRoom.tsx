@@ -70,7 +70,25 @@ export default function WaitingRoom() {
   //     socket.off("receive_names");
   //   };
   // }, [nickName, roomCode]);
+
   
+  useEffect(() => {
+    const handleExperimentType = (data) =>{
+      console.log("Received experiment type from the host...")
+      setExperimentType(data);
+      console.log("Here is the experiment type sent by the host");
+      console.log("Experiment Type set to:", experimentType)
+    };
+    socket.on("experiment-type", handleExperimentType);
+    return () => {
+      socket.off("experiment-type", handleExperimentType);
+    };
+  }, []);
+  
+  useEffect(() => {
+    console.log("Trying to get experiment type. Currently set to: ", experimentType)
+    socket.emit("join-room");
+  },[experimentType])
 
   useEffect(() => {
     function kickUser()
@@ -140,9 +158,6 @@ export default function WaitingRoom() {
 
     setIsSpectator(userRole === "spectator");
     console.log("SPECTATOR AHH: ", isSpectator);
-
-    
-
     getSessionID();
   }, []);
 
@@ -197,15 +212,35 @@ export default function WaitingRoom() {
   }, []);
 
   useEffect(() => {
+    const getVideoFileData = async () => {
+      try{
+        const response = await axios.get(
+          `http://localhost:3000/joiner/getVideoFile/${experimentID}`
+        );
+        if(response.status === 200){
+          console.log("Returned get video data:", response.data);
+          const experimentTitle = response.data.name;
+          const experimentDesc = response.data.description;
+          const path = response.data.path;
+          console.log("RESPONSE DATA VARIABLES:", experimentTitle, experimentDesc, path);
+          setExperimentId(experimentID);
+          setExperimentTitle(experimentTitle);
+          setExperimentDesc(experimentDesc);
+          setExperimentPath(path);
+        }
+      } catch(error){
+        toast.error("Failed to receive video data");
+        console.log("Error receiving video data in joiner FE:", error);
+      }
+    }
     //if(!experimentID) return;
-
     const getPhotoData = async () => {
       try {
         console.log("SENDING TO THE ROUTE EXPERIMENT ID: ", experimentID);
         const response = await axios.get(
           `http://localhost:3000/joiner/getPhoto/${experimentID}`
         );
-        if (response.status == 200) {
+        if (response.status === 200) {
           //toast.success("Successfully received photolab data.");
           console.log("RETURNED GET PHOTO DATA: ", response.data);
           const experimentTitle = response.data.name;
@@ -226,11 +261,16 @@ export default function WaitingRoom() {
           setExperimentPath(path);
         }
       } catch (error) {
-        toast.error("Failed to receive photolab data");
+        toast.error("Failed to receive photo data");
         console.log("Error receiving photolab data in joiner fe: ", error);
       }
     };
-    getPhotoData();
+    if(experimentType === 1){
+      getVideoFileData();
+    }
+    if(experimentType === 2){
+      getPhotoData();
+    }
   }, [experimentID, setExperimentDesc, setExperimentId, setExperimentTitle, setExperimentPath]);
 
   useEffect(() => {
@@ -243,13 +283,16 @@ export default function WaitingRoom() {
     } else if (experimentType === 3) {
       setExperimentTypeString('GalleryLab')
       setExperimentIcon(<TfiGallery style={{ fontSize: '20px' }} />)
+    } else if (experimentType === 4) {
+      setExperimentTypeString('ArticleLab')
+      setExperimentIcon(<TfiGallery style={{ fontSize: '20px' }} />)
     } else {
       console.log("Invalid experiment type");
     }
   }, [experimentType, setExperimentTypeString])
   return (
     <div className="flex flex-col items-center justify-center h-1/2 mx-8">
-      <div className="flex flex-col md:flex-row items-start justify-between gap-72">
+      <div className="flex flex-col my-10 md:flex-row items-start justify-between gap-72">
         {/* left section */}
         <Toaster position="top-right" />
         <div className="md:w-1/2 space-y-4">

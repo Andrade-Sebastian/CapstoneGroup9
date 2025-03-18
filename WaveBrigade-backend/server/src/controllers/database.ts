@@ -27,7 +27,8 @@ export interface IPhotoLabDatabaseInfo {
 export interface IVideoLabDatabaseInfo {
 	experimentTitle: string,
 	experimentDescription: string | null,
-	videoBlob: string;
+	videoBlob?: string;
+	videoID?: string;
 	socketID: string;
 }
 export interface IGalleryLabDatabaseInfo {
@@ -412,11 +413,13 @@ export async function createVideoLabInDatabase(initializationInfo: IVideoLabData
 	const {
 		experimentTitle,
 		experimentDescription,
+		videoID,
 		videoBlob,
 		socketID
 	} = initializationInfo;
 
 	console.log(socketID);
+	console.log(`Experiment Title: ${experimentTitle}, Description ${experimentDescription}, Video Source: ${videoID ? videoID: videoBlob}, SocketID ${socketID}`);
 	let experimentID = null;
 	
 	try{
@@ -434,6 +437,8 @@ export async function createVideoLabInDatabase(initializationInfo: IVideoLabData
 	console.log("createExperimentQuery: ", createExperimentQuery.rows[0].experimentid)
 	experimentID = createExperimentQuery.rows[0].experimentid;
 
+	const videoPath = videoID ? videoID : videoBlob;
+
 	//add a video lab
 	const query = await dbClient.queryObject(`
 		INSERT INTO videolab ( 
@@ -443,7 +448,7 @@ export async function createVideoLabInDatabase(initializationInfo: IVideoLabData
 		VALUES ($1, $2);
 		`, [
 			experimentID,
-			videoBlob
+			videoPath
 			]
 	);
 	console.log("CreateVideoLabInDatabase() -> socketID: ", socketID)

@@ -157,10 +157,11 @@ databaseRouter.post("/video-lab", upload.single("videoBlob"), async(req: Request
         sessionID = await getSessionIDFromSocketID(socketID);
         console.log("In DB Route of /video-lab. SessionID:", sessionID);
         if(videoID){
+            console.log("WALTER, here is the exp. info bruh:", experimentTitle, "video ID hopefully", videoID, "SocketID",socketID);
             experimentID = await createVideoLabInDatabase({
                 experimentTitle: experimentTitle, 
                 experimentDescription: experimentDescription,
-                videoID: `https://youtube.com/embed/${videoID}`,
+                videoID: videoID,
                 socketID: socketID
             }, sessionID)
         }
