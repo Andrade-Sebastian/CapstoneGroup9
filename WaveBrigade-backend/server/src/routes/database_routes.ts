@@ -7,7 +7,8 @@ import { determineFileExtension, getNumberFilesInDirectory } from "../controller
 import axios from 'axios';
 
 import fsPromises from 'node:fs/promises';
-import { dbClient } from "./joiner_routes.ts";
+import { dbClient } from "../routes/joiner_routes.ts";
+
 
 const labDirectories = {
     "photo-lab": "/app/backend/server/src/media/photo-lab",
@@ -66,6 +67,44 @@ const storage = multer.diskStorage({
 });
 
 const upload = multer({ storage });
+
+
+databaseRouter.get("/device-info/:lastFourSerial", async(req: Request, res: Response) => {
+    const lastFourSerial = req.params.lastFourSerial;
+    console.log("Last four serial: ", lastFourSerial);
+
+    try{    
+        await dbClient.connect();
+
+        const query = await dbClient.queryObject(`SELECT * FROM DEVICE WHERE RIGHT(serialnumber, 4) = $1;`, [lastFourSerial]);
+
+        if (query.rows.length === 0)
+        {
+            console.log("No device found with last four serial=", lastFourSerial);
+            res.status(404).send({
+                "Message": "No device found with last four serial provided"
+            });
+        }else{
+            res.status(200).send(query.rows);
+        }
+
+    }catch(error){
+        console.log("error:" ,error);
+        res.status(500).send({
+            "Error": JSON.stringify(error)
+        });
+    }finally{
+        await dbClient.end();
+    }
+});
+
+
+
+
+
+
+
+
 
 
 databaseRouter.post("/photo-lab", upload.single("imageBlob"), async(req: Request, res: Response) => {
@@ -363,65 +402,35 @@ databaseRouter.get("/photo-lab/info/:photolabid", async(req: Request, res: Respo
 })
 
 
-databaseRouter.get("/get-device-info/:deviceid", async(req: Request, res: Response) => {
-    const deviceID = req.params.deviceid;
+// Returns device ID based on user's socketID
+databaseRouter.get("/device-id/:socketID", async (req: Request, res: Response) => {
+
+    const socketID = req.params.socketID;
+    let deviceID = null;
 
     try{
         await dbClient.connect();
 
-        const query = await dbClient.queryObject(`SELECT 
-            dev.deviceid,
-            ipaddress,
-            serialnumber,
-            devicesocketid,
-            samplingfrequency,
-            isavailable,
-            isconnected,
-            userid,
-            nickname,
-            device,
-            sessionid,
-            ismasked,
-            frontendsocketid,
-            leftsession,
-            userrole
-                FROM DEVICE dev JOIN "User" on deviceid=${deviceID} and "User".device=${deviceID}`)
-        
-        if (query.rows[0] === undefined)
-        {
-            throw new Error("Could not find device. Either the device was not found, or a user is not associated to the requested device")
-        }
-        const deviceAndUserInfo = {
-            "device_id": query.rows[0].deviceid,
-            "device_ipaddress": query.rows[0].ipaddress,
-            "device_serialnumber": query.rows[0].serialnumber,
-            "device_devicesocketid": query.rows[0].devicesocketid,
-            "device_samplingfrequency": query.rows[0].samplingfrequency,
-            "device_isavailable": query.rows[0].isavailable,
-            "device_isconnected": query.rows[0].isconnected,
-            "user_id": query.rows[0].userid,
-            "user_nickname": query.rows[0].nickname,
-            "user_device_id": query.rows[0].device,
-            "user_sessionid": query.rows[0].sessionid,
-            "user_ismasked": query.rows[0].ismasked,
-            "user_frontendsocketid": query.rows[0].frontendsocketid,
-            "user_leftsession": query.rows[0].leftsession,
-            "user_userrole": query.rows[0].userrole
-        }
 
+        //get device id assigned to the user at socket id 
+        const query = await dbClient.queryObject(`select device from "User" where frontendsocketid='${socketID}'`)
 
-        return res.status(200).send(deviceAndUserInfo);
+        if(query.rows.length === 0){
+            res.status(404).send({
+                "message": "Either the device was not found, or is not associated to the user"
+            })
+        }else{
+            deviceID = query.rows[0].device
+        }
 
     }catch(error){
         console.log(error)
-        return res.status(404).send({
-            "Message": "An error occured :/",
-            "Error": (error as Error).message
-        })
+        res.status(500).send({"Error": error})
     }finally{
         await dbClient.end()
     }
-
+    
+    res.status(200).send({"deviceID": deviceID})
 })
 
 export default databaseRouter;

@@ -48,9 +48,11 @@ export default function ConnectEmotiBit() {
 
     if(success){
       toast.success("Connection Successful! Your EmotiBit was connected successfully", {id: loadingToastId});
+      socket.emit("joiner-connected", { socketID: socketId, nickname: nickname, lastFourSerial: code, });
       setIsConnected(true);
       setSerial(code);
-      joinRoom(deviceID);
+      setDeviceId(deviceID);
+      await joinRoom(deviceID);
       setTimeout(() => {
         navigateTo("/waiting-room");
       }, 2000);
