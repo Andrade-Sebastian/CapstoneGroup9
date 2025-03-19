@@ -35,8 +35,6 @@ export default function WaitingRoom() {
     experimentTypeString,
     setExperimentTypeString,
     setSessionId,
-    setUsers,
-    addUser,
     devices,
     removeUser,
     addDevice,
@@ -375,7 +373,7 @@ export default function WaitingRoom() {
         const updatedUsers = state.users.map((user) => {
           if(user.nickname === focusedUser){
             console.log(`Detaching ${focusedUser} from EmotiBit ${user.associatedDevice?. serialNumber}`);
-            return {...user, nickname: null, socketId: null};
+            return {...user, nickname: null, socketId: null, isConnected: false};
           }
           return user;
         });
@@ -405,7 +403,7 @@ export default function WaitingRoom() {
           const updatedUsers = state.users.map((user) => {
             if(user.associatedDevice?.serialNumber.endsWith(lastFourSerial)){
               console.log(`Updating user ${user.userId} with nickname: ${nickname}... and ${socketID}`);
-              return {...user, nickname, socketId: socketID};
+              return {...user, nickname, socketId: socketID, isConnected: true};
             }
             return user;
           });
@@ -526,9 +524,9 @@ export default function WaitingRoom() {
           <div className="flex-col gap-4 overflow-y-auto max-h-[300px] md:max-h-[400px] p-4 border rounded-md shadow-md ">
             {Array.isArray(emotiBits) && emotiBits.length > 0 ? (
               emotiBits.map((user) => {
-                const isConnected = !!user.nickname && !!user.socketid; //if both of these exists
+                const isConnected = user.nickname !== null && user.isConnected === true;
                 return(
-                  <EmotiBitList key={user.userid} user={user} isConnected={isConnected} onAction={() => handleOpenModalSettings(user.userid)} />
+                  <EmotiBitList key={user.userId} user={user} isConnected={isConnected} onAction={() => handleOpenModalSettings(user.userid)} />
                 );
               })
           ) : ( 

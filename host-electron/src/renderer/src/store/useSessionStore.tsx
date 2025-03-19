@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 
 export interface IUserInfo {
+  socketid: any;
   device: number,
   deviceId: number,
   deviceSocketId: string,
@@ -98,7 +99,7 @@ export const useSessionStore = create<SessionState>()(
             setVideoURL: (videoURL: string): void => set(() => ({videoURL: videoURL})),
             setVideoID: (videoID: string): void => set(() => ({videoID: videoID})),
             addDevice: (device: IDevice): void => set((state) => ({
-              devices: [...state.devices, device], // ✅ Ensures new devices are added safely
+              devices: [...state.devices, device], 
             })),
             removeDevice: (device: any): void => set((state) => ({devices: state.devices.filter((d) => d.deviceId !== device.deviceId)})),
             setExperimentType: (experimentType: number): void => set(() => ({ experimentType: experimentType})),
