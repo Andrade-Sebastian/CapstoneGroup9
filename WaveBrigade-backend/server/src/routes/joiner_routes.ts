@@ -2,7 +2,7 @@ import express, { Request, Response } from "express";
 import {getSessionState} from "../controllers/session_controller.ts";
 import SessionManager from "../sessions_singleton.ts";
 import { addSocketToSession } from "../sessionMappings.ts";
-import {addUserToSession, getUsersFromSession, validateRoomCode, removeUserFromSession, validDeviceSerial, validatePassword, getPhotoLabInfo, joinSessionAsSpectator} from "../controllers/database.ts";
+import {addUserToSession, getUsersFromSession, validateRoomCode, removeUserFromSession, validDeviceSerial, validatePassword, getPhotoLabInfo, getVideoLabInfo, joinSessionAsSpectator} from "../controllers/database.ts";
 import {Filter} from "npm:bad-words";
 const app = express();
 const joinerRouter = express.Router();
@@ -306,6 +306,22 @@ joinerRouter.get("/getPhoto/:experimentID", async (req: Request, res: Response) 
     try{
         const photoInfo = await getPhotoLabInfo(experimentID);
         return res.status(200).send(photoInfo);
+        
+    }
+    catch(error){
+        console.log(error);
+        return res.status(500).send(error);
+    }
+})
+
+joinerRouter.get("/getVideoFile/:experimentID", async (req: Request, res: Response) => {
+    console.log("In joiner/getVideoFile/:experimentID", req.body);
+    
+    const experimentID = req.params.experimentID;
+    
+    try{
+        const videoFileInfo = await getVideoLabInfo(experimentID);
+        return res.status(200).send(videoFileInfo);
         
     }
     catch(error){

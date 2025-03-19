@@ -59,6 +59,7 @@ export default function WaitingRoom() {
   const [experimentIcon, setExperimentIcon] = useState<JSX.Element>(
     <CiPlay1 style={{ fontSize: '20px' }} />
   )
+
   const emotiBits = useSessionStore((state) => state.users);
   const setUsers = useSessionStore((state) => state.setUsers);
   const addUser = useSessionStore ((state) => state.addUser);
@@ -67,7 +68,18 @@ export default function WaitingRoom() {
   const [counter, setCounter] = useState(0);
   const [allDevicesConnected, setAllDevicesConnected] = useState(false);
   const ipc = window.api;
+
+  useEffect(() =>{
+    setTimeout(()=>{
+
+      console.log("Sending experiment type to users");
+      socket.emit("experiment-type", experimentType);
+    }, 500);
+  }, [])
+
+
   
+
   useEffect(() => {
     if (experimentType === 1) {
       setExperimentTypeString('VideoLab')

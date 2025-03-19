@@ -119,7 +119,26 @@ app.get("/get-photo/:filename", (req: Request, res: Response) => {
     res.status(404).json({ success: false, message: "Image not found" });
   }
 });
+//Getting video logic to show for the joiner, the get is in video fe active experiment
+app.get("/get-videoFile/:filename", (req: Request, res: Response) => {
+  const { filename } = req.params;
+  if (filename.includes("..")) {
+    return res
+    .status(400)
+    .json({ success: false, message: "Invalid Filename" });
+  }
+  const filePath = path.join(__dirname, "/media/video-lab/", filename);
+  
+  if (fs.existsSync(filePath)) {
+    res.sendFile(filePath);
+  } else {
+    res.status(404).json({ success: false, message: "Video not found" });
+  }
+});
 
+let latestExperimentType = null;
+let isVideoPlaying = false;
+let latestSeekTime = 0;
 io.on("connection", (socket) => {
   
   // console.log("(main.ts): User Connected | socketID: " + socket.id)
@@ -180,6 +199,24 @@ io.on("connection", (socket) => {
     );
     socket.emit("brainflow-assignment", { socketId: socket.id });
   });
+  
+  socket.on("experiment-type", (data) => {
+    console.log("Event received: experiment-type in BE", data);
+    latestExperimentType = data;
+    io.emit("experiment-type", data)
+  });
+
+  socket.on("join-room", () => {
+    console.log("User joined, latest experiment:", latestExperimentType)
+    if(latestExperimentType !== null){
+      socket.emit("experiment-type", latestExperimentType);
+    }
+    if(latestExperimentType === 1){
+      console.log("ExperimentType is a video, sending an emit to joiner to tell them the video state. Is video playing?", isVideoPlaying)
+      socket.emit("play-video", isVideoPlaying);
+      socket.emit("seek-video", latestSeekTime);
+    }
+  });
 
   //recieve emotibit data
   socket.on("update", (payload) => {
@@ -197,6 +234,19 @@ io.on("connection", (socket) => {
     console.log("Update Event: Received data:", JSON.stringify(ancData.data1));
     io.emit("update", payload);
   });
+
+  //Socket Video Player
+  socket.on("play-video", (data) => {
+    console.log("[Socket: play-video] Attempting to play/pause video. Data passed:", data)
+    isVideoPlaying = data;
+    socket.broadcast.emit("play-video", data) //sending to joiners, not to the host with broadcast.emit
+  });
+
+  socket.on("seek-video", (seconds) => {
+    console.log("Socket: seek-video] Attempting to seek video. Seconds passed:", seconds)
+    latestSeekTime = seconds;
+    socket.broadcast.emit("seek-video", seconds)
+  })
 
   session_handlers(io, socket, rooms, isHost);
 

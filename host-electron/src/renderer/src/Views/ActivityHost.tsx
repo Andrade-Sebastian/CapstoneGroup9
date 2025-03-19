@@ -1,5 +1,5 @@
 import { useLocation } from 'react-router-dom'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { CiPlay1 } from 'react-icons/ci'
 import { TfiGallery } from 'react-icons/tfi'
 import { TiCamera } from 'react-icons/ti'
@@ -76,6 +76,9 @@ export default function ActivityHost() {
   const [experimentIcon, setExperimentIcon] = useState<JSX.Element>(
     <CiPlay1 style={{ fontSize: '20px' }} />
   )
+  const [isPlaying, setIsPlaying] = useState(false);
+  const playerRef = useRef(null)
+  const [latestSeekTime, setLatestSeekTime] = useState(0);
   const handleMask = () => toast.error('No joiner to mask')
   const handleOpenModal = () => setIsModalOpen(true)
   const handleCloseModal = () => setIsModalOpen(false)
@@ -182,6 +185,41 @@ export default function ActivityHost() {
     }
   }, [experimentType, videoLabSource, videoID])
 
+
+  //Video Synchronization Logic
+
+  const handlePlayPause = (playing) => {
+    console.log("Host emitting PLAY video event:", playing);
+    setIsPlaying(playing);
+    socket.emit("play-video", playing)
+  }
+
+  const handleSeek = (seconds) => {
+    if(seconds !== undefined){
+      console.log(`Host emitting SEEK video event: ${seconds} seconds`);
+      setLatestSeekTime(seconds);
+      socket.emit("seek-video", seconds)
+    }
+    else{
+      console.log("Seconds is undefined", seconds)
+    }
+  };
+
+  //Using manual seeking since onSeek doesn't work with YouTube videos
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (playerRef.current) {
+        const currentTime = playerRef.current.getCurrentTime();
+        if(Math.abs(currentTime - latestSeekTime) > 1) { //if the current time is more than 1 seconds different from latestSeek time, correction will happen
+          console.log(`Seeking to: ${currentTime}`);
+          setLatestSeekTime(currentTime); //make sure to update state
+          handleSeek(currentTime);
+        }
+      }
+    }, 1000);
+    return () => clearInterval(interval);
+  },[latestSeekTime]);
+
   return (
     <div className="flex flex-col w-full px-8 pt-6">
       <Toaster position="top-right" />
@@ -231,11 +269,11 @@ export default function ActivityHost() {
         <div className="relative flex justify-center items-center rounded-xl">
           {experimentType == 1 && isMediaAFile ? (
             <div>
-            <ReactPlayer url={videoLabSource} controls />
+            <ReactPlayer ref={playerRef} url={videoLabSource} controls playing={isPlaying} onPlay={() => handlePlayPause(true)} onPause={() => handlePlayPause(false)} onSeek={(seconds) => {console.log(`onSeek Triggered! Seeked to: ${seconds}`); handleSeek(seconds)}} onProgress={({playedSeconds}) => { if (playerRef.current){ console.log("Current Time:", playedSeconds)}}}  />
             </div>
           ) : experimentType == 1 && !isMediaAFile ?(
             <div>
-            <ReactPlayer url={`https://www.youtube.com/embed/${videoID}`} controls/>
+            <ReactPlayer ref={playerRef} url={`https://www.youtube.com/embed/${videoID}`} controls playing={isPlaying} onPlay={() => handlePlayPause(true)} onPause= {() => handlePlayPause(false)} onSeek={(seconds) => {console.log(`onSeek Triggered! Seeked to: ${seconds}`); handleSeek(seconds)}} onProgress={({playedSeconds}) => { console.log("Current Time:", playedSeconds)}} />
             </div>
           ) : experimentType == 2 ? (
             <img

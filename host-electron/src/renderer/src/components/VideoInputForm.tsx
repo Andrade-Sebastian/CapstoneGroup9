@@ -184,11 +184,6 @@ export default function VideoInputForm(props: IVideoInputForm) {
       if (response.status === 200) {
         toast.success('Lab was created successfully', { id: loadingToastId })
         const expId = response.data.experimentID
-        // setExperimentTitle(experimentTitle)
-        // setExperimentDesc(experimentDesc)
-        // console.log("THIS IS INSIDE THE RESPONSE.STATUS BEEEEFOOOOORE THE VIDEO FILENAME IS SET,", videoLabSource);
-        // set_video_filename(videoLabSource)
-        // console.log("THIS IS INSIDE THE RESPONSE.STATUS AFTEEEEEER THE VIDEO FILENAME IS SET,", videoLabSource);
         console.log('sending out some experiment data')
         socket.emit('experiment-data', { experimentTitle, experimentDesc, expId })
         console.log('hopefully sent out some experiment data')
