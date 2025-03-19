@@ -137,6 +137,8 @@ app.get("/get-videoFile/:filename", (req: Request, res: Response) => {
 });
 
 let latestExperimentType = null;
+let isVideoPlaying = false;
+let latestSeekTime = 0;
 io.on("connection", (socket) => {
   
   // console.log("(main.ts): User Connected | socketID: " + socket.id)
@@ -202,6 +204,11 @@ io.on("connection", (socket) => {
     if(latestExperimentType !== null){
       socket.emit("experiment-type", latestExperimentType);
     }
+    if(latestExperimentType === 1){
+      console.log("ExperimentType is a video, sending an emit to joiner to tell them the video state. Is video playing?", isVideoPlaying)
+      socket.emit("play-video", isVideoPlaying);
+      socket.emit("seek-video", latestSeekTime);
+    }
   });
 
   //recieve emotibit data
@@ -220,6 +227,19 @@ io.on("connection", (socket) => {
     console.log("Update Event: Received data:", JSON.stringify(ancData.data1));
     io.emit("update", payload);
   });
+
+  //Socket Video Player
+  socket.on("play-video", (data) => {
+    console.log("[Socket: play-video] Attempting to play/pause video. Data passed:", data)
+    isVideoPlaying = data;
+    socket.broadcast.emit("play-video", data) //sending to joiners, not to the host with broadcast.emit
+  });
+
+  socket.on("seek-video", (seconds) => {
+    console.log("Socket: seek-video] Attempting to seek video. Seconds passed:", seconds)
+    latestSeekTime = seconds;
+    socket.broadcast.emit("seek-video", seconds)
+  })
 
   session_handlers(io, socket, rooms, isHost);
 

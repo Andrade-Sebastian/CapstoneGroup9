@@ -3,7 +3,7 @@ import { FaThermometerEmpty } from "react-icons/fa";
 import { LuSquareStack } from "react-icons/lu";
 import { BsChatSquareText } from "react-icons/bs";
 import { TbHexagons } from "react-icons/tb";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import socket from "./socket.tsx";
 import axios from "axios";
 import { Divider } from "@heroui/divider";
@@ -23,6 +23,8 @@ export default function ActiveExperiment() {
   const [isMediaAFile, setIsMediaAFile] = useState(false)
   const [photoPath, setPhotoPath] = useState("");
   const [videoPath, setVideoPath] = useState("");
+  const [isPlaying, setIsPlaying] = useState(false);
+  const playerRef = useRef(null);
   const [videoID, setVideoID] = useState("");
   const {
     isConnected,
@@ -173,6 +175,26 @@ export default function ActiveExperiment() {
   //   }
   // })
 
+  useEffect(()=> {
+    socket.on("play-video", (data) =>{
+      console.log("Recieved event play-video.", data)
+      setIsPlaying(data)
+      console.log("The variable isPlaying is set to", isPlaying)
+    } );
+
+    socket.on("seek-video", (seconds) =>{
+      console.log("Recieved event seek-video", seconds);
+      if(playerRef.current){
+        playerRef.current.seekTo(seconds, "seconds");
+      }
+    })
+    return () => {
+      socket.off("play-video")
+      socket.off("seek-video")
+    }
+  },[])
+
+
   return (
     <div className="flex h-screen bg-white p-4">
       {/* picture  */}
@@ -182,12 +204,12 @@ export default function ActiveExperiment() {
           {experimentType == 1 && isMediaAFile ? (
             <div>
               <p> The video is a file</p>
-              <ReactPlayer url={videoPath} controls/>
+              <ReactPlayer ref={playerRef} url={videoPath} playing={isPlaying} controls={true}/>
               </div>
           ) : experimentType ==1 && !isMediaAFile ? (
             <div>
               <p> The video is not a file. </p>
-              <ReactPlayer url={`https://www.youtube.com/embed/${videoID}`} controls/>
+              <ReactPlayer ref={playerRef} url={`https://www.youtube.com/embed/${videoID}`} playing={isPlaying} controls={false} config={{youtube: { playerVars: { showinfo: 0}}}}/>
               </div>
           ) : experimentType == 2 ? (
             <img src={photoPath} className="rounded-lg w-full max-w-lg h-auto" alt="Experiment Image" /> 
