@@ -166,14 +166,6 @@ export default function ActiveExperiment() {
     }
   },[experimentPath, experimentType, setPhotoPath, setVideoPath]);
 
-  // useEffect(() => {
-  //   const fetchStoredVideo = async () => {
-  //     const filename = experimentPath.split("/").pop();
-  //     try{
-  //       const response = await axios.get(`http://localhost:3000/get-videoFile/${filename}`);
-  //     }
-  //   }
-  // })
 
   useEffect(()=> {
     socket.on("play-video", (data) =>{
@@ -203,12 +195,10 @@ export default function ActiveExperiment() {
         <div className="flex justify-center w-full">
           {experimentType == 1 && isMediaAFile ? (
             <div>
-              <p> The video is a file</p>
               <ReactPlayer ref={playerRef} url={videoPath} playing={isPlaying} controls={true}/>
               </div>
           ) : experimentType ==1 && !isMediaAFile ? (
             <div>
-              <p> The video is not a file. </p>
               <ReactPlayer ref={playerRef} url={`https://www.youtube.com/embed/${videoID}`} playing={isPlaying} controls={false} config={{youtube: { playerVars: { showinfo: 0}}}}/>
               </div>
           ) : experimentType == 2 ? (
@@ -331,9 +321,28 @@ export default function ActiveExperiment() {
         </div>
         <div className="mt-4">
           {activeTab === "images" ? (
-            <div>
-              <p> Obama</p>
+        <div className="flex justify-center w-full">
+        {experimentType == 1 && isMediaAFile ? (
+          <div>
+            <p>Local Video: {videoPath}</p>
             </div>
+        ) : experimentType ==1 && !isMediaAFile ? (
+          <div>
+            <p>YouTube Video: https://www.youtube.com/embed/{videoID} </p>
+            </div>
+        ) : experimentType == 2 ? (
+            <p>Image: {photoPath}</p>
+          
+        ): experimentType == 3 ? (
+          <div>
+            <p>Gallery lab stuff</p>
+            </div>
+        ) : (
+          <div>
+            <p> Article lab stuff</p>
+          </div>
+        )}
+      </div>
           ) : (
             <div className="p-4 text-gray-500"> Chat Feature </div>
           )}
