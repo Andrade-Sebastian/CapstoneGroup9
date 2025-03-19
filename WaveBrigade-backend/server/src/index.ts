@@ -33,6 +33,7 @@ import express from "npm:express@^4.17.1";
 import { createServer } from "node:http";
 import { Server } from "npm:socket.io@^4.8.1";
 import cors from "npm:cors";
+import { updateDeviceConnection } from "./controllers/database";
 
 //const express = require('express');
 const app = express();
@@ -213,6 +214,10 @@ io.on("connection", (socket) => {
     })
 
     socket.on("disconnect", () =>{})
+
+    socket.on('successful-brainflow-launch', (data) =>{
+        updateDeviceConnection(data);
+    })
 });
 
 

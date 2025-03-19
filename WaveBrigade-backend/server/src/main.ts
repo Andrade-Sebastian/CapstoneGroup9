@@ -184,6 +184,13 @@ io.on("connection", (socket) => {
 
   })
 
+  socket.on("joiner-connected", async (data) => {
+    const {socketID, nickname, lastFourSerial} = data;
+    console.log(`Received joiner-connected event in the backend for socket: ${socketID} of the name ${nickname} with their last four serial number being ${lastFourSerial}`)
+    console.log("Now emitting event to host FE")
+    io.emit("joiner-connected", {socketID, nickname, lastFourSerial});
+  })
+
   //send socket Id to brainflow
   socket.on("brainflow-assignment", () => {
     console.log(

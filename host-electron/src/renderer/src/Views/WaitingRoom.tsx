@@ -13,13 +13,15 @@ import { IUser } from '@renderer/hooks/useSessionState'
 import EmotiBitList from '../components/EmotiBitList'
 import ModalComponent from '../components/ModalComponent.js'
 import { CiCircleCheck } from 'react-icons/ci'
-import { error } from 'console'
+import { count, error } from 'console'
 import { useNavigate } from "react-router-dom";
 import React from 'react';
 import { toNamespacedPath } from 'path';
 import toast, { Toaster } from 'react-hot-toast'
 import { useSessionStore } from '../store/useSessionStore.tsx'
-import { session } from 'electron';
+import { ipcRenderer, session } from 'electron';
+import { isDeepStrictEqual } from 'util';
+import { IUserInfo } from "../store/useSessionStore";
 
 
 export default function WaitingRoom() {
@@ -27,15 +29,12 @@ export default function WaitingRoom() {
   const {
     sessionId,
     hostName,
-    users: emotiBits,
+    users,
     roomCode,
     experimentType,
     experimentTypeString,
     setExperimentTypeString,
     setSessionId,
-    setUsers,
-    users,
-    addUser,
     devices,
     removeUser,
     addDevice,
@@ -43,6 +42,8 @@ export default function WaitingRoom() {
     experimentTitle,
     experimentDesc
   } = useSessionStore()
+  const [ isBeginDisabled, setIsBeginDisabled] = useState(false);
+  const [ isConnectEmotibitDisabled, setIsConnectEmotibitDisabled] = useState(false);
   const [nicknames, setNickNames] = useState<string[]>([])
   const [sessionID, setSessionID] = useState('')
   const [serialNumber, setSerialNumber] = useState('')
@@ -59,6 +60,15 @@ export default function WaitingRoom() {
     <CiPlay1 style={{ fontSize: '20px' }} />
   )
 
+  const emotiBits = useSessionStore((state) => state.users);
+  const setUsers = useSessionStore((state) => state.setUsers);
+  const addUser = useSessionStore ((state) => state.addUser);
+  const [currentUsers, setCurrentUsers] = useState<IUserInfo[]>([]);
+  const [sessionDevices, setSessionDevices] = useState<string[]>([]);
+  const [counter, setCounter] = useState(0);
+  const [allDevicesConnected, setAllDevicesConnected] = useState(false);
+  const ipc = window.api;
+
   useEffect(() =>{
     setTimeout(()=>{
 
@@ -66,6 +76,9 @@ export default function WaitingRoom() {
       socket.emit("experiment-type", experimentType);
     }, 500);
   }, [])
+
+
+  
 
   useEffect(() => {
     if (experimentType === 1) {
@@ -86,23 +99,90 @@ export default function WaitingRoom() {
   }, [experimentType])
 
   //Modal Handlers
-  const handleOpenModal = () => setIsModalOpen(true)
+  const handleOpenModal = () => {
+    setIsModalOpen(true);
+    setIsBeginDisabled(true);
+    setIsConnectEmotibitDisabled(false);
+    console.log(`[HandleOpenModal]Begin is ${isBeginDisabled} and ConnectEmotibitDisabled is ${isConnectEmotibitDisabled}`)
+  }
   const handleCloseModal = () => setIsModalOpen(false)
   const handleAction = () => {
     console.log('Creating lobby...')
     if(nicknames.length != 0){
       handleSubmit()
       handleCloseModal()
+      setAllDevicesConnected(false);
     }
     else{
       toast.error("Please wait for people to join");
     }
   }
+  const handleConnectEmotibit = async () => {
+    //Insert logic here to run script...
+    setIsBeginDisabled(true);
+    setIsConnectEmotibitDisabled(true);
+    setCounter(0);
+
+    if(currentUsers.length > 0){
+      
+      await launchProcesses();
+    }
+  }
+
+  useEffect(() => {
+    let isChecking = false;
+
+    const checkDevices = async () => {
+      if (isChecking || counter >= 10) {
+        clearInterval(intervalId);
+        return;
+      }
+      isChecking = true;
+
+        try{
+          const connectedDevices = await axios.get(`http://localhost:3000/host/check-connected-devices/${sessionId}`)
+          console.log("CONNECTED DEVICES RESPONSE DATA: ", connectedDevices.data);
+          if(connectedDevices.data.success){
+              setAllDevicesConnected(connectedDevices.data.devices.every(device => device.isconnected));
+          }
+          if (allDevicesConnected) {
+            clearInterval(intervalId); // Stop checking if all devices are connected
+          }
+        }
+        catch(error){
+          console.error("Error trying to start brainflow for devices");
+          toast.error("There was a problem connecting devices. Please try again.");
+        }
+
+        setCounter(prev => prev += 1);
+        isChecking = false;
+    }
+
+    const intervalId = setInterval(checkDevices, 2000)
+
+    return () => clearInterval(intervalId)
+    
+  }, [allDevicesConnected, sessionId, counter, setAllDevicesConnected, setCounter])
+
+  useEffect(() => {
+        if(allDevicesConnected){
+          console.log("All devices are connected");
+          toast.success("All devices are connected!");
+          setIsConnectEmotibitDisabled(true);
+          setIsBeginDisabled(false);
+        }
+        else if (counter >= 10){
+          console.log("Not all devices are connected");
+          toast.error("There was a problem connecting devices. Please try again.");
+          setIsConnectEmotibitDisabled(false);
+          setIsBeginDisabled(true);
+        }
+  }, [allDevicesConnected, counter, setIsConnectEmotibitDisabled, setIsBeginDisabled])
+      
 
   //Add EmotiBit Modals
   const handleOpenModalEmoti = () => {
     setIsModalOpenEmoti(true);
-
   }
 
   const handleCloseModalEmoti = () => {
@@ -121,46 +201,54 @@ export default function WaitingRoom() {
 
   // }
 
-  const handleConfirmEmoti = async() =>{
+  const handleConfirmEmoti = async () =>{
     if(!serialNumber.trim() || !IPAddress.trim()){
       toast.error("Please enter both a Serial Number and an IP Address");
       return
     }
 
-    const newEmotiBit = {
-        userId: `user${emotiBits.length + 1}`,
-        socketId: `socket${Math.floor(Math.random() * 10000)}`,
-        nickname: `Joiner ${emotiBits.length + 1}`,
+    const emotiBits = {
+        userId: `device-${serialNumber}`,
+        socketId: null,
+        nickname: null,
         associatedDevice: {
-          serialNumber: serialNumber,
+          serialNumber,
           ipAddress: IPAddress
+        }
+      };
+      try{
+
+        await axios.post(`http://localhost:3000/host/register-device`, {
+          sessionID: sessionID,
+          serialNumber: serialNumber,
+          ipAddress: IPAddress,
+          deviceSocketID: sessionStorage.getItem('socketID')
+        });
+
+        addUser(emotiBits);
+        socket.emit("new-device-registered", emotiBits);
+        toast.success("Device registered successfully");
+      } catch(error){
+        console.error("Error registering device:", error);
+        toast.error("Failed to register device");
       }
-    }
-
-
-    console.log("devices", )
-
-    console.log("------")
-    console.log("sessionID ", sessionID)
-    console.log('Trying to register device with serial number ' + serialNumber + ' and IP Address ' + IPAddress)
-    console.log("socketid", sessionStorage.getItem('socketID'))
-
-    
-    await axios.post(`http://localhost:3000/host/register-device`, {
-      sessionID: sessionID,
-      serialNumber: serialNumber,
-      ipAddress: IPAddress,
-      deviceSocketID: sessionStorage.getItem('socketID')
-    })
-
-
-    addUser(newEmotiBit)
-
-    console.log(users)
-    setSerialNumber('');
-    setIPAddress('');
-    setIsModalOpenEmoti(false);
-    }
+      
+          console.log("devices", )
+      
+          console.log("------")
+          console.log("sessionID ", sessionID)
+          console.log('Trying to register device with serial number ' + serialNumber + ' and IP Address ' + IPAddress)
+          console.log("socketid", sessionStorage.getItem('socketID'))
+      
+          
+      
+      
+          
+          console.log(users)
+      setSerialNumber('');
+      setIPAddress('');
+      setIsModalOpenEmoti(false);
+    };
 
   // Joined EmotiBit Settings Modal
   const handleRemoveEmoti = async() => {
@@ -207,25 +295,78 @@ export default function WaitingRoom() {
     //   setIsModalOpenSettings(false);
     // }
     
-    //handleSubmit
+    //function to start a brainflow process for each emotibit
+  async function launchProcesses(){
+    console.log("INSIDE LAUNCH PROCESS");
+    for(let i = 0; i < currentUsers.length; i++){
+      console.log("CURRENT USER PASSED INTO IPC: ", currentUsers[i]);
+      ipc.send("brainflow:launch", 
+        currentUsers[i].ipaddress,
+        currentUsers[i].serialnumber,
+        "http://localhost:3000",
+        currentUsers[i].userid,
+        currentUsers[i].frontendsocketid,
+        currentUsers[i].sessionid
+      )
+      setSessionDevices([...sessionDevices, users[i].serialnumber]);
+
+    }
+
     
+  }
+  useEffect(() => {
+    const setDeviceConnection = async (event, data) => {
+        const {sessionID, serialNumber, status} = data;
+        console.log("IPC RECIEVE STATUS: ", status);
+        if(status === "success"){
+          try {
+                
+                await axios.post(`http://localhost:3000/host/update-device-connection`,
+                {
+                  serial: serialNumber,
+                  socket: sessionStorage.getItem('socketID'),
+                  connection: true
+                }
+              )
+            console.log("All devices successfully updated");
+          }
+          catch(error){
+            console.error("Failed to update device status", error);
+          }
+        }
+      };
+
+    const cleanUp = ipc.receive("brainflow:launched", setDeviceConnection);
+      
+      return () => {
+        cleanUp()
+      }
+  }, [launchProcesses])
+
     //Handling kicking a user
   const handleOpenModalKick = (e) => {
     console.log("HANDLE KICK", e.target.closest('button').querySelector('p').textContent);
     setIsModalOpenKick(true)
     setFocusedUser(e.target.closest('button').querySelector('p').textContent.trim());
 
-  }
-    const handleCloseModalKick = () => {setIsModalOpenKick(false)}
+  };
+    const handleCloseModalKick = () => {setIsModalOpenKick(false)};
     
     
     const handleKickUser = () => {
-
+      console.log("!!ATTEMPTING TO KICK USER!!")
+      if(!focusedUser){
+        console.log("No user selected for kicking.")
+        return;
+      }
+      console.log("User Map at Kick Time:", theUserMap);
+      console.log("Focused User at Kick Time:", focusedUser);
       const nicknameSocketID = theUserMap.get(focusedUser);
       console.log("Kicking user with socket ID: ", nicknameSocketID);
-      console.log("HERE IS THE USER MAP BEFORE EMIT KICKING", theUserMap)
+      console.log("HERE IS THE USER MAP BEFORE EMIT KICKING", theUserMap);
+
       if(!nicknameSocketID){
-        console.log("Cannot kick user: there is no socket id found.")
+        console.log("Cannot kick user: there is no socket id found.", focusedUser)
         return;
       }
       console.log("Kicking user with socketID:", nicknameSocketID);
@@ -238,16 +379,71 @@ export default function WaitingRoom() {
         const newMap = new Map(prevMap);
         newMap.delete(focusedUser);
         return newMap;
-      })
+      });
+      console.log("Here is the usermap after kicking", theUserMap);
+
+      useSessionStore.setState((state) => {
+        const updatedUsers = state.users.map((user) => {
+          if(user.nickname === focusedUser){
+            console.log(`Detaching ${focusedUser} from EmotiBit ${user.associatedDevice?. serialNumber}`);
+            return {...user, nickname: null, socketId: null, isConnected: false};
+          }
+          return user;
+        });
+        console.log("Zustand usersafter kick", updatedUsers)
+        return { users: updatedUsers};
+      });
+
+      console.log("Updated zustand users after kick...", useSessionStore.getState().users);
     
-      console.log("Updated user map:", theUserMap);
-      
-      console.log("Kicking user...")
-    
-      console.log("HERE IS THE USER MAP AFTER RESETING THE MAP", theUserMap)
       setIsModalOpenKick(false);
       
-    }
+    };
+
+  useEffect(() => {
+    console.log("Component re-rendered, emotibits,", emotiBits);
+  }, [emotiBits]);
+
+  useEffect(() => {
+    socket.on("joiner-connected", async ({ socketID, nickname, lastFourSerial }) => {
+      console.log(`Joiner Connected Event received: Joiner-${nickname}, SocketID-${socketID}, Last Four of Serial ${lastFourSerial}`);
+      try{
+        const response = await axios.get(`http://localhost:3000/database/device-info/${lastFourSerial}`);
+        const deviceData = response.data;
+        console.log("Device data received:", deviceData)
+        
+        useSessionStore.setState((state) => {
+          const updatedUsers = state.users.map((user) => {
+            if(user.associatedDevice?.serialNumber.endsWith(lastFourSerial)){
+              console.log(`Updating user ${user.userId} with nickname: ${nickname}... and ${socketID}`);
+              return {...user, nickname, socketId: socketID, isConnected: true};
+            }
+            return user;
+          });
+          console.log("Zustand users after update:", updatedUsers);
+          return {users: updatedUsers};
+        });
+        console.log("Zustand users after update", useSessionStore.getState().users);
+
+        setTheUserMap((prevMap) => {
+          const newMap = new Map(prevMap);
+          newMap.set(nickname, socketID);
+          return newMap;
+        });
+        console.log("Updated usermap.. ", useSessionStore.getState().users);
+
+        const serialNumber = Array.isArray(deviceData) ? deviceData[0]?.serialnumber : deviceData?.serialnumber;
+        toast.success(`${nickname} connected to EmotiBit ${serialNumber}`);
+      } catch(error){
+        console.error("Error fetching device data:", error);
+        toast.error("Error fetching device data:");
+
+      }
+    });
+    return () => {
+      socket.off("joiner-connected");
+    };
+  }, [setUsers, setTheUserMap]);
 
   useEffect(() => {
     if (!useSessionStore.getState().sessionId) return
@@ -276,7 +472,7 @@ export default function WaitingRoom() {
 
         console.log(userMap)
         setTheUserMap(userMap);
-  
+        setCurrentUsers(users);
         setNickNames(nicknames);
         setSocketID(socketID);
       } catch (error) {
@@ -289,24 +485,19 @@ export default function WaitingRoom() {
 
     return () => clearInterval(interval)
   }, [sessionID]) //Don't fetch any data until sessionID is set
-
-  // const handleEmptyWaitingRoom = () => {
-  //   if(nicknames.length === 0){
-  //     toast.error("Cannot begin experiment. There is no one in the waiting room!")
-  //     return;
-  //   }
-  //   else{
-  //     toast.success("Beginning experiment...")
-  //     navigateTo('/activity-room');
-  //   }
-  // }
   
   const handleBackButton = () => {
     navigateTo('/host/select-lab')
   }
   
   const handleSubmit =() => {
-    console.log('in handle submit')
+    console.log('Attempting to start experiment...');
+    const allEmotiBitsConnected = emotiBits.every((user) => user.nickname && user.socketId);
+    if(!allEmotiBitsConnected){
+      toast.error("Cannot start experiment. Not all EmotiBits are connected!");
+      return;
+    }
+    console.log("Starting experiment...")
       //-----HARDCODED FOR TESTING-------
     socket.emit("session-start");
     socket.emit("session-start-spectator")
@@ -344,9 +535,16 @@ export default function WaitingRoom() {
         <div className="w-full flex flex-col mt-6">
           <h2 className="text-xl lg:text-2xl font-semibold text-gray-800 mb-4"> Connected EmotiBits</h2>
           <div className="flex-col gap-4 overflow-y-auto max-h-[300px] md:max-h-[400px] p-4 border rounded-md shadow-md ">
-            {emotiBits.map((user) => (
-              <EmotiBitList key={user.userId} user={user} isConnected={true} onAction={() => handleOpenModalSettings(user.userId)} />
-            ))}
+            {Array.isArray(emotiBits) && emotiBits.length > 0 ? (
+              emotiBits.map((user) => {
+                const isConnected = user.nickname !== null && user.isConnected === true;
+                return(
+                  <EmotiBitList key={user.userId} user={user} isConnected={isConnected} onAction={() => handleOpenModalSettings(user.userid)} />
+                );
+              })
+          ) : ( 
+          <p> No EmotiBits connected yet.</p> 
+        )}
           </div>
           <button
             onClick={handleOpenModalEmoti}
@@ -382,15 +580,19 @@ export default function WaitingRoom() {
         {/*This will redirect to Media Page */}
       </div>
       <ModalComponent
-        onAction={handleAction}
+        onAction={handleConnectEmotibit}
+        onAction2={handleAction}
         isOpen={isModalOpen}
         onCancel={handleCloseModal}
-        modalTitle="Begin Experiment"
-        button="Begin"
+        modalTitle="Connect Emotibits"
+        button="Connect Emotibits"
+        button2="Begin"
+        isButtonDisabled={isBeginDisabled}
+        isButton1Disabled={isConnectEmotibitDisabled}
       >
         <div className="mb-6">
           <h1 className="text-md text-gray-700 mb-2">
-            Are you sure you want to begin the experiment?
+            Before beginning the experiment, please connect Emotibits first.
           </h1>
         </div>
         

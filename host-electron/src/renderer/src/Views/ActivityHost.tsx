@@ -28,14 +28,12 @@ export default function ActivityHost() {
   const {
     sessionId,
     hostName,
-    users: emotiBits,
+    users,
     roomCode,
     experimentType,
     experimentTypeString,
     setExperimentTypeString,
     setSessionId,
-    setUsers,
-    users,
     addUser,
     devices,
     removeUser,
@@ -56,7 +54,24 @@ export default function ActivityHost() {
   const [isModalUserOptionsOpen, setIsModalUserOptionsOpen] = useState(false)
   const [selectedEmotiBitId, setSelectedEmotiBitId] = useState<string | null>(null)
   const [isMediaAFile, setIsMediaAFile] = useState(false)
-  const [userObjects, setUserObjects] = useState<Array<IUser>>([])
+  const [userObjects, setUserObjects] = useState<Array<{
+    "device": number,
+    "deviceId": number,
+    "deviceSocketId": string,
+    "frontendSocketId": string,
+    "ipAddress": string,
+    "isAvailable": boolean,
+    "isConnected": boolean,
+    "isMasked": boolean,
+    "leftSession": null,
+    "nickname": string,
+    "samplingFrequency": number,
+    "secret": string,
+    "serialNumber": string,
+    "sessionId": number,
+    "userId": string,
+    "userRole": string
+  }>>([])
   const navigateTo = useNavigate()
   const [experimentIcon, setExperimentIcon] = useState<JSX.Element>(
     <CiPlay1 style={{ fontSize: '20px' }} />
@@ -86,7 +101,7 @@ export default function ActivityHost() {
     console.log('Kicking user...')
   }
   const handleViewUser = (userId, experimentType) => {
-    ipc.send('activity:viewUser', sessionId, userId, experimentType)
+    ipc.send("activity:viewUser", sessionId, String(userId), experimentType)
   }
 
   function handleSubmit() {
@@ -114,16 +129,16 @@ export default function ActivityHost() {
     }
   }
 
-  useEffect(() => {
-    const getSessionID = async () => {
-      const response = await axios.get(`http://localhost:3000/joiner/validateRoomCode/${roomCode}`)
-      if (response.status === 200) {
-        setSessionID(response.data.sessionID)
-      }
-    }
+  // useEffect(() => {
+  //   const getSessionID = async () => {
+  //     const response = await axios.get(`http://localhost:3000/joiner/validateRoomCode/${roomCode}`)
+  //     if (response.status === 200) {
+  //       setSessionID(response.data.sessionID)
+  //     }
+  //   }
 
-    getSessionID()
-  }, [])
+  //   getSessionID()
+  // }, [])
 
   useEffect(() => {
     if (!useSessionStore.getState().sessionId) return

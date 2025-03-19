@@ -3,7 +3,7 @@ import { Outlet } from "react-router-dom";
 import NavigationBar from "./components/NavigationBar.tsx";
 import useBrainflowManager from './hooks/useBrainflowManager.ts';
 import { useEffect, useState } from 'react';
-import { io, Socket } from 'socket.io-client';
+import socket from './Socket.js';
 import React from "react";
 import toast, { Toaster } from "react-hot-toast";
 
@@ -25,7 +25,6 @@ function App() {
 
 
   const [isSocketAssigned, setIsSocketAssigned] = useState(false);
-  const socket: Socket = io("http://localhost:3000"); 
 
   useEffect(() => 
   {

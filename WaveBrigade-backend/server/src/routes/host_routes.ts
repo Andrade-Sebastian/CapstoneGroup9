@@ -1,5 +1,5 @@
 import express, { Request, Response } from "npm:express";
-import { createSessionInDatabase, registerDevice, getUserExperimentData } from "../controllers/database.ts";
+import { createSessionInDatabase, registerDevice, getUserExperimentData, updateDeviceConnection, getSessionDevices } from "../controllers/database.ts";
 import { Client } from "https://deno.land/x/postgres@v0.17.0/mod.ts";
 
 const dbClient = new Client({
@@ -149,12 +149,14 @@ hostRouter.get("/get-experiment", (req: Request, res:Response) =>{
 })
 
 
-hostRouter.get("/get-user-experiment/:sessionID/:experimentType", async (req: Request, res: Response) => {
+hostRouter.get("/get-user-experiment/:sessionID/:userID/:experimentType", async (req: Request, res: Response) => {
     const sessionID = req.params.sessionID;
+    const userID = req.params.userID;
     const experimentType = req.params.experimentType;
+    const user = Number(userID);
 
     try{
-        const info = await getUserExperimentData(sessionID, experimentType);
+        const info = await getUserExperimentData(sessionID, user, experimentType);
         console.log("INFO BEING SENT OUT", info);
         return res.status(200).send(info);
 
@@ -164,5 +166,40 @@ hostRouter.get("/get-user-experiment/:sessionID/:experimentType", async (req: Re
         return res.status(400).send({message: "Error getting data"});
     }
 })
+
+//update connection flag for given device
+hostRouter.post("/update-device-connection", async (req: Request, res: Response) => {
+    const { serial, socket, connection } = req.body; 
+    console.log("/update-device-connection: ", req.body);
+    try{
+        const result = await updateDeviceConnection(serial, socket, connection);
+        if(result){
+            return res.status(200).send({success: true});
+        }
+    }
+    catch(error){
+        console.error("Error updating device connection")
+        return res.status(400).send({success: false});
+    }
+});
+
+hostRouter.get("/check-connected-devices/:sessionId", async (req: Request, res: Response) => {
+    const sessionId = req.params.sessionId;
+
+    try{
+        const result = await getSessionDevices(sessionId);
+        console.log("RETURNED RESULT IN /check-connected-devices/sessionId: ", result.length);
+        if(result.length !== 0){
+            return res.status(200).send({success: true, devices: result});
+        }
+        else{
+            return res.status(200).send({success: false});
+        }
+    }
+    catch(error){
+        console.error("Error checking devices in session");
+        return res.status(400).send({success: false});
+    }
+});
 
 export default hostRouter;
