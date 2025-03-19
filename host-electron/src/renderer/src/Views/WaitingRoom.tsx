@@ -99,6 +99,7 @@ export default function WaitingRoom() {
     if(nicknames.length != 0){
       handleSubmit()
       handleCloseModal()
+      setAllDevicesConnected(false);
     }
     else{
       toast.error("Please wait for people to join");
@@ -134,7 +135,6 @@ export default function WaitingRoom() {
           }
           if (allDevicesConnected) {
             clearInterval(intervalId); // Stop checking if all devices are connected
-            setAllDevicesConnected(false);
           }
         }
         catch(error){
@@ -286,15 +286,15 @@ export default function WaitingRoom() {
     //function to start a brainflow process for each emotibit
   async function launchProcesses(){
     console.log("INSIDE LAUNCH PROCESS");
-    for(let i = 0; i < users.length; i++){
-      console.log("CURRENT USER PASSED INTO IPC: ", users[i]);
+    for(let i = 0; i < currentUsers.length; i++){
+      console.log("CURRENT USER PASSED INTO IPC: ", currentUsers[i]);
       ipc.send("brainflow:launch", 
-        users[i].ipaddress,
-        users[i].serialnumber,
+        currentUsers[i].ipaddress,
+        currentUsers[i].serialnumber,
         "http://localhost:3000",
-        users[i].userid,
-        users[i].frontendsocketid,
-        users[i].sessionid
+        currentUsers[i].userid,
+        currentUsers[i].frontendsocketid,
+        currentUsers[i].sessionid
       )
       setSessionDevices([...sessionDevices, users[i].serialnumber]);
 
@@ -308,6 +308,7 @@ export default function WaitingRoom() {
         console.log("IPC RECIEVE STATUS: ", status);
         if(status === "success"){
           try {
+                
                 await axios.post(`http://localhost:3000/host/update-device-connection`,
                 {
                   serial: serialNumber,
@@ -459,7 +460,7 @@ export default function WaitingRoom() {
 
         console.log(userMap)
         setTheUserMap(userMap);
-  
+        setCurrentUsers(users);
         setNickNames(nicknames);
         setSocketID(socketID);
       } catch (error) {
