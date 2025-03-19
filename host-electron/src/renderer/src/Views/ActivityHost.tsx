@@ -126,19 +126,19 @@ export default function ActivityHost() {
     }
   }
 
-  useEffect(() => {
-    const getSessionID = async () => {
-      const response = await axios.get(`http://localhost:3000/joiner/validateRoomCode/${roomCode}`)
-      if (response.status === 200) {
-        setSessionID(response.data.sessionID)
-      }
-    }
-
-    getSessionID()
-  }, [])
-
   // useEffect(() => {
-  //   if (!useSessionStore.getState().sessionId) return
+  //   const getSessionID = async () => {
+  //     const response = await axios.get(`http://localhost:3000/joiner/validateRoomCode/${roomCode}`)
+  //     if (response.status === 200) {
+  //       setSessionID(response.data.sessionID)
+  //     }
+  //   }
+
+  //   getSessionID()
+  // }, [])
+
+  useEffect(() => {
+    if (!useSessionStore.getState().sessionId) return
 
     setSessionID(useSessionStore.getState().sessionId)
     const fetchUsers = async () => {
@@ -162,11 +162,11 @@ export default function ActivityHost() {
       }
     }
 
-  //   fetchUsers()
-  //   const interval = setInterval(fetchUsers, 5000) // Refresh users every 5 seconds
+    fetchUsers()
+    const interval = setInterval(fetchUsers, 5000) // Refresh users every 5 seconds
 
-  //   return () => clearInterval(interval)
-  // }, [sessionID]) //Don't fetch any data until sessionID is set
+    return () => clearInterval(interval)
+  }, [sessionID]) //Don't fetch any data until sessionID is set
 
   useEffect(() => {
     if (experimentType === 1) {
