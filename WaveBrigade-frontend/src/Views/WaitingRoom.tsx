@@ -177,7 +177,12 @@ export default function WaitingRoom() {
 
         // initialize nicknames array
         for (let i = 0; i < users.length; i++) {
-          nicknames.push(users[i].nickname);
+          if (users[i].userrole === "spectator")
+          {
+            nicknames.push(users[i].nickname + " (Spectator)")
+          }else{
+            nicknames.push(users[i].nickname);
+          }
         }
 
         setNickNames(nicknames);

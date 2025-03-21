@@ -685,8 +685,7 @@ export async function getUsersFromSession(sessionID: string){
 	try{
 		await dbClient.connect();
 		const query = await dbClient.queryObject(`SELECT * FROM "User" 
-			JOIN device ON "User".device = device.deviceid
-			WHERE "User".sessionid = $1`,
+			JOIN device ON "User".sessionid = $1`,
 			[sessionID]
 		);
 		// console.log("Users retrieved from ", sessionID, query);

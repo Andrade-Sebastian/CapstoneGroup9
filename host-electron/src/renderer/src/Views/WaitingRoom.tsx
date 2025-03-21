@@ -461,8 +461,14 @@ export default function WaitingRoom() {
         const userMap = new Map();
         // initialize nicknames array
         for (let i = 0; i < users.length; i++) {
-          nicknames.push(users[i].nickname)
-          frontendSocketIDs.push(users[i].frontendsocketid)
+          if (users[i].userrole === "spectator")
+          {
+            nicknames.push(users[i].nickname + " (Spectator)")
+            frontendSocketIDs.push(users[i].frontendsocketid)
+          }else{
+            nicknames.push(users[i].nickname)
+            frontendSocketIDs.push(users[i].frontendsocketid)
+          }
         }
 
 

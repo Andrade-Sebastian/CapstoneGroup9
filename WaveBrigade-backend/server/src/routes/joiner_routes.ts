@@ -371,6 +371,7 @@ joinerRouter.post("/validatePassword", async (req: Request, res: Response) => {
 
 
 joinerRouter.post("/join-as-spectator", async (req: Request, res: Response) => {
+    console.log("I am in /join-as-spectator")
     const {
         socketID,
         nickname,
@@ -383,12 +384,12 @@ joinerRouter.post("/join-as-spectator", async (req: Request, res: Response) => {
         const {
             isValidRoomCode,
             sessionID
-        } = await validateRoomCode(roomCode);
+        } = await validateRoomCode(roomCode); // inspected - keep
         
         
         if(isValidRoomCode){
 
-            try{
+            try{ //change might be here 
                 spectatorInfo = await joinSessionAsSpectator(socketID, nickname, roomCode);
 
             }catch(error){

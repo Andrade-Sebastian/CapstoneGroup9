@@ -19,12 +19,10 @@ export default function EnterFunction() {
     const navigateTo = useNavigate();
     const [users, setUsers] = useState<string[]>([]) //list of users to send to waiting room
     const [socketID, setSocketID] = useState("");
-    const { roomCode, sessionId, socketId} = useJoinerStore()
+    const { userRole, nickname, roomCode, sessionId, socketId, setUserRole} = useJoinerStore()
     const [ password, setPassword]  = useState("");
     const [type, setType] = useState('password')
     const [icon, setIcon] = useState(eyeOff)
-
-    const { userRole, setUserRole} = useJoinerStore();
 
     function handleToggle() {
         //have eye open if text is censored, if not then eye closed
@@ -56,6 +54,12 @@ export default function EnterFunction() {
 
               toast.success("Joining session...");
               console.log("Joining as spectator...");
+
+              await axios.post("http://localhost:3000/joiner/join-as-spectator", {
+                socketID: socketId,
+                nickname: nickname,
+                roomCode: roomCode
+              })
 
               navigateTo('/waiting-room')
               

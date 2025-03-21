@@ -207,17 +207,17 @@ BEGIN
 
     -- Create a User without an associated device
     INSERT INTO "User" (
-        nickname, device, sessionid, ismasked, frontendsocketid, leftsession, userrole
+        nickname, device, sessionid, ismasked, frontendsocketid, leftsession, userrole, secret
     ) 
     VALUES (
-        param_nickname, NULL, found_session_id, FALSE, socket_id, NULL, user_role
+        param_nickname, NULL, found_session_id, FALSE, socket_id, NULL, user_role, 'secret'
     ) RETURNING userid INTO user_id;
 
     -- Return user data
     RETURN QUERY 
-    SELECT "User".userid, "User".nickname, "User".sessionid, "User".ismasked, 
-           "User".frontendsocketid, "User".leftsession, "User".userrole, 
-        "User".device
-    FROM "User" WHERE "User".userid = user_id;
+        SELECT "User".userid, "User".nickname, "User".sessionid, "User".ismasked, 
+            "User".frontendsocketid, "User".leftsession, "User".userrole, 
+                "User".device
+        FROM "User" WHERE "User".userid = user_id;
 END;
 $$ LANGUAGE plpgsql;

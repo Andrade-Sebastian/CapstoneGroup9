@@ -40,7 +40,7 @@ class SessionManager {
 
         if (!this.currentSessions[sessionId])
         {
-            console.log("Session " + sessionId + " not found.")
+            console.log("(sessions_singleton.ts): Session " + sessionId + " not found.")
         }
         else
         {
