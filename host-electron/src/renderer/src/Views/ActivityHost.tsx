@@ -3,7 +3,7 @@ import { useEffect, useState, useRef } from 'react'
 import { CiPlay1 } from 'react-icons/ci'
 import { TfiGallery } from 'react-icons/tfi'
 import { TiCamera } from 'react-icons/ti'
-import { IoVideocam } from 'react-icons/io5'
+import { IoVideocam, IoNewspaper } from 'react-icons/io5'
 import { PiCrownSimpleThin } from 'react-icons/pi'
 import { HiOutlineSignal } from 'react-icons/hi2'
 import { CiUser } from 'react-icons/ci'
@@ -41,6 +41,8 @@ export default function ActivityHost() {
     removeDevice,
     videoLabSource,
     videoID,
+    articleURL,
+    articleLabSource,
     photoLabImageSource,
     experimentTitle,
     experimentDesc
@@ -116,7 +118,7 @@ export default function ActivityHost() {
   }
 
   const checkVideoMediaType = () =>{
-    console.log("CheckVideo media is running... HERE ARE THE VALUES videolabsource ",videoLabSource,"hereis videoID", videoID)
+    console.log("Check Video media is running... HERE ARE THE VALUES videolabsource ",videoLabSource,"hereis videoID", videoID)
     if(videoLabSource && videoLabSource.trim() !==""){
       console.log("Detected video as a file")
       setIsMediaAFile(true)
@@ -128,7 +130,20 @@ export default function ActivityHost() {
       return;
     }
   }
-
+  
+  const checkArticleMediaType = () =>{
+    console.log("Check Article media is running... HERE ARE THE VALUES articlelabsource ",articleLabSource,"hereis videoID", articleURL)
+    if(articleLabSource && articleLabSource.trim() !==""){
+      console.log("Detected article as a file")
+      setIsMediaAFile(true)
+      return;
+    }
+    if(articleURL && articleURL.trim() !== ""){
+      console.log("Detected article as a URL.")
+      setIsMediaAFile(false)
+      return;
+    }
+  }
   // useEffect(() => {
   //   const getSessionID = async () => {
   //     const response = await axios.get(`http://localhost:3000/joiner/validateRoomCode/${roomCode}`)
@@ -180,7 +195,11 @@ export default function ActivityHost() {
       setExperimentIcon(<TiCamera style={{ fontSize: '20px' }} />)
     } else if (experimentType === 3) {
       setExperimentIcon(<TfiGallery style={{ fontSize: '20px' }} />)
-    } else {
+    } else if (experimentType === 4) {
+      checkArticleMediaType();
+      setExperimentIcon(<IoNewspaper style={{ fontSize: '20px' }}/>)
+    } 
+    else {
       console.log('Invalid experiment ID')
     }
   }, [experimentType, videoLabSource, videoID])
@@ -288,12 +307,19 @@ export default function ActivityHost() {
                 Gallery Lab Images here
               </p>
             </div>
-          ) : (
+          ) : experimentType == 4 && isMediaAFile ? (
+            // Not a huge bug but the source should be the article lab source, it's flip flopped, don't know why
             <div>
-              <p>
-                Article Lab here
-              </p>
+                <iframe src={articleLabSource} width="800px" height="500px"></iframe>
             </div>
+          ) : experimentType == 4 && !isMediaAFile ? (
+            <div>
+                <iframe src={articleURL} width="800px" height="500px"></iframe>
+          </div>
+          ) :(
+            <div>
+              <p className="text-red-500">Invalid experiment type... </p>
+              </div>
           )}  
           </div>
         </div>

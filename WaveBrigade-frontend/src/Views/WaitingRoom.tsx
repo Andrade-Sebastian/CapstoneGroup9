@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { CiPlay1 } from "react-icons/ci";
 import { TfiGallery } from 'react-icons/tfi'
 import { TiCamera } from 'react-icons/ti'
-import { IoVideocam } from 'react-icons/io5'
+import { IoVideocam, IoNewspaper } from 'react-icons/io5'
 import socket from "./socket.tsx";
 import axios from "axios";
 import { Divider } from "@heroui/divider";
@@ -265,13 +265,45 @@ export default function WaitingRoom() {
         console.log("Error receiving photolab data in joiner fe: ", error);
       }
     };
+    const getArticleData = async () => {
+      try {
+        console.log("SENDING TO THE ROUTE EXPERIMENT ID: ", experimentID);
+        const response = await axios.get(
+          `http://localhost:3000/joiner/getArticleFile/${experimentID}`
+        );
+        if (response.status === 200) {
+          //toast.success("Successfully received photolab data.");
+          console.log("RETURNED GET Article DATA: ", response.data);
+          const experimentTitle = response.data.name;
+          const experimentDesc = response.data.description;
+          const path = response.data.path;
+          //NEED THE EXPERIMENT TYPE
+          console.log(
+            "RESPONSE DATA VARIABLES: ",
+            experimentDesc,
+            experimentTitle,
+            path
+          );
+          setExperimentId(experimentID);
+          setExperimentTitle(experimentTitle);
+          setExperimentDesc(experimentDesc);
+          setExperimentPath(path);
+        }
+      } catch (error) {
+        toast.error("Failed to receive Article data");
+        console.log("Error receiving article lab data in joiner fe: ", error);
+      }
+    };
     if(experimentType === 1){
       getVideoFileData();
     }
     if(experimentType === 2){
       getPhotoData();
     }
-  }, [experimentID, setExperimentDesc, setExperimentId, setExperimentTitle, setExperimentPath]);
+    if(experimentType === 4){
+      getArticleData();
+    }
+  }, [experimentID, setExperimentDesc, setExperimentId, setExperimentTitle, setExperimentPath, experimentType]);
 
   useEffect(() => {
     if (experimentType === 1) {
@@ -285,7 +317,7 @@ export default function WaitingRoom() {
       setExperimentIcon(<TfiGallery style={{ fontSize: '20px' }} />)
     } else if (experimentType === 4) {
       setExperimentTypeString('ArticleLab')
-      setExperimentIcon(<TfiGallery style={{ fontSize: '20px' }} />)
+      setExperimentIcon(<IoNewspaper style={{ fontSize: '20px' }} />)
     } else {
       console.log("Invalid experiment type");
     }

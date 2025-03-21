@@ -37,7 +37,7 @@ export default function HostSelectLabPage() {
       id: '2',
       name: 'Picture Lab',
       description:
-        'Create a picture lab experiment. Insert your own picture or include a gif for the experiment.',
+        'Create a picture lab experiment. Insert your own picture or include a GIF for the experiment.',
       iconPath: <TiCamera className="size-8" />
     },
     {
@@ -50,7 +50,7 @@ export default function HostSelectLabPage() {
       id: '4',
       name: 'Article Lab',
       description:
-        'Create an article lab experiment. Insert your own pdf or include a link for the experiment.',
+        'Create an article lab experiment. Insert your own PDF or include a link for the experiment.',
       iconPath: <IoNewspaper className="size-8" />
     }
   ]

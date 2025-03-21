@@ -23,9 +23,11 @@ export default function ActiveExperiment() {
   const [isMediaAFile, setIsMediaAFile] = useState(false)
   const [photoPath, setPhotoPath] = useState("");
   const [videoPath, setVideoPath] = useState("");
+  const [articlePath, setArticlePath] = useState("");
   const [isPlaying, setIsPlaying] = useState(false);
   const playerRef = useRef(null);
   const [videoID, setVideoID] = useState("");
+  const [articleURL, setArticleURL] = useState("");
   const {
     isConnected,
     serial,
@@ -55,15 +57,35 @@ export default function ActiveExperiment() {
           return;
         }
     }
+  }
+    const checkArticleMediaType = () =>{
+      console.log("Detecting type of media based on path...   ExperimentPath: ",experimentPath)
+      if(experimentPath){
+        if(experimentPath.startsWith("https://") || experimentPath.startsWith("http://")){ 
+          console.log("Detected a link", experimentPath);
+          setIsMediaAFile(false);
+          return;
+        }
+        else{
+          console.log("Detected article as a file.", experimentPath)
+          setIsMediaAFile(true);
+          return;
+        }
+    }
     else{
-      console.log("Experimentpath is empty", experimentPath)
+      console.log("Experiment path is empty", experimentPath)
       return;
     }
     }
     if (experimentType === 1) {
       console.log("ExperimentType is:", experimentType)
       checkVideoMediaType();
-    } else {
+    } 
+    else if (experimentType === 4) {
+      console.log("ExperimentType is:", experimentType)
+      checkArticleMediaType();
+    }
+    else {
       console.log('Invalid experiment ID')
     }
   }, [experimentPath, experimentType, videoPath])
@@ -97,7 +119,16 @@ export default function ActiveExperiment() {
             console.log("VideoID set to ", videoID)
           });
       };
-
+      
+      const getArticleInfo = async () => {
+        const response = await axios
+          .get(`http://localhost:3000/joiner/getArticleFile/${experimentId}`)
+          .then((response) => {//THERE IS NOTHING BEING SET HERE
+            console.log("Article lab path in activity page:", response.data.path);
+            setArticleURL(response.data.path);
+            console.log("ArticleURL set to ", articleURL)
+          });
+      };
 
     socket.on("end-experiment", () => {
       navigateTo("/");
@@ -110,6 +141,10 @@ export default function ActiveExperiment() {
     if(experimentType === 2){
       setPhotoPath(experimentPath)
       getPhotoInfo();
+    }
+    if(experimentType === 4){
+      setArticlePath(experimentPath)
+      getArticleInfo();
     }
 
     // socket.on("update", (data) => {
@@ -156,6 +191,20 @@ export default function ActiveExperiment() {
         console.log("Error retrieving video:", error);
       }
     }
+    const fetchStoredArticle = async () => {
+      const filename = experimentPath.split("/").pop();
+      try{
+        const response = await axios.get(`http://localhost:3000/get-articleFile/${filename}`);
+        if(response.status === 200){
+          console.log("Fetched article path:", response.config.url);
+          setArticlePath(response.config.url);
+          toast.success("Successfully retreived article!")
+        }
+      }
+      catch(error){
+        console.log("Error retrieving article:", error);
+      }
+    }
     if(experimentType === 1){
       console.log("Fetching video...")
       fetchStoredVideo();
@@ -164,7 +213,11 @@ export default function ActiveExperiment() {
       console.log("Fetching photo...")
       fetchStoredPhoto();
     }
-  },[experimentPath, experimentType, setPhotoPath, setVideoPath]);
+    if(experimentType === 4){
+      console.log("Fetching article...")
+      fetchStoredArticle();
+    }
+  },[experimentPath, experimentType, setPhotoPath, setVideoPath, setArticlePath, articlePath]);
 
 
   useEffect(()=> {
@@ -185,7 +238,6 @@ export default function ActiveExperiment() {
       socket.off("seek-video")
     }
   },[])
-
 
   return (
     <div className="flex h-screen bg-white p-4">
@@ -208,9 +260,17 @@ export default function ActiveExperiment() {
             <div>
               <p>Gallery lab stuff</p>
               </div>
-          ) : (
+          ) : experimentType == 4 && isMediaAFile ? (
             <div>
-              <p> Article lab stuff</p>
+              <iframe src={articlePath} width="800px" height="500px"></iframe>
+              </div>
+          ) : experimentType == 4 && !isMediaAFile ?(
+            <div>
+              <iframe src={articleURL} width="800px" height="500px"></iframe>
+              </div>
+          ) :(
+            <div>
+              <p> Unknown lab. Rejoin</p>
             </div>
           )}
         </div>
@@ -321,32 +381,41 @@ export default function ActiveExperiment() {
         </div>
         <div className="mt-4">
           {activeTab === "images" ? (
-        <div className="flex justify-center w-full">
-        {experimentType == 1 && isMediaAFile ? (
-          <div>
-            <p>Local Video: {videoPath}</p>
-            </div>
-        ) : experimentType ==1 && !isMediaAFile ? (
-          <div>
-            <p>YouTube Video: https://www.youtube.com/embed/{videoID} </p>
-            </div>
-        ) : experimentType == 2 ? (
-            <p>Image: {photoPath}</p>
-          
-        ): experimentType == 3 ? (
-          <div>
-            <p>Gallery lab stuff</p>
-            </div>
-        ) : (
-          <div>
-            <p> Article lab stuff</p>
-          </div>
+            <div className="flex justify-center w-full">
+              {experimentType == 1 && isMediaAFile ? (
+                <div>
+                  <p>Local Video: {videoPath}</p>
+                </div>
+              ) : experimentType ==1 && !isMediaAFile ? (
+                <div>
+                  <p>YouTube Video: https://www.youtube.com/watch?v={videoID} </p>
+                </div>
+              ) : experimentType == 2 ? (
+                <div>
+                  <p>Image: {photoPath}</p>
+                </div>
+              ): experimentType == 3 ? (
+                <div>
+                  <p>Gallery lab stuff</p>
+                </div>
+              ) : experimentType == 4 && isMediaAFile ?(
+                <div>
+                  <p> Local Article: {articlePath}</p>
+                </div>
+              ) : experimentType == 4 && !isMediaAFile ? (
+                <div>
+                  <p> Article Link : {articleURL}</p>
+                </div>
+              ) : (
+                <div> 
+                  <p> Unknown lab. Rejoin</p>
+              </div>
         )}
-      </div>
-          ) : (
+        </div>
+          ): (
             <div className="p-4 text-gray-500"> Chat Feature </div>
           )}
-        </div>
+          </div>
       </div>
     </div>
   );

@@ -39,6 +39,8 @@ interface SessionState{
     videoLabSource: string | null;
     videoURL: string | null;
     videoID: string | null;
+    articleLabSource: string | null;
+    articleURL: string | null;
     devices: IDevice[];
     experimentTypeString: string;
 
@@ -57,6 +59,8 @@ interface SessionState{
     setVideoLabSource: (videoSource: string) => void;
     setVideoURL: (videoURL: string) => void;
     setVideoID: (videoID: string) => void;
+    setArticleLabSource: (articleSource: string) => void;
+    setArticleURL: (articleURL: string) => void;
     addDevice: (device: IDevice) => void;
     removeDevice: (deviceId: string)=> void;
     setExperimentTypeString: (experimentTypeString: string) => void;
@@ -76,6 +80,8 @@ export const useSessionStore = create<SessionState>()(
             videoLabSource: '',
             videoURL: '',
             videoID: '',
+            articleLabSource: '',
+            articleURL: '',
             devices: [],
             experimentType: 0,
             experimentTypeString: '',
@@ -98,6 +104,8 @@ export const useSessionStore = create<SessionState>()(
             setVideoLabSource: (videoSource: string | null): void => set(() => ({ videoLabSource: videoSource })),
             setVideoURL: (videoURL: string): void => set(() => ({videoURL: videoURL})),
             setVideoID: (videoID: string): void => set(() => ({videoID: videoID})),
+            setArticleLabSource: (articleSource: string | null): void => set(() => ({ articleLabSource: articleSource})),
+            setArticleURL: (articleURL: string): void =>set(() => ({articleURL: articleURL})), 
             addDevice: (device: IDevice): void => set((state) => ({
               devices: [...state.devices, device], 
             })),
