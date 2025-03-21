@@ -162,7 +162,7 @@ export default function VideoInputForm(props: IVideoInputForm) {
     setIsSubmitting(true)
 
     try {
-      //create a photo lab
+      //create a video lab
       console.log('Sending data', JSON.stringify(data))
       const response = await axios.post('http://localhost:3000/database/video-lab', data, {
         headers: { 'Content-Type': 'multipart/form-data' }

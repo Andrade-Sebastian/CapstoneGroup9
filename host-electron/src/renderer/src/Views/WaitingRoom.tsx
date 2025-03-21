@@ -1,9 +1,9 @@
 import { useLocation } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import { CiPlay1 } from 'react-icons/ci'
-import { TfiGallery, TfiFile } from 'react-icons/tfi'
+import { TfiGallery } from 'react-icons/tfi'
 import { TiCamera } from 'react-icons/ti'
-import { IoVideocam } from 'react-icons/io5'
+import { IoVideocam, IoNewspaper } from 'react-icons/io5'
 import { FaUserXmark } from "react-icons/fa6";
 import socket from './socket'
 import axios from 'axios'
@@ -92,7 +92,7 @@ export default function WaitingRoom() {
       setExperimentIcon(<TfiGallery style={{ fontSize: '20px' }} />)
     } else if (experimentType === 4){
       setExperimentTypeString('ArticleLab')
-      setExperimentIcon(<TfiFile style={{ fontSize: '20px' }} />)
+      setExperimentIcon(<IoNewspaper style={{ fontSize: '20px' }} />)
     } else {
       console.log("Invalid experiment type");
     }
