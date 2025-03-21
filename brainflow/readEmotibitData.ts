@@ -5,7 +5,7 @@ Sends collected data to the backend for manipulation
 
 */
 
-import { BoardIds, BoardShim, BrainFlowInputParams, BrainFlowPresets} from 'brainflow';
+import { BoardIds, BoardShim, BrainFlowInputParams, BrainFlowPresets, DataFilter} from 'brainflow';
 import * as Papa from 'papaparse';
 import * as fs from 'fs';
 import { io, Socket } from 'socket.io-client';
@@ -147,6 +147,11 @@ async function sendData(socket: Socket): Promise<void>
         unknown: 0,
     }; 
 
+    let heart_rate = 0;
+
+    let ppg_ir: number[] = [];
+    let ppg_r: number[] = [];
+
     try{
         prepareBoard();
         successfulLaunch(socket);
@@ -158,8 +163,31 @@ async function sendData(socket: Socket): Promise<void>
             // console.log("PASSED: " + passedTime);
             const anc_data = board.getBoardData(500, BrainFlowPresets.ANCILLARY_PRESET);
             const aux_data = board.getBoardData(500, BrainFlowPresets.AUXILIARY_PRESET);
+            
+            
+            // if(ppg_ir !== null && ppg_r !== null){
+            //     console.log("PPG_RED: ", ppg_r.length);
+            //     //const heart_rate = DataFilter.getHeartRate(ppg_ir, ppg_r, 500, 8192);
+            //     //console.log(heart_rate);
+            // }
 
             if(anc_data.length !== 0){ //doesn't log data if it is empty
+                ppg_ir = ppg_ir.concat(anc_data[2]);
+                ppg_r = ppg_r.concat(anc_data[1]);
+                //console.log("PPG_IR Length:", ppg_ir);
+                // console.log("PPG_R Length:", ppg_r);
+                if(ppg_ir.length >= 1024 && ppg_r.length >= 1024){
+                //    DataFilter.performLowPass(ppg_ir, 500, 5, 2, 0, 0);
+                   DataFilter.performBandPass(ppg_ir, 500, 5, 10, 2, 0, 0);
+                   DataFilter.performBandPass(ppg_r, 500, 5, 10, 2, 0, 0);
+                        // DataFilter.performHighPass(ppg_ir, 500, 5, 3, 0, 0);
+                        // DataFilter.performHighPass(ppg_r, 500, 5, 3, 0, 0);
+                //     //console.log("PPG_IR Length:", ppg_ir);
+                //     DataFilter.performLowPass(ppg_r, 500, 5, 2, 0, 0,);
+                    heart_rate = DataFilter.getHeartRate(ppg_ir.slice(-1024), ppg_r.slice(-1024), 500, 1024);
+                    console.log("HEART RATE: ", heart_rate);
+                }
+                
                 ancData = {
                     package: anc_data[0][0],
                     data1: anc_data[1][0],
@@ -180,14 +208,15 @@ async function sendData(socket: Socket): Promise<void>
                     };
             };
             
-            console.log("DATA :", ancData.data1);
+            //console.log("DATA :", ancData.data1);
                 //emit to socket an object that holds data and op parameters
                 socket.emit('update', {
                     ancData: ancData,
                     auxData: auxData,
+                    heartRate: heart_rate,
                     ...operationParameters
                 });
-                await sleep(900);
+                await sleep(200);
             }
     }
     catch(error){

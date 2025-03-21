@@ -186,6 +186,7 @@ io.on("connection", (socket) => {
     const {
       ancData,
       auxData,
+      heartRate,
       ipAddress,
       serialNumber,
       backendIp,
@@ -194,7 +195,7 @@ io.on("connection", (socket) => {
       frontEndSocketId,
       assignSocketId,
     } = payload;
-    console.log("Update Event: Received data:", JSON.stringify(ancData.data1));
+    console.log("Update Event: Received data:", JSON.stringify(heartRate));
     io.emit("update", payload);
   });
 
