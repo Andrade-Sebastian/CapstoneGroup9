@@ -10,6 +10,7 @@ interface IDataType {
     chart_type: number;
     chart_name: string;
     chart_color: string;
+    user_id: string;
 }
 let max = 98;
 let min = 93;
@@ -107,7 +108,10 @@ export default function ChartComponent(props: IDataType) {
 
         function onUpdate(payload){
             const {ancData, auxData, ipAddress, serialNumber, backendIp, hostSessionId, userId, frontEndSocketId, assignSocketId} = payload;
-            addDataPoint(ancData, auxData, ancData.timestamp);
+            const selectedUser = Number(userId);
+            if(props.user_id === selectedUser){
+                addDataPoint(ancData, auxData, ancData.timestamp);
+            }
         }
         //brainflowConnect();
         socket.on("brainflow-assignment", brainflowConnect);

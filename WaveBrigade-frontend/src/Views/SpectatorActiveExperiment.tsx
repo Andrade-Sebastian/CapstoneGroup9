@@ -109,7 +109,7 @@ export default function SpectatorActiveExperiment() {
           `http://localhost:3000/joiner/room-users/${sessionID}`
         );
         const users:IJoiner[] = response.data.users.map((user: any, index: number) => ({
-            id: index.toString(),
+            id: user.userid,
             name: user.nickname,
         })); //Array of IUser objects
         console.log("Received users, now attempting to set", users);
@@ -180,6 +180,7 @@ export default function SpectatorActiveExperiment() {
                   chart_type={1}
                   chart_name="BPM"
                   chart_color="rgb(23, 190, 207)"
+                  user_id={selectedJoiner?.id}
                 />
               </div>
             ) : activeChart === "temperatureChart" ? (
@@ -189,6 +190,7 @@ export default function SpectatorActiveExperiment() {
                   chart_type={2}
                   chart_name="°F"
                   chart_color="rgb(255, 99, 132)"
+                  user_id={selectedJoiner?.id}
                 />
               </div>
             ) : (
@@ -199,6 +201,7 @@ export default function SpectatorActiveExperiment() {
                   chart_type={3}
                   chart_name="EDA"
                   chart_color="rgb(75,0,130)"
+                  user_id={selectedJoiner?.id}
                 />
               </div>
             )}
@@ -210,7 +213,7 @@ export default function SpectatorActiveExperiment() {
             Nickname: <span className="font-light">{nickname}</span>
           </p>
           <div>
-            <p className="font-semibold"> Viewing: <span className="font-light"> {nickname}</span></p>
+            <p className="font-semibold"> Viewing: <span className="font-light"> {selectedJoiner?.name}</span></p>
           </div>
           <div className="flex space-x-4">
             <button
