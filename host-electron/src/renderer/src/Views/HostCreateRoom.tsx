@@ -19,7 +19,29 @@ export default function HostCreateRoom() {
   const [type, setType] = useState('password')
   const [icon, setIcon] = useState(eyeOff)
   const navigateTo = useNavigate()
-  const {setHostName, setSessionId, setRoomCode, setUsers, sessionId, roomCode} = useSessionStore();
+  const {setHostName, setSessionId, setRoomCode, setUsers, sessionId, roomCode, setExperimentId, setExperimentTitle,setExperimentType, setExperimentDesc, setExperimentTypeString, setVideoLabSource,setPhotoLabImageSource, setArticleLabSource, setArticleURL,setVideoID,setVideoURL} = useSessionStore();
+
+  function clearZustandStates(){
+    setHostName('');
+    setSessionId('');
+    setRoomCode('');
+    setExperimentId(0);
+    setExperimentTitle('');
+    setExperimentType(0);
+    setExperimentDesc('');
+    setExperimentTypeString('');
+    setVideoLabSource('');
+    setVideoID('');
+    setArticleLabSource('');
+    setPhotoLabImageSource('');
+    setArticleURL('');
+    setVideoURL('');
+  }
+
+  useEffect(() => {
+    console.log("Clearing zustand states...")
+    clearZustandStates();
+  }, [])
 
   useEffect(() => {
     console.log('Session ID: ' + sessionId);
