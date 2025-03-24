@@ -182,7 +182,7 @@ function sendData(socket) {
                     console.log("DATA :", ancData.data1);
                     //emit to socket an object that holds data and op parameters
                     socket.emit('update', __assign({ ancData: ancData, auxData: auxData }, operationParameters));
-                    return [4 /*yield*/, sleep(900)];
+                    return [4 /*yield*/, sleep(200)];
                 case 3:
                     _a.sent();
                     return [3 /*break*/, 2];

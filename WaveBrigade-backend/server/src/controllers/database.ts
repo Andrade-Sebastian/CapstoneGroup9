@@ -628,12 +628,9 @@ export async function addUserToSession(initializationInfo: IAddUserToSessionInfo
 		
 
 		const changeDeviceAvailabilityQuery = await dbClient.queryObject(`UPDATE device
-		SET isavailable = false
-		WHERE deviceid = ${deviceID}; `);
-
-		const changeDeviceAvailabilityQuery2 = await dbClient.queryObject(`UPDATE device
-			SET isconnected = false
-			WHERE deviceid = ${deviceID}; `);
+		SET isavailable = false, isconnected = false
+		WHERE deviceid = $1`,
+		[deviceID]);
 		
 		return query.rows[0]; 
 	}
