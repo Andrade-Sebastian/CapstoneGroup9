@@ -32,7 +32,7 @@ export default function SpectatorActiveExperiment() {
   const [recievedData, setRecievedData] = useState<number[]>([]);
   const [photoPath, setPhotoPath] = useState("");
   const [joiners, setJoiners] = useState<IJoiner[]>([]);
-  const [selectedJoiner, setSelectedJoiner] = useState<IJoiner | null>(null);
+  const [selectedJoiner, setSelectedJoiner] = useState<IJoiner>();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const {
     nickname,

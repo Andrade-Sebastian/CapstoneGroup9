@@ -77,7 +77,7 @@ export default function WaitingRoom() {
       console.log("Received experiment type from the host...")
       setExperimentType(data);
       console.log("Here is the experiment type sent by the host");
-      console.log("Experiment Type set to:", experimentType)
+      console.log("Experiment Type set to:", useJoinerStore.getState().experimentType)
     };
     socket.on("experiment-type", handleExperimentType);
     return () => {
