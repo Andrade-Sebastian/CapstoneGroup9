@@ -217,6 +217,7 @@ export default function WaitingRoom() {
           `http://localhost:3000/joiner/getVideoFile/${experimentID}`
         );
         if(response.status === 200){
+          toast.success("Successfully received video lab data.")
           console.log("Returned get video data:", response.data);
           const experimentTitle = response.data.name;
           const experimentDesc = response.data.description;
@@ -240,7 +241,7 @@ export default function WaitingRoom() {
           `http://localhost:3000/joiner/getPhoto/${experimentID}`
         );
         if (response.status === 200) {
-          //toast.success("Successfully received photolab data.");
+          toast.success("Successfully received photo lab data.");
           console.log("RETURNED GET PHOTO DATA: ", response.data);
           const experimentTitle = response.data.name;
           const captions = response.data.captions;
@@ -271,19 +272,21 @@ export default function WaitingRoom() {
           `http://localhost:3000/joiner/getGallery/${experimentID}`
         );
         if (response.status === 200) {
-          //toast.success("Successfully received photolab data.");
+          toast.success("Successfully received gallery lab data.");
           console.log("RETURNED GET GALLERY DATA: ", response.data);
-          // const experimentTitle = response.data.name;
+          const experimentTitle = response.data.name;
+          const experimentDesc = response.data.description;
+          const images = response.data.images;
           // const captions = response.data.captions;
-          // const experimentDesc = response.data.description;
           // const path = response.data.path;
           //NEED THE EXPERIMENT TYPE
           console.log(
-            "RESPONSE DATA VARIABLES: "
+            "RETURNED GET GALLERY DATA: ", response.data
           );
-          // setExperimentId(experimentID);
-          // setExperimentTitle(experimentTitle);
-          // setExperimentDesc(experimentDesc);
+          
+          setExperimentId(experimentID);
+          setExperimentTitle(experimentTitle);
+          setExperimentDesc(experimentDesc);
           // setExperimentPath(path);
         }
       } catch (error) {
@@ -298,7 +301,7 @@ export default function WaitingRoom() {
           `http://localhost:3000/joiner/getArticleFile/${experimentID}`
         );
         if (response.status === 200) {
-          //toast.success("Successfully received photolab data.");
+          toast.success("Successfully received article lab data.");
           console.log("RETURNED GET Article DATA: ", response.data);
           const experimentTitle = response.data.name;
           const experimentDesc = response.data.description;
@@ -410,7 +413,3 @@ export default function WaitingRoom() {
 function then(arg0: () => void) {
   throw new Error("Function not implemented.");
 }
-
-
-//PROBLEM: SO THE FIRST JOINER GETS KICKED CORRECTLY AND GETS SENT TO THE JOIN PAGE. HOWEVER, WHEN I TRY TO JOIN AS A NEW
-//JOINER, THE BACKEND REMEMBERS AN OLD SOCKETID, THE ONE THAT WAS ALREADY KICKED, AND TRIES TO DISCONNECT THAT ONE INSTEAD OF THE NEW GUY

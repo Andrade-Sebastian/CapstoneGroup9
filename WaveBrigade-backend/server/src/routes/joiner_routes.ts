@@ -316,7 +316,7 @@ joinerRouter.get("/getPhoto/:experimentID", async (req: Request, res: Response) 
 joinerRouter.get("/getGallery/:experimentID", async (req: Request, res: Response) => {
     console.log("In joiner/getGallery/:experimentID", req.body);
     
-    const experimentID = req.params.experimentID;
+    const experimentID = parseInt(req.params.experimentID);
     
     try{
         const galleryInfo = await getGalleryLabInfo(experimentID);
