@@ -19,7 +19,7 @@ export default function HostCreateRoom() {
   const [type, setType] = useState('password')
   const [icon, setIcon] = useState(eyeOff)
   const navigateTo = useNavigate()
-  const {setHostName, setSessionId, setRoomCode, setUsers, sessionId, roomCode} = useSessionStore();
+  const {setHostName, setSessionId, setRoomCode, setUsers, setSpectators, sessionId, roomCode} = useSessionStore();
 
   useEffect(() => {
     console.log('Session ID: ' + sessionId);
@@ -40,19 +40,19 @@ export default function HostCreateRoom() {
 
 
   //hardcoded to test host/session/create
-  const [sessionInfo, setSessionInfo] = useState({
-    sessionName: '',
-    selectedExperimentId: '17', //(ideally this would be undefined)
-    password: password,
-    allowSpectators: true
-  })
+  // const [sessionInfo, setSessionInfo] = useState({
+  //   sessionName: '',
+  //   selectedExperimentId: '17', //(ideally this would be undefined)
+  //   password: password,
+  //   allowSpectators: true
+  // })
 
-  const testSessionInfo = {
-    sessionName: 'Awesome',
-    selectedExperimentId: '17',
-    allowSpectators: true,
-    password: ''
-  }
+  // const testSessionInfo = {
+  //   sessionName: 'Awesome',
+  //   selectedExperimentId: '17',
+  //   allowSpectators: true,
+  //   password: ''
+  // }
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -82,6 +82,7 @@ export default function HostCreateRoom() {
       if(response.status === 200){
         setSessionId(response.data.sessionid);
         setRoomCode(response.data.roomcode);
+        setSpectators(allowSpectators);
       }
       console.log(response.data);
       //navigate to idk

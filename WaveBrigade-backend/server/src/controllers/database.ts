@@ -61,7 +61,17 @@ export interface IArticleLabDatabaseInfo{
 }
 
 
+export async function checkSpectators(sessionID: number){
 
+	try {
+		await dbClient.connect();
+		const query = await dbClient.queryObject(`SELECT isspectatorsallowed FROM SESSION WHERE sessionid = $1`, [sessionID]);
+		return query.rows[0];
+	}
+	catch(error){
+		console.log("Error getting spectator info from session");
+	}
+}
 
 export async function joinSessionAsSpectator(socketID: string, nickname: string, roomCode: string){
 	
