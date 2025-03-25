@@ -40,6 +40,7 @@ export default function WaitingRoom() {
     experimentTypeString,
     setExperimentTypeString,
     setExperimentPath,
+    addPhoto,
     setWasKicked,
     wasKicked,
     experimentId,
@@ -287,7 +288,14 @@ export default function WaitingRoom() {
           setExperimentId(experimentID);
           setExperimentTitle(experimentTitle);
           setExperimentDesc(experimentDesc);
-          // setExperimentPath(path);
+          images.forEach((image, index) => {
+            addPhoto({
+              id: index,
+              src: image.path,
+              file:null,
+              caption: image.caption
+            })
+          })
         }
       } catch (error) {
         toast.error("Failed to receive photo data");

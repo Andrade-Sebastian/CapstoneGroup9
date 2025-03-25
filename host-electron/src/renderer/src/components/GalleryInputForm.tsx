@@ -103,7 +103,7 @@ export default function GalleryInputForm(props: IGalleryInput) {
     props.onFileSelected(true)
 
     const newPhoto = {
-      id: imageID + 1, //change later
+      id: imageID + 1, 
       src: url,
       caption: caption,
       uploadedAt: new Date()

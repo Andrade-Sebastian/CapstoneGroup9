@@ -135,6 +135,22 @@ app.get("/get-videoFile/:filename", (req: Request, res: Response) => {
     res.status(404).json({ success: false, message: "Video not found" });
   }
 });
+//Getting gallery logic to show for the joiner, the get is in joiner fe active experiment
+app.get("/get-gallery/:filename", (req: Request, res: Response) => {
+  const { filename } = req.params;
+  if (filename.includes("..")) {
+    return res
+    .status(400)
+    .json({ success: false, message: "Invalid Filename" });
+  }
+  const filePath = path.join(__dirname, "/media/gallery-lab/", filename);
+  
+  if (fs.existsSync(filePath)) {
+    res.sendFile(filePath);
+  } else {
+    res.status(404).json({ success: false, message: "Image not found" });
+  }
+});
 
 //Getting article logic to show for the joiner, the get is in joiner fe active experiment
 app.get("/get-articleFile/:filename", (req: Request, res: Response) => {
@@ -263,6 +279,12 @@ io.on("connection", (socket) => {
     console.log("Socket: seek-video] Attempting to seek video. Seconds passed:", seconds)
     latestSeekTime = seconds;
     socket.broadcast.emit("seek-video", seconds)
+  })
+
+  socket.on("image-selected", (image) => {
+    console.log("In event image-selected, now attempting to send image to students");
+    socket.broadcast.emit("image-selected", image);
+    console.log("Broadcasted image to students");
   })
 
   session_handlers(io, socket, rooms, isHost);

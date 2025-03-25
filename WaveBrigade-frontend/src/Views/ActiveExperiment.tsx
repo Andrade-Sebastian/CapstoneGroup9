@@ -14,6 +14,7 @@ import React from "react";
 import { stringify } from "postcss";
 import { useNavigate } from "react-router-dom";
 import ReactPlayer from 'react-player';
+import GalleryViewer from "../Components/GalleryViewer.tsx";
 
 export default function ActiveExperiment() {
   const [selectedButton, setSelectedButton] = useState("heartRate");
@@ -23,6 +24,8 @@ export default function ActiveExperiment() {
   const [isMediaAFile, setIsMediaAFile] = useState(false)
   const [photoPath, setPhotoPath] = useState("");
   const [videoPath, setVideoPath] = useState("");
+  const [galleryPath, setGalleryPath] = useState("");
+  const [selectedCaption, setSelectedCaption] = useState("");
   const [articlePath, setArticlePath] = useState("");
   const [isPlaying, setIsPlaying] = useState(false);
   const playerRef = useRef(null);
@@ -35,6 +38,7 @@ export default function ActiveExperiment() {
     roomCode,
     experimentId,
     experimentPath,
+    galleryPhotos,
     experimentTitle,
     experimentDesc,
     experimentType
@@ -119,6 +123,13 @@ export default function ActiveExperiment() {
             console.log("VideoID set to ", videoID)
           });
       };
+      const getGalleryInfo = async () => {
+        const response = await axios
+          .get(`http://localhost:3000/joiner/getGallery/${experimentId}`)
+          .then((response) => {//THERE IS NOTHING BEING SET HERE
+            console.log("Gallery lab path in activity page:", response.data.path);
+          });
+      };
       
       const getArticleInfo = async () => {
         const response = await axios
@@ -141,6 +152,10 @@ export default function ActiveExperiment() {
     if(experimentType === 2){
       setPhotoPath(experimentPath)
       getPhotoInfo();
+    }
+    if(experimentType === 3){
+      setGalleryPath(experimentPath)
+      getGalleryInfo();
     }
     if(experimentType === 4){
       setArticlePath(experimentPath)
@@ -191,6 +206,19 @@ export default function ActiveExperiment() {
         console.log("Error retrieving video:", error);
       }
     }
+    const fetchStoredGallery = async (filename: string) => {
+      try{
+        const response = await axios.get(`http://localhost:3000/get-gallery/${filename}`);
+        if(response.status === 200){
+          console.log("Fetched photo path:", response.config.url);
+          setGalleryPath(response.config.url);
+          toast.success("Successfully retreived video!")
+        }
+      }
+      catch(error){
+        console.log("Error retrieving image from gallery:", error);
+      }
+    }
     const fetchStoredArticle = async () => {
       const filename = experimentPath.split("/").pop();
       try{
@@ -213,11 +241,19 @@ export default function ActiveExperiment() {
       console.log("Fetching photo...")
       fetchStoredPhoto();
     }
+    if(experimentType === 3){
+      console.log("Fetching gallery...")
+      socket.on("image-selected", (imageData) => {
+      console.log("Gallery image-selected event recieved. Host changed the image, fetching stored gallery...", imageData);
+      setSelectedCaption(imageData.caption);
+      fetchStoredGallery(imageData.filename);})
+    }
     if(experimentType === 4){
       console.log("Fetching article...")
       fetchStoredArticle();
     }
   },[experimentPath, experimentType, setPhotoPath, setVideoPath, setArticlePath, articlePath]);
+
 
 
   useEffect(()=> {
@@ -258,7 +294,7 @@ export default function ActiveExperiment() {
             
           ): experimentType == 3 ? (
             <div>
-              <p>Gallery lab stuff</p>
+              <GalleryViewer imageSrc={galleryPath} caption={selectedCaption}/>
               </div>
           ) : experimentType == 4 && isMediaAFile ? (
             <div>

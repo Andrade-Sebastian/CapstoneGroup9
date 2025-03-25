@@ -261,7 +261,7 @@ databaseRouter.post("/gallery-lab", upload.array("images"), async(req: Request, 
 
         const detectedFileExtension = determineFileExtension(file);
         const fileNumber = await getNumberFilesInDirectory(galleryLabMediaDirectory);
-        const newFileName = `${fileNumber}_${detectedFileExtension}`;
+        const newFileName = `${fileNumber}${detectedFileExtension}`;
         const newFilePath = `${galleryLabMediaDirectory}/${newFileName}`;
 
         await fsPromises.rename(file.path, newFilePath);

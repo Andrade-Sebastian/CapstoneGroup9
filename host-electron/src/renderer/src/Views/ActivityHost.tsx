@@ -23,6 +23,7 @@ import React from 'react'
 import useBrainflowManager from '../hooks/useBrainflowManager.ts'
 import { io } from 'socket.io-client'
 import ReactPlayer from 'react-player'
+import GalleryComponent from "../components/GalleryComponent.tsx";
 
 export default function ActivityHost() {
   const {
@@ -45,7 +46,8 @@ export default function ActivityHost() {
     articleLabSource,
     photoLabImageSource,
     experimentTitle,
-    experimentDesc
+    experimentDesc,
+    galleryPhotos
   } = useSessionStore()
   const { handleHostEndSession } = useBrainflowManager()
   const [nicknames, setNickNames] = useState<string[]>([])
@@ -302,10 +304,9 @@ export default function ActivityHost() {
             >
             </img>
           ) : experimentType == 3 ? (
-            <div> 
-              <p> 
-                Gallery Lab Images here
-              </p>
+            <div className='w-full mt-8'>
+              <h2 className='text-xl font-semibold mb-4 text-center'> Uploaded Gallery</h2>
+              <GalleryComponent images={galleryPhotos}/>
             </div>
           ) : experimentType == 4 && isMediaAFile ? (
             // Not a huge bug but the source should be the article lab source, it's flip flopped, don't know why

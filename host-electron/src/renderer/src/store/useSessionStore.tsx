@@ -56,6 +56,7 @@ interface SessionState{
     //gallery
     galleryPhotos: IGallery[];
     currentGalleryIndex: number | null;
+    selectedGalleryImage: IGallery | null;
     
     devices: IDevice[];
     experimentTypeString: string;
@@ -86,6 +87,7 @@ interface SessionState{
     removePhoto: (id: string) => void;
     clearPhotos: () => void;
     setCurrentGalleryIndex: (index: number) => void;
+    setSelectedGalleryImage: (image: IGallery | null) => void;
     reorderPhoto: (fromIndex: number, toIndex: number) => void;
     addDevice: (device: IDevice) => void;
     removeDevice: (deviceId: string)=> void;
@@ -110,6 +112,7 @@ export const useSessionStore = create<SessionState>()(
             articleURL: '',
             galleryPhotos: [],
             currentGalleryIndex: null,
+            selectedGalleryImage: null,
             devices: [],
             experimentType: 0,
             experimentTypeString: '',
@@ -139,6 +142,7 @@ export const useSessionStore = create<SessionState>()(
             removePhoto: (id): void => set((state) => ({ galleryPhotos: state.galleryPhotos.filter((p) => p.id !== id)})),
             clearPhotos: (): void => set({ galleryPhotos: [], currentGalleryIndex: null}),
             setCurrentGalleryIndex: (index): void => set({ currentGalleryIndex: index}),
+            setSelectedGalleryImage: (image): void => set(() => ({selectedGalleryImage: image})),
             reorderPhoto: (fromIndex, toIndex): void => set((state) => { const photos = [...state.galleryPhotos] 
               if(fromIndex < 0 || toIndex < 0 || fromIndex >= photos.length || toIndex >= photos.length){
                 return{}
