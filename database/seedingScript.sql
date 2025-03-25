@@ -21,6 +21,25 @@ CREATE TABLE IF NOT EXISTS PhotoLab
 );
 
 --Done Refactoring
+CREATE TABLE IF NOT EXISTS VideoLab
+(
+    VideoLabID SERIAL PRIMARY KEY,
+    ExperimentID SERIAL REFERENCES Experiment(ExperimentID),
+    Path VARCHAR(100)
+);
+
+CREATE TABLE IF NOT EXISTS GalleryLab
+(
+    GalleryLabID SERIAL PRIMARY KEY,
+    ExperimentID INTEGER REFERENCES Experiment(ExperimentID),
+    Filename VARCHAR(256),
+    Path VARCHAR(256),
+    Caption VARCHAR(512),
+    TimeShown INTEGER,
+    ImageOrder INTEGER
+);
+
+--Done Refactoring
 CREATE TABLE IF NOT EXISTS Session
 (
     SessionID serial PRIMARY KEY,
@@ -98,22 +117,3 @@ CREATE TABLE IF NOT EXISTS RecordingDataPoint
     Timestamp TIMESTAMP
 );
 
-
---Done Refactoring
-CREATE TABLE IF NOT EXISTS VideoLab
-(
-    VideoLabID SERIAL PRIMARY KEY,
-    ExperimentID SERIAL REFERENCES Experiment(ExperimentID),
-    Path VARCHAR(100)
-);
-
-CREATE TABLE IF NOT EXISTS GalleryLab
-(
-    GalleryLabID INTEGER PRIMARY KEY,
-    ExperimentID INTEGER REFERENCES Experiment(ExperimentID),
-    Filename VARCHAR(256),
-    Path VARCHAR(256),
-    Caption VARCHAR(512),
-    TimeShown INTEGER,
-    ImageOrder INTEGER
-);

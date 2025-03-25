@@ -190,7 +190,7 @@ databaseRouter.post("/video-lab", upload.single("videoBlob"), async(req: Request
         sessionID = await getSessionIDFromSocketID(socketID);
         console.log("In DB Route of /video-lab. SessionID:", sessionID);
         if(videoID){
-            console.log("WALTER, here is the exp. info bruh:", experimentTitle, "video ID hopefully", videoID, "SocketID",socketID);
+            console.log("Video lab info", experimentTitle, "video ID", videoID, "SocketID",socketID);
             experimentID = await createVideoLabInDatabase({
                 experimentTitle: experimentTitle, 
                 experimentDescription: experimentDescription,
@@ -229,28 +229,62 @@ databaseRouter.post("/video-lab", upload.single("videoBlob"), async(req: Request
 });
 
 
-databaseRouter.post("/gallery-lab", async(req: Request, res: Response) => {
-    //check to see if the type matches
-    const galleryLabInfo = req.body;
-    // const {
-    //     experimentID,
-    //     path,
-    //     captions
-    // } = req.body;
-
+databaseRouter.post("/gallery-lab", upload.array("images"), async(req: Request, res: Response) => {
     try{
-        console.log("(database_routes.ts: In galleryLab, recieved : ", JSON.stringify(galleryLabInfo))
-        await createGalleryLabInDatabase(galleryLabInfo)
-        console.log("(database_routes.ts): !!Gallery Lab to database :D-=")
+    const imageFiles = req.files as Express.Multer.File[]
+    const {experimentTitle, experimentDescription, socketID} = req.body;
+    const rawCaptions = req.body.captions;
+
+    if(!imageFiles || imageFiles.length === 0) {
+        return res.status(400).json({message: "No images uploaded."});
+    }
+
+    const captions = Array.isArray(rawCaptions) ? rawCaptions : [rawCaptions];
+
+    //just in case there is a mismatch of captions and files
+    if (captions.length !== imageFiles.length) {
+        return res.status(400).json({message: "Number of captions need to match the number of images."});
+    }
+    const sessionID = await getSessionIDFromSocketID(socketID);
+
+    if(!sessionID){
+        return res.status(404).json({message: "There is no session found for given socketID."});
+    }
+
+    //create experiment 
+    let experimentID = null;
+    const imagesToInsert: {path: string, caption: string }[] = [];
+    
+    for(let i = 0; i < imageFiles.length; i++) {
+        const file = imageFiles[i];
+        const caption = captions[i];
+
+        const detectedFileExtension = determineFileExtension(file);
+        const fileNumber = await getNumberFilesInDirectory(galleryLabMediaDirectory);
+        const newFileName = `${fileNumber}_${detectedFileExtension}`;
+        const newFilePath = `${galleryLabMediaDirectory}/${newFileName}`;
+
+        await fsPromises.rename(file.path, newFilePath);
+
+        imagesToInsert.push({
+            path: `/media/gallery-lab/${newFileName}`, //path
+            caption
+        });   
+    }
+    experimentID = await createGalleryLabInDatabase({experimentTitle: experimentTitle, experimentDescription: experimentDescription, socketID: socketID}, imagesToInsert, sessionID);
+
+    
+    console.log("(database_routes.ts: In galleryLab, recieved : ", sessionID);
+    res.status(200).json({
+    message: "Gallery lab created successfully.",
+    experimentID});
     } catch (error) {
+        console.log("Error in /gallery-lab", error);
         res.status(500).send({
             "message": "Could not add gallery lab to database",
             "error": error
         });
     }
-    res.status(200).send({
-        "message": "In gallery-lab"
-    })
 })
 
 databaseRouter.post("/article-lab", upload.single("articleBlob"), async(req: Request, res: Response) => {

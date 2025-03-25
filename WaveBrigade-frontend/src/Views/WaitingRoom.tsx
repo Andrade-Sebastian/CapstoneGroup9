@@ -93,7 +93,6 @@ export default function WaitingRoom() {
   useEffect(() => {
     function kickUser()
     {
-
       //Global store that keeps track of whether the user has been previously kicked or not
       setWasKicked(true);
       console.log("Kick function. Here is the socketID and sessionID", socketId, sessionId)
@@ -265,6 +264,33 @@ export default function WaitingRoom() {
         console.log("Error receiving photolab data in joiner fe: ", error);
       }
     };
+    const getGalleryData = async () => {
+      try {
+        console.log("SENDING TO THE ROUTE EXPERIMENT ID: ", experimentID);
+        const response = await axios.get(
+          `http://localhost:3000/joiner/getGallery/${experimentID}`
+        );
+        if (response.status === 200) {
+          //toast.success("Successfully received photolab data.");
+          console.log("RETURNED GET GALLERY DATA: ", response.data);
+          // const experimentTitle = response.data.name;
+          // const captions = response.data.captions;
+          // const experimentDesc = response.data.description;
+          // const path = response.data.path;
+          //NEED THE EXPERIMENT TYPE
+          console.log(
+            "RESPONSE DATA VARIABLES: "
+          );
+          // setExperimentId(experimentID);
+          // setExperimentTitle(experimentTitle);
+          // setExperimentDesc(experimentDesc);
+          // setExperimentPath(path);
+        }
+      } catch (error) {
+        toast.error("Failed to receive photo data");
+        console.log("Error receiving photolab data in joiner fe: ", error);
+      }
+    };
     const getArticleData = async () => {
       try {
         console.log("SENDING TO THE ROUTE EXPERIMENT ID: ", experimentID);
@@ -299,6 +325,9 @@ export default function WaitingRoom() {
     }
     if(experimentType === 2){
       getPhotoData();
+    }
+    if(experimentType === 3){
+      getGalleryData();
     }
     if(experimentType === 4){
       getArticleData();
