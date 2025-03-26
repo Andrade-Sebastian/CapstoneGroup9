@@ -62,7 +62,17 @@ export interface IArticleLabDatabaseInfo{
 }
 
 
+export async function checkSpectators(sessionID: number){
 
+	try {
+		await dbClient.connect();
+		const query = await dbClient.queryObject(`SELECT isspectatorsallowed FROM SESSION WHERE sessionid = $1`, [sessionID]);
+		return query.rows[0];
+	}
+	catch(error){
+		console.log("Error getting spectator info from session");
+	}
+}
 
 export async function joinSessionAsSpectator(socketID: string, nickname: string, roomCode: string){
 	
@@ -649,12 +659,9 @@ export async function addUserToSession(initializationInfo: IAddUserToSessionInfo
 		
 
 		const changeDeviceAvailabilityQuery = await dbClient.queryObject(`UPDATE device
-		SET isavailable = false
-		WHERE deviceid = ${deviceID}; `);
-
-		const changeDeviceAvailabilityQuery2 = await dbClient.queryObject(`UPDATE device
-			SET isconnected = false
-			WHERE deviceid = ${deviceID}; `);
+		SET isavailable = false, isconnected = false
+		WHERE deviceid = $1`,
+		[deviceID]);
 		
 		return query.rows[0]; 
 	}
