@@ -104,8 +104,6 @@ export default function WaitingRoom() {
       console.log("Kicking user from database in sessionID: ", sessionId);
       //is sessionID the global one? or a useState?
 
-
-
       axios.post('http://localhost:3000/joiner/leave-room', {
         sessionID: sessionId,
         socketID: socketId
@@ -147,11 +145,11 @@ export default function WaitingRoom() {
 
   useEffect(() => {
     const getSessionID = async () => {
-      const response = await axios
+      const _response = await axios
         .get(`http://localhost:3000/joiner/verify-code/${roomCode}`)
         .then((response) => {
           setSessionID(response.data.sessionID);
-          setSessionId(sessionID)
+          setSessionId(response.data.sessionID)
         });
     }; 
 
@@ -162,14 +160,15 @@ export default function WaitingRoom() {
   }, []);
 
   useEffect(() => {
+    console.log("SessionID: ", sessionId)
     if (!sessionID) return;
 
     const fetchUsers = async () => {
       try {
-        console.log("Trying to get users from session " + sessionID);
+        console.log("(Joiner | WaitingRoom.ts): Trying to get users from session " + sessionId);
         console.log("Socket ID: ", socketId);
         const response = await axios.get(
-          `http://localhost:3000/joiner/room-users/${sessionID}`
+          `http://localhost:3000/joiner/room-users/${sessionId}`
         );
         const users = response.data.users; //Array of IUser objects
 
@@ -186,6 +185,7 @@ export default function WaitingRoom() {
         }
 
         setNickNames(nicknames);
+        console.log("Recieved users: ", JSON.stringify(nicknames))
       } catch (error) {
         console.error("Error fetching users:", error);
       }
@@ -201,6 +201,7 @@ export default function WaitingRoom() {
   useEffect(() => {
     const getExperimentData = async () => {
       try {
+        console.log("Trying to get rc, ", roomCode)
         const response = await axios.get(
           `http://localhost:3000/joiner/session/getInfo/${roomCode}`
         );

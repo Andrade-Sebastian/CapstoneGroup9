@@ -1,6 +1,5 @@
 import express, { Request, Response } from "express";
 import {getSessionState} from "../controllers/session_controller.ts";
-import SessionManager from "../sessions_singleton.ts";
 import { addSocketToSession } from "../sessionMappings.ts";
 import {addUserToSession, getUsersFromSession, validateRoomCode, removeUserFromSession, validDeviceSerial, validatePassword, getPhotoLabInfo, getVideoLabInfo, joinSessionAsSpectator} from "../controllers/database.ts";
 import {Filter} from "npm:bad-words";
@@ -159,6 +158,7 @@ joinerRouter.get("/check-name/:nickName", async (req: Request, res: Response) =>
         return res.status(500).json({success: false, message: "Internal server error"});
     }
 })
+
 joinerRouter.get("/validateRoomCode/:roomCode", async (req: Request, res: Response) => {
     const roomCode = req.params.roomCode;
     console.log("Roomcode: ", roomCode);
@@ -183,7 +183,9 @@ joinerRouter.get("/validateRoomCode/:roomCode", async (req: Request, res: Respon
     
 })
 
-joinerRouter.post("/leave-room", (req: Request, res: Response) => {
+joinerRouter.post("/leave-room", async(req: Request, res: Response) => {
+    console.log("In leave-room");
+    
     const {
         sessionID,
         socketID
@@ -191,7 +193,7 @@ joinerRouter.post("/leave-room", (req: Request, res: Response) => {
     console.log("In /leave-room, recieved", req.body)
     
     try {
-        const users = removeUserFromSession(sessionID, socketID);
+        const users = await removeUserFromSession(sessionID, socketID);
 
         //Free up EmotiBit if possible (do last)
         return res.status(200).send({
@@ -341,9 +343,13 @@ joinerRouter.get("/verify-code/:roomCode", async (req: Request, res: Response) =
             sessionID
         } = await validateRoomCode(roomCode);
         
-        if (isValidRoomCode) {
+        if (isValidRoomCode === true) {
             return res.status(200).json({ 
                 sessionID: sessionID
+            })
+        }else{
+            return res.status(404).send({
+                sessionID: null
             })
         }
     } catch (error) {

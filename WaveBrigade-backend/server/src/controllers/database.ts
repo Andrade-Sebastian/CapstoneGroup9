@@ -1,12 +1,13 @@
 import { Client } from "https://deno.land/x/postgres@v0.17.0/mod.ts"; //for database functionality
 
 export const dbClient = new Client({
-  user: "postgres",
-  database: "WB_Database",
-  password: "postgres",
-  hostname: "wb-backend-database",
-  port: 5432,
+	user: "postgres",
+	database: "WB_Database",
+	password: "postgres",
+	hostname: "wb-backend-database",
+	port: 5432,
 });
+  
 
 
 interface ISessionCreationParams{
@@ -195,24 +196,31 @@ export async function createExperiment(experimentName: string, description: stri
 }
 
 
-export async function validateRoomCode(roomCode:string): Promise<{isValidRoomCode: boolean, sessionID: string | null}>
+export async function validateRoomCode(roomCode:string): Promise<{isValidRoomCode: boolean, sessionID: number | null}>
 {
 
 	let isValidRoomCode = false;
 
 	try{
+		console.log("-------------------");
+		console.log("Initializing db")
+		console.log("Connecting to database")
 		await dbClient.connect();
+		console.log("Finished connecting to database")
+		console.log(`query is: SELECT sessionid FROM session WHERE roomcode= ${roomCode} LIMIT 1`)
 		const query = await dbClient.queryObject(`SELECT 
 			sessionid FROM session WHERE roomcode= $1 LIMIT 1`,
 			[roomCode]);
-		// console.log(query)
-		// console.log("rows length", query.rows.length)
-
+		console.log("After queryobject")
+		console.log(query);
+		console.log("rows length", query.rows.length);
+		
 		if (query.rows.length > 0){//result is valid
 			console.log("(database.ts): Validated room code")
+			console.log("-------------------");
 			const sessionID = query.rows[0].sessionid;
 			isValidRoomCode = true;
-
+			
 			const roomCodeValidationInfo = {
 				isValidRoomCode: isValidRoomCode,
 				sessionID: sessionID
@@ -225,9 +233,10 @@ export async function validateRoomCode(roomCode:string): Promise<{isValidRoomCod
 		}
 		else{
 			console.log("(database.ts): Invalid room code");
+			console.log("-------------------");
 			return {
 				isValidRoomCode: isValidRoomCode,
-				sessionID: null
+				sessionID: -1
 			}
 		}
 		
@@ -236,7 +245,7 @@ export async function validateRoomCode(roomCode:string): Promise<{isValidRoomCod
 		console.log("(database.ts): No valid room code: " + error)
 		return {
 			isValidRoomCode: isValidRoomCode,
-			sessionID: ""
+			sessionID: -1
 		}
 	}
 }
@@ -700,16 +709,19 @@ export async function removeUserFromSession(sessionID: string, socketID: string)
 	console.log("in removeUserFromSession, sessionID is ", sessionID, "socketID is ", socketID);
 	try{
 		await dbClient.connect();
-		const getDevice = await dbClient.queryObject(`SELECT device FROM "User" WHERE sessionID = $1 AND frontendsocketid = $2 AND userrole = $3`,
-			[sessionID, socketID, "joiner"]
+		const getDevice = await dbClient.queryObject(`SELECT device FROM "User" WHERE sessionID = $1 AND frontendsocketid = $2`,
+			[sessionID, socketID]
 		)
 		const query = await dbClient.queryObject(`DELETE FROM "User" WHERE sessionID = $1 AND frontendsocketid = $2`,
 			[sessionID, socketID]
 		);
+		console.log("here: ", query)
 		console.log("Deleted user");
-		const deviceID = getDevice.rows[0]
-		console.log("(LoOk HeRe): device id is", deviceID.device )
-		await makeDeviceAvailable(deviceID.device);
+		const deviceID = (getDevice.rows[0] as { device: number }) || null;
+		// console.log("(LoOk HeRe): device id is", deviceID.device )
+		if (deviceID !== null){ //bc the spectator's device is null
+			await makeDeviceAvailable(deviceID.device);
+		}
 	}
 	catch(error){
 		console.log("Unable to delete user", error);

@@ -71,6 +71,12 @@ app.use("/host", hostRouter);
 app.use("/joiner", joinerRouter);
 app.use("/database", databaseRouter);
 app.use("/experiment", experimentRouter);
+
+app.use((req, res, next) => {
+  console.log(`Received request: ${req.method} ${req.url}`);
+  next();
+});
+
 // app.use('/media', express.static(path.join(__dirname, 'media')));
 
 export const io = new Server(server, {
@@ -231,7 +237,7 @@ io.on("connection", (socket) => {
       frontEndSocketId,
       assignSocketId,
     } = payload;
-    console.log("Update Event: Received data:", JSON.stringify(ancData.data1));
+    // console.log("Update Event: Received data:", JSON.stringify(ancData.data1));
     io.emit("update", payload);
   });
 

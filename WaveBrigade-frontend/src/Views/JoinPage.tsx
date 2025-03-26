@@ -35,7 +35,7 @@ export default function JoinPage() {
 	socket.connect()
 
     setUserRole("student");
-	console.log("Global wasKicked variable: ", wasKicked)
+	console.log("(JoinPage.tsx): Global wasKicked variable: ", wasKicked)
 
 	if(wasKicked){
 		console.log("JoinPage.tsx: User was kicked")
@@ -84,15 +84,17 @@ export default function JoinPage() {
           toast.success("Room code valid. Password is needed...");
           //Set global store 'userRole' to 'spectator'
           setUserRole("spectator");
-          console.log("global user role: ", userRole);
+          console.log("(JoinPage.tsx): ", userRole);
 
-          console.log("before axios call");
+
+
+          console.log("(JoinPage.tsx): before axios call");
           //check to see if the session allows spectators
-          console.log("sessionID", sessionID);
+          console.log("(JoinPage.tsx) - 91: Passing in sessionID to /allowsSpectators", sessionId);
           const response = await axios.get(
             `http://localhost:3000/joiner/session/allows-spectators/${sessionId}`
           );
-          console.log("response:", response.data.allowsSpectators);
+          console.log("(JoinPage.tsx): Allows spectators - 95: ", response.data.allowsSpectators);
 
           //navigate them to the password page
           setTimeout(() => {
@@ -149,22 +151,25 @@ export default function JoinPage() {
     try {
       console.log("Validating room code..." + StudentInputRoomCode);
       setRoomCode(StudentInputRoomCode); // Store the room code in global state
-
-      const response = await axios.get(
+      let response = null;
+      response = await axios.get(
         `http://localhost:3000/joiner/verify-code/${StudentInputRoomCode}`
       );
-      console.log("Session ID: ", response.data.sessionID);
+      console.log("Full response", response)
+      console.log("(JoinPage.tsx) - validateRoomCode(): Session ID: ", response.data.sessionID);
       console.log("Response status: ", response.status);
 
       if (response.status === 200) {
         console.log("Room code is valid!");
         setSessionId(response.data.sessionID); // Store sessionID when room code is valid
+        console.log(sessionId)
         setRoomCode(StudentInputRoomCode);
         setNickname(nickName);
         //launchProcess();
         console.log("Response from validate room code", response.data);
         return true;
       }
+      console.log("here")
       toast.error("Could not validate code due to an API error...");
       return false;
     } catch (error) {

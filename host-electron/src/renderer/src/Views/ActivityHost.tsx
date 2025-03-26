@@ -146,7 +146,7 @@ export default function ActivityHost() {
     setSessionID(useSessionStore.getState().sessionId)
     const fetchUsers = async () => {
       try {
-        console.log('Trying to get users from session ' + sessionID)
+        console.log('(ActivityHost.ts): Trying to get users from session ' + sessionID)
         const response = await axios.get(`http://localhost:3000/joiner/room-users/${sessionID}`)
         const users = response.data.users //Array of IUser objects
 

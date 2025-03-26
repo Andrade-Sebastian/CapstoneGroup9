@@ -390,7 +390,7 @@ export default function WaitingRoom() {
           }
           return user;
         });
-        console.log("Zustand usersafter kick", updatedUsers)
+        console.log("Zustand users after kick", updatedUsers)
         return { users: updatedUsers};
       });
 
@@ -446,9 +446,11 @@ export default function WaitingRoom() {
   }, [setUsers, setTheUserMap]);
 
   useEffect(() => {
+    console.log("hello um, ", !useSessionStore.getState().sessionId);
+    console.log("sessionId:askjdnalksjdna", sessionId)
+    setSessionID(useSessionStore.getState().sessionId)
     if (!useSessionStore.getState().sessionId) return
 
-    setSessionID(useSessionStore.getState().sessionId)
     const fetchUsers = async () => {
       try {
         // console.log('Trying to get users from session ' + sessionID);
