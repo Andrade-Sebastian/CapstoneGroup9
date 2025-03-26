@@ -1,6 +1,7 @@
 import express, { Request, Response } from "npm:express";
 import { createSessionInDatabase, registerDevice, getUserExperimentData, updateDeviceConnection, getSessionDevices } from "../controllers/database.ts";
 import { Client } from "https://deno.land/x/postgres@v0.17.0/mod.ts";
+import * as bcrypt from "https://deno.land/x/bcrypt/mod.ts";
 
 const dbClient = new Client({
   user: "postgres",
@@ -12,6 +13,7 @@ const dbClient = new Client({
 
 const hostRouter = express.Router();
 let experimentData = {}
+const saltRounds = 10;
 
 hostRouter.use(express.json());
 
@@ -22,13 +24,16 @@ hostRouter.use(express.json());
 //Returns: The session that was created (JSON)
 hostRouter.post("/session/create", async (req: Request, res: Response) => {
 
+
     try {
+        const salt = await bcrypt.genSalt(saltRounds);
+        const hash = await bcrypt.hash(req.body.password, salt);
 
         const session = await createSessionInDatabase(
         {
             hostSocketID: req.body.hostSocketID,
             isPasswordProtected: req.body.isPasswordProtected,
-            password: req.body.password,
+            password: hash,
             isSpectatorsAllowed: req.body.isSpectatorsAllowed,
         });
 

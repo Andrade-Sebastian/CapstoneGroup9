@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS Session
     HostSocketID varchar(100) NOT NULL,
     StartTimestamp TIMESTAMP, --Nullable
     isPasswordProtected BOOLEAN,
-    Password VARCHAR(100), --Nullable
+    Password VARCHAR(255), --Nullable
     isSpectatorsAllowed BOOLEAN,
     EndTimestamp TIMESTAMP --Nullable
 );

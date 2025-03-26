@@ -285,6 +285,7 @@ export async function createSessionInDatabase(initializationInfo: ISessionCreati
 
 	try 
 	{
+
 		await dbClient.connect(); // Connect to the database 
 		console.log("(database.ts): createSessionInDatabase() - Connected to Database");
 		const result = await dbClient.queryObject(
@@ -783,24 +784,20 @@ export async function assignExperimentToSession(sessionID: number, experimentID:
 
 }
 
-export async function validatePassword(sessionID:string, password:string): Promise<boolean>{
-	
-	let isValidPass = false;
+export async function validatePassword(sessionID:string){
 
 	try{
 		await dbClient.connect();
-		const query = await dbClient.queryObject(`SELECT sessionid FROM session WHERE sessionid = $1 AND password = $2`,
-			[sessionID, password]
+		const query = await dbClient.queryObject(`SELECT password FROM session WHERE sessionid = $1`,
+			[sessionID]
 		);
 		if(query.rows.length > 0){
-			isValidPass = true;
+			return query.rows[0];
 		}
 	}
 	catch(error){
 		console.log("Password is not valid", error);
 	}
-
-	return isValidPass;
 }
 
 export async function getUserExperimentData(sessionID: string, userID: number, experimentType: string){
