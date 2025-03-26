@@ -56,7 +56,8 @@ export interface IAddUserToSessionInfo {
 export interface IArticleLabDatabaseInfo{
 	experimentTitle: string,
 	experimentDescription: string | null,
-	article: string,
+	articleBlob?: string,
+	articleURL?: string,
 	socketID: string
 }
 
@@ -176,6 +177,23 @@ export async function getVideoLabInfo(experimentID: number): Promise<void>{
 	}
 }
 
+export async function getArticleLabInfo(experimentID: number): Promise<void>{
+	console.log("Article Experiment passed in", experimentID);
+
+	try{
+		await dbClient.connect();
+		const query = await dbClient.queryObject(`SELECT articlelab.experimentid, path, name, description FROM articlelab JOIN experiment 
+			ON articlelab.experimentid = experiment.experimentid WHERE articlelab.experimentid = $1 LIMIT 1`,
+			[experimentID]
+		);
+		
+		console.log("Article Lab Info: ", query.rows[0]);
+		return query.rows[0];
+	}
+	catch(error){
+		console.log("Unable to retrieve article lab info", error);
+	}
+}
 
 function generateRandomCode(length: number){
     const numbers = '0123456789';
@@ -537,11 +555,13 @@ export async function createArticleLabInDatabase(initializationInfo: IArticleLab
 	const {
 		experimentTitle,
 		experimentDescription,
-		article,
+		articleURL,
+		articleBlob,
 		socketID
 	} = initializationInfo;
 
 	console.log(socketID);
+	console.log(`Experiment Title: ${experimentTitle}, Description ${experimentDescription}, Article Source: ${articleURL ? articleURL: articleBlob}, SocketID ${socketID}`);
 	let experimentID = null;
 
 	try{
@@ -561,6 +581,7 @@ export async function createArticleLabInDatabase(initializationInfo: IArticleLab
 		console.log("createExperimentQuery: ", createExperimentQuery.rows[0].experimentid)
 		experimentID = createExperimentQuery.rows[0].experimentid;
 
+		const articlePath = articleURL ? articleURL : articleBlob;
 
 		//Add an article lab 
 		const query = await dbClient.queryObject(`
@@ -571,7 +592,7 @@ export async function createArticleLabInDatabase(initializationInfo: IArticleLab
 			VALUES ($1, $2);
 			`, [
 				experimentID,
-				article,
+				articlePath,
 				]
 		);
 

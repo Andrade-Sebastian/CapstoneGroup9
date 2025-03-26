@@ -23,7 +23,7 @@ export default function ChartComponent(props: IDataType) {
     const [timeState, acceptTimeState] = useState<Array<number>>([]);
     //const [edaState, acceptEdaDataState] = useState<Array<number>>([]);
 
-    function addDataPoint(ancDataFrame, auxDataFrame, timeStamp: number){
+    function addDataPoint(ancDataFrame, auxDataFrame, heartRate, timeStamp: number){
         
         const numOfPoints = plotState.length;
         const numOfTimeStamps = timeState.length;
@@ -41,6 +41,9 @@ export default function ChartComponent(props: IDataType) {
 
         // CHART TYPE IF STATEMENTS  
         if(props.chart_type === 1){
+            min = 60;
+            max = 90;
+            current_data = heartRate;
             console.log( "ECG CHART")
         }  
         else if(props.chart_type === 2){
@@ -107,10 +110,10 @@ export default function ChartComponent(props: IDataType) {
         // }
 
         function onUpdate(payload){
-            const {ancData, auxData, ipAddress, serialNumber, backendIp, hostSessionId, userId, frontEndSocketId, assignSocketId} = payload;
+            const {ancData, auxData, heartRate, ipAddress, serialNumber, backendIp, hostSessionId, userId, frontEndSocketId, assignSocketId} = payload;
             const selectedUser = Number(userId);
             if(props.user_id === selectedUser){
-                addDataPoint(ancData, auxData, ancData.timestamp);
+                addDataPoint(ancData, auxData, heartRate, ancData.timestamp);
             }
         }
         //brainflowConnect();

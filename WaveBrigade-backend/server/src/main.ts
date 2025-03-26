@@ -119,7 +119,7 @@ app.get("/get-photo/:filename", (req: Request, res: Response) => {
     res.status(404).json({ success: false, message: "Image not found" });
   }
 });
-//Getting video logic to show for the joiner, the get is in video fe active experiment
+//Getting video logic to show for the joiner, the get is in joiner fe active experiment
 app.get("/get-videoFile/:filename", (req: Request, res: Response) => {
   const { filename } = req.params;
   if (filename.includes("..")) {
@@ -128,6 +128,23 @@ app.get("/get-videoFile/:filename", (req: Request, res: Response) => {
     .json({ success: false, message: "Invalid Filename" });
   }
   const filePath = path.join(__dirname, "/media/video-lab/", filename);
+  
+  if (fs.existsSync(filePath)) {
+    res.sendFile(filePath);
+  } else {
+    res.status(404).json({ success: false, message: "Video not found" });
+  }
+});
+
+//Getting article logic to show for the joiner, the get is in joiner fe active experiment
+app.get("/get-articleFile/:filename", (req: Request, res: Response) => {
+  const { filename } = req.params;
+  if (filename.includes("..")) {
+    return res
+    .status(400)
+    .json({ success: false, message: "Invalid Filename" });
+  }
+  const filePath = path.join(__dirname, "/media/article-lab/", filename);
   
   if (fs.existsSync(filePath)) {
     res.sendFile(filePath);
@@ -223,6 +240,7 @@ io.on("connection", (socket) => {
     const {
       ancData,
       auxData,
+      heartRate,
       ipAddress,
       serialNumber,
       backendIp,
@@ -231,7 +249,7 @@ io.on("connection", (socket) => {
       frontEndSocketId,
       assignSocketId,
     } = payload;
-    console.log("Update Event: Received data:", JSON.stringify(ancData.data1));
+    console.log("Update Event: Received data:", JSON.stringify(heartRate));
     io.emit("update", payload);
   });
 
