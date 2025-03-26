@@ -264,18 +264,16 @@ databaseRouter.post("/gallery-lab", upload.array("images"), async(req: Request, 
         return res.status(404).json({message: "There is no session found for given socketID."});
     }
 
-    await clearGalleryFolder(galleryLabMediaDirectory)
     //create experiment 
     let experimentID = null;
     const imagesToInsert: {path: string, caption: string }[] = [];
-    const existingFileCount = await getNumberFilesInDirectory(galleryLabMediaDirectory);
     for(let i = 0; i < imageFiles.length; i++) {
         const file = imageFiles[i];
         console.log("Incoming file path from multer:", file.path);
         const caption = captions[i];
         const detectedFileExtension = determineFileExtension(file);
         
-        const newFileName = `${existingFileCount + i}${detectedFileExtension}`;
+        const newFileName = `${i}${detectedFileExtension}`;
         const newFilePath = `${galleryLabMediaDirectory}/${newFileName}`;
         
         await fsPromises.rename(file.path, newFilePath);

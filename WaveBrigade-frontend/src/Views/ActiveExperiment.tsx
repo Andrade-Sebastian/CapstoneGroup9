@@ -31,6 +31,7 @@ export default function ActiveExperiment() {
   const playerRef = useRef(null);
   const [videoID, setVideoID] = useState("");
   const [articleURL, setArticleURL] = useState("");
+  const [currentGalleryPhotoID, setCurrentGalleryPhotoID] = useState(0);
   const {
     isConnected,
     serial,
@@ -247,16 +248,8 @@ export default function ActiveExperiment() {
       console.log("Gallery image-selected event recieved. Host changed the image, fetching stored gallery...", imageData);
       setSelectedCaption(imageData.caption);
       const matchedPhoto = galleryPhotos.find(photo => photo.id === imageData.id);
-      // console.log("Here is the matched photo", matchedPhoto);
-      // console.log("Gallery photos in store:", galleryPhotos);
-      // console.log("HERE IS THE DATA FROM FOR LOOP")
-      // for(let i = 0; i < galleryPhotos.length; i++ ){
-      //   console.log(i)
-      //   console.log(galleryPhotos.find(photo => photo.id))
-      //   console.log(imageData.id)
-      //   console.log(galleryPhotos[i])
-      // }
       if(matchedPhoto) {
+        setCurrentGalleryPhotoID(matchedPhoto.id)
         const filename = matchedPhoto.src.split("/").pop();
         console.log("Here is the matchedPhoto correct filename", filename)
         fetchStoredGallery(filename);
@@ -315,7 +308,7 @@ export default function ActiveExperiment() {
           ): experimentType == 3 ? (
             <div>
               {galleryPath ? (
-                <GalleryViewer imageSrc={galleryPath} caption={selectedCaption}/>
+                <GalleryViewer imageSrc={galleryPath} caption={selectedCaption} index={currentGalleryPhotoID}/>
 
               ): (
                 <p className="text-xl text-gray-500 font-medium mt-10"> Waiting for host to select a photo...</p>

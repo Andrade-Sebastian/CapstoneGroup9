@@ -1,7 +1,7 @@
 import React, { useRef, useState, useEffect, ReactElement } from 'react'
 import { PiRocketLaunchThin } from 'react-icons/pi'
-import { IoIosArrowUp } from "react-icons/io";
-import { IoIosArrowDown } from "react-icons/io";
+import { IoIosArrowUp } from 'react-icons/io'
+import { IoIosArrowDown } from 'react-icons/io'
 import { IoCloseCircle } from 'react-icons/io5'
 import { useNavigate } from 'react-router-dom'
 import { useSessionStore } from '../store/useSessionStore'
@@ -47,7 +47,7 @@ export default function GalleryInputForm(props: IGalleryInput) {
   const [image_filename, set_image_filename] = useState<string | null>(null)
   const [isModalOpenPhoto, setIsModalOpenPhoto] = useState(false)
   const [tempImage, setTempImage] = useState<string | null>(null)
-  const [tempFile, setTempFile ] = useState<File | null> (null);
+  const [tempFile, setTempFile] = useState<File | null>(null)
   const [imageSource, setImageSource] = useState<string | null>(null)
   const [imageID, setImageID] = useState(0)
 
@@ -61,7 +61,7 @@ export default function GalleryInputForm(props: IGalleryInput) {
   const handleConfirmImage = () => {
     if (tempImage && tempFile && caption) {
       const photo = {
-        id: imageID + 1, 
+        id: imageID + 1,
         src: tempImage,
         file: tempFile,
         caption: caption,
@@ -103,7 +103,7 @@ export default function GalleryInputForm(props: IGalleryInput) {
     props.onFileSelected(true)
 
     const newPhoto = {
-      id: imageID + 1, 
+      id: imageID + 1,
       src: url,
       caption: caption,
       uploadedAt: new Date()
@@ -145,17 +145,17 @@ export default function GalleryInputForm(props: IGalleryInput) {
 
   async function handleSubmit(e) {
     const data = new FormData()
-    console.log("Appending data in handle submit");
+    console.log('Appending data in handle submit')
     data.append('labType', 'gallery-lab')
     data.append('experimentTitle', experimentTitle)
     data.append('experimentDescription', experimentDesc)
     data.append('experimentCaptions', caption)
     galleryPhotos.forEach((photo) => {
-        data.append('images', photo.file)
-        data.append('captions', photo.caption)
+      data.append('images', photo.file)
+      data.append('captions', photo.caption)
     })
     data.append('socketID', JSON.stringify(sessionStorage.getItem('socketID')))
-    console.log("Done appending data.")
+    console.log('Done appending data.')
     const loadingToastId = toast.loading('Creating Lab...')
     if (isSubmitting) return
 
@@ -175,7 +175,7 @@ export default function GalleryInputForm(props: IGalleryInput) {
         const images = response.data.images
         setExperimentTitle(experimentTitle)
         setExperimentDesc(experimentDesc)
-        console.log("Images from gallery", images)
+        console.log('Images from gallery', images)
         console.log('sending out some experiment data')
         socket.emit('experiment-data', { experimentTitle, experimentDesc, expId, images })
         console.log('hopefully sent out some experiment data')
@@ -194,69 +194,74 @@ export default function GalleryInputForm(props: IGalleryInput) {
     }
   }
 
-      //debug
-      useEffect(() =>{
-          console.log("gallery array: ", galleryPhotos);
-          console.log("caption: ", caption);
-          console.log("experimentTitle: ", experimentTitle);
-          console.log("experimentDesc: ", experimentDesc);
-          console.log("isFileSelected: " + JSON.stringify(isFileSelected))
-          
-        }, [[galleryPhotos,caption, experimentDesc, experimentTitle]])
+  //debug
+  useEffect(() => {
+    console.log('gallery array: ', galleryPhotos)
+    console.log('caption: ', caption)
+    console.log('experimentTitle: ', experimentTitle)
+    console.log('experimentDesc: ', experimentDesc)
+    console.log('isFileSelected: ' + JSON.stringify(isFileSelected))
+  }, [[galleryPhotos, caption, experimentDesc, experimentTitle]])
 
   return (
     <div className="flex flex-row w-full h-screen gap-30">
       {/* Middle */}
-      <div className='flex flex-col items-center justify-center w-full md:w-2/5 space-y-6'>
-      <form
-        onSubmit={handleSubmit}
-        className="w-full max-w-md space-y-6"
-        encType="multipart/form-data"
-      >
-        <div className="w-full">
-          <label htmlFor="experimentTitle" className="block text-sm font-medium text-gray-700 mb-2">
-            Enter Title for Experiment <span className="text-purple-500">*</span>
-          </label>
-          <input
-            type="text"
-            id="experimentTitle"
-            className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            //   focus:outline-none focus:ring-2 focus:ring-indigo-500
-            onChange={(e) => setExperimentTitle(e.target.value)}
-            value={experimentTitle}
-            placeholder="Provide a title for your experiment"
-          />
-        </div>
+      <div className="flex flex-col items-center justify-center w-full md:w-2/5 space-y-6">
+        <form
+          onSubmit={handleSubmit}
+          className="w-full max-w-md space-y-6"
+          encType="multipart/form-data"
+        >
+          <div className="w-full">
+            <label
+              htmlFor="experimentTitle"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
+              Enter Title for Experiment <span className="text-purple-500">*</span>
+            </label>
+            <input
+              type="text"
+              id="experimentTitle"
+              className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              //   focus:outline-none focus:ring-2 focus:ring-indigo-500
+              onChange={(e) => setExperimentTitle(e.target.value)}
+              value={experimentTitle}
+              placeholder="Provide a title for your experiment"
+            />
+          </div>
 
-        <div className="mb-6">
-          <label htmlFor="experimentDesc" className="block text-sm font-medium text-gray-700 mb-2">
-            Enter Description for Experiment <span className="text-purple-500">*</span>
-          </label>
-          <textarea
-            id="experimentDesc"
-            className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            //   focus:outline-none focus:ring-2 focus:ring-indigo-500
-            onChange={(e) => setExperimentDesc(e.target.value)}
-            value={experimentDesc}
-            placeholder="Provide a description for your experiment"
-          />
-        </div>
+          <div className="mb-6">
+            <label
+              htmlFor="experimentDesc"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
+              Enter Description for Experiment <span className="text-purple-500">*</span>
+            </label>
+            <textarea
+              id="experimentDesc"
+              className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              //   focus:outline-none focus:ring-2 focus:ring-indigo-500
+              onChange={(e) => setExperimentDesc(e.target.value)}
+              value={experimentDesc}
+              placeholder="Provide a description for your experiment"
+            />
+          </div>
 
-        <div className="flex gap-10 items-center justify-center">
-          <button
-            type="button"
-            onClick={handleOpenModal}
-            disabled={!experimentTitle.trim() || galleryPhotos.length < 2}
-            className={`mt-6 font-semibold py-3 px-6 rounded-md shadow-md transition duration-300 ease-in-out ${
-              experimentTitle.trim() && galleryPhotos.length >= 2
-                ? 'bg-[#7F56D9] hover:bg-violet-500 text-white cursor-pointer'
-                : 'bg-gray-400 text-white cursor-not-allowed'
-            }`}
-          >
-            Confirm
-          </button>
-        </div>
-      </form>
+          <div className="flex gap-10 items-center justify-center">
+            <button
+              type="button"
+              onClick={handleOpenModal}
+              disabled={!experimentTitle.trim() || galleryPhotos.length < 2}
+              className={`mt-6 font-semibold py-3 px-6 rounded-md shadow-md transition duration-300 ease-in-out ${
+                experimentTitle.trim() && galleryPhotos.length >= 2
+                  ? 'bg-[#7F56D9] hover:bg-violet-500 text-white cursor-pointer'
+                  : 'bg-gray-400 text-white cursor-not-allowed'
+              }`}
+            >
+              Confirm
+            </button>
+          </div>
+        </form>
       </div>
 
       {/* right side: adding picture.. */}
@@ -270,11 +275,17 @@ export default function GalleryInputForm(props: IGalleryInput) {
           <div className="overflow-y-auto max-h-[300px] mb-4">
             {galleryPhotos.map((image, index) => (
               <div key={index} className="relative mb-4 bg-white p-2 rounded-md shadow-md">
-                <img
-                  src={image.src}
-                  alt="Uploaded"
-                  className="w-full h-[150px] object-cover rounded-md"
-                />
+                <div className="relative">
+                  <img
+                    src={image.src}
+                    alt="Uploaded"
+                    className="w-full h-[150px] object-cover rounded-md"
+                  />
+                  <div className="absolute bottom-1 left-1 bg-black text-white text-xs font-semibold px-2 py-1 rounded-md">
+                    {index + 1}
+                  </div>
+                </div>
+
                 <input
                   type="text"
                   value={image.caption}
@@ -288,16 +299,16 @@ export default function GalleryInputForm(props: IGalleryInput) {
                   <IoCloseCircle size={20} />
                 </button>
                 <button
-                  disabled={index===0} //cant move up if at the top
+                  disabled={index === 0} //cant move up if at the top
                   className="absolute top-2 left-2 bg-gray-100 rounded-full p-1 text-black hover:bg-gray-200 cursor-pointer"
-                  onClick={() => reorderPhoto(index, index - 1)} 
+                  onClick={() => reorderPhoto(index, index - 1)}
                 >
                   <IoIosArrowUp size={20} />
                 </button>
                 <button
                   disabled={index === galleryPhotos.length - 1} //cant move down if at the bottom
                   className="absolute bottom-2 left-2 bg-gray-100 rounded-full p-1 text-black hover:bg-gray-200 cursor-pointer"
-                  onClick={() => reorderPhoto(index, index +1)}
+                  onClick={() => reorderPhoto(index, index + 1)}
                 >
                   <IoIosArrowDown size={20} />
                 </button>
@@ -333,7 +344,7 @@ export default function GalleryInputForm(props: IGalleryInput) {
           </button>
         </div>
       </div>
-      
+
       <ModalComponent
         onAction={handleAction}
         isOpen={isModalOpen}
@@ -373,7 +384,14 @@ export default function GalleryInputForm(props: IGalleryInput) {
           </label>
           <div className="flex flex-wrap gap-2 max-h-[150px] overflow-y-auto">
             {galleryPhotos.map((photo, index) => (
-                <img key={index} src={photo.src} alt={`Image ${index+1}`} className='w-20 h-20 object-cover rounded-md border border-gray-300'/>))}</div> 
+              <img
+                key={index}
+                src={photo.src}
+                alt={`Image ${index + 1}`}
+                className="w-20 h-20 object-cover rounded-md border border-gray-300"
+              />
+            ))}
+          </div>
         </div>
       </ModalComponent>
       <ModalComponent
@@ -393,11 +411,11 @@ export default function GalleryInputForm(props: IGalleryInput) {
             className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
             accept="image/png, image/jpeg, image/jpg"
             onChange={(e) => {
-              const file = e.target.files?.[0];
+              const file = e.target.files?.[0]
               if (file) {
                 const url = URL.createObjectURL(file)
                 setTempImage(url)
-                setTempFile(file);
+                setTempFile(file)
               }
             }}
           />
