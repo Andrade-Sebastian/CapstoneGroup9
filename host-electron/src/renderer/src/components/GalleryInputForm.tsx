@@ -172,11 +172,12 @@ export default function GalleryInputForm(props: IGalleryInput) {
       if (response.status === 200) {
         toast.success('Lab was created successfully', { id: loadingToastId })
         const expId = response.data.experimentID
+        const images = response.data.images
         setExperimentTitle(experimentTitle)
         setExperimentDesc(experimentDesc)
-        //   set_image_filename();
+        console.log("Images from gallery", images)
         console.log('sending out some experiment data')
-        socket.emit('experiment-data', { experimentTitle, experimentDesc, expId })
+        socket.emit('experiment-data', { experimentTitle, experimentDesc, expId, images })
         console.log('hopefully sent out some experiment data')
         setTimeout(() => {
           navigateTo('/waiting-room')

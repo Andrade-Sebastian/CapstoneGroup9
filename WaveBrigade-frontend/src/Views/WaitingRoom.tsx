@@ -41,6 +41,7 @@ export default function WaitingRoom() {
     setExperimentTypeString,
     setExperimentPath,
     addPhoto,
+    galleryPhotos,
     setWasKicked,
     wasKicked,
     experimentId,
@@ -85,6 +86,26 @@ export default function WaitingRoom() {
       socket.off("experiment-type", handleExperimentType);
     };
   }, []);
+
+  // useEffect(() => {
+  //   const handleGalleryImageData = (data) =>{
+  //     console.log("Received gallery data from host", data);
+
+  //     const {experimentTitle, experimentDesc, expId, images} = data;
+  //     images.forEach((img,index) =>{
+  //       addPhoto({
+  //         id: index,
+  //         src: img.path,
+  //         file:null,
+  //         caption: img.caption
+  //       });
+  //     });
+  //   };
+  //   socket.on("experiment-data", handleGalleryImageData);
+  //   return () => {
+  //     socket.off("experiment-data", handleGalleryImageData);
+  //   };
+  // },[]);
   
   useEffect(() => {
     console.log("Trying to get experiment type. Currently set to: ", experimentType)
@@ -277,28 +298,37 @@ export default function WaitingRoom() {
           console.log("RETURNED GET GALLERY DATA: ", response.data);
           const experimentTitle = response.data.name;
           const experimentDesc = response.data.description;
-          const images = response.data.images;
+          response.data.images.forEach((img,index) =>{
+            addPhoto({
+              id: index,
+              src: img.path,
+              file:null,
+              caption: img.caption
+            });
+          });
+
+          //const images = response.data.images;
           // const captions = response.data.captions;
           // const path = response.data.path;
           //NEED THE EXPERIMENT TYPE
           console.log(
             "RETURNED GET GALLERY DATA: ", response.data
           );
-          
+          console.log("GalleryPhoto data from getGallery", galleryPhotos)
           setExperimentId(experimentID);
           setExperimentTitle(experimentTitle);
           setExperimentDesc(experimentDesc);
-          images.forEach((image, index) => {
-            addPhoto({
-              id: index,
-              src: image.path,
-              file:null,
-              caption: image.caption
-            })
-          })
+          // images.forEach((image, index) => {
+          //   addPhoto({
+          //     id: index,
+          //     src: image.path,
+          //     file:null,
+          //     caption: image.caption
+          //   })
+          // })
         }
       } catch (error) {
-        toast.error("Failed to receive photo data");
+        toast.error("Failed to receive gallery data");
         console.log("Error receiving photolab data in joiner fe: ", error);
       }
     };

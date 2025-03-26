@@ -8,6 +8,7 @@ import axios from 'axios';
 
 import fsPromises from 'node:fs/promises';
 import { dbClient } from "../routes/joiner_routes.ts";
+import path from "node:path/posix";
 
 
 const labDirectories = {
@@ -230,6 +231,18 @@ databaseRouter.post("/video-lab", upload.single("videoBlob"), async(req: Request
 
 
 databaseRouter.post("/gallery-lab", upload.array("images"), async(req: Request, res: Response) => {
+    const clearGalleryFolder = async (directoryPath: string) => {
+        try{
+            const files = await fs.promises.readdir(directoryPath);
+            for(const file of files) {
+                const filePath = path.join(directoryPath, file);
+                await fs.promises.unlink(filePath);
+            }
+            console.log("Cleared gallery folder.")
+        } catch(error){
+            console.log("Error clearing folder", error)
+        }
+    };
     try{
     const imageFiles = req.files as Express.Multer.File[]
     const {experimentTitle, experimentDescription, socketID} = req.body;
@@ -251,20 +264,22 @@ databaseRouter.post("/gallery-lab", upload.array("images"), async(req: Request, 
         return res.status(404).json({message: "There is no session found for given socketID."});
     }
 
+    await clearGalleryFolder(galleryLabMediaDirectory)
     //create experiment 
     let experimentID = null;
     const imagesToInsert: {path: string, caption: string }[] = [];
-    
+    const existingFileCount = await getNumberFilesInDirectory(galleryLabMediaDirectory);
     for(let i = 0; i < imageFiles.length; i++) {
         const file = imageFiles[i];
+        console.log("Incoming file path from multer:", file.path);
         const caption = captions[i];
-
         const detectedFileExtension = determineFileExtension(file);
-        const fileNumber = await getNumberFilesInDirectory(galleryLabMediaDirectory);
-        const newFileName = `${fileNumber}${detectedFileExtension}`;
+        
+        const newFileName = `${existingFileCount + i}${detectedFileExtension}`;
         const newFilePath = `${galleryLabMediaDirectory}/${newFileName}`;
-
+        
         await fsPromises.rename(file.path, newFilePath);
+        console.log("Incoming file path from multer:", file.path);
 
         imagesToInsert.push({
             path: `/media/gallery-lab/${newFileName}`, //path
@@ -277,7 +292,7 @@ databaseRouter.post("/gallery-lab", upload.array("images"), async(req: Request, 
     console.log("(database_routes.ts: In galleryLab, recieved : ", sessionID);
     res.status(200).json({
     message: "Gallery lab created successfully.",
-    experimentID});
+    experimentID, images: imagesToInsert});
     } catch (error) {
         console.log("Error in /gallery-lab", error);
         res.status(500).send({

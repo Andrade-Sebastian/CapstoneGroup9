@@ -172,6 +172,7 @@ app.get("/get-articleFile/:filename", (req: Request, res: Response) => {
 let latestExperimentType = null;
 let isVideoPlaying = false;
 let latestSeekTime = 0;
+let latestExperimentData = null;
 io.on("connection", (socket) => {
   
   // console.log("(main.ts): User Connected | socketID: " + socket.id)
@@ -193,6 +194,7 @@ io.on("connection", (socket) => {
   });
   socket.on("experiment-data", (data) => {
     console.log("In experiment-data in main.ts, here is the data", data);
+    latestExperimentData = data;
     io.emit("experiment-data", data);
     console.log("hopefully emitted");
   });
@@ -248,6 +250,10 @@ io.on("connection", (socket) => {
       console.log("ExperimentType is a video, sending an emit to joiner to tell them the video state. Is video playing?", isVideoPlaying)
       socket.emit("play-video", isVideoPlaying);
       socket.emit("seek-video", latestSeekTime);
+    }
+    if(latestExperimentType === 3 && latestExperimentData){
+      console.log("Gallery lab, sending data to joiner")
+      socket.emit("experiment-data", latestExperimentData)
     }
   });
 

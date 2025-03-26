@@ -212,7 +212,7 @@ export default function ActiveExperiment() {
         if(response.status === 200){
           console.log("Fetched photo path:", response.config.url);
           setGalleryPath(response.config.url);
-          toast.success("Successfully retreived video!")
+          toast.success("Successfully retreived image!")
         }
       }
       catch(error){
@@ -241,18 +241,38 @@ export default function ActiveExperiment() {
       console.log("Fetching photo...")
       fetchStoredPhoto();
     }
-    if(experimentType === 3){
+    if(experimentType === 3 && galleryPhotos.length > 0){
       console.log("Fetching gallery...")
       socket.on("image-selected", (imageData) => {
       console.log("Gallery image-selected event recieved. Host changed the image, fetching stored gallery...", imageData);
       setSelectedCaption(imageData.caption);
-      fetchStoredGallery(imageData.filename);})
+      const matchedPhoto = galleryPhotos.find(photo => photo.id === imageData.id);
+      // console.log("Here is the matched photo", matchedPhoto);
+      // console.log("Gallery photos in store:", galleryPhotos);
+      // console.log("HERE IS THE DATA FROM FOR LOOP")
+      // for(let i = 0; i < galleryPhotos.length; i++ ){
+      //   console.log(i)
+      //   console.log(galleryPhotos.find(photo => photo.id))
+      //   console.log(imageData.id)
+      //   console.log(galleryPhotos[i])
+      // }
+      if(matchedPhoto) {
+        const filename = matchedPhoto.src.split("/").pop();
+        console.log("Here is the matchedPhoto correct filename", filename)
+        fetchStoredGallery(filename);
+      }
+      else{
+        console.log("No matching photo found for caption:", imageData.src);
+      }});
+      return () =>{
+        socket.off("image-selected");
+      }
     }
     if(experimentType === 4){
       console.log("Fetching article...")
       fetchStoredArticle();
     }
-  },[experimentPath, experimentType, setPhotoPath, setVideoPath, setArticlePath, articlePath]);
+  },[experimentPath, experimentType, setPhotoPath, setVideoPath, setArticlePath, articlePath, galleryPhotos]);
 
 
 
@@ -294,7 +314,12 @@ export default function ActiveExperiment() {
             
           ): experimentType == 3 ? (
             <div>
-              <GalleryViewer imageSrc={galleryPath} caption={selectedCaption}/>
+              {galleryPath ? (
+                <GalleryViewer imageSrc={galleryPath} caption={selectedCaption}/>
+
+              ): (
+                <p className="text-xl text-gray-500 font-medium mt-10"> Waiting for host to select a photo...</p>
+              )}
               </div>
           ) : experimentType == 4 && isMediaAFile ? (
             <div>
