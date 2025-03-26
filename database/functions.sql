@@ -23,7 +23,7 @@ CREATE OR REPLACE FUNCTION Create_Session(
     room_code VARCHAR(100),
     host_socket_id VARCHAR(100),
     is_password_protected BOOLEAN,
-    "password" VARCHAR(100),
+    "password" VARCHAR(255),
     is_spectators_allowed BOOLEAN
 )
 RETURNS TABLE (

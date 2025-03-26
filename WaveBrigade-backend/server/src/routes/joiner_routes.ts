@@ -4,6 +4,8 @@ import SessionManager from "../sessions_singleton.ts";
 import { addSocketToSession } from "../sessionMappings.ts";
 import {addUserToSession, getUsersFromSession, validateRoomCode, removeUserFromSession, validDeviceSerial, validatePassword, getPhotoLabInfo, getVideoLabInfo, getArticleLabInfo, joinSessionAsSpectator} from "../controllers/database.ts";
 import {Filter} from "npm:bad-words";
+import * as bcrypt from "https://deno.land/x/bcrypt/mod.ts";
+
 const app = express();
 const joinerRouter = express.Router();
 joinerRouter.use(express.json());
@@ -372,8 +374,9 @@ joinerRouter.post("/validatePassword", async (req: Request, res: Response) => {
     const {sessionID, password} = req.body;
     
     try{
-        const isValidPassword = await validatePassword(sessionID, password);
-        if(isValidPassword){
+        const hashedPass = await validatePassword(sessionID);
+        const isValidPass = await bcrypt.compare(password, hashedPass.password)
+        if(isValidPass){
             return res.status(200).json({success: true})
         }
         else{
