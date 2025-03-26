@@ -24,9 +24,9 @@ const operationParameters = {
 }
 
 const ancHeaders = ['Package', 'EDA', 'Temperature', 'Thermistor', 'Timestamp', 'Unknown']; //create a list of headers for the csv
-// const ancFilePath = './anc_from_streamer.csv';
+// const ancFilePath = './operationParameters.userId/anc_data.csv';
 // const auxHeaders = ['Package', 'PPG_Red', 'PPG_Infa_Red', 'PPG_Green', 'Timestamp', 'Unknown'];
-// const auxFilePath = './aux_from_streamer.csv';
+// const auxFilePath = './operationParameters.userId/aux_data.csv';
 
 //initializes the board 
 const board = new BoardShim(BoardIds.EMOTIBIT_BOARD, {});
@@ -163,27 +163,16 @@ async function sendData(socket: Socket): Promise<void>
             // console.log("PASSED: " + passedTime);
             const anc_data = board.getBoardData(500, BrainFlowPresets.ANCILLARY_PRESET);
             const aux_data = board.getBoardData(500, BrainFlowPresets.AUXILIARY_PRESET);
-            
-            
-            // if(ppg_ir !== null && ppg_r !== null){
-            //     console.log("PPG_RED: ", ppg_r.length);
-            //     //const heart_rate = DataFilter.getHeartRate(ppg_ir, ppg_r, 500, 8192);
-            //     //console.log(heart_rate);
-            // }
 
             if(anc_data.length !== 0){ //doesn't log data if it is empty
                 ppg_ir = ppg_ir.concat(anc_data[2]);
                 ppg_r = ppg_r.concat(anc_data[1]);
-                //console.log("PPG_IR Length:", ppg_ir);
-                // console.log("PPG_R Length:", ppg_r);
+                
+                //heart rate can only start collecting if there are enough data samples
                 if(ppg_ir.length >= 1024 && ppg_r.length >= 1024){
-                //    DataFilter.performLowPass(ppg_ir, 500, 5, 2, 0, 0);
                    DataFilter.performBandPass(ppg_ir, 500, 5, 10, 2, 0, 0);
                    DataFilter.performBandPass(ppg_r, 500, 5, 10, 2, 0, 0);
-                        // DataFilter.performHighPass(ppg_ir, 500, 5, 3, 0, 0);
-                        // DataFilter.performHighPass(ppg_r, 500, 5, 3, 0, 0);
-                //     //console.log("PPG_IR Length:", ppg_ir);
-                //     DataFilter.performLowPass(ppg_r, 500, 5, 2, 0, 0,);
+        
                     heart_rate = DataFilter.getHeartRate(ppg_ir.slice(-1024), ppg_r.slice(-1024), 500, 1024);
                     console.log("HEART RATE: ", heart_rate);
                 }
@@ -208,7 +197,6 @@ async function sendData(socket: Socket): Promise<void>
                     };
             };
             
-            //console.log("DATA :", ancData.data1);
                 //emit to socket an object that holds data and op parameters
                 socket.emit('update', {
                     ancData: ancData,
