@@ -229,6 +229,11 @@ ipcMain.on(
     })
   }
 )
+
+function destroyAllProcesses(event){
+  console.log("Brainflow proccesses being destroyed. Good day.");
+}
 ipcMain.on('echo-server:destroy-user', processDestroyer);
 ipcMain.on('echo-server:status', processStatus);
 ipcMain.on('activity:viewUser', handleViewUser);
+ipcMain.on('brainflow:destroy', destroyAllProcesses)

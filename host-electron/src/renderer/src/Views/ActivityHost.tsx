@@ -115,6 +115,8 @@ export default function ActivityHost() {
     socket.emit('end-experiment')
     setTimeout(() => {
       //-----HARDCODED FOR TESTING-------
+      ipc.send("brainflow:destroy");
+      console.log("USERS IN THE SESSION STORE: ", useSessionStore.getState().users);
       navigateTo('/summary')
     }, 2000)
   }

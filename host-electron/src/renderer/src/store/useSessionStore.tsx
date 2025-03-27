@@ -25,6 +25,7 @@ interface IDevice {
   serialNumber: string;
   ipAddress: string;
   deviceSocketId: string;
+  isConnected: boolean;
 }
 
 interface IGallery{
@@ -95,6 +96,7 @@ interface SessionState{
     removeDevice: (deviceId: string)=> void;
     setExperimentTypeString: (experimentTypeString: string) => void;
     setSpectators: (spectators: boolean) => void;
+    updateDevice: (updatedDevice: IDevice) => void;
 }
 
 export const useSessionStore = create<SessionState>()(
@@ -160,6 +162,11 @@ export const useSessionStore = create<SessionState>()(
               devices: [...state.devices, device], 
             })),
             removeDevice: (device: any): void => set((state) => ({devices: state.devices.filter((d) => d.deviceId !== device.deviceId)})),
+            updateDevice: (updatedDevice: IDevice) => set((state) => ({
+              devices: state.devices.map((device) =>
+                device.serialNumber === updatedDevice.serialNumber ? { ...device, ...updatedDevice } : device
+              ),
+            })),
             setExperimentType: (experimentType: number): void => set(() => ({ experimentType: experimentType})),
             setExperimentTypeString: (experimentTypeString: string): void => set(() => ({experimentTypeString: experimentTypeString})),
             setSpectators: (isAllowed: boolean): void => set(() => ({spectators: isAllowed}))
