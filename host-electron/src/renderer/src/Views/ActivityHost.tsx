@@ -83,7 +83,9 @@ export default function ActivityHost() {
   const [isPlaying, setIsPlaying] = useState(false);
   const playerRef = useRef(null)
   const [latestSeekTime, setLatestSeekTime] = useState(0);
-  const handleMask = () => toast.error('No joiner to mask')
+  const handleMask = () => {
+    //Mask all button
+  }
   const handleOpenModal = () => setIsModalOpen(true)
   const handleCloseModal = () => setIsModalOpen(false)
   const handleAction = () => {
