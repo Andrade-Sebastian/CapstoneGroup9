@@ -428,7 +428,7 @@ export default function ActiveExperiment() {
             }`}
             onClick={() => setActiveTab("images")}
           >
-            <LuSquareStack className="mr-2" /> Images
+            <LuSquareStack className="mr-2" /> Media
           </button>
           <button
             className={`rounded-lg flex-1 p-2 text-lg flex items-center justify-center ${
