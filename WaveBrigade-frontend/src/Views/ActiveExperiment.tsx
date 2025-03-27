@@ -15,6 +15,8 @@ import { stringify } from "postcss";
 import { useNavigate } from "react-router-dom";
 import ReactPlayer from 'react-player';
 import GalleryViewer from "../Components/GalleryViewer.tsx";
+import { join } from "node:path";
+
 
 export default function ActiveExperiment() {
   const [selectedButton, setSelectedButton] = useState("heartRate");
@@ -37,6 +39,7 @@ export default function ActiveExperiment() {
     serial,
     nickname,
     roomCode,
+    joinerId,
     experimentId,
     experimentPath,
     galleryPhotos,
@@ -340,6 +343,7 @@ export default function ActiveExperiment() {
                   chart_type={1}
                   chart_name="BPM"
                   chart_color="rgb(23, 190, 207)"
+                  user_id={joinerId}
                 />
               </div>
             ) : activeChart === "temperatureChart" ? (
@@ -350,6 +354,7 @@ export default function ActiveExperiment() {
                   chart_type={2}
                   chart_name="°F"
                   chart_color="rgb(255, 99, 132)"
+                  user_id={joinerId}
                 />
               </div>
             ) : (
@@ -360,6 +365,7 @@ export default function ActiveExperiment() {
                   chart_type={3}
                   chart_name="EDA"
                   chart_color="rgb(75,0,130)"
+                  user_id={joinerId}
                 />{" "}
               </div>
             )}

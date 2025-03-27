@@ -2,8 +2,10 @@ import express, { Request, Response } from "express";
 import {getSessionState} from "../controllers/session_controller.ts";
 import SessionManager from "../sessions_singleton.ts";
 import { addSocketToSession } from "../sessionMappings.ts";
-import {addUserToSession, getUsersFromSession, validateRoomCode, removeUserFromSession, validDeviceSerial, validatePassword, getPhotoLabInfo, getVideoLabInfo, getGalleryLabInfo, getArticleLabInfo, joinSessionAsSpectator} from "../controllers/database.ts";
+import {addUserToSession, getUsersFromSession, validateRoomCode, removeUserFromSession, validDeviceSerial, validatePassword, getPhotoLabInfo, getVideoLabInfo, getGalleryLabInfo, getArticleLabInfo, joinSessionAsSpectator, checkSpectators} from "../controllers/database.ts";
 import {Filter} from "npm:bad-words";
+import * as bcrypt from "https://deno.land/x/bcrypt/mod.ts";
+
 const app = express();
 const joinerRouter = express.Router();
 joinerRouter.use(express.json());
@@ -40,27 +42,13 @@ joinerRouter.get("/session/allows-spectators/:sessionId", async (req: Request, r
     const sessionID = req.params.sessionId;
 
     try{
-        await dbClient.connect()
-
-        const query = await dbClient.queryObject(`SELECT isspectatorsallowed FROM SESSION WHERE sessionid = '${sessionID}'`);
-
-        if(query.rows.length === 0){
-            return res.status(400).send({
-                "message": "Session not found for sessionID: " + sessionID
-            })
-        }
+        const allowSpectators = await checkSpectators(sessionID);
+        return res.status(200).send(allowSpectators);
 
     }catch(error){
         console.log(error);
         return res.status(500).send(error);
     }
-    finally{    
-        await dbClient.end();
-    }
-    
-    return res.status(200).send({
-        "allowsSpectators": true
-    });
 })
 
 
@@ -387,8 +375,9 @@ joinerRouter.post("/validatePassword", async (req: Request, res: Response) => {
     const {sessionID, password} = req.body;
     
     try{
-        const isValidPassword = await validatePassword(sessionID, password);
-        if(isValidPassword){
+        const hashedPass = await validatePassword(sessionID);
+        const isValidPass = await bcrypt.compare(password, hashedPass.password)
+        if(isValidPass){
             return res.status(200).json({success: true})
         }
         else{

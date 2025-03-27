@@ -60,8 +60,10 @@ interface SessionState{
     
     devices: IDevice[];
     experimentTypeString: string;
-    
-    
+
+    spectators: boolean;
+
+
     setSessionId: (id: string) => void;
     setHostName: (name: string) => void;
     setUsers: (users: IUserInfo[]) => void;
@@ -92,6 +94,7 @@ interface SessionState{
     addDevice: (device: IDevice) => void;
     removeDevice: (deviceId: string)=> void;
     setExperimentTypeString: (experimentTypeString: string) => void;
+    setSpectators: (spectators: boolean) => void;
 }
 
 export const useSessionStore = create<SessionState>()(
@@ -116,6 +119,7 @@ export const useSessionStore = create<SessionState>()(
             devices: [],
             experimentType: 0,
             experimentTypeString: '',
+            spectators: false,
             
 
             setSessionId: (id: string): void => set(() => ({ sessionId: id})),
@@ -157,5 +161,6 @@ export const useSessionStore = create<SessionState>()(
             })),
             removeDevice: (device: any): void => set((state) => ({devices: state.devices.filter((d) => d.deviceId !== device.deviceId)})),
             setExperimentType: (experimentType: number): void => set(() => ({ experimentType: experimentType})),
-            setExperimentTypeString: (experimentTypeString: string): void => set(() => ({experimentTypeString: experimentTypeString}))
+            setExperimentTypeString: (experimentTypeString: string): void => set(() => ({experimentTypeString: experimentTypeString})),
+            setSpectators: (isAllowed: boolean): void => set(() => ({spectators: isAllowed}))
         }));
