@@ -37,6 +37,15 @@ import {IUser} from "../../typings.ts"
 
 import { create } from 'zustand';
 
+interface IGallery{
+    id: number;
+    src:string;
+    file: File
+    title?: string;
+    caption?: string;
+    uploadedAt?: Date; 
+  }
+
 interface JoinerState{
     joinerId: string;
     nickname: string | null;
@@ -51,6 +60,7 @@ interface JoinerState{
     experimentType: number;
     experimentTypeString: string;
     experimentPath: string;
+    galleryPhotos: IGallery[];
     users: Array<IUser>;
     sessionId: string;
     secret: string | undefined;
@@ -73,6 +83,7 @@ interface JoinerState{
     setSecret: (secret: string) => void;
     setExperimentTypeString: (experimentTypeString: string) => void;
     setExperimentPath: (experimentPath: string) => void;
+    addPhoto: (photo: IGallery) => void;
     setUserRole: (role: string) => void;
     setWasKicked: (wasKicked: boolean) => void;
 }
@@ -92,6 +103,7 @@ export const useJoinerStore = create<JoinerState>()(
         experimentType: 0,
         experimentTypeString: '',
         experimentPath: '',
+        galleryPhotos: [],
         users: [],
         sessionId: '',
         secret: undefined,
@@ -116,6 +128,7 @@ export const useJoinerStore = create<JoinerState>()(
         setSessionId: (id: string): void => set(() => ({sessionId: id})),
         setExperimentTypeString: (experimentTypeString: string): void => set(() => ({experimentTypeString: experimentTypeString})),
         setExperimentPath: (experimentPath: string): void => set(() => ({experimentPath: experimentPath})),
+        addPhoto: (photo): void => set((state) => ({galleryPhotos: [...state.galleryPhotos, photo]})),
         setUserRole: (role: string): void => set(() => ({userRole: role})),
         setWasKicked: (wasKicked: boolean): void => set(() => ({wasKicked: wasKicked})),
         

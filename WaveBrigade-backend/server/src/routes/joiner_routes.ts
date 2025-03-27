@@ -2,7 +2,7 @@ import express, { Request, Response } from "express";
 import {getSessionState} from "../controllers/session_controller.ts";
 import SessionManager from "../sessions_singleton.ts";
 import { addSocketToSession } from "../sessionMappings.ts";
-import {addUserToSession, getUsersFromSession, validateRoomCode, removeUserFromSession, validDeviceSerial, validatePassword, getPhotoLabInfo, getVideoLabInfo, getArticleLabInfo, joinSessionAsSpectator, checkSpectators} from "../controllers/database.ts";
+import {addUserToSession, getUsersFromSession, validateRoomCode, removeUserFromSession, validDeviceSerial, validatePassword, getPhotoLabInfo, getVideoLabInfo, getGalleryLabInfo, getArticleLabInfo, joinSessionAsSpectator, checkSpectators} from "../controllers/database.ts";
 import {Filter} from "npm:bad-words";
 import * as bcrypt from "https://deno.land/x/bcrypt/mod.ts";
 
@@ -294,6 +294,21 @@ joinerRouter.get("/getPhoto/:experimentID", async (req: Request, res: Response) 
     try{
         const photoInfo = await getPhotoLabInfo(experimentID);
         return res.status(200).send(photoInfo);
+        
+    }
+    catch(error){
+        console.log(error);
+        return res.status(500).send(error);
+    }
+})
+joinerRouter.get("/getGallery/:experimentID", async (req: Request, res: Response) => {
+    console.log("In joiner/getGallery/:experimentID", req.body);
+    
+    const experimentID = parseInt(req.params.experimentID);
+    
+    try{
+        const galleryInfo = await getGalleryLabInfo(experimentID);
+        return res.status(200).send(galleryInfo);
         
     }
     catch(error){

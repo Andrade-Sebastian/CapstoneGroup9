@@ -22,6 +22,7 @@ import { useSessionStore } from '../store/useSessionStore.tsx'
 import { ipcRenderer, session } from 'electron';
 import { isDeepStrictEqual } from 'util';
 import { IUserInfo } from "../store/useSessionStore";
+import { GalleryComponent} from "../components/GalleryComponent.tsx";
 
 
 export default function WaitingRoom() {

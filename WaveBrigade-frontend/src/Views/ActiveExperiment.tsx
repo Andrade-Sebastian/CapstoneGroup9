@@ -14,7 +14,9 @@ import React from "react";
 import { stringify } from "postcss";
 import { useNavigate } from "react-router-dom";
 import ReactPlayer from 'react-player';
+import GalleryViewer from "../Components/GalleryViewer.tsx";
 import { join } from "node:path";
+
 
 export default function ActiveExperiment() {
   const [selectedButton, setSelectedButton] = useState("heartRate");
@@ -24,11 +26,14 @@ export default function ActiveExperiment() {
   const [isMediaAFile, setIsMediaAFile] = useState(false)
   const [photoPath, setPhotoPath] = useState("");
   const [videoPath, setVideoPath] = useState("");
+  const [galleryPath, setGalleryPath] = useState("");
+  const [selectedCaption, setSelectedCaption] = useState("");
   const [articlePath, setArticlePath] = useState("");
   const [isPlaying, setIsPlaying] = useState(false);
   const playerRef = useRef(null);
   const [videoID, setVideoID] = useState("");
   const [articleURL, setArticleURL] = useState("");
+  const [currentGalleryPhotoID, setCurrentGalleryPhotoID] = useState(0);
   const {
     isConnected,
     serial,
@@ -37,6 +42,7 @@ export default function ActiveExperiment() {
     joinerId,
     experimentId,
     experimentPath,
+    galleryPhotos,
     experimentTitle,
     experimentDesc,
     experimentType
@@ -121,6 +127,13 @@ export default function ActiveExperiment() {
             console.log("VideoID set to ", videoID)
           });
       };
+      const getGalleryInfo = async () => {
+        const response = await axios
+          .get(`http://localhost:3000/joiner/getGallery/${experimentId}`)
+          .then((response) => {//THERE IS NOTHING BEING SET HERE
+            console.log("Gallery lab path in activity page:", response.data.path);
+          });
+      };
       
       const getArticleInfo = async () => {
         const response = await axios
@@ -143,6 +156,10 @@ export default function ActiveExperiment() {
     if(experimentType === 2){
       setPhotoPath(experimentPath)
       getPhotoInfo();
+    }
+    if(experimentType === 3){
+      setGalleryPath(experimentPath)
+      getGalleryInfo();
     }
     if(experimentType === 4){
       setArticlePath(experimentPath)
@@ -193,6 +210,19 @@ export default function ActiveExperiment() {
         console.log("Error retrieving video:", error);
       }
     }
+    const fetchStoredGallery = async (filename: string) => {
+      try{
+        const response = await axios.get(`http://localhost:3000/get-gallery/${filename}`);
+        if(response.status === 200){
+          console.log("Fetched photo path:", response.config.url);
+          setGalleryPath(response.config.url);
+          toast.success("Successfully retreived image!")
+        }
+      }
+      catch(error){
+        console.log("Error retrieving image from gallery:", error);
+      }
+    }
     const fetchStoredArticle = async () => {
       const filename = experimentPath.split("/").pop();
       try{
@@ -215,11 +245,31 @@ export default function ActiveExperiment() {
       console.log("Fetching photo...")
       fetchStoredPhoto();
     }
+    if(experimentType === 3 && galleryPhotos.length > 0){
+      console.log("Fetching gallery...")
+      socket.on("image-selected", (imageData) => {
+      console.log("Gallery image-selected event recieved. Host changed the image, fetching stored gallery...", imageData);
+      setSelectedCaption(imageData.caption);
+      const matchedPhoto = galleryPhotos.find(photo => photo.id === imageData.id);
+      if(matchedPhoto) {
+        setCurrentGalleryPhotoID(matchedPhoto.id)
+        const filename = matchedPhoto.src.split("/").pop();
+        console.log("Here is the matchedPhoto correct filename", filename)
+        fetchStoredGallery(filename);
+      }
+      else{
+        console.log("No matching photo found for caption:", imageData.src);
+      }});
+      return () =>{
+        socket.off("image-selected");
+      }
+    }
     if(experimentType === 4){
       console.log("Fetching article...")
       fetchStoredArticle();
     }
-  },[experimentPath, experimentType, setPhotoPath, setVideoPath, setArticlePath, articlePath]);
+  },[experimentPath, experimentType, setPhotoPath, setVideoPath, setArticlePath, articlePath, galleryPhotos]);
+
 
 
   useEffect(()=> {
@@ -260,7 +310,12 @@ export default function ActiveExperiment() {
             
           ): experimentType == 3 ? (
             <div>
-              <p>Gallery lab stuff</p>
+              {galleryPath ? (
+                <GalleryViewer imageSrc={galleryPath} caption={selectedCaption} index={currentGalleryPhotoID}/>
+
+              ): (
+                <p className="text-xl text-gray-500 font-medium mt-10"> Waiting for host to select a photo...</p>
+              )}
               </div>
           ) : experimentType == 4 && isMediaAFile ? (
             <div>

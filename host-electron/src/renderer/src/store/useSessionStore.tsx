@@ -26,6 +26,15 @@ interface IDevice {
   ipAddress: string;
   deviceSocketId: string;
 }
+
+interface IGallery{
+  id: number;
+  src:string;
+  file: File
+  title?: string;
+  caption?: string;
+  uploadedAt?: Date; 
+}
 interface SessionState{
     sessionId: string;
     hostName: string;
@@ -35,14 +44,23 @@ interface SessionState{
     experimentTitle: string;
     experimentDesc: string;
     experimentType: number;
+    //photo
     photoLabImageSource: string | null;
+    //video
     videoLabSource: string | null;
     videoURL: string | null;
     videoID: string | null;
+    //article
     articleLabSource: string | null;
     articleURL: string | null;
+    //gallery
+    galleryPhotos: IGallery[];
+    currentGalleryIndex: number | null;
+    selectedGalleryImage: IGallery | null;
+    
     devices: IDevice[];
     experimentTypeString: string;
+
     spectators: boolean;
 
 
@@ -56,12 +74,23 @@ interface SessionState{
     setExperimentTitle: (experimentTitle: string) => void;
     setExperimentDesc: (experimentDesc: string) => void;
     setExperimentType: (experimentType: number) => void;
+    //setPhoto
     setPhotoLabImageSource: (imageSource: string) => void;
+    //setVideo
     setVideoLabSource: (videoSource: string) => void;
     setVideoURL: (videoURL: string) => void;
     setVideoID: (videoID: string) => void;
+    //setArticle
     setArticleLabSource: (articleSource: string) => void;
     setArticleURL: (articleURL: string) => void;
+    //setGallery
+    addPhoto: (photo: IGallery) => void;
+    addPhotos: (photos: IGallery[]) => void;
+    removePhoto: (id: string) => void;
+    clearPhotos: () => void;
+    setCurrentGalleryIndex: (index: number) => void;
+    setSelectedGalleryImage: (image: IGallery | null) => void;
+    reorderPhoto: (fromIndex: number, toIndex: number) => void;
     addDevice: (device: IDevice) => void;
     removeDevice: (deviceId: string)=> void;
     setExperimentTypeString: (experimentTypeString: string) => void;
@@ -84,6 +113,9 @@ export const useSessionStore = create<SessionState>()(
             videoID: '',
             articleLabSource: '',
             articleURL: '',
+            galleryPhotos: [],
+            currentGalleryIndex: null,
+            selectedGalleryImage: null,
             devices: [],
             experimentType: 0,
             experimentTypeString: '',
@@ -109,6 +141,21 @@ export const useSessionStore = create<SessionState>()(
             setVideoID: (videoID: string): void => set(() => ({videoID: videoID})),
             setArticleLabSource: (articleSource: string | null): void => set(() => ({ articleLabSource: articleSource})),
             setArticleURL: (articleURL: string): void =>set(() => ({articleURL: articleURL})), 
+            addPhoto: (photo): void => set((state) => ({galleryPhotos: [...state.galleryPhotos, photo]})),
+            addPhotos: (photos): void => set((state) => ({galleryPhotos: [...state.galleryPhotos, ...photos]})),
+            removePhoto: (id): void => set((state) => ({ galleryPhotos: state.galleryPhotos.filter((p) => p.id !== id)})),
+            clearPhotos: (): void => set({ galleryPhotos: [], currentGalleryIndex: null}),
+            setCurrentGalleryIndex: (index): void => set({ currentGalleryIndex: index}),
+            setSelectedGalleryImage: (image): void => set(() => ({selectedGalleryImage: image})),
+            reorderPhoto: (fromIndex, toIndex): void => set((state) => { const photos = [...state.galleryPhotos] 
+              if(fromIndex < 0 || toIndex < 0 || fromIndex >= photos.length || toIndex >= photos.length){
+                return{}
+              }
+              const [movedItem] = photos.splice(fromIndex, 1)
+              photos.splice(toIndex, 0, movedItem)
+
+              return {galleryPhotos: photos}
+            }), 
             addDevice: (device: IDevice): void => set((state) => ({
               devices: [...state.devices, device], 
             })),

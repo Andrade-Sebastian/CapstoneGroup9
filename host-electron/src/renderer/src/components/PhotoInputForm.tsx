@@ -42,9 +42,6 @@ export default function PhotoInputForm(props: IPhotoInputForm) {
   const [isFileSelected, setIsFileSelected] = useState(false)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [file, setFile] = useState<File | null>(null)
-
-  // const [experiment_title, set_experiment_title] = useState("");
-  // const [experiment_description, set_experiment_description] = useState("");
   const [image_filename, set_image_filename] = useState<string | null>(null);
   
 
