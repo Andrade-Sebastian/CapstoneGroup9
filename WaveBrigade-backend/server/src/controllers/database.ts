@@ -114,6 +114,7 @@ export async function makeDeviceAvailable(deviceID: number)
 	catch(error){
 		console.log("Unable to make device available", error);
 	}
+	await dbClient.end()  //added end
 }
 
 export async function makeDeviceNotAvailable(deviceID: number)
@@ -128,6 +129,7 @@ export async function makeDeviceNotAvailable(deviceID: number)
 	catch(error){
 		console.log("Unable to make device not available", error);
 	}
+	await dbClient.end()  //added end
 }	
 
 
@@ -143,11 +145,13 @@ export async function getPhotoLabInfo(experimentID: number): Promise<void>{
 		);
 		
 		console.log("Photo Lab Info: ", query.rows[0]);
+
 		return query.rows[0];
 	}
 	catch(error){
 		console.log("Unable to retrieve photo lab info", error);
-	}
+	} 
+	await dbClient.end()  //added end
 }
 export async function getVideoLabInfo(experimentID: number): Promise<void>{
 	console.log("Video Experiment passed in", experimentID);
@@ -158,6 +162,7 @@ export async function getVideoLabInfo(experimentID: number): Promise<void>{
 			ON videolab.experimentid = experiment.experimentid WHERE videolab.experimentid = $1 LIMIT 1`,
 			[experimentID]
 		);
+		await dbClient.end()  //added end
 		
 		console.log("Video Lab Info: ", query.rows[0]);
 		return query.rows[0];
@@ -215,6 +220,8 @@ export async function validateRoomCode(roomCode:string): Promise<{isValidRoomCod
 		console.log(query);
 		console.log("rows length", query.rows.length);
 		
+		await dbClient.end(); //added end 
+
 		if (query.rows.length > 0){//result is valid
 			console.log("(database.ts): Validated room code")
 			console.log("-------------------");
@@ -248,6 +255,7 @@ export async function validateRoomCode(roomCode:string): Promise<{isValidRoomCod
 			sessionID: -1
 		}
 	}
+
 }
 
 
@@ -282,7 +290,7 @@ export async function createSessionInDatabase(initializationInfo: ISessionCreati
 	finally 
 	{
 		//console.log("(Database.ts): ending database connection")
-		await dbClient.end();
+		await dbClient.end(); 
 		//console.log("(Database.ts): finished ending database connection")
 	}
 }
@@ -301,6 +309,8 @@ export async function getSessionState(sessionID: number){
 	catch(error){
 		console.log("Unable to retrieve state", error);
 	}
+	await dbClient.end();
+
 }
 
 
@@ -314,6 +324,7 @@ export async function getSessionIDFromSocketID(socketID: string){
             `SELECT sessionid FROM session WHERE hostsocketid = $1`, 
             [cleanSocketID] 
         );
+
 
         if (query.rows.length > 0) {
             return query.rows[0].sessionid; 
@@ -401,6 +412,8 @@ export async function createPhotoLabInDatabase(initializationInfo: IPhotoLabData
 				UPDATE session
 				SET experimentid = ${experimentID}
 				WHERE sessionid = ${sessionID}; `)
+			await dbClient.end(); //added end
+			
 		}catch(error)
 		{
 			console.log(error)
@@ -484,6 +497,8 @@ export async function createVideoLabInDatabase(initializationInfo: IVideoLabData
 				UPDATE session
 				SET experimentid = ${experimentID}
 				WHERE sessionid = ${sessionID}; `)
+			await dbClient.end(); //added end
+			
 		}catch(error)
 		{
 			console.log(error)
@@ -524,6 +539,8 @@ export async function createGalleryLabInDatabase(initializationInfo: IGalleryLab
 				path,
 				captions
 			]);
+		await dbClient.end(); //added end
+		
 
 		console.log("(database.ts): gallery Lab Successfully Added")
 	}
@@ -597,6 +614,8 @@ export async function createArticleLabInDatabase(initializationInfo: IArticleLab
 				UPDATE session
 				SET experimentid = ${experimentID}
 				WHERE sessionid = ${sessionID}; `)
+			await dbClient.end(); //added end
+			
 		}catch(error)
 		{
 			console.log(error)
@@ -644,6 +663,7 @@ export async function addUserToSession(initializationInfo: IAddUserToSessionInfo
 			SET isconnected = false
 			WHERE deviceid = ${deviceID}; `);
 		
+		await dbClient.end(); //added end
 		return query.rows[0]; 
 	}
 	catch(error)
@@ -651,6 +671,7 @@ export async function addUserToSession(initializationInfo: IAddUserToSessionInfo
 		console.log("Unable to add user ", error)
 		throw error;
 	}
+
 }
 
 export async function registerDevice(initializationInfo: IRegisterDeviceInfo){
@@ -688,6 +709,8 @@ export async function registerDevice(initializationInfo: IRegisterDeviceInfo){
 		console.log("Unable to add user ", error)
 	}
 
+	await dbClient.end();//added end
+
 }
 
 export async function getUsersFromSession(sessionID: string){
@@ -697,6 +720,7 @@ export async function getUsersFromSession(sessionID: string){
 			JOIN device ON "User".sessionid = $1`,
 			[sessionID]
 		);
+		await dbClient.end();//added end
 		// console.log("Users retrieved from ", sessionID, query);
 		return query.rows;
 	}
@@ -738,6 +762,7 @@ export async function validDeviceSerial(nickName: string, roomCode:number, seria
 		const query = await dbClient.queryObject(`SELECT deviceid FROM device WHERE RIGHT(device.serialnumber, 4) = $1 AND isavailable = $2`,
 			[serialCode, true] 
 		);
+		await dbClient.end(); //added end
 
 		console.log("HERE+++ ", query);
 		
@@ -759,6 +784,7 @@ export async function assignExperimentToSession(sessionID: number, experimentID:
 		const query = await dbClient.queryObject(`UPDATE session
 		SET experimentid = ${experimentID}
 		WHERE sessionid = ${sessionID}; `);
+		await dbClient.end(); //added end
 	}
 	catch(error){
 		console.log("Unable to assign experiment to session", error);
@@ -778,6 +804,7 @@ export async function validatePassword(sessionID:string, password:string): Promi
 		if(query.rows.length > 0){
 			isValidPass = true;
 		}
+		await dbClient.end(); //added end
 	}
 	catch(error){
 		console.log("Password is not valid", error);
@@ -819,6 +846,7 @@ export async function updateDeviceConnection(serialNumber: string, socketId: str
 			[connection, serialNumber]
 		);
 		console.log("Updated device to connected in database: ", query.rows[0]);
+		await dbClient.end();//added end
 		return true;
 	}
 	catch(error){
@@ -837,6 +865,7 @@ export async function getSessionDevices(sessionId: string){
 			WHERE session.sessionid = $1`,
 			[sessionId]
 		);
+		await dbClient.end(); //added end
 		console.log("DEVICES IN SESSION: ", query.rows);
 		return query.rows
 	}
