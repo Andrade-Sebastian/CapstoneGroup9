@@ -30,6 +30,9 @@ export default function ActivityStudentView(): ReactElement{
 
     const {sessionId, userId, experimentType} = useParams();
     console.log("PARAMS RECIEVED: ", sessionId, userId, experimentType);
+    const handleMask = (targetUserId) => {
+      socket.emit("toggle-mask", {userId: targetUserId})
+    }
 
     useEffect(() => {
       const getUserData = async () => {
@@ -88,7 +91,8 @@ export default function ActivityStudentView(): ReactElement{
           <div className="flex space-x-4">
             <button
               className="bg-[#7F56D9] hover:bg-violet text-3xl p-4 rounded-lg text-white cursor-pointer"
-              onClick={() => {setSelectedButton("heartRate"); setActiveChart("heartRateChart");}}
+              // onClick={() => {setSelectedButton("heartRate"); setActiveChart("heartRateChart");}}
+              onClick={() => {handleMask(currentUserId)}}
             >
               Mask
             </button>

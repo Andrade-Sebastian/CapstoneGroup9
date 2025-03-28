@@ -69,6 +69,7 @@ interface SessionState{
     setUsers: (users: IUserInfo[]) => void;
     addUser: (user: IUserInfo) => void;
     removeUser: (userId: number) => void;
+    toggleUserMask: (userId: string) => void;
     setRoomCode: (code: string) => void;
     setExperimentId: (id: number) => void;
     setExperimentTitle: (experimentTitle: string) => void;
@@ -131,6 +132,7 @@ export const useSessionStore = create<SessionState>()(
             setUsers: (users: IUserInfo[] | undefined): void => set((state) => ({
               users: Array.isArray(users) ? [...users] : [...state.users],
             })),
+            toggleUserMask: (userId: string): void => set((state) => ({ users: state.users.map((user) => user.userId === userId ? { ...user, isMasked: !user.isMasked} : user),})),
             setRoomCode: (code: string): void => set(() => ({ roomCode: code})),
             setExperimentId: (id: number): void => set(() => ({experimentId: id})),
             setExperimentTitle: (title: string): void => set(() => ({ experimentTitle: title})),
