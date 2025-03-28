@@ -1,5 +1,5 @@
 import express from "express";
-import type { Request, Response } from "express";
+import type { Request, Response, Router } from "express";
 import { createPhotoLabInDatabase, createVideoLabInDatabase, createGalleryLabInDatabase, getSessionIDFromSocketID, addUserToSession, IUserDatabaseInfo, getSessionState, getPhotoLabInfo, assignExperimentToSession, createArticleLabInDatabase} from "../controllers/database.ts";
 import multer from "multer";
 import fs from 'node:fs';
@@ -8,6 +8,7 @@ import axios from 'axios';
 
 import fsPromises from 'node:fs/promises';
 import { dbClient } from "../routes/joiner_routes.ts";
+import { RequesterBuilder } from "grpc";
 
 
 const labDirectories = {
@@ -36,7 +37,7 @@ Object.values(labDirectories).forEach((dir) => {
     }
 });
 
-const databaseRouter = express.Router();
+const databaseRouter: Router = express.Router();
 databaseRouter.use(express.json()); 
 
 /*
@@ -367,6 +368,49 @@ databaseRouter.get("/device-id/:socketID", async (req: Request, res: Response) =
     
     res.status(200).send({"deviceID": deviceID})
 })
+
+databaseRouter.post("/remove-session/:sessionID", async(req: Request, res: Response) => {
+    const sessionID = req.params.sessionID;
+
+    console.log(`POST: In /remove-session/${sessionID}`)
+
+    try{
+        // await dbClient.connect();
+
+        // //query here 
+        //provoke an error here
+        // throw new Error("Simulated error for testing purposes"); -> caught
+        console.log(`Query: select Remove_Session(${sessionID})`)
+        const query = await dbClient.queryObject(`select Remove_Session($1)`, [sessionID])
+        console.log("After the query", query.rows[0].remove_session)
+
+        const wasRemoved: boolean = query.rows[0].remove_session;
+
+        if (wasRemoved){
+            res.status(200).send({
+                "message": "In /remove-session/:sessionID",
+                "huh": `Successfully removed session ${sessionID}`
+            });
+        }else{
+            res.status(400).send({
+                "Message": "Invalid sessionid..."
+            })
+        }
+
+    }catch(error: unknown){
+        console.log(error);
+    
+        res.status(500).send({
+            "Error": error
+        })
+        return;
+    }
+
+    
+    
+})
+
+
 
 export default databaseRouter;
 

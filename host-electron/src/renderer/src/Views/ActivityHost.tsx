@@ -110,7 +110,8 @@ export default function ActivityHost() {
     handleHostEndSession() //process destruction for all users
     console.log('in handle submit')
 
-    socket.emit('end-experiment')
+    socket.emit('end-experiment');
+    //call /end-experiment route here -- deletes everything 
     setTimeout(() => {
       //-----HARDCODED FOR TESTING-------
       navigateTo('/summary')

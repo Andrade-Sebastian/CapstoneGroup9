@@ -47,7 +47,7 @@ import joinerRouter from "./routes/joiner_routes.ts";
 import session_handlers from "./handlers/session_handlers.ts";
 import experimentRouter from "./routes/experiment_routes.ts";
 import databaseRouter from "./routes/database_routes.ts";
-import { Request, Response } from "express";
+import { Request, Response, Router } from "express";
 import path from "node:path";
 import fs from "node:fs";
 import { fileURLToPath } from "node:url";

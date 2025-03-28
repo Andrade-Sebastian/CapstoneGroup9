@@ -17,6 +17,8 @@ DROP FUNCTION IF EXISTS Get_Session_Users(INT);
 DROP FUNCTION IF EXISTS Create_Session(VARCHAR(100), VARCHAR(100), BOOLEAN, VARCHAR(100), BOOLEAN);
 DROP FUNCTION IF EXISTS Join_Session(VARCHAR(100), VARCHAR(100), TEXT, VARCHAR(100), TEXT, INT);
 DROP FUNCTION IF EXISTS Join_Session_Without_EmotiBit(VARCHAR(100), VARCHAR(100), TEXT, VARCHAR(100));
+DROP FUNCTION IF EXISTS Remove_Session(sessionid INT);
+
 
 -- Create_Session
 CREATE OR REPLACE FUNCTION Create_Session(
@@ -220,4 +222,34 @@ BEGIN
         "User".device
     FROM "User" WHERE "User".userid = user_id;
 END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION Remove_Session(sessionid INT) RETURNS BOOLEAN AS 
+$$ 
+DECLARE 
+	
+	BEGIN
+        -- If the session doesn't exist, return false
+        IF NOT EXISTS (SELECT 1 FROM session WHERE session.sessionid = Remove_Session.sessionid) THEN
+            RETURN FALSE; 
+        END IF;
+
+		-- Step 1: Set devices used by session users to available
+	    UPDATE Device
+		    SET IsAvailable = TRUE
+		    WHERE DeviceID IN (
+		        SELECT Device FROM "User"
+		        WHERE "User".sessionid = Remove_Session.sessionid
+		    );
+
+		-- Step 2: Delete the users in the session
+		delete from "User" where "User".sessionid = Remove_Session.sessionid;
+
+		-- Step 3: Delete the session 
+		delete from session where session.sessionid = Remove_Session.sessionid;
+	
+		return true;
+	END; 
+	
 $$ LANGUAGE plpgsql;
