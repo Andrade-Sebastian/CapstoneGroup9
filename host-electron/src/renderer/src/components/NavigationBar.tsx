@@ -16,7 +16,7 @@ import {
   Button,
   useDisclosure
 } from "@heroui/react";
-import ModalComponent from "./ModalComponent.tsx";
+
 
 export interface INavbarProps {
   onOpenSettings: () => void;
@@ -25,8 +25,6 @@ export interface INavbarProps {
 
 export default function NavigationBar(props: INavbarProps) {
   const {isOpen, onOpen, onOpenChange} = useDisclosure();
-  const [isModalSettingsOpen, setIsModalSettingsOpen] = useState(false);
-  const [isModalInfoOpen, setIsModalInfoOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   return (
       <Navbar

@@ -7,6 +7,7 @@ import socket from './Socket.js';
 import React from "react";
 import toast, { Toaster } from "react-hot-toast";
 import ModalComponent from "./components/ModalComponent.tsx";
+import { useSessionStore } from "./store/useSessionStore.tsx";
 
 function App() {
   useBrainflowManager();
@@ -28,7 +29,7 @@ function App() {
   const [isSocketAssigned, setIsSocketAssigned] = useState(false);
   const [isModalSettingsOpen, setIsModalSettingsOpen] = useState(false);
   const [isModalInfoOpen, setIsModalInfoOpen] = useState(false);
-
+const { hostName, roomCode} = useSessionStore();
   const handleSettingsAction = () => {
     console.log("Settings submitted");
     setIsModalSettingsOpen(false);
@@ -190,7 +191,11 @@ function App() {
         modalTitle="Settings"
       >
         <div className="mb-6">
-          <h1 className="text-md text-gray-700 mb-2">Here are some settings</h1>
+        <div className="mb-6">
+          <p><span className="font-bold">Nickname:</span> {hostName || ""}</p>
+          <p><span className="font-bold">Roomcode:</span> {roomCode || ""}</p>
+          {/* <p><span className="font-bold">SocketID:</span> {socketId || ""}</p> */}
+        </div>
         </div>
       </ModalComponent>
 
