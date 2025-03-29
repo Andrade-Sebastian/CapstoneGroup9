@@ -1,12 +1,12 @@
-import { Client } from "https://deno.land/x/postgres@v0.17.0/mod.ts"; //for database functionality
 
-export const dbClient = new Client({
-	user: "postgres",
-	database: "WB_Database",
-	password: "postgres",
-	hostname: "wb-backend-database",
-	port: 5432,
-});
+import dbClient from "./dbClient.ts";
+// export const dbClient = new Client({
+// 	user: "postgres",
+// 	database: "WB_Database",
+// 	password: "postgres",
+// 	hostname: "wb-backend-database",
+// 	port: 5432,
+// });
   
 
 
@@ -71,7 +71,10 @@ export async function joinSessionAsSpectator(socketID: string, nickname: string,
 
 
 	try{
-		await dbClient.connect();
+		console.log("joinAsSpectator() Connecting to database")
+	
+		console.log("joinAsSpectator() Connected to database")
+		console.log("joinAsSpectator(): before query")
 		const query = await dbClient.queryObject(`SELECT * from Join_Session_Without_EmotiBit($1, $2, $3, $4)`,
 			[
 				nickname, 
@@ -80,6 +83,7 @@ export async function joinSessionAsSpectator(socketID: string, nickname: string,
 				userRole
 			]
 		);
+		console.log("joinAsSpectator(): after query")
 
 		console.log("Query rows", query.rows[0]);
 		
@@ -91,7 +95,6 @@ export async function joinSessionAsSpectator(socketID: string, nickname: string,
 
 
 	}finally{
-		await dbClient.end();
 	}
 
 	return spectatorData;
@@ -103,7 +106,6 @@ export async function joinSessionAsSpectator(socketID: string, nickname: string,
 export async function makeDeviceAvailable(deviceID: number)
 {
 	try{
-		await dbClient.connect();
 		const query = await dbClient.queryObject(`UPDATE device
 		SET isavailable = true,
 		devicesocketid = ' '
@@ -114,13 +116,11 @@ export async function makeDeviceAvailable(deviceID: number)
 	catch(error){
 		console.log("Unable to make device available", error);
 	}
-	await dbClient.end()  //added end
 }
 
 export async function makeDeviceNotAvailable(deviceID: number)
 {
 	try{
-		await dbClient.connect();
 		const query = await dbClient.queryObject(`UPDATE device
 		SET isavailable = false
 		WHERE deviceid = $1`,
@@ -129,7 +129,6 @@ export async function makeDeviceNotAvailable(deviceID: number)
 	catch(error){
 		console.log("Unable to make device not available", error);
 	}
-	await dbClient.end()  //added end
 }	
 
 
@@ -138,7 +137,6 @@ export async function getPhotoLabInfo(experimentID: number): Promise<void>{
 	console.log("Photo Experiment passed in", experimentID);
 
 	try{
-		await dbClient.connect();
 		const query = await dbClient.queryObject(`SELECT photolab.experimentid, path, captions, name, description FROM photolab JOIN experiment 
 			ON photolab.experimentid = experiment.experimentid WHERE photolab.experimentid = $1 LIMIT 1`,
 			[experimentID]
@@ -151,18 +149,15 @@ export async function getPhotoLabInfo(experimentID: number): Promise<void>{
 	catch(error){
 		console.log("Unable to retrieve photo lab info", error);
 	} 
-	await dbClient.end()  //added end
 }
 export async function getVideoLabInfo(experimentID: number): Promise<void>{
 	console.log("Video Experiment passed in", experimentID);
 
 	try{
-		await dbClient.connect();
 		const query = await dbClient.queryObject(`SELECT videolab.experimentid, path, name, description FROM videolab JOIN experiment 
 			ON videolab.experimentid = experiment.experimentid WHERE videolab.experimentid = $1 LIMIT 1`,
 			[experimentID]
 		);
-		await dbClient.end()  //added end
 		
 		console.log("Video Lab Info: ", query.rows[0]);
 		return query.rows[0];
@@ -186,7 +181,6 @@ function generateRandomCode(length: number){
 export async function createExperiment(experimentName: string, description: string){
     try {
         // Create the table
-        await dbClient.connect();
         console.log("(database.ts): createExperiment() - Connected to Database");
 
         const result = await dbClient.queryObject(`INSERT INTO experiment(name,description) VALUES($1,$2) RETURNING experimentid, name, description`,
@@ -195,7 +189,6 @@ export async function createExperiment(experimentName: string, description: stri
 		return result.rows[0] as string;
       } finally {
         // Release the connection back into the pool
-        await dbClient.end();
       }
     
 }
@@ -204,13 +197,13 @@ export async function createExperiment(experimentName: string, description: stri
 export async function validateRoomCode(roomCode:string): Promise<{isValidRoomCode: boolean, sessionID: number | null}>
 {
 
+
 	let isValidRoomCode = false;
 
 	try{
 		console.log("-------------------");
 		console.log("Initializing db")
 		console.log("Connecting to database")
-		await dbClient.connect();
 		console.log("Finished connecting to database")
 		console.log(`query is: SELECT sessionid FROM session WHERE roomcode= ${roomCode} LIMIT 1`)
 		const query = await dbClient.queryObject(`SELECT 
@@ -220,7 +213,10 @@ export async function validateRoomCode(roomCode:string): Promise<{isValidRoomCod
 		console.log(query);
 		console.log("rows length", query.rows.length);
 		
-		await dbClient.end(); //added end 
+
+
+		// OCT 
+		// 
 
 		if (query.rows.length > 0){//result is valid
 			console.log("(database.ts): Validated room code")
@@ -246,7 +242,6 @@ export async function validateRoomCode(roomCode:string): Promise<{isValidRoomCod
 				sessionID: -1
 			}
 		}
-		
 	}
 	catch(error){
 		console.log("(database.ts): No valid room code: " + error)
@@ -274,7 +269,6 @@ export async function createSessionInDatabase(initializationInfo: ISessionCreati
 
 	try 
 	{
-		await dbClient.connect(); // Connect to the database 
 		console.log("(database.ts): createSessionInDatabase() - Connected to Database");
 		const result = await dbClient.queryObject(
 			`SELECT * FROM Create_Session('${roomCode}', '${hostSocketID}', ${isPasswordProtected}, '${password}', ${isSpectatorsAllowed});`);
@@ -290,7 +284,6 @@ export async function createSessionInDatabase(initializationInfo: ISessionCreati
 	finally 
 	{
 		//console.log("(Database.ts): ending database connection")
-		await dbClient.end(); 
 		//console.log("(Database.ts): finished ending database connection")
 	}
 }
@@ -300,7 +293,6 @@ export async function createSessionInDatabase(initializationInfo: ISessionCreati
 
 export async function getSessionState(sessionID: number){
 	try{
-		await dbClient.connect();
 		const query = await dbClient.queryObject(`SELECT * FROM session WHERE sessionid = $1`,
 			[sessionID]
 		);
@@ -309,7 +301,6 @@ export async function getSessionState(sessionID: number){
 	catch(error){
 		console.log("Unable to retrieve state", error);
 	}
-	await dbClient.end();
 
 }
 
@@ -318,7 +309,6 @@ export async function getSessionIDFromSocketID(socketID: string){
 	const cleanSocketID = socketID.replace(/^"|"$/g, "");
 
 	try {
-        await dbClient.connect();
 
         const query = await dbClient.queryObject<{ sessionid: number }>(
             `SELECT sessionid FROM session WHERE hostsocketid = $1`, 
@@ -338,7 +328,7 @@ export async function getSessionIDFromSocketID(socketID: string){
         return null; 
     } 
 	finally {
-        await dbClient.end();
+		console.log("hello doen")
 	}
 }
 
@@ -357,7 +347,6 @@ export async function createPhotoLabInDatabase(initializationInfo: IPhotoLabData
 	let experimentID = null;
 
 	try{
-		await dbClient.connect();
 		
 		const createExperimentQuery = await dbClient.queryObject(`
 			INSERT INTO experiment(name, description)
@@ -407,12 +396,10 @@ export async function createPhotoLabInDatabase(initializationInfo: IPhotoLabData
 		console.log("Updating session")
 		//relate the experiment to the session		
 		try{
-			await dbClient.connect()
 			const updateSessionQuery = await dbClient.queryObject(`
 				UPDATE session
 				SET experimentid = ${experimentID}
 				WHERE sessionid = ${sessionID}; `)
-			await dbClient.end(); //added end
 			
 		}catch(error)
 		{
@@ -446,7 +433,6 @@ export async function createVideoLabInDatabase(initializationInfo: IVideoLabData
 	let experimentID = null;
 	
 	try{
-		await dbClient.connect();
 		
 		const createExperimentQuery = await dbClient.queryObject(`
 			INSERT INTO experiment(name, description)
@@ -492,12 +478,10 @@ export async function createVideoLabInDatabase(initializationInfo: IVideoLabData
 		console.log("Updating session")
 		//relate the experiment to the session		
 		try{
-			await dbClient.connect()
 			const updateSessionQuery = await dbClient.queryObject(`
 				UPDATE session
 				SET experimentid = ${experimentID}
 				WHERE sessionid = ${sessionID}; `)
-			await dbClient.end(); //added end
 			
 		}catch(error)
 		{
@@ -525,7 +509,6 @@ export async function createGalleryLabInDatabase(initializationInfo: IGalleryLab
 	} = initializationInfo;
 
 	try{
-		await dbClient.connect();
 
 		const query = await dbClient.queryObject(`
 			INSERT INTO gallerylab (
@@ -539,7 +522,6 @@ export async function createGalleryLabInDatabase(initializationInfo: IGalleryLab
 				path,
 				captions
 			]);
-		await dbClient.end(); //added end
 		
 
 		console.log("(database.ts): gallery Lab Successfully Added")
@@ -561,7 +543,6 @@ export async function createArticleLabInDatabase(initializationInfo: IArticleLab
 	let experimentID = null;
 
 	try{
-		await dbClient.connect();
 		
 		const createExperimentQuery = await dbClient.queryObject(`
 			INSERT INTO experiment(name, description)
@@ -609,12 +590,10 @@ export async function createArticleLabInDatabase(initializationInfo: IArticleLab
 		console.log("Updating session")
 		//relate the experiment to the session		
 		try{
-			await dbClient.connect()
 			const updateSessionQuery = await dbClient.queryObject(`
 				UPDATE session
 				SET experimentid = ${experimentID}
 				WHERE sessionid = ${sessionID}; `)
-			await dbClient.end(); //added end
 			
 		}catch(error)
 		{
@@ -647,7 +626,6 @@ export async function addUserToSession(initializationInfo: IAddUserToSessionInfo
 	const userRole = "joiner";
 	
 	try{
-		await dbClient.connect();
 
 		//add the user to the session with the emotibit
 		const query = await dbClient.queryObject(`SELECT * FROM Join_Session($1, $2, $3, $4, $5, $6)`,
@@ -663,7 +641,6 @@ export async function addUserToSession(initializationInfo: IAddUserToSessionInfo
 			SET isconnected = false
 			WHERE deviceid = ${deviceID}; `);
 		
-		await dbClient.end(); //added end
 		return query.rows[0]; 
 	}
 	catch(error)
@@ -684,7 +661,6 @@ export async function registerDevice(initializationInfo: IRegisterDeviceInfo){
 
 	try{
 
-		await dbClient.connect();
 		const query = await dbClient.queryObject(`
 			INSERT INTO DEVICE(
 				ipaddress, 
@@ -709,18 +685,15 @@ export async function registerDevice(initializationInfo: IRegisterDeviceInfo){
 		console.log("Unable to add user ", error)
 	}
 
-	await dbClient.end();//added end
 
 }
 
 export async function getUsersFromSession(sessionID: string){
 	try{
-		await dbClient.connect();
 		const query = await dbClient.queryObject(`SELECT * FROM "User" 
 			JOIN device ON "User".sessionid = $1`,
 			[sessionID]
 		);
-		await dbClient.end();//added end
 		// console.log("Users retrieved from ", sessionID, query);
 		return query.rows;
 	}
@@ -732,37 +705,34 @@ export async function getUsersFromSession(sessionID: string){
 export async function removeUserFromSession(sessionID: string, socketID: string){
 	console.log("in removeUserFromSession, sessionID is ", sessionID, "socketID is ", socketID);
 	try{
-		await dbClient.connect();
 		const getDevice = await dbClient.queryObject(`SELECT device FROM "User" WHERE sessionID = $1 AND frontendsocketid = $2`,
-			[sessionID, socketID]
-		)
-		const query = await dbClient.queryObject(`DELETE FROM "User" WHERE sessionID = $1 AND frontendsocketid = $2`,
-			[sessionID, socketID]
-		);
-		console.log("here: ", query)
-		console.log("Deleted user");
-		const deviceID = (getDevice.rows[0] as { device: number }) || null;
-		// console.log("(LoOk HeRe): device id is", deviceID.device )
-		if (deviceID !== null){ //bc the spectator's device is null
-			await makeDeviceAvailable(deviceID.device);
-		}
+		 	[sessionID, socketID]
+		 )
+		// const query = await dbClient.queryObject(`DELETE FROM "User" WHERE sessionID = $1 AND frontendsocketid = $2`,
+		// 	[sessionID, socketID]
+		// );
+		// console.log("here: ", query)
+		// console.log("Deleted user");
+		// const deviceID = (getDevice.rows[0] as { device: number }) || null;
+		// // console.log("(LoOk HeRe): device id is", deviceID.device )
+		// if (deviceID !== null){ //bc the spectator's device is null
+		// 	await makeDeviceAvailable(deviceID.device);
+		// }
 	}
 	catch(error){
 		console.log("Unable to delete user", error);
 	}
 	finally{
-		await dbClient.end();
+		console.log("done")
 	}
 }
 
 export async function validDeviceSerial(nickName: string, roomCode:number, serialCode: string){
 	console.log("validDeviceSerial: ", serialCode)
 	try{
-		await dbClient.connect();
 		const query = await dbClient.queryObject(`SELECT deviceid FROM device WHERE RIGHT(device.serialnumber, 4) = $1 AND isavailable = $2`,
 			[serialCode, true] 
 		);
-		await dbClient.end(); //added end
 
 		console.log("HERE+++ ", query);
 		
@@ -780,11 +750,9 @@ export async function assignExperimentToSession(sessionID: number, experimentID:
 	//add the experiment to the session
 	//assign the experiment to the session
 	try{
-		await dbClient.connect();
 		const query = await dbClient.queryObject(`UPDATE session
 		SET experimentid = ${experimentID}
 		WHERE sessionid = ${sessionID}; `);
-		await dbClient.end(); //added end
 	}
 	catch(error){
 		console.log("Unable to assign experiment to session", error);
@@ -797,14 +765,12 @@ export async function validatePassword(sessionID:string, password:string): Promi
 	let isValidPass = false;
 
 	try{
-		await dbClient.connect();
 		const query = await dbClient.queryObject(`SELECT sessionid FROM session WHERE sessionid = $1 AND password = $2`,
 			[sessionID, password]
 		);
 		if(query.rows.length > 0){
 			isValidPass = true;
 		}
-		await dbClient.end(); //added end
 	}
 	catch(error){
 		console.log("Password is not valid", error);
@@ -815,7 +781,6 @@ export async function validatePassword(sessionID:string, password:string): Promi
 
 export async function getUserExperimentData(sessionID: string, userID: number, experimentType: string){
 	try{
-		await dbClient.connect();
 		switch(experimentType){
 			case "photo-lab":
 				const userInfo = await dbClient.queryObject(`SELECT "User".*, device.*, photolab.path FROM "User"
@@ -838,7 +803,6 @@ export async function getUserExperimentData(sessionID: string, userID: number, e
 
 export async function updateDeviceConnection(serialNumber: string, socketId: string, connection: true){
 	try{
-		await dbClient.connect();
 		const query = await dbClient.queryObject(`UPDATE device
 			SET isconnected = $1
 			WHERE serialnumber = $2
@@ -846,7 +810,6 @@ export async function updateDeviceConnection(serialNumber: string, socketId: str
 			[connection, serialNumber]
 		);
 		console.log("Updated device to connected in database: ", query.rows[0]);
-		await dbClient.end();//added end
 		return true;
 	}
 	catch(error){
@@ -857,7 +820,6 @@ export async function updateDeviceConnection(serialNumber: string, socketId: str
 
 export async function getSessionDevices(sessionId: string){
 	try{
-		await dbClient.connect();
 		const query = await dbClient.queryObject(`SELECT device.deviceid, device.isconnected 
 			FROM "User"
 			JOIN session ON "User".sessionid = session.sessionid
@@ -865,7 +827,6 @@ export async function getSessionDevices(sessionId: string){
 			WHERE session.sessionid = $1`,
 			[sessionId]
 		);
-		await dbClient.end(); //added end
 		console.log("DEVICES IN SESSION: ", query.rows);
 		return query.rows
 	}

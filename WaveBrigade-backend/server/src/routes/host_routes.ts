@@ -1,14 +1,15 @@
 import express, { Request, Response } from "npm:express";
 import { createSessionInDatabase, registerDevice, getUserExperimentData, updateDeviceConnection, getSessionDevices } from "../controllers/database.ts";
-import { Client } from "https://deno.land/x/postgres@v0.17.0/mod.ts";
+// import { Client } from "https://deno.land/x/postgres@v0.17.0/mod.ts";
 
-const dbClient = new Client({
-  user: "postgres",
-  database: "WB_Database",
-  password: "postgres",
-  hostname: "wb-backend-database",
-  port: 5432,
-});
+// const dbClient = new Client({
+//   user: "postgres",
+//   database: "WB_Database",
+//   password: "postgres",
+//   hostname: "wb-backend-database",
+//   port: 5432,
+// });
+import dbClient from "../controllers/dbClient.ts";
 
 const hostRouter = express.Router();
 let experimentData = {}
@@ -58,6 +59,7 @@ hostRouter.post("/register-device", async(req: Request, res: Response) => {
         ipAddress,
         deviceSocketID
     } = req.body;
+    console.log(JSON.stringify(req.body))
 
     if (!sessionID || !serialNumber || !ipAddress || !deviceSocketID) {
         return res.status(400).send({
@@ -94,7 +96,6 @@ hostRouter.post("/remove-device", async (req: Request, res: Response) => {
     }
 
     try{
-        await dbClient.connect();
         const result = await dbClient.queryObject(
             `DELETE FROM device where serialnumber = '${serialNumber}' 
             AND ipaddress = '${ipAddress}'`
@@ -106,7 +107,6 @@ hostRouter.post("/remove-device", async (req: Request, res: Response) => {
         console.error("Error removing device", error);
         return res.status(500).send(false);
     }finally{
-        await dbClient.end();
     }
 
 

@@ -7,7 +7,7 @@ import { determineFileExtension, getNumberFilesInDirectory } from "../controller
 import axios from 'axios';
 
 import fsPromises from 'node:fs/promises';
-import { dbClient } from "../routes/joiner_routes.ts";
+import dbClient from "../controllers/dbClient.ts";
 
 
 const labDirectories = {
@@ -74,7 +74,6 @@ databaseRouter.get("/device-info/:lastFourSerial", async(req: Request, res: Resp
     console.log("Last four serial: ", lastFourSerial);
 
     try{    
-        await dbClient.connect();
 
         const query = await dbClient.queryObject(`SELECT * FROM DEVICE WHERE RIGHT(serialnumber, 4) = $1;`, [lastFourSerial]);
 
@@ -94,7 +93,6 @@ databaseRouter.get("/device-info/:lastFourSerial", async(req: Request, res: Resp
             "Error": JSON.stringify(error)
         });
     }finally{
-        await dbClient.end();
     }
 });
 
@@ -410,7 +408,6 @@ databaseRouter.get("/device-id/:socketID", async (req: Request, res: Response) =
     let deviceID = null;
 
     try{
-        await dbClient.connect();
 
 
         //get device id assigned to the user at socket id 
@@ -427,10 +424,7 @@ databaseRouter.get("/device-id/:socketID", async (req: Request, res: Response) =
     }catch(error){
         console.log(error)
         res.status(500).send({"Error": error})
-    }finally{
-        await dbClient.end()
-    }
-    
+    }    
     res.status(200).send({"deviceID": deviceID})
 })
 

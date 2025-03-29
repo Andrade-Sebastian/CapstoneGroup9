@@ -15,6 +15,7 @@ import socketSessionMap, {
   removeSocket,
 } from "./sessionMappings.ts";
 import axios from "npm:axios";
+import dbClient from "./controllers/dbClient.ts";
 
 //CHANGE TO RELATIVE PATH
 const PROTO_PATH = "./server/src/grpc/protos/emotiBits.proto";
@@ -314,3 +315,6 @@ server.listen(PORT, HOST, () => {
     `(main.ts): Express & SocketIO Server running at http://localhost:${PORT}`
   );
 });
+
+
+await dbClient.end()

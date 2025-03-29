@@ -3,6 +3,8 @@ import {getSessionState} from "../controllers/session_controller.ts";
 import { addSocketToSession } from "../sessionMappings.ts";
 import {addUserToSession, getUsersFromSession, validateRoomCode, removeUserFromSession, validDeviceSerial, validatePassword, getPhotoLabInfo, getVideoLabInfo, joinSessionAsSpectator} from "../controllers/database.ts";
 import {Filter} from "npm:bad-words";
+import dbClient from "../controllers/dbClient.ts";
+
 const app = express();
 const joinerRouter = express.Router();
 joinerRouter.use(express.json());
@@ -39,7 +41,6 @@ joinerRouter.get("/session/allows-spectators/:sessionId", async (req: Request, r
     const sessionID = req.params.sessionId;
 
     try{
-        await dbClient.connect()
 
         const query = await dbClient.queryObject(`SELECT isspectatorsallowed FROM SESSION WHERE sessionid = '${sessionID}'`);
 
@@ -54,7 +55,6 @@ joinerRouter.get("/session/allows-spectators/:sessionId", async (req: Request, r
         return res.status(500).send(error);
     }
     finally{    
-        await dbClient.end();
     }
     
     return res.status(200).send({
@@ -181,6 +181,8 @@ joinerRouter.get("/validateRoomCode/:roomCode", async (req: Request, res: Respon
     }
 
     
+
+    
 })
 
 joinerRouter.post("/leave-room", async(req: Request, res: Response) => {
@@ -245,15 +247,7 @@ joinerRouter.post("/verify-serial", async (req: Request, res: Response) => {
 
 
 
-import { Client } from "https://deno.land/x/postgres@v0.17.0/mod.ts";
-import { join } from "node:path";
-export const dbClient = new Client({
-    user: "postgres",
-    database: "WB_Database",
-    password: "postgres",
-    hostname: "wb-backend-database",
-    port: 5432,
-});
+
 
 //change to function
 joinerRouter.get("/session/getInfo/:roomCode", async (req: Request, res: Response) => {
@@ -262,7 +256,6 @@ joinerRouter.get("/session/getInfo/:roomCode", async (req: Request, res: Respons
     const roomCode = req.params.roomCode;
     
     try{
-        await dbClient.connect()
         
         const query = await dbClient.queryObject(`SELECT 
             sessionid, 
@@ -292,10 +285,6 @@ joinerRouter.get("/session/getInfo/:roomCode", async (req: Request, res: Respons
         {
             console.log(error);
             return res.status(500).send(error);
-        }
-        finally 
-        {
-            await dbClient.end();
         }
         
     })
@@ -333,7 +322,9 @@ joinerRouter.get("/getVideoFile/:experimentID", async (req: Request, res: Respon
 })
 
 joinerRouter.get("/verify-code/:roomCode", async (req: Request, res: Response) => {
+
     const roomCode  = req.params.roomCode;
+   
     console.log("Room Code: ", roomCode);
     
     
@@ -355,6 +346,8 @@ joinerRouter.get("/verify-code/:roomCode", async (req: Request, res: Response) =
     } catch (error) {
         return res.status(400).json({ error: error });
     }
+
+   
 });
 
 joinerRouter.post("/validatePassword", async (req: Request, res: Response) => {
