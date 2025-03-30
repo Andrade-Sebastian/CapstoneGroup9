@@ -5,6 +5,10 @@ import {addUserToSession, getUsersFromSession, validateRoomCode, removeUserFromS
 import {Filter} from "npm:bad-words";
 import dbClient from "../controllers/dbClient.ts";
 
+
+import * as bcrypt from "https://deno.land/x/bcrypt/mod.ts";
+
+
 const app = express();
 const joinerRouter = express.Router();
 joinerRouter.use(express.json());
@@ -41,7 +45,6 @@ joinerRouter.get("/session/allows-spectators/:sessionId", async (req: Request, r
     const sessionID = req.params.sessionId;
 
     try{
-
         const query = await dbClient.queryObject(`SELECT isspectatorsallowed FROM SESSION WHERE sessionid = '${sessionID}'`);
 
         if(query.rows.length === 0){
@@ -49,11 +52,15 @@ joinerRouter.get("/session/allows-spectators/:sessionId", async (req: Request, r
                 "message": "Session not found for sessionID: " + sessionID
             })
         }
+        const allowSpectators = await checkSpectators(sessionID);
+        return res.status(200).send(allowSpectators);
+
 
     }catch(error){
         console.log(error);
         return res.status(500).send(error);
     }
+
     finally{    
     }
     
@@ -297,6 +304,21 @@ joinerRouter.get("/getPhoto/:experimentID", async (req: Request, res: Response) 
         return res.status(500).send(error);
     }
 })
+joinerRouter.get("/getGallery/:experimentID", async (req: Request, res: Response) => {
+    console.log("In joiner/getGallery/:experimentID", req.body);
+    
+    const experimentID = parseInt(req.params.experimentID);
+    
+    try{
+        const galleryInfo = await getGalleryLabInfo(experimentID);
+        return res.status(200).send(galleryInfo);
+        
+    }
+    catch(error){
+        console.log(error);
+        return res.status(500).send(error);
+    }
+})
 
 joinerRouter.get("/getVideoFile/:experimentID", async (req: Request, res: Response) => {
     console.log("In joiner/getVideoFile/:experimentID", req.body);
@@ -306,6 +328,22 @@ joinerRouter.get("/getVideoFile/:experimentID", async (req: Request, res: Respon
     try{
         const videoFileInfo = await getVideoLabInfo(experimentID);
         return res.status(200).send(videoFileInfo);
+        
+    }
+    catch(error){
+        console.log(error);
+        return res.status(500).send(error);
+    }
+})
+
+joinerRouter.get("/getArticleFile/:experimentID", async (req: Request, res: Response) => {
+    console.log("In joiner/getArticleFile/:experimentID", req.body);
+    
+    const experimentID = req.params.experimentID;
+    
+    try{
+        const articleFileInfo = await getArticleLabInfo(experimentID);
+        return res.status(200).send(articleFileInfo);
         
     }
     catch(error){
@@ -348,8 +386,9 @@ joinerRouter.post("/validatePassword", async (req: Request, res: Response) => {
     const {sessionID, password} = req.body;
     
     try{
-        const isValidPassword = await validatePassword(sessionID, password);
-        if(isValidPassword){
+        const hashedPass = await validatePassword(sessionID);
+        const isValidPass = await bcrypt.compare(password, hashedPass.password)
+        if(isValidPass){
             return res.status(200).json({success: true})
         }
         else{

@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { CiPlay1 } from "react-icons/ci";
 import { TfiGallery } from 'react-icons/tfi'
 import { TiCamera } from 'react-icons/ti'
-import { IoVideocam } from 'react-icons/io5'
+import { IoVideocam, IoNewspaper } from 'react-icons/io5'
 import socket from "./socket.tsx";
 import axios from "axios";
 import { Divider } from "@heroui/divider";
@@ -40,6 +40,8 @@ export default function WaitingRoom() {
     experimentTypeString,
     setExperimentTypeString,
     setExperimentPath,
+    addPhoto,
+    galleryPhotos,
     setWasKicked,
     wasKicked,
     experimentId,
@@ -77,13 +79,33 @@ export default function WaitingRoom() {
       console.log("Received experiment type from the host...")
       setExperimentType(data);
       console.log("Here is the experiment type sent by the host");
-      console.log("Experiment Type set to:", experimentType)
+      console.log("Experiment Type set to:", useJoinerStore.getState().experimentType)
     };
     socket.on("experiment-type", handleExperimentType);
     return () => {
       socket.off("experiment-type", handleExperimentType);
     };
   }, []);
+
+  // useEffect(() => {
+  //   const handleGalleryImageData = (data) =>{
+  //     console.log("Received gallery data from host", data);
+
+  //     const {experimentTitle, experimentDesc, expId, images} = data;
+  //     images.forEach((img,index) =>{
+  //       addPhoto({
+  //         id: index,
+  //         src: img.path,
+  //         file:null,
+  //         caption: img.caption
+  //       });
+  //     });
+  //   };
+  //   socket.on("experiment-data", handleGalleryImageData);
+  //   return () => {
+  //     socket.off("experiment-data", handleGalleryImageData);
+  //   };
+  // },[]);
   
   useEffect(() => {
     console.log("Trying to get experiment type. Currently set to: ", experimentType)
@@ -93,7 +115,6 @@ export default function WaitingRoom() {
   useEffect(() => {
     function kickUser()
     {
-
       //Global store that keeps track of whether the user has been previously kicked or not
       setWasKicked(true);
       console.log("Kick function. Here is the socketID and sessionID", socketId, sessionId)
@@ -233,6 +254,7 @@ export default function WaitingRoom() {
           `http://localhost:3000/joiner/getVideoFile/${experimentID}`
         );
         if(response.status === 200){
+          toast.success("Successfully received video lab data.")
           console.log("Returned get video data:", response.data);
           const experimentTitle = response.data.name;
           const experimentDesc = response.data.description;
@@ -256,7 +278,7 @@ export default function WaitingRoom() {
           `http://localhost:3000/joiner/getPhoto/${experimentID}`
         );
         if (response.status === 200) {
-          //toast.success("Successfully received photolab data.");
+          toast.success("Successfully received photo lab data.");
           console.log("RETURNED GET PHOTO DATA: ", response.data);
           const experimentTitle = response.data.name;
           const captions = response.data.captions;
@@ -280,13 +302,93 @@ export default function WaitingRoom() {
         console.log("Error receiving photolab data in joiner fe: ", error);
       }
     };
+    const getGalleryData = async () => {
+      try {
+        console.log("SENDING TO THE ROUTE EXPERIMENT ID: ", experimentID);
+        const response = await axios.get(
+          `http://localhost:3000/joiner/getGallery/${experimentID}`
+        );
+        if (response.status === 200) {
+          toast.success("Successfully received gallery lab data.");
+          console.log("RETURNED GET GALLERY DATA: ", response.data);
+          const experimentTitle = response.data.name;
+          const experimentDesc = response.data.description;
+          response.data.images.forEach((img,index) =>{
+            addPhoto({
+              id: index,
+              src: img.path,
+              file:null,
+              caption: img.caption
+            });
+          });
+
+          //const images = response.data.images;
+          // const captions = response.data.captions;
+          // const path = response.data.path;
+          //NEED THE EXPERIMENT TYPE
+          console.log(
+            "RETURNED GET GALLERY DATA: ", response.data
+          );
+          console.log("GalleryPhoto data from getGallery", galleryPhotos)
+          setExperimentId(experimentID);
+          setExperimentTitle(experimentTitle);
+          setExperimentDesc(experimentDesc);
+          // images.forEach((image, index) => {
+          //   addPhoto({
+          //     id: index,
+          //     src: image.path,
+          //     file:null,
+          //     caption: image.caption
+          //   })
+          // })
+        }
+      } catch (error) {
+        toast.error("Failed to receive gallery data");
+        console.log("Error receiving photolab data in joiner fe: ", error);
+      }
+    };
+    const getArticleData = async () => {
+      try {
+        console.log("SENDING TO THE ROUTE EXPERIMENT ID: ", experimentID);
+        const response = await axios.get(
+          `http://localhost:3000/joiner/getArticleFile/${experimentID}`
+        );
+        if (response.status === 200) {
+          toast.success("Successfully received article lab data.");
+          console.log("RETURNED GET Article DATA: ", response.data);
+          const experimentTitle = response.data.name;
+          const experimentDesc = response.data.description;
+          const path = response.data.path;
+          //NEED THE EXPERIMENT TYPE
+          console.log(
+            "RESPONSE DATA VARIABLES: ",
+            experimentDesc,
+            experimentTitle,
+            path
+          );
+          setExperimentId(experimentID);
+          setExperimentTitle(experimentTitle);
+          setExperimentDesc(experimentDesc);
+          setExperimentPath(path);
+        }
+      } catch (error) {
+        toast.error("Failed to receive Article data");
+        console.log("Error receiving article lab data in joiner fe: ", error);
+      }
+    };
     if(experimentType === 1){
       getVideoFileData();
     }
     if(experimentType === 2){
       getPhotoData();
     }
-  }, [experimentID, setExperimentDesc, setExperimentId, setExperimentTitle, setExperimentPath]);
+    if(experimentType === 3){
+      getGalleryData();
+    }
+    if(experimentType === 4){
+      getArticleData();
+    }
+  }, [experimentID, setExperimentDesc, setExperimentId, setExperimentTitle, setExperimentPath, experimentType]);
 
   useEffect(() => {
     if (experimentType === 1) {
@@ -300,7 +402,7 @@ export default function WaitingRoom() {
       setExperimentIcon(<TfiGallery style={{ fontSize: '20px' }} />)
     } else if (experimentType === 4) {
       setExperimentTypeString('ArticleLab')
-      setExperimentIcon(<TfiGallery style={{ fontSize: '20px' }} />)
+      setExperimentIcon(<IoNewspaper style={{ fontSize: '20px' }} />)
     } else {
       console.log("Invalid experiment type");
     }
@@ -364,7 +466,3 @@ export default function WaitingRoom() {
 function then(arg0: () => void) {
   throw new Error("Function not implemented.");
 }
-
-
-//PROBLEM: SO THE FIRST JOINER GETS KICKED CORRECTLY AND GETS SENT TO THE JOIN PAGE. HOWEVER, WHEN I TRY TO JOIN AS A NEW
-//JOINER, THE BACKEND REMEMBERS AN OLD SOCKETID, THE ONE THAT WAS ALREADY KICKED, AND TRIES TO DISCONNECT THAT ONE INSTEAD OF THE NEW GUY

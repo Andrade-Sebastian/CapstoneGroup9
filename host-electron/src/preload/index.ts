@@ -11,6 +11,9 @@ export type BRAINFLOW_DESTROY_USER = "brainflow:destroy-user"
 //event names for renderer
 export type ActivityEvents =
   //each one of these is called a "channel"
+  "session:request-data" |
+  "session:send-to-window" |
+  "session:sync" |
   TYPE_BRAINFLOW_LAUNCH | //launches brainflow
   BRAINFLOW_STATUS | //status
   BRAINFLOW_DESTROY | //closes brainflow
@@ -26,6 +29,9 @@ export type ActivityEvents =
 
 
 const activityEventsChannels: Array<ActivityEvents> = [
+  "session:request-data",
+  "session:send-to-window",
+  "session:sync",
   "brainflow:launched",
   "brainflow:launch",
   "brainflow:status",

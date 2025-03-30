@@ -27,6 +27,7 @@
     "@heroui/react": "^2.6.14",
     "@nextui-org/listbox": "^2.3.9",
     "@nextui-org/react": "^2.6.11",
+    "@simplepdf/react-embed-pdf": "^1.9.0",
     "@tailwindcss/vite": "^4.0.0",
     "axios": "^1.7.9",
     "brainflow": "^5.16.0",

@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS Session
     HostSocketID varchar(100) NOT NULL,
     StartTimestamp TIMESTAMP, --Nullable
     isPasswordProtected BOOLEAN,
-    Password VARCHAR(100), --Nullable
+    Password VARCHAR(255), --Nullable
     isSpectatorsAllowed BOOLEAN,
     EndTimestamp TIMESTAMP --Nullable
 );
@@ -110,8 +110,8 @@ CREATE TABLE IF NOT EXISTS VideoLab
 
 CREATE TABLE IF NOT EXISTS GalleryLab
 (
-    GalleryLabID INTEGER PRIMARY KEY,
-    ExperimentID INTEGER REFERENCES Experiment(ExperimentID),
+    GalleryLabID SERIAL PRIMARY KEY,
+    ExperimentID SERIAL REFERENCES Experiment(ExperimentID),
     Filename VARCHAR(256),
     Path VARCHAR(256),
     Caption VARCHAR(512),

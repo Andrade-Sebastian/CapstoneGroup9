@@ -13,8 +13,7 @@ interface IUserDataType {
     chart_color: string;
     user_id: number;
 }
-let max = 98;
-let min = 93;
+
 const now: Date = new Date();
 
 export default function ChartComponent(props: IUserDataType) {
@@ -23,13 +22,21 @@ export default function ChartComponent(props: IUserDataType) {
     const [plotState, acceptPlotDataState] = useState<Array<number>>([]);
     const [timeState, acceptTimeState] = useState<Array<number>>([]);
     //const [edaState, acceptEdaDataState] = useState<Array<number>>([]);
+    // const [min, setMin] = useState(93);
+    // const [max, setMax] = useState(98);
+    let min = 93;
+    let max = 98;
     const ipc = window.api;
+    
+
+    console.log("CHART TYPE: ", props.chart_type);
 
     function addDataPoint(ancDataFrame, auxDataFrame, timeStamp: number){
         
         const numOfPoints = plotState.length;
         const numOfTimeStamps = timeState.length;
         let current_data = 0;
+        
 
         console.log("LENGTH OF ARRAY: ", numOfPoints);
 
@@ -46,12 +53,16 @@ export default function ChartComponent(props: IUserDataType) {
             console.log( "ECG CHART")
         }  
         else if(props.chart_type === 2){
+            // setMin(80);
+            // setMax(98);
             min = 80;
             max = 98;
             current_data = (ancDataFrame.data2 * 1.8) + 32;
             console.log("TEMP CHART: ", current_data);
         }
         else if(props.chart_type === 3){
+            // setMin(2);
+            // setMax(0);
             min = 0;
             max = 2;
             current_data = (ancDataFrame.data1)
@@ -65,7 +76,10 @@ export default function ChartComponent(props: IUserDataType) {
         let counter = 0;
         const intervalId = setInterval(() => {
             counter++
-            max = Math.max(max, Math.round(current_data));
+            const temp_max = Math.max(max, Math.round(current_data))
+            max = temp_max;
+           // const temp_min = temp_max - 1;
+            //setMin(temp_min);
             min = max - 1;
             //console.log("MAX: ", max);
             //console.log("MIN: ", min);
@@ -74,6 +88,10 @@ export default function ChartComponent(props: IUserDataType) {
                 clearInterval(intervalId);
                 max = current_data;
                 min = max - 1;
+                // setMax(current_data);
+                // const temp_max = max;
+                // const temp_min = temp_max - 1;
+                // setMin(temp_min);
             }
         }, 10000);
 
@@ -105,11 +123,11 @@ export default function ChartComponent(props: IUserDataType) {
         return () => {
             socket.off('update', onUpdate);
         };
-    }, [addDataPoint, timeState]);
+    }, [addDataPoint, timeState, props.user_id]);
 
     return(
-        <div className='h-auto w-auto'>
-            <div id="chart">
+        <div className='w-full h-full'>
+            <div id={"chart-${props.chart_type}"}>
                 
                 <Plot
                     data={[
@@ -133,10 +151,13 @@ export default function ChartComponent(props: IUserDataType) {
                     // }
                     ]}
                     layout = {{
+                        autosize: true,
+                        responsive: true,
                         width: 700,
                         height: 350,
+                        margin: {l:40, r: 10, b: 40, t: 10},
                         yaxis: {
-                            title: 'Temperature (°F)',//props.chart_name,,
+                            title: props.chart_name,
                             range: [min, max + 1],
                             tick: 1,
                         },
@@ -145,6 +166,9 @@ export default function ChartComponent(props: IUserDataType) {
                     config={{
                         displayModeBar: false 
                       }}
+
+                    useResizeHandler={true}
+                    style ={{ width: "100%", height: "100%"}}
                 />
             </div> 
         </div>

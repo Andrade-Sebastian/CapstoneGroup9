@@ -8,6 +8,8 @@ import axios from 'axios';
 
 import fsPromises from 'node:fs/promises';
 import dbClient from "../controllers/dbClient.ts";
+import path from "node:path/posix";
+
 
 
 const labDirectories = {
@@ -179,12 +181,6 @@ databaseRouter.post("/photo-lab", upload.single("imageBlob"), async(req: Request
 
 databaseRouter.post("/video-lab", upload.single("videoBlob"), async(req: Request, res: Response) => {
     
-    // const experimentTitle = req.body.experimentTitle;
-    // const experimentDescription = req.body.experimentDescription;
-    // const videoID = req.body.videoID;
-    // const videoBlob = req.body.videoBlob;
-    // const socketID = req.body.socketID;
-
     const {experimentTitle, experimentDescription, videoID, socketID } = req.body;
 
     let experimentID = null;
@@ -194,7 +190,7 @@ databaseRouter.post("/video-lab", upload.single("videoBlob"), async(req: Request
         sessionID = await getSessionIDFromSocketID(socketID);
         console.log("In DB Route of /video-lab. SessionID:", sessionID);
         if(videoID){
-            console.log("WALTER, here is the exp. info bruh:", experimentTitle, "video ID hopefully", videoID, "SocketID",socketID);
+            console.log("Video lab info", experimentTitle, "video ID", videoID, "SocketID",socketID);
             experimentID = await createVideoLabInDatabase({
                 experimentTitle: experimentTitle, 
                 experimentDescription: experimentDescription,
@@ -204,8 +200,8 @@ databaseRouter.post("/video-lab", upload.single("videoBlob"), async(req: Request
         }
         else if(req.file){
             console.log("There do be a file, uploaded file:", req.file)
-            let fileNumber = await getNumberFilesInDirectory(videoLabMediaDirectory);
-            let detectedFileExtension = determineFileExtension(req.file) 
+            const fileNumber = await getNumberFilesInDirectory(videoLabMediaDirectory);
+            const detectedFileExtension = determineFileExtension(req.file) 
             const fileName = fileNumber + detectedFileExtension
             //adding file to appropriate directory
             try{
@@ -230,151 +226,137 @@ databaseRouter.post("/video-lab", upload.single("videoBlob"), async(req: Request
         console.log(error)
         res.status(500).send({message:"Could not add video lab to database", error})
     }
-
-    // //giving the file a new name ex. (#).mp4
-    
-    // if (req.file) //if a file was provided
-    // {
-    //     console.log("There do be a file")
-    //     console.log("Uploaded file: ", req.file)
-    // }
-    // else //if no file was provided
-    // {
-    //     console.log("No file provided");
-    //     return res.status(500).send("No file provided");
-    // }
-
-    // let experimentID = null
-    // console.log("New Filename, ", fileName)
-
-    // //change the req.file.name to filename
-    // console.log("File path", req.file.path);
-
- 
-
-    // //add the video lab to the database
-    // let sessionID = -1;
-
-    // try{
-    //     sessionID = await getSessionIDFromSocketID(socketID);
-
-    //     console.log("Session id--", sessionID)
-    //     experimentID = await createVideoLabInDatabase({
-    //         experimentTitle: experimentTitle, 
-    //         experimentDescription: experimentDescription,
-    //         videoBlob: fileName,
-    //         socketID: socketID
-    //     }, sessionID)
-    // } 
-    // catch (error) {
-    //     res.status(500).send({
-    //         "message": "Could not add video lab to database",
-    //         "error": error
-    //     });
-    // }
-    
-    // res.status(200).send({
-    //     "message": "succeess",
-    //     "experimentID": experimentID
-    // })
 });
 
 
-databaseRouter.post("/gallery-lab", async(req: Request, res: Response) => {
-    //check to see if the type matches
-    const galleryLabInfo = req.body;
-    // const {
-    //     experimentID,
-    //     path,
-    //     captions
-    // } = req.body;
-
+databaseRouter.post("/gallery-lab", upload.array("images"), async(req: Request, res: Response) => {
+    const clearGalleryFolder = async (directoryPath: string) => {
+        try{
+            const files = await fs.promises.readdir(directoryPath);
+            for(const file of files) {
+                const filePath = path.join(directoryPath, file);
+                await fs.promises.unlink(filePath);
+            }
+            console.log("Cleared gallery folder.")
+        } catch(error){
+            console.log("Error clearing folder", error)
+        }
+    };
     try{
-        console.log("(database_routes.ts: In galleryLab, recieved : ", JSON.stringify(galleryLabInfo))
-        await createGalleryLabInDatabase(galleryLabInfo)
-        console.log("(database_routes.ts): !!Gallery Lab to database :D-=")
+    const imageFiles = req.files as Express.Multer.File[]
+    const {experimentTitle, experimentDescription, socketID} = req.body;
+    const rawCaptions = req.body.captions;
+
+    if(!imageFiles || imageFiles.length === 0) {
+        return res.status(400).json({message: "No images uploaded."});
+    }
+
+    const captions = Array.isArray(rawCaptions) ? rawCaptions : [rawCaptions];
+
+    //just in case there is a mismatch of captions and files
+    if (captions.length !== imageFiles.length) {
+        return res.status(400).json({message: "Number of captions need to match the number of images."});
+    }
+    const sessionID = await getSessionIDFromSocketID(socketID);
+
+    if(!sessionID){
+        return res.status(404).json({message: "There is no session found for given socketID."});
+    }
+
+    //create experiment 
+    let experimentID = null;
+    const imagesToInsert: {path: string, caption: string }[] = [];
+    for(let i = 0; i < imageFiles.length; i++) {
+        const file = imageFiles[i];
+        console.log("Incoming file path from multer:", file.path);
+        const caption = captions[i];
+        const detectedFileExtension = determineFileExtension(file);
+        
+        const newFileName = `${i}${detectedFileExtension}`;
+        const newFilePath = `${galleryLabMediaDirectory}/${newFileName}`;
+        
+        await fsPromises.rename(file.path, newFilePath);
+        console.log("Incoming file path from multer:", file.path);
+
+        imagesToInsert.push({
+            path: `/media/gallery-lab/${newFileName}`, //path
+            caption
+        });   
+    }
+    experimentID = await createGalleryLabInDatabase({experimentTitle: experimentTitle, experimentDescription: experimentDescription, socketID: socketID}, imagesToInsert, sessionID);
+
+    
+    console.log("(database_routes.ts: In galleryLab, recieved : ", sessionID);
+    res.status(200).json({
+    message: "Gallery lab created successfully.",
+    experimentID, images: imagesToInsert});
     } catch (error) {
+        console.log("Error in /gallery-lab", error);
         res.status(500).send({
             "message": "Could not add gallery lab to database",
             "error": error
         });
     }
-    res.status(200).send({
-        "message": "In gallery-lab"
-    })
 })
 
-databaseRouter.post("/article-lab", upload.single("article"), async(req: Request, res: Response) => {
+databaseRouter.post("/article-lab", upload.single("articleBlob"), async(req: Request, res: Response) => {
+
+    const {experimentTitle, experimentDescription, articleURL, socketID} = req.body;
 
     console.log("Received form data:", req.body);  // Log all fields in req.body
 
-    const labType = req.body.labType;  // This should now be available
-    console.log("LAB TYPE: ", labType);  // Log labType to verify
-
-    const experimentTitle = req.body.experimentTitle;
-    const experimentDescription = req.body.experimentDescription;
-    const article = req.body.article;
-    const socketID = req.body.socketID
-
-    //giving the file a new name
-    let fileNumber = await getNumberFilesInDirectory(articleLabMediaDirectory);
-    let detectedFileExtension = determineFileExtension(req.file) 
-    const fileName = fileNumber + detectedFileExtension
-
-
-    if (req.file) //if a file was provided
-    {
-        console.log("There do be a file")
-        console.log("Uploaded file: ", req.file)
-    }
-    else //if no file was provided
-    {
-        console.log("No file provided");
-        return res.status(500).send("No file provided");
-    }
-
-    let experimentID = null
-    console.log("New Filename, ", fileName)
-
-    //change the req.file.name to filename
-    console.log("File path", req.file.path);
-
- 
-    //add the file to the /app/backend/server/src/media/photo-lab directory
-    try{
-        await fsPromises.rename(req.file.path, `/app/backend/server/src/media/article-lab/${fileName}`);
-    }
-    catch(error){
-        console.log("Error moving file: ", error);
-        return res.status(500).send("Error moving file.");
-    };
-
-    //add the photo lab to the database
+    let experimentID = null;
     let sessionID = -1;
+
+    // const labType = req.body.labType;  // This should now be available
+    // console.log("LAB TYPE: ", labType);  // Log labType to verify
+
+    // const experimentTitle = req.body.experimentTitle;
+    // const experimentDescription = req.body.experimentDescription;
+    // const article = req.body.article;
+    // const socketID = req.body.socketID
 
     try{
         sessionID = await getSessionIDFromSocketID(socketID);
-
-        console.log("Session id--", sessionID)
-        experimentID = await createArticleLabInDatabase({
-            experimentTitle: experimentTitle, 
-            experimentDescription: experimentDescription,
-            article: fileName,
-            socketID: socketID
-        }, sessionID)
-    } 
-    catch (error) {
-        res.status(500).send({
-            "message": "Could not add article lab to database",
-            "error": error
-        });
+        console.log("In DB Route of /article-lab. SessionID:", sessionID);
+        if(articleURL){
+            console.log("Exp.title :", experimentTitle, "article url hopefully", articleURL, "SocketID",socketID);
+            experimentID = await createArticleLabInDatabase({
+                experimentTitle: experimentTitle, 
+                experimentDescription: experimentDescription,
+                articleURL: articleURL,
+                socketID: socketID
+            }, sessionID)
+        }
+        else if(req.file){
+            console.log("There do be a file, uploaded file:", req.file)
+            const fileNumber = await getNumberFilesInDirectory(articleLabMediaDirectory);
+            const detectedFileExtension = determineFileExtension(req.file) 
+            const fileName = fileNumber + detectedFileExtension
+            //adding file to appropriate directory
+            try{
+                await fsPromises.rename(req.file.path, `/app/backend/server/src/media/article-lab/${fileName}`);
+                experimentID = await createArticleLabInDatabase({
+                    experimentTitle: experimentTitle, 
+                    experimentDescription: experimentDescription,
+                    articleBlob: fileName,
+                    socketID: socketID
+                }, sessionID)
+            }
+            catch(error){
+                console.log("Error moving file: ", error);
+                return res.status(500).send("Error moving file.");
+            };
+        }
+        else{
+            return res.status(400).send({message: "No article file or URL provided..."})
+        }
+        res.status(200).send({message: "Success", experimentID})
+    }catch(error){
+        console.log(error)
+        res.status(500).send({message:"Could not add article lab to database", error})
     }
-    
-    res.status(200).send({
-        "message": "succeess",
-        "experimentID": experimentID
-    })
-})
+});
 
 
 databaseRouter.get("/photo-lab/info/:photolabid", async(req: Request, res: Response) => {

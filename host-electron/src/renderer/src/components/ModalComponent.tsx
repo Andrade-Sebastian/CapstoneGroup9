@@ -46,7 +46,7 @@ export default function ModalComponent(props: IModalComponent, photoLabData: pho
           {props.button && (
             <button
               type="button"
-              className="mt-6 font-semibold py-3 px-6 rounded-md shadow-md transition duration-300 ease-in-out bg-[#7F56D9] hover:bg-violet-500 text-white disabled:bg-gray-400 disabled:cursor-not-allowed" 
+              className="mt-6 font-semibold py-3 px-6 rounded-md shadow-md transition duration-300 ease-in-out bg-[#7F56D9] hover:bg-violet-500 text-white disabled:bg-gray-400 disabled:cursor-not-allowed cursor-pointer" 
               onClick={props.onAction}
               disabled={props.isButton1Disabled}
             >
@@ -58,7 +58,7 @@ export default function ModalComponent(props: IModalComponent, photoLabData: pho
 
           <button
             type="button"
-            className="mt-6 font-semibold py-3 px-6 rounded-md shadow-md transition duration-300 ease-in-out bg-[#7F56D9] hover:bg-violet-500 text-white disabled:bg-gray-400 disabled:cursor-not-allowed"
+            className="mt-6 font-semibold py-3 px-6 rounded-md shadow-md transition duration-300 ease-in-out bg-[#7F56D9] hover:bg-violet-500 text-white disabled:bg-gray-400 disabled:cursor-not-allowed cursor-pointer"
             onClick={props.onAction2}
             disabled={props.isButtonDisabled}
           >
@@ -77,7 +77,7 @@ export default function ModalComponent(props: IModalComponent, photoLabData: pho
           )}
           <button
             type="button"
-            className="mt-6 font-semibold py-3 px-6 rounded-md shadow-md transition duration-300 ease-in-out border bg-white hover:bg-gray-100 text-black"
+            className="mt-6 font-semibold py-3 px-6 rounded-md shadow-md transition duration-300 ease-in-out border bg-white hover:bg-gray-100 text-black cursor-pointer"
             onClick={props.onCancel}
           >
             Cancel

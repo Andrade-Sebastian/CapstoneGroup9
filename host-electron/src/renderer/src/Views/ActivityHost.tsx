@@ -3,7 +3,9 @@ import { useEffect, useState, useRef } from 'react'
 import { CiPlay1 } from 'react-icons/ci'
 import { TfiGallery } from 'react-icons/tfi'
 import { TiCamera } from 'react-icons/ti'
-import { IoVideocam } from 'react-icons/io5'
+import { LuSquareStack } from "react-icons/lu";
+import { BsChatSquareText } from "react-icons/bs";
+import { IoVideocam, IoNewspaper } from 'react-icons/io5'
 import { PiCrownSimpleThin } from 'react-icons/pi'
 import { HiOutlineSignal } from 'react-icons/hi2'
 import { CiUser } from 'react-icons/ci'
@@ -23,6 +25,7 @@ import React from 'react'
 import useBrainflowManager from '../hooks/useBrainflowManager.ts'
 import { io } from 'socket.io-client'
 import ReactPlayer from 'react-player'
+import GalleryComponent from "../components/GalleryComponent.tsx";
 
 export default function ActivityHost() {
   const {
@@ -41,15 +44,19 @@ export default function ActivityHost() {
     removeDevice,
     videoLabSource,
     videoID,
+    articleURL,
+    articleLabSource,
     photoLabImageSource,
     experimentTitle,
-    experimentDesc
+    experimentDesc,
+    galleryPhotos
   } = useSessionStore()
   const { handleHostEndSession } = useBrainflowManager()
   const [nicknames, setNickNames] = useState<string[]>([])
   const [sessionID, setSessionID] = useState('')
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [serialNumber, setSerialNumber] = useState('')
+  const [activeTab, setActiveTab] = useState("images");
   const [IPAddress, setIPAddress] = useState('')
   const [isModalUserOptionsOpen, setIsModalUserOptionsOpen] = useState(false)
   const [selectedEmotiBitId, setSelectedEmotiBitId] = useState<string | null>(null)
@@ -116,7 +123,7 @@ export default function ActivityHost() {
   }
 
   const checkVideoMediaType = () =>{
-    console.log("CheckVideo media is running... HERE ARE THE VALUES videolabsource ",videoLabSource,"hereis videoID", videoID)
+    console.log("Check Video media is running... HERE ARE THE VALUES videolabsource ",videoLabSource,"hereis videoID", videoID)
     if(videoLabSource && videoLabSource.trim() !==""){
       console.log("Detected video as a file")
       setIsMediaAFile(true)
@@ -128,7 +135,20 @@ export default function ActivityHost() {
       return;
     }
   }
-
+  
+  const checkArticleMediaType = () =>{
+    console.log("Check Article media is running... HERE ARE THE VALUES articlelabsource ",articleLabSource,"hereis videoID", articleURL)
+    if(articleLabSource && articleLabSource.trim() !==""){
+      console.log("Detected article as a file")
+      setIsMediaAFile(true)
+      return;
+    }
+    if(articleURL && articleURL.trim() !== ""){
+      console.log("Detected article as a URL.")
+      setIsMediaAFile(false)
+      return;
+    }
+  }
   // useEffect(() => {
   //   const getSessionID = async () => {
   //     const response = await axios.get(`http://localhost:3000/joiner/validateRoomCode/${roomCode}`)
@@ -180,7 +200,11 @@ export default function ActivityHost() {
       setExperimentIcon(<TiCamera style={{ fontSize: '20px' }} />)
     } else if (experimentType === 3) {
       setExperimentIcon(<TfiGallery style={{ fontSize: '20px' }} />)
-    } else {
+    } else if (experimentType === 4) {
+      checkArticleMediaType();
+      setExperimentIcon(<IoNewspaper style={{ fontSize: '20px' }}/>)
+    } 
+    else {
       console.log('Invalid experiment ID')
     }
   }, [experimentType, videoLabSource, videoID])
@@ -283,20 +307,83 @@ export default function ActivityHost() {
             >
             </img>
           ) : experimentType == 3 ? (
-            <div> 
-              <p> 
-                Gallery Lab Images here
-              </p>
+            <div className='w-full mt-8'>
+              <h2 className='text-xl font-semibold mb-4 text-center'> Uploaded Gallery</h2>
+              <GalleryComponent images={galleryPhotos}/>
             </div>
-          ) : (
+          ) : experimentType == 4 && isMediaAFile ? (
+            // Not a huge bug but the source should be the article lab source, it's flip flopped, don't know why
             <div>
-              <p>
-                Article Lab here
-              </p>
+                <iframe src={articleLabSource} width="800px" height="500px"></iframe>
             </div>
+          ) : experimentType == 4 && !isMediaAFile ? (
+            <div>
+                <iframe src={articleURL} width="800px" height="500px"></iframe>
+          </div>
+          ) :(
+            <div>
+              <p className="text-red-500">Invalid experiment type... </p>
+              </div>
           )}  
           </div>
         </div>
+              {/* <div className="hidden lg:block w-full lg:w-1/4 p-4 bg-white shadow-md rounded-lg overflow-y-auto">
+        <div className="flex border-b">
+          <button
+            className={`rounded-lg flex-1 p-2 text-lg flex items-center justify-center ${
+              activeTab === "images" ? "bg-[#7F56D9] text-white" : "bg-gray-300"
+            }`}
+            onClick={() => setActiveTab("images")}
+          >
+            <LuSquareStack className="mr-2" /> Media
+          </button>
+          <button
+            className={`rounded-lg flex-1 p-2 text-lg flex items-center justify-center ${
+              activeTab === "chat" ? "bg-[#7F56D9] text-white" : "bg-gray-300"
+            }`}
+            onClick={() => setActiveTab("chat")}
+          >
+            <BsChatSquareText className="mr-2" /> Chat
+          </button>
+        </div>
+        <div className="mt-4">
+          {activeTab === "images" ? (
+            <div className="flex justify-center w-full">
+              {experimentType == 1 && isMediaAFile ? (
+                <div>
+                  <p>Local Video: {videoPath}</p>
+                </div>
+              ) : experimentType ==1 && !isMediaAFile ? (
+                <div>
+                  <p>YouTube Video: https://www.youtube.com/watch?v={videoID} </p>
+                </div>
+              ) : experimentType == 2 ? (
+                <div>
+                  <p>Image: {photoPath}</p>
+                </div>
+              ): experimentType == 3 ? (
+                <div>
+                  <p>Gallery lab stuff</p>
+                </div>
+              ) : experimentType == 4 && isMediaAFile ?(
+                <div>
+                  <p> Local Article: {articlePath}</p>
+                </div>
+              ) : experimentType == 4 && !isMediaAFile ? (
+                <div>
+                  <p> Article Link : {articleURL}</p>
+                </div>
+              ) : (
+                <div> 
+                  <p> Unknown lab. Rejoin</p>
+              </div>
+        )}
+        </div>
+          ): (
+            <div className="p-4 text-gray-500"> Chat Feature </div>
+          )}
+          </div>
+      </div> */}
       </div>
       <Divider className="my-6" />
       <hr></hr>

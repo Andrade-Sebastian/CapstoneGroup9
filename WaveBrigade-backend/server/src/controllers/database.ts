@@ -33,9 +33,11 @@ export interface IVideoLabDatabaseInfo {
 	socketID: string;
 }
 export interface IGalleryLabDatabaseInfo {
-	experimentID: number,
-	path: string, //Image path
-	captions: string 
+	experimentTitle: string,
+	experimentDescription: string | null,
+	path?: string, //Image path
+	captions?: string,
+	socketID: string,
 }
 
 
@@ -57,12 +59,23 @@ export interface IAddUserToSessionInfo {
 export interface IArticleLabDatabaseInfo{
 	experimentTitle: string,
 	experimentDescription: string | null,
-	article: string,
+	articleBlob?: string,
+	articleURL?: string,
 	socketID: string
 }
 
 
+export async function checkSpectators(sessionID: number){
 
+	try {
+		await dbClient.connect();
+		const query = await dbClient.queryObject(`SELECT isspectatorsallowed FROM SESSION WHERE sessionid = $1`, [sessionID]);
+		return query.rows[0];
+	}
+	catch(error){
+		console.log("Error getting spectator info from session");
+	}
+}
 
 export async function joinSessionAsSpectator(socketID: string, nickname: string, roomCode: string){
 	
@@ -166,7 +179,53 @@ export async function getVideoLabInfo(experimentID: number): Promise<void>{
 		console.log("Unable to retrieve video lab info", error);
 	}
 }
+export async function getGalleryLabInfo(experimentID: number) {
+	console.log("Gallery Experiment passed in", experimentID);
 
+	try{
+		await dbClient.connect();
+		const query = await dbClient.queryObject(`
+			SELECT gallerylab.path, gallerylab.caption, experiment.name, experiment.description 
+			FROM gallerylab 
+			JOIN experiment ON gallerylab.experimentid = experiment.experimentid WHERE gallerylab.experimentid = $1;`,
+			[experimentID]
+		);
+		
+		console.log("Gallery Lab Info: ", query.rows[0]);
+		const experimentInfo = {
+			name: query.rows[0].name,
+			description: query.rows[0].description,
+			images:query.rows.map((row)=> ({
+				path: row.path,
+				caption: row.caption,
+			})),
+		};
+		return experimentInfo;
+	}
+	catch(error){
+		console.log("Unable to retrieve gallery lab info", error);
+	} finally{
+		await dbClient.end();
+	}
+}
+
+export async function getArticleLabInfo(experimentID: number): Promise<void>{
+	console.log("Article Experiment passed in", experimentID);
+
+	try{
+		await dbClient.connect();
+		const query = await dbClient.queryObject(`SELECT articlelab.experimentid, path, name, description FROM articlelab JOIN experiment 
+			ON articlelab.experimentid = experiment.experimentid WHERE articlelab.experimentid = $1 LIMIT 1`,
+			[experimentID]
+		);
+		
+		console.log("Article Lab Info: ", query.rows[0]);
+		return query.rows[0];
+	}
+	catch(error){
+		console.log("Unable to retrieve article lab info", error);
+	}
+}
 
 function generateRandomCode(length: number){
     const numbers = '0123456789';
@@ -387,7 +446,7 @@ export async function createPhotoLabInDatabase(initializationInfo: IPhotoLabData
 			
 		}catch(error)
 		{
-			console.log(error);;
+			console.log(error);
 		
 		}
 		console.log()
@@ -501,15 +560,15 @@ export async function createVideoLabInDatabase(initializationInfo: IVideoLabData
 
 
 
-export async function createGalleryLabInDatabase(initializationInfo: IGalleryLabDatabaseInfo): Promise<void>{
-	const {
-		experimentID,
-		path, 
-		captions
+export async function createGalleryLabInDatabase(initializationInfo: IGalleryLabDatabaseInfo, images: { path: string, caption: string } [], sessionID: number): Promise<number>{
+	const{
+		experimentTitle,
+		experimentDescription,
+		socketID
 	} = initializationInfo;
+	let experimentID = 0;
 
 	try{
-
 		const query = await dbClient.queryObject(`
 			INSERT INTO gallerylab (
 			experimentid,
@@ -522,12 +581,56 @@ export async function createGalleryLabInDatabase(initializationInfo: IGalleryLab
 				path,
 				captions
 			]);
+		//Creating experiment
+		const createExperimentQuery = await dbClient.queryObject(`
+			INSERT INTO experiment(name, description)
+			VALUES ($1, $2)
+			returning experimentid;`, 
+			[
+				experimentTitle,
+				experimentDescription
+			]
+		);
+		console.log("Create experiment query:", createExperimentQuery.rows[0].experimentid)
+		experimentID = createExperimentQuery.rows[0].experimentid;
+
+		//add a gallery lab - insert gallery image entries
+		for( const {path, caption} of images){
+			await dbClient.queryObject(`
+				INSERT INTO gallerylab (experimentid, path, caption)
+				VALUES ($1, $2, $3)`, [experimentID, path, caption]);
+		}
+		console.log("(database.ts): gallery lab entries successfully added!");
+		console.log("CreatePhotoLabInDatabase() -> socketID: ", socketID)
+		//get session id from host socket id 
+		//let sessionID = -1
+
+		// sessionID = await getSessionIDFromSocketID(socketID);
+			
+	
+		console.log()
+		console.log("CreateGalleryLabInDatabase() -> sessionID, experimentID", sessionID, experimentID)
+
+		console.log("Updating session")
+		//relate the experiment to the session		
+	
+		await dbClient.queryObject(`
+			UPDATE session
+			SET experimentid = $1 WHERE sessionid = $2;`, 
+			[experimentID, sessionID]);
+		console.log("Session updated with experiment ID:", experimentID);
+		console.log("Returning this Experiment id in gallery", experimentID)
+		console.log("images inserted for experiment:", experimentID)
+		console.table(images);
+		return experimentID
+
 		
 
-		console.log("(database.ts): gallery Lab Successfully Added")
 	}
 	catch(error){
 		console.log("Error adding gallery lab to the database: " + error)
+	} finally{
+		await dbClient.end();
 	}
 }
 
@@ -535,11 +638,13 @@ export async function createArticleLabInDatabase(initializationInfo: IArticleLab
 	const {
 		experimentTitle,
 		experimentDescription,
-		article,
+		articleURL,
+		articleBlob,
 		socketID
 	} = initializationInfo;
 
 	console.log(socketID);
+	console.log(`Experiment Title: ${experimentTitle}, Description ${experimentDescription}, Article Source: ${articleURL ? articleURL: articleBlob}, SocketID ${socketID}`);
 	let experimentID = null;
 
 	try{
@@ -558,6 +663,7 @@ export async function createArticleLabInDatabase(initializationInfo: IArticleLab
 		console.log("createExperimentQuery: ", createExperimentQuery.rows[0].experimentid)
 		experimentID = createExperimentQuery.rows[0].experimentid;
 
+		const articlePath = articleURL ? articleURL : articleBlob;
 
 		//Add an article lab 
 		const query = await dbClient.queryObject(`
@@ -568,7 +674,7 @@ export async function createArticleLabInDatabase(initializationInfo: IArticleLab
 			VALUES ($1, $2);
 			`, [
 				experimentID,
-				article,
+				articlePath,
 				]
 		);
 
@@ -634,12 +740,9 @@ export async function addUserToSession(initializationInfo: IAddUserToSessionInfo
 		
 
 		const changeDeviceAvailabilityQuery = await dbClient.queryObject(`UPDATE device
-		SET isavailable = false
-		WHERE deviceid = ${deviceID}; `);
-
-		const changeDeviceAvailabilityQuery2 = await dbClient.queryObject(`UPDATE device
-			SET isconnected = false
-			WHERE deviceid = ${deviceID}; `);
+		SET isavailable = false, isconnected = false
+		WHERE deviceid = $1`,
+		[deviceID]);
 		
 		return query.rows[0]; 
 	}
@@ -809,23 +912,22 @@ export async function assignExperimentToSession(sessionID: number, experimentID:
 
 }
 
-export async function validatePassword(sessionID:string, password:string): Promise<boolean>{
-	
-	let isValidPass = false;
+export async function validatePassword(sessionID:string){
 
 	try{
 		const query = await dbClient.queryObject(`SELECT sessionid FROM session WHERE sessionid = $1 AND password = $2`,
 			[sessionID, password]
+                                             
+		const query = await dbClient.queryObject(`SELECT password FROM session WHERE sessionid = $1`,
+			[sessionID]
 		);
 		if(query.rows.length > 0){
-			isValidPass = true;
+			return query.rows[0];
 		}
 	}
 	catch(error){
 		console.log("Password is not valid", error);
 	}
-
-	return isValidPass;
 }
 
 export async function getUserExperimentData(sessionID: string, userID: number, experimentType: string){

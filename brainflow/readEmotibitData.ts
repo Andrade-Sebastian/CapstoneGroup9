@@ -5,7 +5,7 @@ Sends collected data to the backend for manipulation
 
 */
 
-import { BoardIds, BoardShim, BrainFlowInputParams, BrainFlowPresets} from 'brainflow';
+import { BoardIds, BoardShim, BrainFlowInputParams, BrainFlowPresets, DataFilter} from 'brainflow';
 import * as Papa from 'papaparse';
 import * as fs from 'fs';
 import { io, Socket } from 'socket.io-client';
@@ -24,9 +24,9 @@ const operationParameters = {
 }
 
 const ancHeaders = ['Package', 'EDA', 'Temperature', 'Thermistor', 'Timestamp', 'Unknown']; //create a list of headers for the csv
-// const ancFilePath = './anc_from_streamer.csv';
+// const ancFilePath = './operationParameters.userId/anc_data.csv';
 // const auxHeaders = ['Package', 'PPG_Red', 'PPG_Infa_Red', 'PPG_Green', 'Timestamp', 'Unknown'];
-// const auxFilePath = './aux_from_streamer.csv';
+// const auxFilePath = './operationParameters.userId/aux_data.csv';
 
 //initializes the board 
 const board = new BoardShim(BoardIds.EMOTIBIT_BOARD, {});
@@ -147,6 +147,11 @@ async function sendData(socket: Socket): Promise<void>
         unknown: 0,
     }; 
 
+    let heart_rate = 0;
+
+    let ppg_ir: number[] = [];
+    let ppg_r: number[] = [];
+
     try{
         prepareBoard();
         successfulLaunch(socket);
@@ -160,6 +165,18 @@ async function sendData(socket: Socket): Promise<void>
             const aux_data = board.getBoardData(500, BrainFlowPresets.AUXILIARY_PRESET);
 
             if(anc_data.length !== 0){ //doesn't log data if it is empty
+                ppg_ir = ppg_ir.concat(anc_data[2]);
+                ppg_r = ppg_r.concat(anc_data[1]);
+                
+                //heart rate can only start collecting if there are enough data samples
+                if(ppg_ir.length >= 1024 && ppg_r.length >= 1024){
+                   DataFilter.performBandPass(ppg_ir, 500, 5, 10, 2, 0, 0);
+                   DataFilter.performBandPass(ppg_r, 500, 5, 10, 2, 0, 0);
+        
+                    heart_rate = DataFilter.getHeartRate(ppg_ir.slice(-1024), ppg_r.slice(-1024), 500, 1024);
+                    console.log("HEART RATE: ", heart_rate);
+                }
+                
                 ancData = {
                     package: anc_data[0][0],
                     data1: anc_data[1][0],
@@ -180,14 +197,14 @@ async function sendData(socket: Socket): Promise<void>
                     };
             };
             
-            console.log("DATA :", ancData.data1);
                 //emit to socket an object that holds data and op parameters
                 socket.emit('update', {
                     ancData: ancData,
                     auxData: auxData,
+                    heartRate: heart_rate,
                     ...operationParameters
                 });
-                await sleep(900);
+                await sleep(200);
             }
     }
     catch(error){

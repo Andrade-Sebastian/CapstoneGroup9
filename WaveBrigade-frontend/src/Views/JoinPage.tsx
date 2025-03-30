@@ -55,14 +55,10 @@ export default function JoinPage() {
   }, []);
 
 
-  //const { launchProcess } = useBrainflowManager();
-
   const handleSubmit = async (e) => {
 	console.log(new Date().toLocaleTimeString(), "Current socketID in Zustand: ", socketId)
     setRoomCode(StudentInputRoomCode);
     e.preventDefault();
-
-    // const loadingToastId = toast.loading("Verifying Room Code...");
 
     if (!StudentInputRoomCode && !nickName) {
       console.error("Please enter both a nickname and a room code...");
@@ -78,6 +74,7 @@ export default function JoinPage() {
     try {
       const isValidName = await checkNickName(nickName);
       const isValidRoomCode = await validateRoomCode(StudentInputRoomCode);
+      const canSpectate = await checkSpectatorsAllowed(useJoinerStore.getState().sessionId);
 
       if (isValidRoomCode && isValidName) {
         if (isJoiningAsSpectator) {
@@ -96,15 +93,25 @@ export default function JoinPage() {
           );
           console.log("(JoinPage.tsx): Allows spectators - 95: ", response.data.allowsSpectators);
 
+        if(isJoiningAsSpectator && !canSpectate){
+          toast.error("Cannot join as a spectator. Try again.");
+          setisJoiningAsSpectator(false);
+        }
+        else{
+          if (isJoiningAsSpectator && canSpectate) {
+            toast.success("Room code valid. Password is needed...");
+            //Set global store 'userRole' to 'spectator'
+            setUserRole("spectator");
+            console.log("global user role: ", userRole);
+            
+          } 
+          else {
+            //when they input the password, navigate to the waiting room
+            console.log("joiner");
+            setUserRole("student");
+            toast.success("Room code valid. Password is needed...");
+          }
           //navigate them to the password page
-          setTimeout(() => {
-            navigateTo("/enter-password");
-          }, 2000);
-        } else {
-          //when they input the password, navigate to the waiting room
-          console.log("joiner");
-          setUserRole("student");
-          toast.success("Room code valid. Password is needed...");
           setTimeout(() => {
             navigateTo("/enter-password");
           }, 2000);
@@ -179,6 +186,23 @@ export default function JoinPage() {
     }
   };
 
+  //checks if spectators are allowed for the specific session
+  const checkSpectatorsAllowed = async (sessionId: string) => {
+    try{
+      console.log("Checking if spectators allowed");
+      const response = await axios.get(
+          `http://localhost:3000/joiner/session/allows-spectators/${sessionId}`
+      );
+      if(response.status === 200){ //returns true or false
+        console.log("Spectators Allowed: ", response.data.isspectatorsallowed);
+          return response.data.isspectatorsallowed;
+        }
+      }
+      catch(error){
+        console.log("Unable to check if spectators are allowed");
+        return false;
+      }
+  }
   return (
     <div className="flex h-screen">
       <div className="flex flex-col max-sm:hidden items-center justify-center w-2/5">

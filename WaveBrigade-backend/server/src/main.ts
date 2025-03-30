@@ -126,7 +126,7 @@ app.get("/get-photo/:filename", (req: Request, res: Response) => {
     res.status(404).json({ success: false, message: "Image not found" });
   }
 });
-//Getting video logic to show for the joiner, the get is in video fe active experiment
+//Getting video logic to show for the joiner, the get is in joiner fe active experiment
 app.get("/get-videoFile/:filename", (req: Request, res: Response) => {
   const { filename } = req.params;
   if (filename.includes("..")) {
@@ -142,10 +142,44 @@ app.get("/get-videoFile/:filename", (req: Request, res: Response) => {
     res.status(404).json({ success: false, message: "Video not found" });
   }
 });
+//Getting gallery logic to show for the joiner, the get is in joiner fe active experiment
+app.get("/get-gallery/:filename", (req: Request, res: Response) => {
+  const { filename } = req.params;
+  if (filename.includes("..")) {
+    return res
+    .status(400)
+    .json({ success: false, message: "Invalid Filename" });
+  }
+  const filePath = path.join(__dirname, "/media/gallery-lab/", filename);
+  
+  if (fs.existsSync(filePath)) {
+    res.sendFile(filePath);
+  } else {
+    res.status(404).json({ success: false, message: "Image not found" });
+  }
+});
+
+//Getting article logic to show for the joiner, the get is in joiner fe active experiment
+app.get("/get-articleFile/:filename", (req: Request, res: Response) => {
+  const { filename } = req.params;
+  if (filename.includes("..")) {
+    return res
+    .status(400)
+    .json({ success: false, message: "Invalid Filename" });
+  }
+  const filePath = path.join(__dirname, "/media/article-lab/", filename);
+  
+  if (fs.existsSync(filePath)) {
+    res.sendFile(filePath);
+  } else {
+    res.status(404).json({ success: false, message: "Video not found" });
+  }
+});
 
 let latestExperimentType = null;
 let isVideoPlaying = false;
 let latestSeekTime = 0;
+let latestExperimentData = null;
 io.on("connection", (socket) => {
   
   // console.log("(main.ts): User Connected | socketID: " + socket.id)
@@ -167,6 +201,7 @@ io.on("connection", (socket) => {
   });
   socket.on("experiment-data", (data) => {
     console.log("In experiment-data in main.ts, here is the data", data);
+    latestExperimentData = data;
     io.emit("experiment-data", data);
     console.log("hopefully emitted");
   });
@@ -223,6 +258,10 @@ io.on("connection", (socket) => {
       socket.emit("play-video", isVideoPlaying);
       socket.emit("seek-video", latestSeekTime);
     }
+    if(latestExperimentType === 3 && latestExperimentData){
+      console.log("Gallery lab, sending data to joiner")
+      socket.emit("experiment-data", latestExperimentData)
+    }
   });
 
   //recieve emotibit data
@@ -230,6 +269,7 @@ io.on("connection", (socket) => {
     const {
       ancData,
       auxData,
+      heartRate,
       ipAddress,
       serialNumber,
       backendIp,
@@ -238,7 +278,9 @@ io.on("connection", (socket) => {
       frontEndSocketId,
       assignSocketId,
     } = payload;
-    // console.log("Update Event: Received data:", JSON.stringify(ancData.data1));
+
+    console.log("Update Event: Received data:", JSON.stringify(ancData.data1));
+
     io.emit("update", payload);
   });
 
@@ -253,6 +295,12 @@ io.on("connection", (socket) => {
     console.log("Socket: seek-video] Attempting to seek video. Seconds passed:", seconds)
     latestSeekTime = seconds;
     socket.broadcast.emit("seek-video", seconds)
+  })
+
+  socket.on("image-selected", (image) => {
+    console.log("In event image-selected, now attempting to send image to students");
+    socket.broadcast.emit("image-selected", image);
+    console.log("Broadcasted image to students");
   })
 
   session_handlers(io, socket, rooms, isHost);
