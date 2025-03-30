@@ -702,22 +702,24 @@ export async function getUsersFromSession(sessionID: string){
 	}
 }
 
-export async function removeUserFromSession(sessionID: string, socketID: string){
+export async function removeUserFromSession(sessionID: number, socketID: string)
+{
 	console.log("in removeUserFromSession, sessionID is ", sessionID, "socketID is ", socketID);
 	try{
 		const getDevice = await dbClient.queryObject(`SELECT device FROM "User" WHERE sessionID = $1 AND frontendsocketid = $2`,
 		 	[sessionID, socketID]
-		 )
-		// const query = await dbClient.queryObject(`DELETE FROM "User" WHERE sessionID = $1 AND frontendsocketid = $2`,
-		// 	[sessionID, socketID]
-		// );
-		// console.log("here: ", query)
-		// console.log("Deleted user");
-		// const deviceID = (getDevice.rows[0] as { device: number }) || null;
-		// // console.log("(LoOk HeRe): device id is", deviceID.device )
-		// if (deviceID !== null){ //bc the spectator's device is null
-		// 	await makeDeviceAvailable(deviceID.device);
-		// }
+		)
+		const query = await dbClient.queryObject(`DELETE FROM "User" WHERE sessionID = $1 AND frontendsocketid = $2`,
+			[sessionID, socketID]
+		);
+		
+		console.log("here: ", query)
+		console.log("Deleted user");
+		const deviceID = (getDevice.rows[0] as { device: number }) || null;
+		// console.log("(LoOk HeRe): device id is", deviceID.device )
+		if (deviceID !== null){ //bc the spectator's device is null
+			await makeDeviceAvailable(deviceID.device);
+		}
 	}
 	catch(error){
 		console.log("Unable to delete user", error);
@@ -726,6 +728,53 @@ export async function removeUserFromSession(sessionID: string, socketID: string)
 		console.log("done")
 	}
 }
+
+export async function removeSpectatorFromSession(sessionID: number, socketID: string): Promise<boolean>{
+
+	console.log(`(database.ts): In removeUserFromSession(${sessionID}, ${socketID})`);
+
+	let userExistsInSession = false;
+
+	try{
+		await dbClient.connect();
+
+		try{
+			const validateUser = await dbClient.queryObject(`SELECT userid FROM "User" WHERE sessionID = $1 AND frontendsocketid = $2`, 
+				[sessionID, socketID])
+			console.log("User obj: ", validateUser.rows[0])
+			userExistsInSession = validateUser.rows[0] !== undefined
+			console.log("User exists in session? ", userExistsInSession)
+
+			if (!userExistsInSession){
+				console.log(`User with sessionID ${sessionID} and socketID ${socketID} was not found.`)
+				return false;
+			}
+		}catch(error){ //If postgres couldn't find the requested user 
+			console.log(error)
+			return false;
+		}
+
+		
+		try{
+			const query = await dbClient.queryObject(`DELETE FROM "User" WHERE sessionID = $1 AND frontendsocketid = $2`,
+				[sessionID, socketID]
+			);
+			console.log("(database.ts): removeSpectatorFromSession() -> ", query)
+			
+			return true;
+		}catch(error){
+			console.log(error)
+			return false;
+		}
+	}catch(error){
+		console.log(error);
+		return false;
+	}
+
+
+}
+
+
 
 export async function validDeviceSerial(nickName: string, roomCode:number, serialCode: string){
 	console.log("validDeviceSerial: ", serialCode)

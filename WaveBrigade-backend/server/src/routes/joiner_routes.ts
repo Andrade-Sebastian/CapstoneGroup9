@@ -2,6 +2,7 @@ import express, { Request, Response } from "express";
 import {getSessionState} from "../controllers/session_controller.ts";
 import { addSocketToSession } from "../sessionMappings.ts";
 import {addUserToSession, getUsersFromSession, validateRoomCode, removeUserFromSession, validDeviceSerial, validatePassword, getPhotoLabInfo, getVideoLabInfo, joinSessionAsSpectator} from "../controllers/database.ts";
+import {addUserToSession, getUsersFromSession, validateRoomCode, removeUserFromSession, validDeviceSerial, validatePassword, getPhotoLabInfo, getVideoLabInfo, joinSessionAsSpectator, removeSpectatorFromSession} from "../controllers/database.ts";
 import {Filter} from "npm:bad-words";
 import dbClient from "../controllers/dbClient.ts";
 
@@ -186,6 +187,9 @@ joinerRouter.get("/validateRoomCode/:roomCode", async (req: Request, res: Respon
 })
 
 joinerRouter.post("/leave-room", async(req: Request, res: Response) => {
+
+
+joinerRouter.post("/leave-room", async (req: Request, res: Response) => {
     console.log("In leave-room");
     
     const {
@@ -194,36 +198,36 @@ joinerRouter.post("/leave-room", async(req: Request, res: Response) => {
     } = req.body;
     console.log("In /leave-room, recieved", req.body)
     
+
+    const { sessionID, socketID } = req.body;
+    console.log("In /leave-room, received", req.body);
+
     try {
         const users = await removeUserFromSession(sessionID, socketID);
 
-        //Free up EmotiBit if possible (do last)
         return res.status(200).send({
             "message": "in /remove-user",
             "sessionID": sessionID,
             "socketID": socketID
+            message: "in /leave-room",
+            sessionID: sessionID,
+            socketID: socketID,
         });
     } catch (error) {
-        if (error instanceof Error) {
-            if (error.name === "SESSION_NOT_FOUND") {
-                return res.status(400).send({
-                    error: error.name,
-                    message: error.message
-                });
-            }
         }
 
         // Fallback error response
         return res.status(500).send({
             error: "INTERNAL_SERVER_ERROR",
             message: "An unexpected error occurred."
+            message: "An unexpected error occurred.",
         });
     }
-
-})
+});
 
 //stored procedure
 joinerRouter.post("/verify-serial", async (req: Request, res: Response) => {
+joinerRouter.post("/verify-serial", async(req: Request, res: Response) => {
     console.log("Request received at /verify-serial:", req.body);
     const {nickName, roomCode, serialCode } = req.body;
 
@@ -424,6 +428,31 @@ joinerRouter.get("/debug", (req: Request, res: Response) => {
     res.status(200).send({
         message: "in joiner"
     })
+
+})
+
+
+joinerRouter.post("/remove-spectator-from-session", async(req: Request, res: Response) => {
+    const {
+        sessionID,
+        socketID
+    } = req.body;
+
+    
+    const wasRemoved = await removeSpectatorFromSession(sessionID, socketID);
+    
+    if(wasRemoved){
+        res.status(200).send({
+            "message": "In joiner/remove-spectator-from-session",
+            "recieved": req.body,
+            "Success": true
+        })
+    }
+    else{
+        res.status(404).send({
+            "message": `User with socketID ${socketID} was not found in session ${sessionID}`
+        })
+    }
 
 })
 
