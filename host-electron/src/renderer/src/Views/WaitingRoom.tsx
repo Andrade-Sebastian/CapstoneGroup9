@@ -342,62 +342,78 @@ export default function WaitingRoom() {
         cleanUp()
       }
   }, [launchProcesses])
+  
 
-    //Handling kicking a user
+  //Handling kicking a user
   const handleOpenModalKick = (e) => {
     console.log("HANDLE KICK", e.target.closest('button').querySelector('p').textContent);
     setIsModalOpenKick(true)
+    
     setFocusedUser(e.target.closest('button').querySelector('p').textContent.trim());
-
   };
-    const handleCloseModalKick = () => {setIsModalOpenKick(false)};
-    
-    
-    const handleKickUser = () => {
-      console.log("!!ATTEMPTING TO KICK USER!!")
-      if(!focusedUser){
-        console.log("No user selected for kicking.")
-        return;
-      }
-      console.log("User Map at Kick Time:", theUserMap);
-      console.log("Focused User at Kick Time:", focusedUser);
-      const nicknameSocketID = theUserMap.get(focusedUser);
-      console.log("Kicking user with socket ID: ", nicknameSocketID);
-      console.log("HERE IS THE USER MAP BEFORE EMIT KICKING", theUserMap);
 
-      if(!nicknameSocketID){
-        console.log("Cannot kick user: there is no socket id found.", focusedUser)
-        return;
-      }
-      console.log("Kicking user with socketID:", nicknameSocketID);
-
-      socket.emit("kick", nicknameSocketID);
-      
-      console.log("Emitted kick event");
+  const handleCloseModalKick = () => {setIsModalOpenKick(false)};
     
-      setTheUserMap(prevMap => {
-        const newMap = new Map(prevMap);
-        newMap.delete(focusedUser);
-        return newMap;
+    
+  const handleKickUser = () => {
+    console.log("focused user in handleKickUser():", focusedUser)
+    console.log("!!ATTEMPTING TO KICK USER!!")
+    if(!focusedUser){
+      console.log("No user selected for kicking.")
+      return;
+    }
+
+    let nicknameSocketID = "";
+
+    if (focusedUser.includes("(Spectator)")){
+      // Remove "(Spectator)" from the string
+      console.log("in IF")
+      nicknameSocketID = theUserMap.get(focusedUser.replace("(Spectator)", "").trim());
+      setFocusedUser(focusedUser.replace("(Spectator)", "").trim());
+    }else{
+      nicknameSocketID = theUserMap.get(focusedUser);
+    }
+
+
+    console.log("User Map at Kick Time:", theUserMap);
+    console.log("Focused User at Kick Time:", focusedUser);
+
+    console.log("Kicking user with socket ID: ", nicknameSocketID);
+    console.log("HERE IS THE USER MAP BEFORE EMIT KICKING", theUserMap);
+
+    if(!nicknameSocketID){
+      console.log("Cannot kick user: there is no socket id found.", focusedUser)
+      return;
+    }
+    console.log("Kicking user with socketID:", nicknameSocketID);
+
+    socket.emit("kick", nicknameSocketID);
+    
+    console.log("Emitted kick event");
+  
+    setTheUserMap(prevMap => {
+      const newMap = new Map(prevMap);
+      newMap.delete(focusedUser);
+      return newMap;
+    });
+    console.log("Here is the usermap after kicking", theUserMap);
+
+    useSessionStore.setState((state) => {
+      const updatedUsers = state.users.map((user) => {
+        if(user.nickname === focusedUser){
+          console.log(`Detaching ${focusedUser} from EmotiBit ${user.associatedDevice?.serialNumber}`);
+          return {...user, nickname: null, socketId: null, isConnected: false};
+        }
+        return user;
       });
-      console.log("Here is the usermap after kicking", theUserMap);
+      console.log("Zustand users after kick", updatedUsers)
+      return { users: updatedUsers};
+    });
 
-      useSessionStore.setState((state) => {
-        const updatedUsers = state.users.map((user) => {
-          if(user.nickname === focusedUser){
-            console.log(`Detaching ${focusedUser} from EmotiBit ${user.associatedDevice?. serialNumber}`);
-            return {...user, nickname: null, socketId: null, isConnected: false};
-          }
-          return user;
-        });
-        console.log("Zustand users after kick", updatedUsers)
-        return { users: updatedUsers};
-      });
-
-      console.log("Updated zustand users after kick...", useSessionStore.getState().users);
+    console.log("Updated zustand users after kick...", useSessionStore.getState().users);
+  
+    setIsModalOpenKick(false);
     
-      setIsModalOpenKick(false);
-      
     };
 
   useEffect(() => {

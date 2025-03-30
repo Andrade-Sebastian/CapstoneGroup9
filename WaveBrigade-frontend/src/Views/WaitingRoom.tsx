@@ -104,6 +104,15 @@ export default function WaitingRoom() {
       console.log("Kicking user from database in sessionID: ", sessionId);
       //is sessionID the global one? or a useState?
 
+      if (userRole === "spectator"){
+        console.log(`removing spectator from session ${sessionId} with socketID ${socketId}`)
+        axios.post("http://localhost:3000/joiner/remove-spectator-from-session", 
+          {
+            sessionID: sessionId,
+            socketID: socketId
+          }
+        )
+      }
       axios.post('http://localhost:3000/joiner/leave-room', {
         sessionID: sessionId,
         socketID: socketId
