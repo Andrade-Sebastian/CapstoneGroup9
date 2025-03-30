@@ -1,7 +1,6 @@
 import express, { Request, Response } from "express";
 import {getSessionState} from "../controllers/session_controller.ts";
 import { addSocketToSession } from "../sessionMappings.ts";
-import {addUserToSession, getUsersFromSession, validateRoomCode, removeUserFromSession, validDeviceSerial, validatePassword, getPhotoLabInfo, getVideoLabInfo, joinSessionAsSpectator} from "../controllers/database.ts";
 import {addUserToSession, getUsersFromSession, validateRoomCode, removeUserFromSession, validDeviceSerial, validatePassword, getPhotoLabInfo, getVideoLabInfo, joinSessionAsSpectator, removeSpectatorFromSession} from "../controllers/database.ts";
 import {Filter} from "npm:bad-words";
 import dbClient from "../controllers/dbClient.ts";
@@ -186,8 +185,6 @@ joinerRouter.get("/validateRoomCode/:roomCode", async (req: Request, res: Respon
     
 })
 
-joinerRouter.post("/leave-room", async(req: Request, res: Response) => {
-
 
 joinerRouter.post("/leave-room", async (req: Request, res: Response) => {
     console.log("In leave-room");
@@ -199,34 +196,26 @@ joinerRouter.post("/leave-room", async (req: Request, res: Response) => {
     console.log("In /leave-room, recieved", req.body)
     
 
-    const { sessionID, socketID } = req.body;
-    console.log("In /leave-room, received", req.body);
-
     try {
         const users = await removeUserFromSession(sessionID, socketID);
 
         return res.status(200).send({
-            "message": "in /remove-user",
+            "message": "in /leave-room",
             "sessionID": sessionID,
-            "socketID": socketID
-            message: "in /leave-room",
-            sessionID: sessionID,
-            socketID: socketID,
+            "socketID": socketID,
         });
     } catch (error) {
-        }
+        
 
         // Fallback error response
         return res.status(500).send({
             error: "INTERNAL_SERVER_ERROR",
             message: "An unexpected error occurred."
-            message: "An unexpected error occurred.",
         });
     }
 });
 
 //stored procedure
-joinerRouter.post("/verify-serial", async (req: Request, res: Response) => {
 joinerRouter.post("/verify-serial", async(req: Request, res: Response) => {
     console.log("Request received at /verify-serial:", req.body);
     const {nickName, roomCode, serialCode } = req.body;
@@ -455,9 +444,6 @@ joinerRouter.post("/remove-spectator-from-session", async(req: Request, res: Res
     }
 
 })
-
-
-
 
 
 export default joinerRouter;
