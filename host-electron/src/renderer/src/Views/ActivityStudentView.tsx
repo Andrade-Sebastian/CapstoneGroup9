@@ -14,6 +14,7 @@ import { useJoinerStore } from '../hooks/stores/useJoinerStore.ts'
 import { stringify } from 'postcss'
 import { useNavigate } from 'react-router-dom'
 import { session } from 'electron'
+import toast, { Toaster } from "react-hot-toast";
 import ReactPlayer from 'react-player'
 import GalleryComponent from '../components/GalleryComponent.tsx'
 
@@ -26,6 +27,11 @@ export default function ActivityStudentView(): ReactElement {
   const [currentUser, setCurrentUser] = useState('')
   const [currentUserId, setCurrentUserId] = useState(0)
   const [currentPath, setCurrentPath] = useState('')
+  const [photoPath, setPhotoPath] = useState("");
+  const [videoPath, setVideoPath] = useState("");
+  const [galleryPath, setGalleryPath] = useState("");
+  const [selectedCaption, setSelectedCaption] = useState("");
+  const [articlePath, setArticlePath] = useState("");
   const [bpmAvg, setBpmAvg] = useState(0)
   const playerRef = useRef(null)
   const [isPlaying, setIsPlaying] = useState(false)
@@ -33,8 +39,11 @@ export default function ActivityStudentView(): ReactElement {
   const [gsrAvg, setGsrAvg] = useState(0)
   const [fileName, setFileName] = useState('')
   const [isMasked, setIsMasked] = useState(false);
-  const [isMediaAFile, setIsMediaAFile] = useState(false)
-  const [latestSeekTime, setLatestSeekTime] = useState(0)
+  const [experimentID, setExperimentID] = useState(0);
+  const [isMediaAFile, setIsMediaAFile] = useState(false);
+  const [latestSeekTime, setLatestSeekTime] = useState(0);
+  const [experimentPath, setExperimentPath] = useState('');
+  const [currentGalleryPhotoID, setCurrentGalleryPhotoID] = useState(0);
   const {
     hostName,
     users,
@@ -52,7 +61,11 @@ export default function ActivityStudentView(): ReactElement {
     articleURL,
     articleLabSource,
     photoLabImageSource,
+    setExperimentId,
+    setExperimentTitle,
+    setExperimentDesc,
     experimentTitle,
+    addPhoto,
     experimentDesc,
     galleryPhotos
   } = useSessionStore()
@@ -70,20 +83,53 @@ export default function ActivityStudentView(): ReactElement {
     console.log('Kicking user...')
   }
 
-  useEffect(() => {
-    const ipc = window.api;
+  // useEffect(() => {
+  //   function kickUser()
+  //   {
+  //     //Global store that keeps track of whether the user has been previously kicked or not
+  //     setWasKicked(true);
+  //     console.log("Kick function. Here is the socketID and sessionID", socketId, sessionId)
+  //     //removes user from database
+      
 
-    ipc.send('session:request-data');
+  //     //sessionid is empty when making this request. Thats causing the bug
+  //     console.log("Kicking user from database in sessionID: ", sessionId);
+  //     //is sessionID the global one? or a useState?
 
-    ipc.receive('session:sync', (sessionData) => {
-      console.log("Populating store", sessionData);
-      useSessionStore.setState(sessionData);
 
-    });
-    return () => {
-      ipc.removeAllListeners?.('session:sync');
-    };
-  },[])
+
+  //     axios.post('http://localhost:3000/joiner/leave-room', {
+  //       sessionID: sessionId,
+  //       socketID: socketId
+  //     })
+  //     .then(() =>{
+  //       console.log("Successfully removed from database");
+  //       navigateTo("/");
+  //     })
+  //     .catch(error =>{
+  //       console.log("Error removing user from database", error)
+  //     })
+  //   }
+  //   socket.on("kick", kickUser);
+  //   console.log("Listening for 'kick event");
+  //   return () => {
+  //     socket.off("kick", kickUser);
+  // }}, []);
+
+  // useEffect(() => {
+  //   const ipc = window.api;
+
+  //   ipc.send('session:request-data');
+
+  //   ipc.receive('session:sync', (sessionData) => {
+  //     console.log("Populating store", sessionData);
+  //     useSessionStore.setState(sessionData);
+
+  //   });
+  //   return () => {
+  //     ipc.removeAllListeners?.('session:sync');
+  //   };
+  // },[])
 
   const checkVideoMediaType = () => {
     console.log(
@@ -123,6 +169,168 @@ export default function ActivityStudentView(): ReactElement {
     }
   }
 
+  
+  useEffect(() => {
+    const fetchExperimentID = async () => {
+      try {
+        const response = await axios.get(
+          `http://localhost:3000/joiner/session/getInfo/${roomCode}`
+        );
+        if (response.status === 200) {
+          console.log("EXPERIMENT ID RETURNED: ", response.data.experimentid);
+          setExperimentID(response.data.experimentid);
+        }
+      } catch (error) {
+        // toast.error("Failed to get experiment id")
+        console.log("Error retrieving experiment id in joiner fe", error);
+      }
+    };
+    fetchExperimentID();
+  }, [roomCode]);
+
+  useEffect(() => {
+    const getVideoFileData = async () => {
+      try{
+        const response = await axios.get(
+          `http://localhost:3000/joiner/getVideoFile/${experimentID}`
+        );
+        if(response.status === 200){
+          toast.success("Successfully received video lab data.")
+          console.log("Returned get video data:", response.data);
+          const experimentTitle = response.data.name;
+          const experimentDesc = response.data.description;
+          const path = response.data.path;
+          console.log("RESPONSE DATA VARIABLES:", experimentTitle, experimentDesc, path);
+          setExperimentId(experimentID);
+          setExperimentTitle(experimentTitle);
+          setExperimentDesc(experimentDesc);
+          setExperimentPath(path);
+        }
+      } catch(error){
+        toast.error("Failed to receive video data");
+        console.log("Error receiving video data in joiner FE:", error);
+      }
+    }
+    //if(!experimentID) return;
+    const getPhotoData = async () => {
+      try {
+        console.log("SENDING TO THE ROUTE EXPERIMENT ID: ", experimentID);
+        const response = await axios.get(
+          `http://localhost:3000/joiner/getPhoto/${experimentID}`
+        );
+        if (response.status === 200) {
+          toast.success("Successfully received photo lab data.");
+          console.log("RETURNED GET PHOTO DATA: ", response.data);
+          const experimentTitle = response.data.name;
+          const captions = response.data.captions;
+          const experimentDesc = response.data.description;
+          const path = response.data.path;
+          //NEED THE EXPERIMENT TYPE
+          console.log(
+            "RESPONSE DATA VARIABLES: ",
+            captions,
+            experimentDesc,
+            experimentTitle,
+            path
+          );
+          setExperimentId(experimentID);
+          setExperimentTitle(experimentTitle);
+          setExperimentDesc(experimentDesc);
+          setExperimentPath(path);
+        }
+      } catch (error) {
+        toast.error("Failed to receive photo data");
+        console.log("Error receiving photolab data in joiner fe: ", error);
+      }
+    };
+    const getGalleryData = async () => {
+      try {
+        console.log("SENDING TO THE ROUTE EXPERIMENT ID: ", experimentID);
+        const response = await axios.get(
+          `http://localhost:3000/joiner/getGallery/${experimentID}`
+        );
+        if (response.status === 200) {
+          toast.success("Successfully received gallery lab data.");
+          console.log("RETURNED GET GALLERY DATA: ", response.data);
+          const experimentTitle = response.data.name;
+          const experimentDesc = response.data.description;
+          response.data.images.forEach((img,index) =>{
+            addPhoto({
+              id: index,
+              src: img.path,
+              file:null,
+              caption: img.caption
+            });
+          });
+
+          //const images = response.data.images;
+          // const captions = response.data.captions;
+          // const path = response.data.path;
+          //NEED THE EXPERIMENT TYPE
+          console.log(
+            "RETURNED GET GALLERY DATA: ", response.data
+          );
+          console.log("GalleryPhoto data from getGallery", galleryPhotos)
+          setExperimentId(experimentID);
+          setExperimentTitle(experimentTitle);
+          setExperimentDesc(experimentDesc);
+          // images.forEach((image, index) => {
+          //   addPhoto({
+          //     id: index,
+          //     src: image.path,
+          //     file:null,
+          //     caption: image.caption
+          //   })
+          // })
+        }
+      } catch (error) {
+        toast.error("Failed to receive gallery data");
+        console.log("Error receiving photolab data in joiner fe: ", error);
+      }
+    };
+    const getArticleData = async () => {
+      try {
+        console.log("SENDING TO THE ROUTE EXPERIMENT ID: ", experimentID);
+        const response = await axios.get(
+          `http://localhost:3000/joiner/getArticleFile/${experimentID}`
+        );
+        if (response.status === 200) {
+          toast.success("Successfully received article lab data.");
+          console.log("RETURNED GET Article DATA: ", response.data);
+          const experimentTitle = response.data.name;
+          const experimentDesc = response.data.description;
+          const path = response.data.path;
+          //NEED THE EXPERIMENT TYPE
+          console.log(
+            "RESPONSE DATA VARIABLES: ",
+            experimentDesc,
+            experimentTitle,
+            path
+          );
+          setExperimentId(experimentID);
+          setExperimentTitle(experimentTitle);
+          setExperimentDesc(experimentDesc);
+          setExperimentPath(path);
+        }
+      } catch (error) {
+        toast.error("Failed to receive Article data");
+        console.log("Error receiving article lab data in joiner fe: ", error);
+      }
+    };
+    if(experimentType === "video-lab"){
+      getVideoFileData();
+    }
+    if(experimentType === "photo-lab"){
+      getPhotoData();
+    }
+    if(experimentType === "gallery-data"){
+      getGalleryData();
+    }
+    if(experimentType === "article-data"){
+      getArticleData();
+    }
+  }, [experimentID, setExperimentDesc, setExperimentId, setExperimentTitle, setExperimentPath, experimentType]);
+
   useEffect(() => {
     const getUserData = async () => {
       try {
@@ -145,21 +353,261 @@ export default function ActivityStudentView(): ReactElement {
     getUserData()
   }, [sessionId, experimentType, userId])
 
-  useEffect(() => {
-    const fetchStoredPhoto = async () => {
-      // const filename = experimentPath.split("/").pop();
-      try {
-        const response = await axios.get(`http://localhost:3000/get-photo/${fileName}`)
-        if (response.status === 200) {
-          console.log('Fetched image path:', response.config.url)
-          setCurrentPath(response.config.url)
+  // useEffect(() => {
+  //   console.log("Running active experiment");
+  //   console.log(
+  //     "Experiment ID: ",
+  //     experimentID
+  //   );
+  //   if(!experimentID){
+  //     console.log("Experiment ID is null, aborting the fetch...");
+  //     return;
+  //   }
+  //     const getPhotoInfo = async () => {
+  //       const response = await axios
+  //         .get(`http://localhost:3000/joiner/getPhoto/${experimentID}`)
+  //         .then((response) => {//THERE IS NOTHING BEING SET HERE
+  //           console.log("Photo lab path in activity page:", response.data.path);
+  //         });
+  //     };
+    
+
+  //     const getVideoInfo = async () => {
+  //       const response = await axios
+  //         .get(`http://localhost:3000/joiner/getVideoFile/${experimentID}`)
+  //         .then((response) => {//THERE IS NOTHING BEING SET HERE
+  //           console.log("Video lab path in activity page:", response.data.path);
+  //           setVideoID(response.data.path);
+  //           console.log("VideoID set to ", videoID)
+  //         });
+  //     };
+  //     const getGalleryInfo = async () => {
+  //       const response = await axios
+  //         .get(`http://localhost:3000/joiner/getGallery/${experimentID}`)
+  //         .then((response) => {//THERE IS NOTHING BEING SET HERE
+  //           console.log("Gallery lab path in activity page:", response.data.path);
+  //         });
+  //     };
+      
+  //     const getArticleInfo = async () => {
+  //       const response = await axios
+  //         .get(`http://localhost:3000/joiner/getArticleFile/${experimentID}`)
+  //         .then((response) => {//THERE IS NOTHING BEING SET HERE
+  //           console.log("Article lab path in activity page:", response.data.path);
+  //           setArticleURL(response.data.path);
+  //           console.log("ArticleURL set to ", articleURL)
+  //         });
+  //     };
+
+  //   socket.on("end-experiment", () => {
+  //     // navigateTo("/");
+  //     console.log("End experiment receieved, now need to close the window...")
+  //   });
+
+  //   if(experimentType === "video-lab"){
+  //     setVideoPath(experimentPath)
+  //     getVideoInfo();
+  //   }
+  //   if(experimentType === "photo-lab"){
+  //     setPhotoPath(experimentPath)
+  //     getPhotoInfo();
+  //   }
+  //   if(experimentType === "gallery-lab"){
+  //     setGalleryPath(experimentPath)
+  //     getGalleryInfo();
+  //   }
+  //   if(experimentType === "article-lab"){
+  //     setArticlePath(experimentPath)
+  //     getArticleInfo();
+  //   }
+
+  //   // socket.on("update", (data) => {
+  //   //   if (Array.isArray(data)) {
+  //   //     console.log("Data received:", data);
+  //   //     setRecievedData(data);
+  //   //   } else {
+  //   //     console.error("Did not receive an array of data, received:", data);
+  //   //   }
+  //   // });
+  //   return () => {
+  //     socket.off("end-experiment");
+  //     //socket.off("update");
+  //   };
+  // }, []);
+
+  useEffect(()=>{
+    const fetchExperimentData = async () => {
+      if(!experimentID){
+        console.log("There is no experimentID!!! Cannot fetch data...");
+        return;
+      }
+      try{
+        let response;
+
+        switch(experimentType){
+          case "photo-lab":
+            response = await axios.get(`http://localhost:3000/joiner/getPhoto/${experimentID}`);
+            if(response.status === 200){
+              setExperimentTitle(response.data.name);
+              setExperimentDesc(response.data.description);
+              setPhotoPath(response.data.path);
+            }
+            break;
+          case "video-lab":
+            response = await axios.get(`http://localhost:3000/joiner/getVideoFile/${experimentID}`);
+            if(response.status === 200){
+              setExperimentTitle(response.data.name);
+              setExperimentDesc(response.data.description);
+              setVideoPath(response.data.path);
+            }
+            break;
+          
+          case "gallery-lab":
+            response = await axios.get(`http://localhost:3000/joiner/getGallery/${experimentID}`);
+            if(response.status === 200){
+              setExperimentTitle(response.data.name);
+              setExperimentDesc(response.data.description);
+              const images = response.data.images || [];
+              images.forEach((image, index) =>{
+                addPhoto({
+                  id: index,
+                  src: img.path,
+                  caption:img.caption,
+                  file:null
+                });
+              });
+            }
+            break;
+          
+          case "article-lab":
+            response = await axios.get(`http://localhost:3000/joiner/getArticleFile/${experimentID}`);
+            if(response.status === 200){
+              setExperimentTitle(response.data.name);
+              setExperimentDesc(response.data.description);
+              setArticlePath(response.data.path);
+            }
+            break;
+          default:
+            console.log("Invalid experiment type:", experimentType);
+          
         }
-      } catch (error) {
-        console.log('Error retrieving image:', error)
+      } catch(error){
+        console.log("Error fetching experiment data", error);
+      }
+    };
+    fetchExperimentData();
+  }, [experimentID, experimentType])
+
+  useEffect(() =>{
+    const fetchStoredPhoto = async () =>{
+      const filename = experimentPath.split("/").pop();
+      try{
+          const response = await axios.get(`http://localhost:3000/get-photo/${filename}`);
+          if(response.status === 200){
+            console.log("Fetched image path:", response.config.url);
+            setPhotoPath(response.config.url);
+            toast.success("Successfully retreived photo!")
+          }
+      }
+      catch(error){
+        console.log("Error retrieving image:", error);
+      }
+    };
+
+    const fetchStoredVideo = async () => {
+      const filename = experimentPath.split("/").pop();
+      try{
+        const response = await axios.get(`http://localhost:3000/get-videoFile/${filename}`);
+        if(response.status === 200){
+          console.log("Fetched video path:", response.config.url);
+          setVideoPath(response.config.url);
+          toast.success("Successfully retreived video!")
+        }
+      }
+      catch(error){
+        console.log("Error retrieving video:", error);
       }
     }
-    fetchStoredPhoto()
-  }, [setCurrentPath])
+    const fetchStoredGallery = async (filename: string) => {
+      try{
+        const response = await axios.get(`http://localhost:3000/get-gallery/${filename}`);
+        if(response.status === 200){
+          console.log("Fetched photo path:", response.config.url);
+          setGalleryPath(response.config.url);
+          toast.success("Successfully retreived image!")
+        }
+      }
+      catch(error){
+        console.log("Error retrieving image from gallery:", error);
+      }
+    }
+    const fetchStoredArticle = async () => {
+      const filename = experimentPath.split("/").pop();
+      try{
+        const response = await axios.get(`http://localhost:3000/get-articleFile/${filename}`);
+        if(response.status === 200){
+          console.log("Fetched article path:", response.config.url);
+          setArticlePath(response.config.url);
+          toast.success("Successfully retreived article!")
+        }
+      }
+      catch(error){
+        console.log("Error retrieving article:", error);
+      }
+    }
+    if(experimentType === "video-lab"){
+      console.log("Fetching video...")
+      fetchStoredVideo();
+    }
+    if(experimentType === "photo-lab"){
+      console.log("Fetching photo...")
+      fetchStoredPhoto();
+    }
+    if(experimentType === "gallery-lab" && galleryPhotos.length > 0){
+      console.log("Fetching gallery...")
+      socket.on("image-selected", (imageData) => {
+      console.log("Gallery image-selected event recieved. Host changed the image, fetching stored gallery...", imageData);
+      setSelectedCaption(imageData.caption);
+      const matchedPhoto = galleryPhotos.find(photo => photo.id === imageData.id);
+      if(matchedPhoto) {
+        setCurrentGalleryPhotoID(matchedPhoto.id)
+        const filename = matchedPhoto.src.split("/").pop();
+        console.log("Here is the matchedPhoto correct filename", filename)
+        fetchStoredGallery(filename);
+      }
+      else{
+        console.log("No matching photo found for caption:", imageData.src);
+      }});
+      return () =>{
+        socket.off("image-selected");
+      }
+    }
+    if(experimentType === "article-lab"){
+      console.log("Fetching article...")
+      fetchStoredArticle();
+    }
+  },[experimentPath, experimentType, setPhotoPath, setVideoPath, setArticlePath, articlePath, galleryPhotos]);
+
+
+
+  useEffect(()=> {
+    socket.on("play-video", (data) =>{
+      console.log("Recieved event play-video.", data)
+      setIsPlaying(data)
+      console.log("The variable isPlaying is set to", isPlaying)
+    } );
+
+    socket.on("seek-video", (seconds) =>{
+      console.log("Recieved event seek-video", seconds);
+      if(playerRef.current){
+        playerRef.current.seekTo(seconds, "seconds");
+      }
+    })
+    return () => {
+      socket.off("play-video")
+      socket.off("seek-video")
+    }
+  },[])
 
   //Video Synchronization Logic
 
@@ -250,7 +698,7 @@ export default function ActivityStudentView(): ReactElement {
             </div>
           ) : experimentType == 'photo-lab' ? (
             <img
-              src={photoLabImageSource}
+              src={photoPath}
               className="rounded-lg shadow-lg max-w-2xl w-[60%] md:w-[70%] lg:w-50%"
               alt="Experiment Image"
             ></img>
