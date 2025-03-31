@@ -6,6 +6,7 @@ import ActivitySingleton from './activitySingleton.ts'
 import createProcessWindow from './activity_window.ts'
 import { IActivityInstance } from './activitySingleton.ts'
 import axios from 'axios'
+import { useSessionStore } from '../renderer/src/store/useSessionStore.tsx';
 
 
 export const windows:Array<{
@@ -87,7 +88,18 @@ app.on('window-all-closed', () => {
 function handleViewUser(
   event: Electron.IpcMainEvent, sessionId: string, userId: string, experimentType: number
 ){
-  createProcessWindow(sessionId, userId, experimentType);
+  const newProcessWindow = createProcessWindow(sessionId, userId, experimentType);
+
+  const mainWindow = windows.find(w => w.type === 'main')?.instance;
+
+  if(mainWindow){
+    mainWindow.webContents.send('session:request-data', {
+      sessionId,
+      userId,
+      experimentType,
+      targetWindowId: newProcessWindow.webContents.id
+    });
+  }
   event.reply("activity:viewUser", {userId: userId});
 }
 
@@ -232,3 +244,18 @@ ipcMain.on(
 ipcMain.on('echo-server:destroy-user', processDestroyer);
 ipcMain.on('echo-server:status', processStatus);
 ipcMain.on('activity:viewUser', handleViewUser);
+
+ipcMain.on('session:send-to-window', (event) => {
+  const sessionData = useSessionStore.getState();
+  const senderWebContents = event.sender;
+
+  senderWebContents.send('session:sync', sessionData);
+})
+
+ipcMain.on('session:request-data', (event) => {
+  const sessionData = useSessionStore.getState(); // or however you store your host session
+  console.log("💾 Sending session data to student window:", sessionData);
+
+  event.sender.send('session:sync', sessionData);
+});
+

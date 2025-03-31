@@ -126,7 +126,7 @@ export default function ChartComponent(props: IUserDataType) {
     }, [addDataPoint, timeState, props.user_id]);
 
     return(
-        <div className='h-auto w-auto'>
+        <div className='w-full h-full'>
             <div id={"chart-${props.chart_type}"}>
                 
                 <Plot
@@ -151,10 +151,13 @@ export default function ChartComponent(props: IUserDataType) {
                     // }
                     ]}
                     layout = {{
+                        autosize: true,
+                        responsive: true,
                         width: 700,
                         height: 350,
+                        margin: {l:40, r: 10, b: 40, t: 10},
                         yaxis: {
-                            title: 'Temperature (°F)',//props.chart_name,,
+                            title: props.chart_name,
                             range: [min, max + 1],
                             tick: 1,
                         },
@@ -163,6 +166,9 @@ export default function ChartComponent(props: IUserDataType) {
                     config={{
                         displayModeBar: false 
                       }}
+
+                    useResizeHandler={true}
+                    style ={{ width: "100%", height: "100%"}}
                 />
             </div> 
         </div>

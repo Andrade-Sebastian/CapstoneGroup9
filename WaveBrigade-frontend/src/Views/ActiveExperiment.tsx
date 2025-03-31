@@ -308,21 +308,22 @@ export default function ActiveExperiment() {
   })
 
   return (
-    <div className="flex h-screen bg-white p-4">
+    <div className="flex flex-col lg:flex-row h-screen bg-white p-4 space-y-6 lg:space-y-0 lg:space-x-6">
       {/* picture  */}
       <Toaster position="top-right" />
-      <div className="flex flex-col items-center w-3/4 p-auto bg-white shadow-md rounded-lg">
-        <div className="relative flex justify-center w-full">
+      <div className="flex flex-col w-full lg:w-3/4 space-y-4">
+        <div className="w-full bg-white shadow-md rounded-lg p-4 flex justify-center items-center max-h-[300px] overflow-hidden">
+
           {experimentType == 1 && isMediaAFile ? (
             <div>
-              <ReactPlayer ref={playerRef} url={videoPath} playing={isPlaying} controls={true}/>
+              <ReactPlayer ref={playerRef} url={videoPath} playing={isPlaying} controls={true} className="rounded-lg object-contain max-h-[280px] w-auto"/>
               </div>
           ) : experimentType ==1 && !isMediaAFile ? (
             <div>
-              <ReactPlayer ref={playerRef} url={`https://www.youtube.com/embed/${videoID}`} playing={isPlaying} controls={false} config={{youtube: { playerVars: { showinfo: 0}}}}/>
+              <ReactPlayer ref={playerRef} url={`https://www.youtube.com/embed/${videoID}`} playing={isPlaying} controls={false} config={{youtube: { playerVars: { showinfo: 0}}}} className="rounded-lg object-contain max-h-[280px] w-auto"/>
               </div>
           ) : experimentType == 2 ? (
-            <img src={photoPath} className="rounded-lg w-full max-w-lg h-auto" alt="Experiment Image" /> 
+            <img src={photoPath} className="rounded-lg object-contain max-h-[280px] w-auto" alt="Experiment Image" /> 
             
           ): experimentType == 3 ? (
             <div>
@@ -335,11 +336,11 @@ export default function ActiveExperiment() {
               </div>
           ) : experimentType == 4 && isMediaAFile ? (
             <div>
-              <iframe src={articlePath} width="800px" height="500px"></iframe>
+              <iframe src={articlePath} width="800px" height="500px" className="w-full h-[400px] rounded-md"></iframe>
               </div>
           ) : experimentType == 4 && !isMediaAFile ?(
             <div>
-              <iframe src={articleURL} width="800px" height="500px"></iframe>
+              <iframe src={articleURL} width="800px" height="500px" className="w-full h-[400px] rounded-md"></iframe>
               </div>
           ) :(
             <div>
@@ -351,7 +352,7 @@ export default function ActiveExperiment() {
           )}
         </div>
         {/* Chart stuff*/}
-        <div className="w-full mt-4 bg-gray-200 h-auto rounded-md flex flex-col items-center justify-center text-gray-500 p-4">
+        <div className="flex-grow bg-gray-200 rounded-md text-gray-500 p-4 overflow-auto">
           <div className="w-full">
             {activeChart === "heartRateChart" ? (
               <div>
@@ -390,8 +391,8 @@ export default function ActiveExperiment() {
             )}
           </div>
         </div>
-        <Divider className="my-3" />
-        <div className="mt-4 flex justify-between w-full items-center">
+        {/* <Divider className="my-3" /> */}
+        <div className="mt-4 flex justify-between items-center">
           <p className="font-semibold">
             Nickname: <span className="font-light">{nickname}</span>
           </p>
@@ -439,7 +440,7 @@ export default function ActiveExperiment() {
         </div>
       </div>
       {/* tabs */}
-      <div className="w-1/4 p-4 bg-white shadow-md rounded-lg overflow-y-auto">
+      <div className="hidden lg:block w-full lg:w-1/4 p-4 bg-white shadow-md rounded-lg overflow-y-auto">
         <div className="flex border-b">
           <button
             className={`rounded-lg flex-1 p-2 text-lg flex items-center justify-center ${
@@ -447,7 +448,7 @@ export default function ActiveExperiment() {
             }`}
             onClick={() => setActiveTab("images")}
           >
-            <LuSquareStack className="mr-2" /> Images
+            <LuSquareStack className="mr-2" /> Media
           </button>
           <button
             className={`rounded-lg flex-1 p-2 text-lg flex items-center justify-center ${

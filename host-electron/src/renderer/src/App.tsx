@@ -2,12 +2,17 @@
 import { Outlet } from "react-router-dom";
 import NavigationBar from "./components/NavigationBar.tsx";
 import useBrainflowManager from './hooks/useBrainflowManager.ts';
+import { useSessionStore } from '../src/store/useSessionStore.tsx';
 import { useEffect, useState } from 'react';
 import socket from './Socket.js';
 import React from "react";
 import toast, { Toaster } from "react-hot-toast";
 import ModalComponent from "./components/ModalComponent.tsx";
 import { useSessionStore } from "./store/useSessionStore.tsx";
+
+const ipc = window.api
+
+
 
 function App() {
   useBrainflowManager();
@@ -72,6 +77,16 @@ const { hostName, roomCode} = useSessionStore();
   };
     
   }, []);  // Dependency on isSocketAssigned to run when it changes
+
+  useEffect(() => {
+    ipc.receive('session:request-data', (payload) => {
+      const { targetWindowId} = payload
+      const sessionData = useSessionStore.getState()
+      ipc.send('session:send-to-window', {windowId: targetWindowId, sessionData});
+      
+    });
+  },[])
+  
 
   // useEffect(() => {
   //   const cleanup = ipc.receive(

@@ -3,6 +3,8 @@ import { useEffect, useState, useRef } from 'react'
 import { CiPlay1 } from 'react-icons/ci'
 import { TfiGallery } from 'react-icons/tfi'
 import { TiCamera } from 'react-icons/ti'
+import { LuSquareStack } from "react-icons/lu";
+import { BsChatSquareText } from "react-icons/bs";
 import { IoVideocam, IoNewspaper } from 'react-icons/io5'
 import { PiCrownSimpleThin } from 'react-icons/pi'
 import { HiOutlineSignal } from 'react-icons/hi2'
@@ -47,7 +49,11 @@ export default function ActivityHost() {
   const [sessionID, setSessionID] = useState('')
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [serialNumber, setSerialNumber] = useState('')
+
   const [isMasked, setIsMasked] = useState(false);
+
+  const [activeTab, setActiveTab] = useState("images");
+
   const [IPAddress, setIPAddress] = useState('')
   const [isModalUserOptionsOpen, setIsModalUserOptionsOpen] = useState(false)
   const [selectedEmotiBitId, setSelectedEmotiBitId] = useState<string | null>(null)
@@ -347,6 +353,63 @@ export default function ActivityHost() {
           )}  
           </div>
         </div>
+              {/* <div className="hidden lg:block w-full lg:w-1/4 p-4 bg-white shadow-md rounded-lg overflow-y-auto">
+        <div className="flex border-b">
+          <button
+            className={`rounded-lg flex-1 p-2 text-lg flex items-center justify-center ${
+              activeTab === "images" ? "bg-[#7F56D9] text-white" : "bg-gray-300"
+            }`}
+            onClick={() => setActiveTab("images")}
+          >
+            <LuSquareStack className="mr-2" /> Media
+          </button>
+          <button
+            className={`rounded-lg flex-1 p-2 text-lg flex items-center justify-center ${
+              activeTab === "chat" ? "bg-[#7F56D9] text-white" : "bg-gray-300"
+            }`}
+            onClick={() => setActiveTab("chat")}
+          >
+            <BsChatSquareText className="mr-2" /> Chat
+          </button>
+        </div>
+        <div className="mt-4">
+          {activeTab === "images" ? (
+            <div className="flex justify-center w-full">
+              {experimentType == 1 && isMediaAFile ? (
+                <div>
+                  <p>Local Video: {videoPath}</p>
+                </div>
+              ) : experimentType ==1 && !isMediaAFile ? (
+                <div>
+                  <p>YouTube Video: https://www.youtube.com/watch?v={videoID} </p>
+                </div>
+              ) : experimentType == 2 ? (
+                <div>
+                  <p>Image: {photoPath}</p>
+                </div>
+              ): experimentType == 3 ? (
+                <div>
+                  <p>Gallery lab stuff</p>
+                </div>
+              ) : experimentType == 4 && isMediaAFile ?(
+                <div>
+                  <p> Local Article: {articlePath}</p>
+                </div>
+              ) : experimentType == 4 && !isMediaAFile ? (
+                <div>
+                  <p> Article Link : {articleURL}</p>
+                </div>
+              ) : (
+                <div> 
+                  <p> Unknown lab. Rejoin</p>
+              </div>
+        )}
+        </div>
+          ): (
+            <div className="p-4 text-gray-500"> Chat Feature </div>
+          )}
+          </div>
+      </div> */}
       </div>
       <Divider className="my-6" />
       <hr></hr>
