@@ -393,33 +393,33 @@ export default function WaitingRoom() {
     }
   }, [experimentType, setExperimentTypeString])
   return (
-    <div className="flex flex-col items-center justify-center h-1/2 mx-8">
-      <div className="flex flex-col my-10 md:flex-row items-start justify-between gap-72">
+    <div className="flex flex-col items-center justify-center px-4 md:px-8 py-8">
+      <Toaster position="top-right" />
+      <div className="flex flex-col md:flex-row items-start justify-between w-full max-w-6xl gap-8 md:gap-12">
         {/* left section */}
-        <Toaster position="top-right" />
-        <div className="md:w-1/2 space-y-4">
-          <h1 className="text-3xl text-3xl font-semibold text-gray-800">
+        <div className="w-full md:w-1/2 space-y-4">
+          <h1 className="text-2xl sm:text-3xl font-semibold text-gray-800">
             Welcome to Session
           </h1>
-          <p className="text-6xl font-bold text-[#894DD6]">{roomCode}</p>
+          <p className="text-4xl sm:text-5xl font-bold text-[#894DD6] break-words">{roomCode}</p>
           <div className="space-y-2">
-            <p className="text-lg">
+            <p className="text-base sm:text-lg">
               <span className="font-semibold"> NICKNAME:</span> {nickname}
             </p>
             {!isSpectator && ( 
             
               <>
-              <p className="text-lg">
+              <p className="text-base sm:text-lg">
                 <span className="font-semibold">SENSOR SERIAL NUMBER:</span>
                 {serial}
               </p>
-              <p className="text-lg">
-                <span className="font-semibold">SENSOR STATUS:</span>
+              <p className="text-base sm:text-lg flex flex-col sm:flex-row sm:items-center">
+                <span className="font-semibold">SENSOR STATUS: </span>
                 <div>
                   {isConnected ? (
-                    <span className="text-green-500 font-bold"> CONNECTED</span>
+                    <span className="text-green-500 font-bold ml-1"> CONNECTED</span>
                   ) : (
-                    <span className="text-red-500 font-bold"> NOT CONNECTED</span>
+                    <span className="text-red-500 font-bold ml-1">  NOT CONNECTED</span>
                   )}
                 </div>
               </p>
@@ -428,7 +428,7 @@ export default function WaitingRoom() {
           </div>
         </div>
         {/* right section */}
-        <div className="md:w-1/2">
+        <div className="w-full md:w-1/2">
           {/* HARD CODED LAB DESCRIPTION */}
           <WaitingRoomCardComponent
             icon={experimentIcon}
@@ -438,8 +438,8 @@ export default function WaitingRoom() {
           ></WaitingRoomCardComponent>
         </div>
       </div>
-      <Divider className="my-6" />
-      <div className="flex justify-center space-x-8 text-lg font-medium text-gray-800">
+      <Divider className="my-6" w-full max-w-4xl/>
+      <div className="flex flex-wrap justify-center gap-4 text-base sm:text-lg font-medium w-full text-gray-800 max-w-4xl">
         {nicknames.map((name, index) => (
           <p className='flex items-center border-black font-medium rounded-md bg-[#E6E6E6] px-4 py-1.5 text-black font-light gap-2.5' key={index}>{name}</p>
         ))}
@@ -448,6 +448,6 @@ export default function WaitingRoom() {
   );
 }
 
-function then(arg0: () => void) {
-  throw new Error("Function not implemented.");
-}
+// function then(arg0: () => void) {
+//   throw new Error("Function not implemented.");
+// }
