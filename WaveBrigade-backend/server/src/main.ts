@@ -255,6 +255,7 @@ io.on("connection", (socket) => {
     isMasked = !isMasked;
     console.log(`Toggling mask. userId: ${userId}, new mask state: ${isMasked}`);
     if(!userId){
+      console.log("No userId detected, must be masknig all users")
       for(const[socketID, info] of Object.entries(userStates)){
         io.to(socketID).emit("toggle-mask", {
           userId: info.userId,
@@ -264,6 +265,8 @@ io.on("connection", (socket) => {
 
     }else{
       for(const[socketID, info] of Object.entries(userStates)){
+        console.log(`UserID ${userId} and info.userId ${info.userId}`)
+        console.log(`userId detected, must be maskning one user, ${userId}`)
         if(info.userId == userId){
           io.to(socketID).emit("toggle-mask", {
             userId,

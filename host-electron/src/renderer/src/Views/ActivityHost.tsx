@@ -47,6 +47,7 @@ export default function ActivityHost() {
   const [sessionID, setSessionID] = useState('')
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [serialNumber, setSerialNumber] = useState('')
+  const [isMasked, setIsMasked] = useState(false);
   const [IPAddress, setIPAddress] = useState('')
   const [isModalUserOptionsOpen, setIsModalUserOptionsOpen] = useState(false)
   const [selectedEmotiBitId, setSelectedEmotiBitId] = useState<string | null>(null)
@@ -78,8 +79,10 @@ export default function ActivityHost() {
   const [latestSeekTime, setLatestSeekTime] = useState(0);
   const handleMaskAll = () => {
     //Mask all button
+    const newMaskState = !isMasked;
     console.log("Toggling mask for ALL joiners");
     socket.emit("toggle-mask");
+    setIsMasked(newMaskState)
     }
   const handleOpenModal = () => setIsModalOpen(true)
   const handleCloseModal = () => setIsModalOpen(false)
@@ -363,14 +366,15 @@ export default function ActivityHost() {
           <button
             type="button"
             onClick={handleMaskAll}
-            className="mt-6 font-semibold py-3 px-6 rounded-3xl shadow-md transition duration-300 ease-in-out bg-[#7F56D9] hover:bg-violet-500 text-white transition duration-300 cursor-pointer"
+            className={`mt-6 font-semibold py-3 px-6 rounded-3xl shadow-md transition duration-300 ease-in-out text-white cursor-pointer ${
+    isMasked ? 'bg-green-500 hover:bg-green-600' : 'bg-[#7F56D9] hover:bg-violet-500'}`}
           >
-            Mask
+            {isMasked ? 'Unmask' : 'Mask'}
           </button>
           <button
             type="button"
             onClick={handleOpenModal}
-            className="mt-6 font-semibold py-3 px-6 rounded-3xl shadow-md transition duration-300 ease-in-out bg-[#F31260] hover:bg-red-600 text-white transition duration-300 cursor-pointer"
+            className="mt-6 font-semibold py-3 px-6 rounded-3xl shadow-md transition duration-300 ease-in-out bg-[#F31260] hover:bg-red-600 text-white cursor-pointer"
           >
             Stop
           </button>

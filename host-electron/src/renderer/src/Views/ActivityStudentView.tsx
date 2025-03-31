@@ -26,12 +26,15 @@ export default function ActivityStudentView(): ReactElement{
     const [currentUserId, setCurrentUserId] = useState(0);
     const [currentPath, setCurrentPath] = useState("");
     const [fileName, setFileName] = useState("");
+    const [isMasked, setIsMasked] = useState(false);
     const { users } = useSessionStore()
 
     const {sessionId, userId, experimentType} = useParams();
     console.log("PARAMS RECIEVED: ", sessionId, userId, experimentType);
     const handleMask = (targetUserId) => {
+      const newMaskState = !isMasked;
       socket.emit("toggle-mask", {userId: targetUserId})
+      setIsMasked(newMaskState)
     }
 
     useEffect(() => {
@@ -90,13 +93,14 @@ export default function ActivityStudentView(): ReactElement{
           <p className="font-semibold">Viewing Joiner: <span className="font-light">{currentUser}</span></p>
           <div className="flex space-x-4">
             <button
-              className="bg-[#7F56D9] hover:bg-violet text-3xl p-4 rounded-lg text-white cursor-pointer"
+              className={`mt-6 font-semibold py-3 px-6 rounded-xl shadow-md transition duration-300 ease-in-out text-white text-3xl cursor-pointer ${
+                isMasked ? 'bg-green-500 hover:bg-green-600' : 'bg-[#7F56D9] hover:bg-violet-500'}`}
               // onClick={() => {setSelectedButton("heartRate"); setActiveChart("heartRateChart");}}
               onClick={() => {handleMask(currentUserId)}}
             >
-              Mask
+              {isMasked ? 'Unmask' : 'Mask'}
             </button>
-            <button className="bg-[#F54884] hover:bg-[#F02B70] text-3xl p-4 rounded-lg text-white cursor-pointer">
+            <button className="mt-6 font-semibold py-3 px-6 bg-[#F54884] shadow-md transition duration-300 ease-in-out hover:bg-[#F02B70] text-3xl p-4 rounded-xl text-white cursor-pointer">
               Kick
             </button>
           </div>
