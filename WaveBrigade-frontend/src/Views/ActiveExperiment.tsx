@@ -494,7 +494,7 @@ export default function ActiveExperiment() {
         )}
         </div>
           ): (
-            <div className="p-4 text-gray-500"> Chat Feature </div>
+            <div className="flex flex-col h-[60vh] justify-between bg-white rounded-md shadow-md"> Chat Feature </div>
           )}
           </div>
       </div>
