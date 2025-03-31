@@ -312,7 +312,7 @@ export default function ActiveExperiment() {
       {/* picture  */}
       <Toaster position="top-right" />
       <div className="flex flex-col w-full lg:w-3/4 space-y-4">
-        <div className="w-full bg-white shadow-md rounded-lg p-4 flex justify-center items-center max-h-[300px] overflow-hidden">
+        <div className="relative w-full bg-white shadow-md rounded-lg p-4 flex justify-center items-center max-h-[300px] overflow-hidden">
 
           {experimentType == 1 && isMediaAFile ? (
             <div>
@@ -348,7 +348,8 @@ export default function ActiveExperiment() {
             </div>
           )}
           {isMasked && (
-            <div className="absolute top-0 left-0 w-full h-full bg-black opacity-100 z-50 pointer-events-none"> </div>
+            <div className="absolute top-0 left-0 w-full h-full bg-black opacity-100 z-50 pointer-events-none flex items-center justify-center transition-all duration-300 ease-in-out">
+              <p className='text-white font-semibold'>Masked</p> </div>
           )}
         </div>
         {/* Chart stuff*/}
