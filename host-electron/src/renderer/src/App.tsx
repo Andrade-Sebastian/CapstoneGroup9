@@ -2,7 +2,6 @@
 import { Outlet } from "react-router-dom";
 import NavigationBar from "./components/NavigationBar.tsx";
 import useBrainflowManager from './hooks/useBrainflowManager.ts';
-import { useSessionStore } from '../src/store/useSessionStore.tsx';
 import { useEffect, useState } from 'react';
 import socket from './Socket.js';
 import React from "react";
