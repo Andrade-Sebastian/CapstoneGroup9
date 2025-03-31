@@ -31,17 +31,10 @@ export default function ActivityHost() {
   const {
     sessionId,
     hostName,
-    users,
     roomCode,
     experimentType,
     experimentTypeString,
-    setExperimentTypeString,
-    setSessionId,
-    addUser,
-    devices,
-    removeUser,
-    addDevice,
-    removeDevice,
+    toggleUserMask,
     videoLabSource,
     videoID,
     articleURL,
@@ -56,7 +49,11 @@ export default function ActivityHost() {
   const [sessionID, setSessionID] = useState('')
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [serialNumber, setSerialNumber] = useState('')
+
+  const [isMasked, setIsMasked] = useState(false);
+
   const [activeTab, setActiveTab] = useState("images");
+
   const [IPAddress, setIPAddress] = useState('')
   const [isModalUserOptionsOpen, setIsModalUserOptionsOpen] = useState(false)
   const [selectedEmotiBitId, setSelectedEmotiBitId] = useState<string | null>(null)
@@ -86,7 +83,13 @@ export default function ActivityHost() {
   const [isPlaying, setIsPlaying] = useState(false);
   const playerRef = useRef(null)
   const [latestSeekTime, setLatestSeekTime] = useState(0);
-  const handleMask = () => toast.error('No joiner to mask')
+  const handleMaskAll = () => {
+    //Mask all button
+    const newMaskState = !isMasked;
+    console.log("Toggling mask for ALL joiners");
+    socket.emit("toggle-mask");
+    setIsMasked(newMaskState)
+    }
   const handleOpenModal = () => setIsModalOpen(true)
   const handleCloseModal = () => setIsModalOpen(false)
   const handleAction = () => {
@@ -169,12 +172,35 @@ export default function ActivityHost() {
         console.log('Trying to get users from session ' + sessionID)
         const response = await axios.get(`http://localhost:3000/joiner/room-users/${sessionID}`)
         const users = response.data.users //Array of IUser objects
+        const rawUsers = response.data.users;
+
+        const normalizedUsers = rawUsers.map((u) => ({
+          device: u.device,
+          deviceId: u.deviceid,
+          deviceSocketId: u.devicesocketid,
+          frontendSocketId: u.frontendsocketid,
+          ipAddress: u.ipaddress,
+          isAvailable: u.isavailable,
+          isConnected: u.isconnected,
+          isMasked: u.ismasked,
+          leftSession: u.leftsession,
+          nickname: u.nickname,
+          samplingFrequency: u.samplingfrequency,
+          secret: u.secret,
+          serialNumber: u.serialnumber,
+          sessionId: u.sessionid,
+          userId: u.userid,
+          userRole: u.userrole,
+        }));
+        setUserObjects(normalizedUsers);
+
 
         const nicknames = [] //holds only the nicknames of those IUser Objects
 
         setNickNames(nicknames)
+        console.log("Fetched users from backend:", response.data.users);
 
-        setUserObjects(response.data.users)
+        //setUserObjects(response.data.users)
 
         // initialize nicknames array
         for (let i = 0; i < users.length; i++) {
@@ -392,7 +418,7 @@ export default function ActivityHost() {
           {(userObjects || []).map((user, index) => (
             <button
               key={index}
-              onClick={() => handleViewUser(user.userid, experimentType)}
+              onClick={() => handleViewUser(user.userId, experimentType)}
               className="flex items-center border-black font-medium rounded-md bg-[#E6E6E6] hover:bg-[#CECECE] px-4 py-1.5 text-black font-light cursor-pointer gap-2.5"
             >
               <p>{user.nickname}</p>
@@ -402,15 +428,16 @@ export default function ActivityHost() {
         <div className="absolute bottom-2 flex space-x-6 mt-6">
           <button
             type="button"
-            onClick={handleMask}
-            className="mt-6 font-semibold py-3 px-6 rounded-3xl shadow-md transition duration-300 ease-in-out bg-[#7F56D9] hover:bg-violet-500 text-white transition duration-300"
+            onClick={handleMaskAll}
+            className={`mt-6 font-semibold py-3 px-6 rounded-3xl shadow-md transition duration-300 ease-in-out text-white cursor-pointer ${
+    isMasked ? 'bg-green-500 hover:bg-green-600' : 'bg-[#7F56D9] hover:bg-violet-500'}`}
           >
-            Mask
+            {isMasked ? 'Unmask' : 'Mask'}
           </button>
           <button
             type="button"
             onClick={handleOpenModal}
-            className="mt-6 font-semibold py-3 px-6 rounded-3xl shadow-md transition duration-300 ease-in-out bg-[#F31260] hover:bg-red-600 text-white transition duration-300"
+            className="mt-6 font-semibold py-3 px-6 rounded-3xl shadow-md transition duration-300 ease-in-out bg-[#F31260] hover:bg-red-600 text-white cursor-pointer"
           >
             Stop
           </button>

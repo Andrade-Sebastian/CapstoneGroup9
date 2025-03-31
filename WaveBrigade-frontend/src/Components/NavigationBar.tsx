@@ -4,87 +4,61 @@ import {
     NavbarContent,
     NavbarItem,
   } from "@nextui-org/react";
-  import React from "react";
+  import React, {useState} from "react";
   
   import { RiPulseFill } from "react-icons/ri";
   import { IoIosSettings } from "react-icons/io";
   import { Link } from "react-router-dom";
   import { CiCircleInfo } from "react-icons/ci";
+  import { IoMdMenu } from "react-icons/io";
   
   import {
     Button,
     useDisclosure
   } from "@heroui/react";
+
+  export interface INavbarProps {
+    onOpenSettings: () => void;
+    onOpenInfo: () => void;
+  }
   
-  export default function NavigationBar() {
+  export default function NavigationBar(props: INavbarProps) {
     const {isOpen, onOpen, onOpenChange} = useDisclosure();
+    const [menuOpen, setMenuOpen] = useState(false);
     return (
       <div>
         <Navbar
           isBordered={true}
           position="static"
-          className="bg-gradient-to-br from-purple-700 to-violet-400 text-white h-20"
+          className="bg-gradient-to-br from-purple-700 to-violet-400 text-white h-20 px-4"
         >
-          <NavbarBrand className="pl-10">
+          <NavbarBrand className="flex items-center">
             <RiPulseFill style={{ fontSize: "24px" }} />
             <Link to="/">
-              <p className="text-2xl hover:bg-neutral-200">WaveBrigade</p>
+              <p className="text-2xl font-semibold hover:underline">WaveBrigade</p>
             </Link>
             <RiPulseFill style={{ fontSize: "24px" }} />
           </NavbarBrand>
-  
-          <NavbarContent className="ml-auto flex items-center pr-10">
+          <button className="md:hidden text-white cursor-pointer text-3xl" onClick={() => setMenuOpen(!menuOpen)}>
+          <IoMdMenu/>
+        </button>
+          <NavbarContent className="hidden ml-auto md:flex items-center pr-10 justify-end">
               {/* Settings */}
-            <NavbarItem>
+            <NavbarItem className="flex gap-6 items-center justify-end w-full max-w-md">
               <div className="flex gap-10 items-center justify-center">
-                  <Button onPress={onOpen} className="border font-semibold px-6 py-2 flex items-center gap-2 rounded-md shadow-md transition duration-300 ease-in-out">
+                  <button onClick={props.onOpenSettings} className="border font-semibold px-6 py-2 flex items-center gap-2 rounded-md shadow-md transition duration-300 ease-in-out cursor-pointer">
                       SETTINGS
                       <IoIosSettings
                     className="hover:animate-spin"
                     style={{ fontSize: "25px" }}
                   />
-                  </Button>
-                {/* <button
-                  type="button"
-                  className="border font-semibold px-6 py-2 flex items-center gap-2 rounded-md shadow-md transition duration-300 ease-in-out"
-                >
-                  <span>SETTINGS</span>
-                  <IoIosSettings
-                    className="hover:animate-spin"
-                    style={{ fontSize: "25px" }}
-                  />
-                </button> */}
+                  </button>
               </div>
-              {/* Modal for Settings
-              <Modal isOpen={false} onOpenChange={onOpenChange}>
-              <ModalContent>
-                {() => (
-                  <>
-                    <ModalHeader className="flex flex-col gap-1">
-                      Settings
-                    </ModalHeader>
-                    <ModalBody>
-                      <p>Settings content goes here...</p>
-                    </ModalBody>
-                    <ModalFooter>
-                      <Button
-                        color="danger"
-                        variant="light"
-                        onPress={() => onOpenChange()} // Ensure proper state update
-                      >
-                        Close
-                      </Button>
-                    </ModalFooter>
-                  </>
-                )}
-              </ModalContent>
-              </Modal> */}
-            </NavbarItem>
-            <NavbarItem>
               <div className="flex gap-10 items-center justify-center">
                 <button
+                  onClick={props.onOpenInfo}
                   type="button"
-                  className="border font-semibold px-6 py-2 flex items-center gap-2 rounded-md shadow-md transition duration-300 ease-in-out"
+                  className="border cursor-pointer font-semibold px-6 py-2 flex items-center gap-2 rounded-md shadow-md transition duration-300 ease-in-out"
                 >
                   INFO
                   <CiCircleInfo style={{ fontSize: "25px" }} />
@@ -93,6 +67,16 @@ import {
               </div>
             </NavbarItem>
           </NavbarContent>
+          {menuOpen &&(
+          <div className="absolute rounded-md top-20 left-0 w-full bg-[#7F56D9] text-white shadow-md md:hidden flex flex-col items-center space-y-4 py-4">
+            <button className="w-11/12 text-center py-2 cursor-pointer font-semibold rounded-md border hover:bg-violet-500" onClick={props.onOpenSettings}>
+            SETTINGS
+            </button>
+            <button className="w-11/12 text-center py-2 cursor-pointer font-semibold rounded-md border hover:bg-violet-500" onClick={props.onOpenInfo}>
+            INFO
+            </button>
+          </div>
+        )}
         </Navbar>
       </div>
     );

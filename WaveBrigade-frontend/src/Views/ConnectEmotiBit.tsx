@@ -15,12 +15,20 @@ export default function ConnectEmotiBit() {
   const [device, setDevice] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigateTo = useNavigate();
-  const { setExperimentId, setExperimentTitle, setExperimentDesc, setIsConnected, setSerial, setDeviceId, nickname, roomCode, socketId, setSessionId, setJoinerId} = useJoinerStore()
+  const { setExperimentId, setExperimentTitle, setExperimentDesc, setIsConnected, setSerial, setDeviceId, nickname, roomCode, socketId, setSessionId, setJoinerId, joinerId} = useJoinerStore()
 
   const handleComplete = (code: string) => {
     console.log("Serial Code Entered:", code);
     setCode(code);
   };
+
+  useEffect(() =>{
+    if(joinerId){
+      console.log("Registering joinerId with backend:", joinerId);
+      socket.emit("register-user", joinerId);
+      socket.emit("join-room")
+    }
+  })
 
   const handleSubmit = async (e: React.FormEvent) =>{
     e.preventDefault();
@@ -85,6 +93,7 @@ export default function ConnectEmotiBit() {
         console.log("RESPONSE AFTER ADDING USER: ", response.data);
         setSessionId(response.data.joiner_sessionid);
         setJoinerId(response.data.joiner_userid);
+        console.log("JOINER", joinerId);
         
         console.log("Added user to session!");
         return true;

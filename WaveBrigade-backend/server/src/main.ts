@@ -51,6 +51,7 @@ import { Request, Response } from "express";
 import path from "node:path";
 import fs from "node:fs";
 import { fileURLToPath } from "node:url";
+import { off } from "node:process";
 
 const app = express();
 
@@ -173,10 +174,17 @@ let latestExperimentType = null;
 let isVideoPlaying = false;
 let latestSeekTime = 0;
 let latestExperimentData = null;
+let isMasked = false;
+let userStates = {};
+
 io.on("connection", (socket) => {
   
   // console.log("(main.ts): User Connected | socketID: " + socket.id)
   // console.log(`(main.ts): Total connections: ${io.engine.clientsCount}`);
+  socket.on("register-user", (userId) => {
+    userStates[socket.id] = {userId};
+    console.log(`User registered: ${userId} with socket ${socket.id}`);
+  })
 
   socket.on("client-assignment", () => {
     console.log("(main.ts): Emitting client-assignment with socketId:", socket.id);
@@ -199,10 +207,11 @@ io.on("connection", (socket) => {
     console.log("hopefully emitted");
   });
 
+  
   socket.on("kick", async (nicknameSocketID) => {
     console.log("Received kick event for", nicknameSocketID);
     console.log("(main.ts): Current socketSessionMap:", socketSessionMap);
-
+    
     const targetSocket = io.sockets.sockets.get(nicknameSocketID);
     
     if (targetSocket) {
@@ -211,21 +220,21 @@ io.on("connection", (socket) => {
       targetSocket.disconnect(true); // Ensures a forced disconnect
       console.log(`(main.ts): Successfully disconnected socket ${nicknameSocketID}`);
     } else {
-        console.log(`(main.ts): No socket found with ID ${nicknameSocketID}`);
+      console.log(`(main.ts): No socket found with ID ${nicknameSocketID}`);
     }
     // io.emit("kick", nicknameSocketID);
-
+    
     // io.emit("kick", socketID);
-
+    
   })
-
+  
   socket.on("joiner-connected", async (data) => {
     const {socketID, nickname, lastFourSerial} = data;
     console.log(`Received joiner-connected event in the backend for socket: ${socketID} of the name ${nickname} with their last four serial number being ${lastFourSerial}`)
     console.log("Now emitting event to host FE")
     io.emit("joiner-connected", {socketID, nickname, lastFourSerial});
   })
-
+  
   //send socket Id to brainflow
   socket.on("brainflow-assignment", () => {
     console.log(
@@ -240,9 +249,44 @@ io.on("connection", (socket) => {
     latestExperimentType = data;
     io.emit("experiment-type", data)
   });
+  
+  socket.on("toggle-mask", ({userId} = {}) => {
+    console.log("Toggling mask...")
+    isMasked = !isMasked;
+    console.log(`Toggling mask. userId: ${userId}, new mask state: ${isMasked}`);
+    if(!userId){
+      console.log("No userId detected, must be masknig all users")
+      for(const[socketID, info] of Object.entries(userStates)){
+        io.to(socketID).emit("toggle-mask", {
+          userId: info.userId,
+          isMasked,
+        });
+      }
+
+    }else{
+      for(const[socketID, info] of Object.entries(userStates)){
+        console.log(`UserID ${userId} and info.userId ${info.userId}`)
+        console.log(`userId detected, must be maskning one user, ${userId}`)
+        if(info.userId == userId){
+          io.to(socketID).emit("toggle-mask", {
+            userId,
+            isMasked,
+        });
+        break;
+      }
+    }
+  }})
 
   socket.on("join-room", () => {
     console.log("User joined, latest experiment:", latestExperimentType)
+    const userInfo = userStates[socket.id];
+    if(userInfo && userInfo.userId){
+      socket.emit("toggle-mask", {
+        userId: userInfo.userId,
+        isMasked: isMasked,
+      });
+    }
+
     if(latestExperimentType !== null){
       socket.emit("experiment-type", latestExperimentType);
     }
@@ -256,7 +300,7 @@ io.on("connection", (socket) => {
       socket.emit("experiment-data", latestExperimentData)
     }
   });
-
+  
   //recieve emotibit data
   socket.on("update", (payload) => {
     const {
@@ -312,6 +356,7 @@ io.on("connection", (socket) => {
 
     console.log("User disconnected: ", socket.id);
     console.log("Reason: ", data);
+    delete userStates[socket.id];
     const sessionID = getSessionBySocket(socket.id);
 
     if (sessionID) {

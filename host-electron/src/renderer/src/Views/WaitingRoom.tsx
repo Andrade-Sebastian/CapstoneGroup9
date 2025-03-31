@@ -549,7 +549,7 @@ export default function WaitingRoom() {
           </div>
           <button
             onClick={handleOpenModalEmoti}
-            className="mt-4 bg-[#7F56D9] hover:bg-violet-500 text-white font-semibold py-3 px-6 rounded-md shadow-md transition duration-300 ease-in-out md:w-auto"
+            className="mt-4 bg-[#7F56D9] hover:bg-violet-500 text-white font-semibold py-3 px-6 rounded-md shadow-md transition duration-300 ease-in-out md:w-auto cursor-pointer"
           >
             Add EmotiBit
           </button>
@@ -567,14 +567,14 @@ export default function WaitingRoom() {
         <button
           type="button"
           onClick={handleBackButton}
-          className="mt-6 font-semibold py-3 px-6 rounded-md shadow-md transition duration-300 ease-in-out bg-gray-500 hover:bg-gray-400 text-white"
+          className="mt-6 font-semibold py-3 px-6 rounded-md shadow-md transition duration-300 ease-in-out bg-gray-500 hover:bg-gray-400 text-white cursor-pointer"
         >
           Back
         </button>
         <button
           type="button"
           onClick={handleOpenModal}
-          className="mt-6 font-semibold py-3 px-6 rounded-md shadow-md transition duration-300 ease-in-out bg-[#7F56D9] hover:bg-violet-500 text-white"
+          className="mt-6 font-semibold py-3 px-6 rounded-md shadow-md transition duration-300 ease-in-out bg-[#7F56D9] hover:bg-violet-500 text-white cursor-pointer"
         >
           Begin
         </button>

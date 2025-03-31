@@ -20,6 +20,7 @@ import { join } from "node:path";
 
 export default function ActiveExperiment() {
   const [selectedButton, setSelectedButton] = useState("heartRate");
+  const [isMasked, setIsMasked] = useState(false);
   const [activeTab, setActiveTab] = useState("images");
   const [activeChart, setActiveChart] = useState("heartRateChart");
   const [recievedData, setRecievedData] = useState<number[]>([]);
@@ -291,12 +292,28 @@ export default function ActiveExperiment() {
     }
   },[])
 
+  useEffect(() => {
+    socket.on("toggle-mask", ({userId, isMasked}) =>{
+      console.log("Received toggle mask event. Trying to toggle mask.")
+      console.log(`UserID:${userId} and JoinerID:${joinerId}`);
+      if(String(userId) === String(joinerId)){
+        setIsMasked(prev => !prev);
+        console.log("Is this user masked:", isMasked);
+      }
+    });
+    // setIsMasked(true);
+    return() =>{
+      socket.off("toggle-mask")
+    }
+  })
+
   return (
     <div className="flex flex-col lg:flex-row h-screen bg-white p-4 space-y-6 lg:space-y-0 lg:space-x-6">
       {/* picture  */}
       <Toaster position="top-right" />
       <div className="flex flex-col w-full lg:w-3/4 space-y-4">
         <div className="w-full bg-white shadow-md rounded-lg p-4 flex justify-center items-center max-h-[300px] overflow-hidden">
+
           {experimentType == 1 && isMediaAFile ? (
             <div>
               <ReactPlayer ref={playerRef} url={videoPath} playing={isPlaying} controls={true} className="rounded-lg object-contain max-h-[280px] w-auto"/>
@@ -329,6 +346,9 @@ export default function ActiveExperiment() {
             <div>
               <p> Unknown lab. Rejoin</p>
             </div>
+          )}
+          {isMasked && (
+            <div className="absolute top-0 left-0 w-full h-full bg-black opacity-100 z-50 pointer-events-none"> </div>
           )}
         </div>
         {/* Chart stuff*/}
