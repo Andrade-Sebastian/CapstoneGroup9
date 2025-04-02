@@ -866,11 +866,15 @@ export async function validatePassword(sessionID:string){
 }
 
 export async function getUserExperimentData(sessionID: string, userID: number, experimentType: string){
+	let userInfo = undefined;
+
 	try{
 		await dbClient.connect();
+
 		switch(experimentType){
-			case "photo-lab":
-				const userInfo = await dbClient.queryObject(`SELECT "User".*, device.*, photolab.path FROM "User"
+			case "photo-lab": {
+
+				userInfo = await dbClient.queryObject(`SELECT "User".*, device.*, photolab.path, session.roomcode FROM "User"
 					LEFT JOIN session ON "User".sessionid = session.sessionid
 					LEFT JOIN experiment ON session.experimentid = experiment.experimentid
 					LEFT JOIN photolab ON experiment.experimentid = photolab.experimentid
@@ -878,10 +882,48 @@ export async function getUserExperimentData(sessionID: string, userID: number, e
 					WHERE "User".userid = $1`,
 					[userID]
 				);
-				return userInfo.rows[0];
 				break;
+			}
+			case "video-lab":{
+
+				userInfo = await dbClient.queryObject(`
+					SELECT "User".*, device.*, videolab.*, session.roomcode FROM "User"
+						LEFT JOIN session ON "User".sessionid = session.sessionid
+						LEFT JOIN experiment ON session.experimentid = experiment.experimentid
+						LEFT JOIN videolab ON experiment.experimentid = videolab.experimentid
+						JOIN device ON "User".device = device.deviceid
+						WHERE "User".userid = $1`, 
+					[userID])
+
+				break;
+			}
+			case "gallery-lab": {
+
+				userInfo = await dbClient.queryObject(
+					`SELECT "User".*, device.*, gallerylab.*, session.roomcode FROM "User"
+					LEFT JOIN session ON "User".sessionid = session.sessionid
+					LEFT JOIN experiment ON session.experimentid = experiment.experimentid
+					LEFT JOIN gallerylab ON experiment.experimentid = gallerylab.experimentid
+					JOIN device ON "User".device = device.deviceid
+					WHERE "User".userid = $1`, 
+					[userID]
+				)
+				break;
+			}
+			case "article-lab": {
+
+				userInfo = await dbClient.queryObject(`SELECT "User".*, device.*, articlelab.*, session.roomcode FROM "User"
+					LEFT JOIN session ON "User".sessionid = session.sessionid
+					LEFT JOIN experiment ON session.experimentid = experiment.experimentid
+					LEFT JOIN articlelab ON experiment.experimentid = articlelab.experimentid
+					JOIN device ON "User".device = device.deviceid
+					WHERE "User".userid = $1`,
+					[userID])
+				break;
+			}
 		}
-		
+
+		return userInfo?.rows[0];
 	}
 	catch(error){
 		console.log("Data is not available", error);
