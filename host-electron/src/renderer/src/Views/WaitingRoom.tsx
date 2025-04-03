@@ -513,8 +513,8 @@ export default function WaitingRoom() {
   
   const handleSubmit =() => {
     console.log('Attempting to start experiment...');
-    const allEmotiBitsConnected = emotiBits.every((user) => user.nickname && user.isConnected);
-    if(!allEmotiBitsConnected){
+    //const allEmotiBitsConnected = emotiBits.every((user) => user.nickname && user.isConnected);
+    if(!allDevicesConnected){
       toast.error("Cannot start experiment. Not all EmotiBits are connected!");
       return;
     }

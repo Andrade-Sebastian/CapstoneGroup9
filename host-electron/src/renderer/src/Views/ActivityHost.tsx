@@ -83,6 +83,8 @@ export default function ActivityHost() {
   const [isPlaying, setIsPlaying] = useState(false);
   const playerRef = useRef(null)
   const [latestSeekTime, setLatestSeekTime] = useState(0);
+  const currentUsers = useSessionStore((state) => state.users);
+
   const handleMask = () => toast.error('No joiner to mask')
   const handleOpenModal = () => setIsModalOpen(true)
   const handleCloseModal = () => setIsModalOpen(false)
@@ -104,6 +106,7 @@ export default function ActivityHost() {
     //insert socket logic to kick user here
     console.log('Kicking user...')
   }
+
   const handleViewUser = (userId, experimentType) => {
     ipc.send("activity:viewUser", sessionId, String(userId), experimentType)
   }
@@ -114,9 +117,6 @@ export default function ActivityHost() {
 
     socket.emit('end-experiment')
     setTimeout(() => {
-      //-----HARDCODED FOR TESTING-------
-      ipc.send("brainflow:destroy");
-      console.log("USERS IN THE SESSION STORE: ", useSessionStore.getState().users);
       navigateTo('/summary')
     }, 2000)
   }
@@ -148,16 +148,6 @@ export default function ActivityHost() {
       return;
     }
   }
-  // useEffect(() => {
-  //   const getSessionID = async () => {
-  //     const response = await axios.get(`http://localhost:3000/joiner/validateRoomCode/${roomCode}`)
-  //     if (response.status === 200) {
-  //       setSessionID(response.data.sessionID)
-  //     }
-  //   }
-
-  //   getSessionID()
-  // }, [])
 
   useEffect(() => {
     if (!useSessionStore.getState().sessionId) return
