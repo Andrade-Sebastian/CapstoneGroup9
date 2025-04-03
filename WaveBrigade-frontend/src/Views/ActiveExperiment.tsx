@@ -308,40 +308,34 @@ export default function ActiveExperiment() {
   })
 
   return (
-    <div className="flex flex-col lg:flex-row h-screen bg-white p-4 space-y-6 lg:space-y-0 lg:space-x-6">
-      {/* picture  */}
+    <div className="flex flex-col lg:flex-row w-full bg-white px-2 py-1 gap-4">
       <Toaster position="top-right" />
-      <div className="flex flex-col w-full lg:w-3/4 space-y-4">
-        <div className="relative w-full bg-white shadow-md rounded-lg p-4 flex justify-center items-center max-h-[300px] overflow-hidden">
-
+      <div className="flex flex-col w-full lg:w-3/4 gap-4 h-[90vh]">
+        <div className="relative w-full bg-white shadow-md flex-grow rounded-lg overflow-hidden pt-[35%]">
+          <div className="absolute top-0 left-0 w-full h-full">
           {experimentType == 1 && isMediaAFile ? (
-            <div>
-              <ReactPlayer ref={playerRef} url={videoPath} playing={isPlaying} controls={true} className="rounded-lg object-contain max-h-[280px] w-auto"/>
-              </div>
+              <ReactPlayer ref={playerRef} url={videoPath} playing={isPlaying} controls={true} className="rounded-lg"/>
           ) : experimentType ==1 && !isMediaAFile ? (
-            <div>
-              <ReactPlayer ref={playerRef} url={`https://www.youtube.com/embed/${videoID}`} playing={isPlaying} controls={false} config={{youtube: { playerVars: { showinfo: 0}}}} className="rounded-lg object-contain max-h-[280px] w-auto"/>
-              </div>
+              <ReactPlayer ref={playerRef} url={`https://www.youtube.com/embed/${videoID}`} playing={isPlaying} controls={false} config={{youtube: { playerVars: { showinfo: 0}}}} width="100%" height="100%" className=" rounded-lg"/>
           ) : experimentType == 2 ? (
-            <img src={photoPath} className="rounded-lg object-contain max-h-[280px] w-auto" alt="Experiment Image" /> 
-            
+            <div className="flex justify-center items-center w-full h-full rounded-lg">
+            <img src={photoPath} className="rounded-lg object-contain max-w-4xl max-h-[55vh]" alt="Experiment Image" /> 
+            </div>
           ): experimentType == 3 ? (
-            <div>
+            <div className="flex flex-col justify-center items-center w-full h-full rounded-lg">
               {galleryPath ? (
+                <div className="flex flex-col items-center">
                 <GalleryViewer imageSrc={galleryPath} caption={selectedCaption} index={currentGalleryPhotoID}/>
+                </div>
 
               ): (
                 <p className="text-xl text-gray-500 font-medium mt-10"> Waiting for host to select a photo...</p>
               )}
               </div>
           ) : experimentType == 4 && isMediaAFile ? (
-            <div>
-              <iframe src={articlePath} width="800px" height="500px" className="w-full h-[400px] rounded-md"></iframe>
-              </div>
+              <iframe src={articlePath} width="800px" height="500px" className="w-full max-w-4xl h-[400px] rounded-md"></iframe>
           ) : experimentType == 4 && !isMediaAFile ?(
-            <div>
-              <iframe src={articleURL} width="800px" height="500px" className="w-full h-[400px] rounded-md"></iframe>
-              </div>
+              <iframe src={articleURL} width="800px" height="500px" className="w-full max-w-4xl h-[400px] rounded-md"></iframe>
           ) :(
             <div>
               <p> Unknown lab. Rejoin</p>
@@ -351,9 +345,10 @@ export default function ActiveExperiment() {
             <div className="absolute top-0 left-0 w-full h-full bg-black opacity-100 z-50 pointer-events-none flex items-center justify-center transition-all duration-300 ease-in-out">
               <p className='text-white font-semibold'>Masked</p> </div>
           )}
+          </div>
         </div>
         {/* Chart stuff*/}
-        <div className="flex-grow bg-gray-200 rounded-md text-gray-500 p-4 overflow-auto">
+        <div className="bg-gray-200 rounded-md text-gray-500 p-4 overflow-auto h-[45vh]">
           <div className="w-full">
             {activeChart === "heartRateChart" ? (
               <div>
@@ -393,7 +388,7 @@ export default function ActiveExperiment() {
           </div>
         </div>
         {/* <Divider className="my-3" /> */}
-        <div className="mt-4 flex justify-between items-center">
+        <div className="mt-2 flex justify-between items-center">
           <p className="font-semibold">
             Nickname: <span className="font-light">{nickname}</span>
           </p>
@@ -441,7 +436,7 @@ export default function ActiveExperiment() {
         </div>
       </div>
       {/* tabs */}
-      <div className="hidden lg:block w-full lg:w-1/4 p-4 bg-white shadow-md rounded-lg overflow-y-auto">
+      <div className="hidden lg:block w-full lg:w-1/4 h-full p-4 bg-white shadow-md rounded-lg overflow-y-auto">
         <div className="flex border-b">
           <button
             className={`rounded-lg flex-1 p-2 text-lg flex items-center justify-center ${

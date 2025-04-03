@@ -35,6 +35,7 @@ export default function ActivityHost() {
     experimentType,
     experimentTypeString,
     toggleUserMask,
+    
     videoLabSource,
     videoID,
     articleURL,
@@ -280,13 +281,13 @@ export default function ActivityHost() {
           <div className="space-y-2">
             <div className="flex items-center space-x-2 text-lg">
               <PiCrownSimpleThin size={24} />
-              <span className="font-semibold text-[#894DD6] "> NICKNAME </span>{' '}
+              <span className="font-semibold text-[#894DD6] "> NICKNAME </span>
               <span>{hostName}</span>
             </div>
             <div className="flex items-center space-x-2 text-lg">
               <HiOutlineSignal size={24} />
               <p className="text-lg">
-                <span className="font-semibold text-[#894DD6]">SOCKET</span> A93KFN2/SJPP2RK401
+                <span className="font-semibold text-[#894DD6]">SOCKET</span> 
               </p>
             </div>
             <div className="flex items-center space-x-2 text-lg">

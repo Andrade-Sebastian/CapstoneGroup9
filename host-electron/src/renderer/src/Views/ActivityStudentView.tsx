@@ -17,6 +17,7 @@ import { session } from 'electron'
 import toast, { Toaster } from "react-hot-toast";
 import ReactPlayer from 'react-player'
 import GalleryComponent from '../components/GalleryComponent.tsx'
+import GalleryViewer from '../components/GalleryViewer.tsx'
 
 export default function ActivityStudentView(): ReactElement {
   const echoProcessAPI = window.api
@@ -48,6 +49,7 @@ export default function ActivityStudentView(): ReactElement {
     hostName,
     users,
     roomCode,
+    setRoomCode,
     experimentTypeString,
     setExperimentTypeString,
     setSessionId,
@@ -57,11 +59,16 @@ export default function ActivityStudentView(): ReactElement {
     addDevice,
     removeDevice,
     videoLabSource,
+    setVideoLabSource,
     videoID,
+    setVideoID,
     articleURL,
+    setArticleURL,
     articleLabSource,
+    setArticleLabSource,
     photoLabImageSource,
     setExperimentId,
+    experimentId,
     setExperimentTitle,
     setExperimentDesc,
     experimentTitle,
@@ -69,6 +76,14 @@ export default function ActivityStudentView(): ReactElement {
     experimentDesc,
     galleryPhotos
   } = useSessionStore()
+  useEffect(() => {
+    const debug = () =>{
+      console.log(`Session Store: Hostname${hostName}, RoomCode${roomCode}, videoLabSource${videoLabSource}, videoID${videoID}, articleURL${articleURL}, articleLabSource${articleLabSource}
+        , photolabImageSource${photoLabImageSource}, experimentId${experimentId}, experimentTitle${experimentTitle}, experimentDesc${experimentDesc}, galleryPhotos${galleryPhotos}, selectedCaption ${selectedCaption}, currentGalleryPhotoID ${currentGalleryPhotoID}
+        `)
+    }
+    debug();
+  },[hostName, roomCode, videoLabSource, videoID, articleURL, articleLabSource, photoLabImageSource, experimentId, experimentTitle, experimentDesc, galleryPhotos, selectedCaption, currentGalleryPhotoID])
 
   const { sessionId, userId, experimentType } = useParams()
   console.log('PARAMS RECIEVED: ', sessionId, userId, experimentType)
@@ -131,45 +146,78 @@ export default function ActivityStudentView(): ReactElement {
   //   };
   // },[])
 
-  const checkVideoMediaType = () => {
-    console.log(
-      'Check Video media is running... HERE ARE THE VALUES videolabsource ',
-      videoLabSource,
-      'hereis videoID',
-      videoID
-    )
-    if (videoLabSource && videoLabSource.trim() !== '') {
-      console.log('Detected video as a file')
-      setIsMediaAFile(true)
-      return
-    }
-    if (videoID && videoID.trim() !== '') {
-      console.log('Detected video as a YouTube link.')
-      setIsMediaAFile(false)
-      return
+  useEffect(() => {
+    const checkVideoMediaType = () =>{
+      console.log("Detecting type of media based on path...   ExperimentPath: ",experimentPath)
+      if(experimentPath){
+        if(experimentPath.length === 11){ //very flimsy way of detecting if the video is a youtube video. All youtube videoIDs have a length of 11 which is why this is done. There must be a better way.....
+          console.log("Detected video as a YouTube link. Path length:", experimentPath.length);
+          setIsMediaAFile(false);
+          return;
+        }
+        else{
+          console.log("Detected video as a file. Path length:", experimentPath.length)
+          setIsMediaAFile(true);
+          return;
+        }
     }
   }
-
-  const checkArticleMediaType = () => {
-    console.log(
-      'Check Article media is running... HERE ARE THE VALUES articlelabsource ',
-      articleLabSource,
-      'hereis videoID',
-      articleURL
-    )
-    if (articleLabSource && articleLabSource.trim() !== '') {
-      console.log('Detected article as a file')
-      setIsMediaAFile(true)
-      return
+    const checkArticleMediaType = () =>{
+      console.log("Detecting type of media based on path...   ExperimentPath: ",experimentPath)
+      if(experimentPath){
+        if(experimentPath.startsWith("https://") || experimentPath.startsWith("http://")){ 
+          console.log("Detected a link", experimentPath);
+          setArticleURL(experimentPath);
+          setIsMediaAFile(false);
+          return;
+        }
+        else{
+          console.log("Detected article as a file.", experimentPath)
+          setIsMediaAFile(true);
+          return;
+        }
     }
-    if (articleURL && articleURL.trim() !== '') {
-      console.log('Detected article as a URL.')
-      setIsMediaAFile(false)
-      return
+    else{
+      console.log("Experiment path is empty", experimentPath)
+      return;
     }
-  }
+    }
+    if (experimentType === "video-lab") {
+      console.log("ExperimentType is:", experimentType)
+      checkVideoMediaType();
+    } 
+    else if (experimentType === "article-lab") {
+      console.log("ExperimentType is:", experimentType)
+      checkArticleMediaType();
+    }
+    else {
+      console.log('Invalid experiment ID')
+    }
+  }, [experimentPath, experimentType, videoPath])
 
-  
+//Gathering data such as RoomCode, user's nickname, filename, and userID
+  useEffect(() => {
+    const getUserData = async () => {
+      try {
+        const response = await axios.get(
+          `http://localhost:3000/host/get-user-experiment/${sessionId}/${userId}/${experimentType}`
+        )
+        console.log('RESPONSE RECIEVED IN ACTIVITYSTUDENTVIEW', response.data)
+        if (response.status === 200) {
+          setCurrentUser(response.data.nickname)
+          setFileName(response.data.path)
+          setCurrentUserId(response.data.userid)
+          setRoomCode(response.data.roomcode)
+        }
+      } catch (error) {
+        console.error('Error retrieving user data', error)
+      }
+    }
+    getUserData()
+  }, [sessionId, experimentType, userId])
+
+
+  //Using roomcode gathered earlier to fetch experimentID
   useEffect(() => {
     const fetchExperimentID = async () => {
       try {
@@ -188,6 +236,7 @@ export default function ActivityStudentView(): ReactElement {
     fetchExperimentID();
   }, [roomCode]);
 
+  //using fetched experimentId to get relevant data
   useEffect(() => {
     const getVideoFileData = async () => {
       try{
@@ -205,6 +254,9 @@ export default function ActivityStudentView(): ReactElement {
           setExperimentTitle(experimentTitle);
           setExperimentDesc(experimentDesc);
           setExperimentPath(path);
+          if(path.length === 11){
+            setVideoID(path)
+          }
         }
       } catch(error){
         toast.error("Failed to receive video data");
@@ -323,35 +375,13 @@ export default function ActivityStudentView(): ReactElement {
     if(experimentType === "photo-lab"){
       getPhotoData();
     }
-    if(experimentType === "gallery-data"){
+    if(experimentType === "gallery-lab"){
       getGalleryData();
     }
-    if(experimentType === "article-data"){
+    if(experimentType === "article-lab"){
       getArticleData();
     }
   }, [experimentID, setExperimentDesc, setExperimentId, setExperimentTitle, setExperimentPath, experimentType]);
-
-  useEffect(() => {
-    const getUserData = async () => {
-      try {
-        const response = await axios.get(
-          `http://localhost:3000/host/get-user-experiment/${sessionId}/${userId}/${experimentType}`
-        )
-        console.log('RESPONSE RECIEVED IN ACTIVITYSTUDENTVIEW', response.data)
-        if (response.status === 200) {
-          setCurrentUser(response.data.nickname)
-          setFileName(response.data.path)
-          setCurrentUserId(response.data.userid)
-          
-
-        }
-      } catch (error) {
-        console.error('Error retrieving user data', error)
-      }
-    }
-
-    getUserData()
-  }, [sessionId, experimentType, userId])
 
   // useEffect(() => {
   //   console.log("Running active experiment");
@@ -471,8 +501,8 @@ export default function ActivityStudentView(): ReactElement {
               images.forEach((image, index) =>{
                 addPhoto({
                   id: index,
-                  src: img.path,
-                  caption:img.caption,
+                  src: image.path,
+                  caption:image.caption,
                   file:null
                 });
               });
@@ -521,6 +551,8 @@ export default function ActivityStudentView(): ReactElement {
         if(response.status === 200){
           console.log("Fetched video path:", response.config.url);
           setVideoPath(response.config.url);
+          setVideoLabSource(videoPath)
+          console.log("In FetchStoredVideo", videoPath, videoLabSource)
           toast.success("Successfully retreived video!")
         }
       }
@@ -643,26 +675,26 @@ export default function ActivityStudentView(): ReactElement {
     return () => clearInterval(interval)
   }, [latestSeekTime])
 
-  useEffect(()=>{
-    //debug
-    console.log("Experiment Type", experimentType, "Photolab:",photoLabImageSource)
-    console.log("Experiment Type", experimentType, "Videolab:",videoID)
-    console.log("Experiment Type", experimentType, "Videolab:",videoLabSource)
-    console.log("Experiment Type", experimentType, "Articlelab:",articleLabSource)
-    console.log("Experiment Type", experimentType, "Articlelab:",articleURL)
-    console.log("Experiment Type", experimentType, "Gallery:", galleryPhotos)
-  },[photoLabImageSource, videoID, videoLabSource, articleURL, articleLabSource, galleryPhotos])
+  // useEffect(()=>{
+  //   //debug
+  //   console.log("Experiment Type", experimentType, "Photolab:",photoLabImageSource)
+  //   console.log("Experiment Type", experimentType, "Videolab:",videoID)
+  //   console.log("Experiment Type", experimentType, "Videolab:",videoLabSource)
+  //   console.log("Experiment Type", experimentType, "Articlelab:",articleLabSource)
+  //   console.log("Experiment Type", experimentType, "Articlelab:",articleURL)
+  //   console.log("Experiment Type", experimentType, "Gallery:", galleryPhotos)
+  // },[photoLabImageSource, videoID, videoLabSource, articleURL, articleLabSource, galleryPhotos])
 
   return (
     <div className="flex flex-col lg:flex-row h-screen w-full bg-white p-6 gap-6">
       {/* picture  */}
-      <div className="flex flex-col w-full lg:w-1/2 bg-white shadow-md rounded-lg p-4">
-        <div className="relative flex justify-center items-center rounded-xl">
+      <div className="flex flex-col w-full lg:w-1/2 bg-white shadow-md rounded-lg p-4 ">
+        <div className="relative flex justify-center items-center sm:mt-35 rounded-xl">
           {experimentType == 'video-lab' && isMediaAFile ? (
             <div>
               <ReactPlayer
                 ref={playerRef}
-                url={videoLabSource}
+                url={videoPath}
                 controls
                 playing={isPlaying}
                 onPlay={() => handlePlayPause(true)}
@@ -703,14 +735,18 @@ export default function ActivityStudentView(): ReactElement {
               alt="Experiment Image"
             ></img>
           ) : experimentType == 'gallery-lab' ? (
-            <div className="w-full mt-8">
-              <h2 className="text-xl font-semibold mb-4 text-center"> Uploaded Gallery</h2>
-              <GalleryComponent images={galleryPhotos} />
-            </div>
+            <div>
+              {galleryPath ? (
+                <GalleryViewer imageSrc={galleryPath} caption={selectedCaption} index={currentGalleryPhotoID}/>
+
+              ): (
+                <p className="text-xl text-gray-500 font-medium mt-10"> Waiting for host to select a photo...</p>
+              )}
+              </div>
           ) : experimentType == 'article-lab' && isMediaAFile ? (
             // Not a huge bug but the source should be the article lab source, it's flip flopped, don't know why
             <div>
-              <iframe src={articleLabSource} width="800px" height="500px"></iframe>
+              <iframe src={articlePath} width="800px" height="500px"></iframe>
             </div>
           ) : experimentType == 'article-lab' && !isMediaAFile ? (
             <div>
