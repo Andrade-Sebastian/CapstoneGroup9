@@ -16,7 +16,8 @@ import { useNavigate } from "react-router-dom";
 import ReactPlayer from 'react-player';
 import GalleryViewer from "../Components/GalleryViewer.tsx";
 import { join } from "node:path";
-
+import ChatBody from "../Components/ChatBody.tsx";
+import ChatFooter from "../Components/ChatFooter.tsx";
 
 export default function ActiveExperiment() {
   const [selectedButton, setSelectedButton] = useState("heartRate");
@@ -494,7 +495,10 @@ export default function ActiveExperiment() {
         )}
         </div>
           ): (
-            <div className="flex flex-col h-[60vh] justify-between bg-white rounded-md shadow-md"> Chat Feature </div>
+            <div className="flex flex-col h-[60vh] justify-between bg-white rounded-md shadow-md">
+              <ChatBody/>
+              <ChatFooter/>
+            </div>
           )}
           </div>
       </div>

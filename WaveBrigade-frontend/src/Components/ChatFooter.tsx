@@ -1,21 +1,21 @@
 import React, { useState } from 'react'
-import socket from '../Socket.js';
-import { useSessionStore } from '../store/useSessionStore.tsx';
+import socket from "../Views/socket.tsx";
+import { useJoinerStore } from '../hooks/stores/useJoinerStore.ts'
 
 export default function ChatFooter() {
   const [message, setMessage] = useState('')
 
   const {
-      hostName,
-    } = useSessionStore()
+      nickname,
+    } = useJoinerStore()
 
   const handleSendMessage = (e) => {
     e.preventDefault()
-    if (message.trim() !== '' && hostName) {
+    if (message.trim() !== '' && nickname) {
       socket.emit("message", {
         text: message,
-        name: hostName,
-        id: `%{socket.id}${Math.random()}`,
+        name: nickname,
+        id: `%{socket.id}${Date.now()}`,
         socketID: socket.id,
       });
       console.log('Sending message:', message)
@@ -25,7 +25,7 @@ export default function ChatFooter() {
     }
   }
   return (
-    <form onSubmit={handleSendMessage} className="flex p-2 border-t bg-[#FEFEFE]" autoComplete='off'>
+    <form onSubmit={handleSendMessage} className="flex p-2 border-t bg-[#FEFEFE]">
       <input
         type="text"
         placeholder="Type your message..."
