@@ -354,7 +354,8 @@ export default function WaitingRoom() {
     const handleCloseModalKick = () => {setIsModalOpenKick(false)};
     
     
-    const handleKickUser = () => {
+    const handleKickUser = async () => {
+      console.log("focused user in handleKickUser():", focusedUser)
       console.log("!!ATTEMPTING TO KICK USER!!")
       if(!focusedUser){
         console.log("No user selected for kicking.")
@@ -362,19 +363,58 @@ export default function WaitingRoom() {
       }
       console.log("User Map at Kick Time:", theUserMap);
       console.log("Focused User at Kick Time:", focusedUser);
-      const nicknameSocketID = theUserMap.get(focusedUser);
-      console.log("Kicking user with socket ID: ", nicknameSocketID);
+      // const nicknameSocketID = theUserMap.get(focusedUser);
+      // console.log("Kicking user with socket ID: ", nicknameSocketID);
       console.log("HERE IS THE USER MAP BEFORE EMIT KICKING", theUserMap);
+      
 
+      let nicknameSocketID = "";
+
+      if (focusedUser.includes(" (Spectator)")){
+        // Remove "(Spectator)" from the string
+        const userFocused = focusedUser.replace(" (Spectator)", "").trim()
+        setFocusedUser(focusedUser.replace(" (Spectator)", "").trim());
+        console.log("in IF")
+        nicknameSocketID = theUserMap.get(userFocused.replace("(Spectator)", "").trim());
+        
+        if(!nicknameSocketID){
+          console.log("Cannot kick SPECTATOR: there is no socket id found.", userFocused)
+          return;
+        }else{
+          console.log("Kicking user with socketID:", nicknameSocketID);
+          
+          console.log("Emitted kick event");
+        }
+        
+        console.log(`<<HOST 389>>trying to kick spectator , sending sessionID ${sessionId} and socketID ${nicknameSocketID}` )
+        axios.post(`http://localhost:3000/joiner/remove-spectator-from-session`,
+          {
+            "sessionID": sessionId,
+            "socketID": nicknameSocketID
+          }
+        )
+        socket.emit("kick", nicknameSocketID);
+      }else{
+        nicknameSocketID = theUserMap.get(focusedUser);
+        if(!nicknameSocketID){
+          console.log("Cannot kick JOINER: there is no socket id found.", focusedUser)
+          return;
+        }else{
+        console.log("Kicking user with socketID:", nicknameSocketID);
+
+        socket.emit("kick", nicknameSocketID);
+      
+        console.log("Emitted kick event");
+      }}
+  
+  
+      console.log("User Map at Kick Time:", theUserMap);
+      console.log("Focused User at Kick Time:", focusedUser);
+  
       if(!nicknameSocketID){
         console.log("Cannot kick user: there is no socket id found.", focusedUser)
         return;
       }
-      console.log("Kicking user with socketID:", nicknameSocketID);
-
-      socket.emit("kick", nicknameSocketID);
-      
-      console.log("Emitted kick event");
     
       setTheUserMap(prevMap => {
         const newMap = new Map(prevMap);
@@ -455,14 +495,20 @@ export default function WaitingRoom() {
         // console.log('Trying to get users from session ' + sessionID);
         const response = await axios.get(`http://localhost:3000/joiner/room-users/${sessionID}`)
         const users = response.data.users //Array of IUser objects
-        console.log("Users", JSON.stringify(users))
+        console.log("(458) Recieved Users", JSON.stringify(users))
+
         
         const nicknames = [] //holds only the nicknames of those IUser Objects
         const frontendSocketIDs = []
         const userMap = new Map();
         // initialize nicknames array
         for (let i = 0; i < users.length; i++) {
-          nicknames.push(users[i].nickname)
+          if (users[i].userrole === "spectator"){
+            nicknames.push(users[i].nickname + " (Spectator)")
+          }else{
+            nicknames.push(users[i].nickname)
+          }
+
           frontendSocketIDs.push(users[i].frontendsocketid)
         }
 
