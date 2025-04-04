@@ -331,10 +331,6 @@ joinerRouter.get("/verify-code/:roomCode", async (req: Request, res: Response) =
             return res.status(200).json({ 
                 sessionID: sessionID
             })
-        }else{
-            return res.status(404).send({
-                sessionID: null
-            })
         }
     } catch (error) {
         return res.status(400).json({ error: error });
