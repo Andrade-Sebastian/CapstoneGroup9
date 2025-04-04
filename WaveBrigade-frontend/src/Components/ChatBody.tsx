@@ -3,7 +3,10 @@ import socket from "../Views/socket.tsx";
 import { useJoinerStore } from '../hooks/stores/useJoinerStore.ts'
 
 export default function ChatBody() {
-  const [messages, setMessages] = useState([]);
+  //const [messages, setMessages] = useState([]);
+  const messages = useJoinerStore((state) => state.messages);
+  const addMessage = useJoinerStore((state) => state.addMessage);
+  //const nickname = useJoinerStore((state) => state.nickname);
   const bottomRef = useRef(null);
     const {
         nickname,
@@ -12,7 +15,7 @@ export default function ChatBody() {
     useEffect(() => {
         const handleMessage = (data) =>{
           console.log("Message receieved", data);
-          setMessages((prevMessages) => [...prevMessages, data]);
+          addMessage(data);
     
         }
         socket.on("message", handleMessage)
@@ -20,7 +23,7 @@ export default function ChatBody() {
           socket.off("message", handleMessage);
         }
       }, [])
-      
+
     useEffect(() =>{
         bottomRef.current?.scrollIntoView({ behavior: 'smooth'});
       }, [messages]);
