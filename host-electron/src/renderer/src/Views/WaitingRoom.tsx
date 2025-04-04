@@ -11,7 +11,7 @@ import { Divider } from '@heroui/divider'
 import WaitingRoomCardComponent from '../components/WaitingRoomCardComponent'
 import { IUser } from '@renderer/hooks/useSessionState'
 import EmotiBitList from '../components/EmotiBitList'
-import ModalComponent from '../components/ModalComponent.js'
+import ModalComponent from '../components/ModalComponent.tsx'
 import { CiCircleCheck } from 'react-icons/ci'
 import { count, error } from 'console'
 import { useNavigate } from "react-router-dom";
