@@ -18,6 +18,7 @@ export default function JoinPage() {
   const navigateTo = useNavigate();
   const [sessionID, setSessionID] = useState("");
   const [isJoiningAsSpectator, setisJoiningAsSpectator] = useState(false);
+
   const {
     userRole,
     sessionId,
@@ -76,8 +77,10 @@ export default function JoinPage() {
       const isValidRoomCode = await validateRoomCode(StudentInputRoomCode);
       const canSpectate = await checkSpectatorsAllowed(useJoinerStore.getState().sessionId);
 
+      console.log("can spectate?", canSpectate)
       if (isValidRoomCode && isValidName) {
         if(isJoiningAsSpectator && !canSpectate){
+          console.log("Joining as spectator but spectators are not allowed")
           toast.error("Cannot join as a spectator. Try again.");
           setisJoiningAsSpectator(false);
         }
@@ -175,8 +178,8 @@ export default function JoinPage() {
           `http://localhost:3000/joiner/session/allows-spectators/${sessionId}`
       );
       if(response.status === 200){ //returns true or false
-        console.log("Spectators Allowed: ", response.data.isspectatorsallowed);
-          return response.data.isspectatorsallowed;
+        console.log("Spectators Allowed: ", response.data.allowsSpectators);
+          return response.data.allowsSpectators;
         }
       }
       catch(error){
@@ -236,8 +239,13 @@ export default function JoinPage() {
                   className="h-4 w-4 accent-[#7F56D9]"
                   checked={isJoiningAsSpectator}
                   onChange={() => {
-                    setisJoiningAsSpectator(!isJoiningAsSpectator);
-                    setUserRole(isJoiningAsSpectator ? "spectator" : "student");
+                    //fixes issue where the checkbox shows the opposite boolean value when clicked on
+                    setisJoiningAsSpectator((previousValue) => {
+                      const newValue = !previousValue;
+                      setUserRole(newValue ? "spectator" : "student");
+                      console.log("checked ?", newValue);
+                      return newValue;
+                    });
                   }}
                 />
                 <label

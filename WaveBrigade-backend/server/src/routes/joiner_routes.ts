@@ -1,10 +1,9 @@
 import express, { Request, Response } from "express";
 import {getSessionState} from "../controllers/session_controller.ts";
-import SessionManager from "../sessions_singleton.ts";
 import { addSocketToSession } from "../sessionMappings.ts";
-import {addUserToSession, getUsersFromSession, validateRoomCode, removeUserFromSession, validDeviceSerial, validatePassword, getPhotoLabInfo, getVideoLabInfo, getGalleryLabInfo, getArticleLabInfo, joinSessionAsSpectator, checkSpectators} from "../controllers/database.ts";
+import {addUserToSession, getUsersFromSession, validateRoomCode, removeUserFromSession, validDeviceSerial, validatePassword, getPhotoLabInfo, getVideoLabInfo, joinSessionAsSpectator, removeSpectatorFromSession} from "../controllers/database.ts";
 import {Filter} from "npm:bad-words";
-import * as bcrypt from "https://deno.land/x/bcrypt/mod.ts";
+import dbClient from "../controllers/dbClient.ts";
 
 const app = express();
 const joinerRouter = express.Router();
@@ -42,13 +41,25 @@ joinerRouter.get("/session/allows-spectators/:sessionId", async (req: Request, r
     const sessionID = req.params.sessionId;
 
     try{
-        const allowSpectators = await checkSpectators(sessionID);
-        return res.status(200).send(allowSpectators);
+
+        const query = await dbClient.queryObject(`SELECT isspectatorsallowed FROM SESSION WHERE sessionid = ${sessionID}`);
+
+        if(query.rows.length === 0){
+            return res.status(400).send({
+                "message": "Session not found for sessionID: " + sessionID
+            })
+        }
 
     }catch(error){
         console.log(error);
         return res.status(500).send(error);
     }
+    finally{    
+    }
+    
+    return res.status(200).send({
+        "allowsSpectators": true
+    });
 })
 
 
@@ -147,6 +158,7 @@ joinerRouter.get("/check-name/:nickName", async (req: Request, res: Response) =>
         return res.status(500).json({success: false, message: "Internal server error"});
     }
 })
+
 joinerRouter.get("/validateRoomCode/:roomCode", async (req: Request, res: Response) => {
     const roomCode = req.params.roomCode;
     console.log("Roomcode: ", roomCode);
@@ -169,33 +181,31 @@ joinerRouter.get("/validateRoomCode/:roomCode", async (req: Request, res: Respon
     }
 
     
+
+    
 })
 
-joinerRouter.post("/leave-room", (req: Request, res: Response) => {
+
+joinerRouter.post("/leave-room", async (req: Request, res: Response) => {
+    console.log("In leave-room");
+    
     const {
         sessionID,
         socketID
     } = req.body;
     console.log("In /leave-room, recieved", req.body)
     
-    try {
-        const users = removeUserFromSession(sessionID, socketID);
 
-        //Free up EmotiBit if possible (do last)
+    try {
+        const users = await removeUserFromSession(sessionID, socketID);
+
         return res.status(200).send({
-            "message": "in /remove-user",
+            "message": "in /leave-room",
             "sessionID": sessionID,
-            "socketID": socketID
+            "socketID": socketID,
         });
     } catch (error) {
-        if (error instanceof Error) {
-            if (error.name === "SESSION_NOT_FOUND") {
-                return res.status(400).send({
-                    error: error.name,
-                    message: error.message
-                });
-            }
-        }
+        
 
         // Fallback error response
         return res.status(500).send({
@@ -203,11 +213,10 @@ joinerRouter.post("/leave-room", (req: Request, res: Response) => {
             message: "An unexpected error occurred."
         });
     }
-
-})
+});
 
 //stored procedure
-joinerRouter.post("/verify-serial", async (req: Request, res: Response) => {
+joinerRouter.post("/verify-serial", async(req: Request, res: Response) => {
     console.log("Request received at /verify-serial:", req.body);
     const {nickName, roomCode, serialCode } = req.body;
 
@@ -231,15 +240,7 @@ joinerRouter.post("/verify-serial", async (req: Request, res: Response) => {
 
 
 
-import { Client } from "https://deno.land/x/postgres@v0.17.0/mod.ts";
-import { join } from "node:path";
-export const dbClient = new Client({
-    user: "postgres",
-    database: "WB_Database",
-    password: "postgres",
-    hostname: "wb-backend-database",
-    port: 5432,
-});
+
 
 //change to function
 joinerRouter.get("/session/getInfo/:roomCode", async (req: Request, res: Response) => {
@@ -248,7 +249,6 @@ joinerRouter.get("/session/getInfo/:roomCode", async (req: Request, res: Respons
     const roomCode = req.params.roomCode;
     
     try{
-        await dbClient.connect()
         
         const query = await dbClient.queryObject(`SELECT 
             sessionid, 
@@ -279,10 +279,6 @@ joinerRouter.get("/session/getInfo/:roomCode", async (req: Request, res: Respons
             console.log(error);
             return res.status(500).send(error);
         }
-        finally 
-        {
-            await dbClient.end();
-        }
         
     })
     
@@ -294,21 +290,6 @@ joinerRouter.get("/getPhoto/:experimentID", async (req: Request, res: Response) 
     try{
         const photoInfo = await getPhotoLabInfo(experimentID);
         return res.status(200).send(photoInfo);
-        
-    }
-    catch(error){
-        console.log(error);
-        return res.status(500).send(error);
-    }
-})
-joinerRouter.get("/getGallery/:experimentID", async (req: Request, res: Response) => {
-    console.log("In joiner/getGallery/:experimentID", req.body);
-    
-    const experimentID = parseInt(req.params.experimentID);
-    
-    try{
-        const galleryInfo = await getGalleryLabInfo(experimentID);
-        return res.status(200).send(galleryInfo);
         
     }
     catch(error){
@@ -333,24 +314,10 @@ joinerRouter.get("/getVideoFile/:experimentID", async (req: Request, res: Respon
     }
 })
 
-joinerRouter.get("/getArticleFile/:experimentID", async (req: Request, res: Response) => {
-    console.log("In joiner/getArticleFile/:experimentID", req.body);
-    
-    const experimentID = req.params.experimentID;
-    
-    try{
-        const articleFileInfo = await getArticleLabInfo(experimentID);
-        return res.status(200).send(articleFileInfo);
-        
-    }
-    catch(error){
-        console.log(error);
-        return res.status(500).send(error);
-    }
-})
-
 joinerRouter.get("/verify-code/:roomCode", async (req: Request, res: Response) => {
+
     const roomCode  = req.params.roomCode;
+   
     console.log("Room Code: ", roomCode);
     
     
@@ -360,14 +327,20 @@ joinerRouter.get("/verify-code/:roomCode", async (req: Request, res: Response) =
             sessionID
         } = await validateRoomCode(roomCode);
         
-        if (isValidRoomCode) {
+        if (isValidRoomCode === true) {
             return res.status(200).json({ 
                 sessionID: sessionID
+            })
+        }else{
+            return res.status(404).send({
+                sessionID: null
             })
         }
     } catch (error) {
         return res.status(400).json({ error: error });
     }
+
+   
 });
 
 joinerRouter.post("/validatePassword", async (req: Request, res: Response) => {
@@ -375,9 +348,8 @@ joinerRouter.post("/validatePassword", async (req: Request, res: Response) => {
     const {sessionID, password} = req.body;
     
     try{
-        const hashedPass = await validatePassword(sessionID);
-        const isValidPass = await bcrypt.compare(password, hashedPass.password)
-        if(isValidPass){
+        const isValidPassword = await validatePassword(sessionID, password);
+        if(isValidPassword){
             return res.status(200).json({success: true})
         }
         else{
@@ -391,6 +363,7 @@ joinerRouter.post("/validatePassword", async (req: Request, res: Response) => {
 
 
 joinerRouter.post("/join-as-spectator", async (req: Request, res: Response) => {
+    console.log("I am in /join-as-spectator")
     const {
         socketID,
         nickname,
@@ -403,12 +376,12 @@ joinerRouter.post("/join-as-spectator", async (req: Request, res: Response) => {
         const {
             isValidRoomCode,
             sessionID
-        } = await validateRoomCode(roomCode);
+        } = await validateRoomCode(roomCode); // inspected - keep
         
         
         if(isValidRoomCode){
 
-            try{
+            try{ //change might be here 
                 spectatorInfo = await joinSessionAsSpectator(socketID, nickname, roomCode);
 
             }catch(error){
@@ -448,7 +421,29 @@ joinerRouter.get("/debug", (req: Request, res: Response) => {
 })
 
 
+joinerRouter.post("/remove-spectator-from-session", async(req: Request, res: Response) => {
+    const {
+        sessionID,
+        socketID
+    } = req.body;
 
+    
+    const wasRemoved: boolean = await removeSpectatorFromSession(sessionID, socketID);
+    
+    if(wasRemoved){
+        res.status(200).send({
+            "message": "In joiner/remove-spectator-from-session",
+            "recieved": req.body,
+            "Success": true
+        })
+    }
+    else{
+        res.status(404).send({
+            "message": `User with socketID ${socketID} was not found in session ${sessionID}`
+        })
+    }
+
+})
 
 
 export default joinerRouter;

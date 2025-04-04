@@ -52,6 +52,7 @@ import path from "node:path";
 import fs from "node:fs";
 import { fileURLToPath } from "node:url";
 import { off } from "node:process";
+import dbClient from "./controllers/dbClient.ts";
 
 const app = express();
 
@@ -399,3 +400,5 @@ server.listen(PORT, HOST, () => {
     `(main.ts): Express & SocketIO Server running at http://localhost:${PORT}`
   );
 });
+
+dbClient.end()

@@ -113,6 +113,9 @@ export default function WaitingRoom() {
   },[experimentType])
 
   useEffect(() => {
+    socket.on("kick", kickUser);
+    console.log("Listening for 'kick event");
+    
     function kickUser()
     {
       //Global store that keeps track of whether the user has been previously kicked or not
@@ -121,10 +124,27 @@ export default function WaitingRoom() {
       //removes user from database
       
 
-      //sessionid is empty when making this request. Thats causing the bug
       console.log("Kicking user from database in sessionID: ", sessionId);
       //is sessionID the global one? or a useState?
 
+      if (userRole === "spectator"){
+        console.log(`removing spectator from session ${sessionId} with socketID ${socketId}`)
+        axios.post("http://localhost:3000/joiner/remove-spectator-from-session", 
+          {
+            sessionID: sessionId,
+            socketID: socketId
+          }
+        ).then(() => {  
+          console.log("Successfully removed from database");
+          navigateTo("/");})
+        .catch(error =>{
+        console.log("Error removing user from database", error)
+      })
+
+        return () => {
+          socket.off("kick", kickUser);
+        }
+      }
 
 
       axios.post('http://localhost:3000/joiner/leave-room', {
@@ -139,8 +159,7 @@ export default function WaitingRoom() {
         console.log("Error removing user from database", error)
       })
     }
-    socket.on("kick", kickUser);
-    console.log("Listening for 'kick event");
+    
     return () => {
       socket.off("kick", kickUser);
   }}, []);
@@ -168,11 +187,12 @@ export default function WaitingRoom() {
 
   useEffect(() => {
     const getSessionID = async () => {
+      console.log("verify-code, room code: ", roomCode)
       const response = await axios
         .get(`http://localhost:3000/joiner/verify-code/${roomCode}`)
         .then((response) => {
           setSessionID(response.data.sessionID);
-          setSessionId(sessionID)
+          setSessionId(response.data.sessionID)
         });
     }; 
 
@@ -182,26 +202,35 @@ export default function WaitingRoom() {
     getSessionID();
   }, []);
 
+
+
   useEffect(() => {
     if (!sessionID) return;
 
     const fetchUsers = async () => {
       try {
-        console.log("Trying to get users from session " + sessionID);
-        console.log("Socket ID: ", socketId);
+        console.log("Trying to get users from session " + sessionId, "type | ", typeof(sessionId));
+        console.log("Socket ID when getting users: ", socketId);
         const response = await axios.get(
-          `http://localhost:3000/joiner/room-users/${sessionID}`
+          `http://localhost:3000/joiner/room-users/${sessionId}`
         );
+        console.log("got ", response.data.users)
         const users = response.data.users; //Array of IUser objects
 
         const nicknames = []; //holds only the nicknames of those IUser Objects
 
         // initialize nicknames array
         for (let i = 0; i < users.length; i++) {
-          nicknames.push(users[i].nickname);
+          if (userRole === "spectator"){
+            nicknames.push(users[i].nickname + " (Spectator)");
+
+          }else{
+            nicknames.push(users[i].nickname)
+          }
+          console.log(nicknames.length)
+          setNickNames(nicknames);
         }
 
-        setNickNames(nicknames);
       } catch (error) {
         console.error("Error fetching users:", error);
       }
