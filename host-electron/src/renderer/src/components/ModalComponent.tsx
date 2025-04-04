@@ -32,10 +32,10 @@ export default function ModalComponent(props: IModalComponent, photoLabData: pho
   if(!props.isOpen) return null; //if modal is closed, don't open
   return (
     //w-lvw h-svh
-    <div className="flex z-[1000] fixed inset-0 bg-black/50" 
-         onClick={props.onCancel} //so if you click outside of the modal, it closes
+    <div className="fixed inset-0 flex z-[1000] items-center  justify-center bg-black/50" 
+        //  onClick={props.onCancel} //so if you click outside of the modal, it closes
     >
-      <div className="flex flex-col bg-white w-[400px] p-6 gap-4 mx-auto my-auto border drop-shadow rounded-md "
+      <div className="flex flex-col bg-white w-[400px] max-h-[90vh]  overflow-y-auto p-6 gap-4 mx-auto my-auto border drop-shadow rounded-md "
            onClick={handleModalClick} //doesn't close when you click inside of the modal
       >
         <div>

@@ -16,10 +16,12 @@ import { useNavigate } from "react-router-dom";
 import ReactPlayer from 'react-player';
 import GalleryViewer from "../Components/GalleryViewer.tsx";
 import { join } from "node:path";
-
+import ChatBody from "../Components/ChatBody.tsx";
+import ChatFooter from "../Components/ChatFooter.tsx";
 
 export default function ActiveExperiment() {
   const [selectedButton, setSelectedButton] = useState("heartRate");
+  const [isMasked, setIsMasked] = useState(false);
   const [activeTab, setActiveTab] = useState("images");
   const [activeChart, setActiveChart] = useState("heartRateChart");
   const [recievedData, setRecievedData] = useState<number[]>([]);
@@ -291,48 +293,63 @@ export default function ActiveExperiment() {
     }
   },[])
 
+  useEffect(() => {
+    socket.on("toggle-mask", ({userId, isMasked}) =>{
+      console.log("Received toggle mask event. Trying to toggle mask.")
+      console.log(`UserID:${userId} and JoinerID:${joinerId}`);
+      if(String(userId) === String(joinerId)){
+        setIsMasked(prev => !prev);
+        console.log("Is this user masked:", isMasked);
+      }
+    });
+    // setIsMasked(true);
+    return() =>{
+      socket.off("toggle-mask")
+    }
+  })
+
   return (
-    <div className="flex h-screen bg-white p-4">
-      {/* picture  */}
+    <div className="flex flex-col lg:flex-row w-full bg-white px-2 py-1 gap-4">
       <Toaster position="top-right" />
-      <div className="flex flex-col items-center w-3/4 p-auto bg-white shadow-md rounded-lg">
-        <div className="flex justify-center w-full">
+      <div className="flex flex-col w-full lg:w-3/4 gap-4 h-[90vh]">
+        <div className="relative w-full bg-white shadow-md flex-grow rounded-lg overflow-hidden pt-[35%]">
+          <div className="absolute top-0 left-0 w-full h-full">
           {experimentType == 1 && isMediaAFile ? (
-            <div>
-              <ReactPlayer ref={playerRef} url={videoPath} playing={isPlaying} controls={true}/>
-              </div>
+              <ReactPlayer ref={playerRef} url={videoPath} playing={isPlaying} controls={true} className="rounded-lg"/>
           ) : experimentType ==1 && !isMediaAFile ? (
-            <div>
-              <ReactPlayer ref={playerRef} url={`https://www.youtube.com/embed/${videoID}`} playing={isPlaying} controls={false} config={{youtube: { playerVars: { showinfo: 0}}}}/>
-              </div>
+              <ReactPlayer ref={playerRef} url={`https://www.youtube.com/embed/${videoID}`} playing={isPlaying} controls={false} config={{youtube: { playerVars: { showinfo: 0}}}} width="100%" height="100%" className=" rounded-lg"/>
           ) : experimentType == 2 ? (
-            <img src={photoPath} className="rounded-lg w-full max-w-lg h-auto" alt="Experiment Image" /> 
-            
+            <div className="flex justify-center items-center w-full h-full rounded-lg">
+            <img src={photoPath} className="rounded-lg object-contain max-w-4xl max-h-[55vh]" alt="Experiment Image" /> 
+            </div>
           ): experimentType == 3 ? (
-            <div>
+            <div className="flex flex-col justify-center items-center w-full h-full rounded-lg">
               {galleryPath ? (
+                <div className="flex flex-col items-center">
                 <GalleryViewer imageSrc={galleryPath} caption={selectedCaption} index={currentGalleryPhotoID}/>
+                </div>
 
               ): (
                 <p className="text-xl text-gray-500 font-medium mt-10"> Waiting for host to select a photo...</p>
               )}
               </div>
           ) : experimentType == 4 && isMediaAFile ? (
-            <div>
-              <iframe src={articlePath} width="800px" height="500px"></iframe>
-              </div>
+              <iframe src={articlePath} width="800px" height="500px" className="w-full max-w-4xl h-[400px] rounded-md"></iframe>
           ) : experimentType == 4 && !isMediaAFile ?(
-            <div>
-              <iframe src={articleURL} width="800px" height="500px"></iframe>
-              </div>
+              <iframe src={articleURL} width="800px" height="500px" className="w-full max-w-4xl h-[400px] rounded-md"></iframe>
           ) :(
             <div>
               <p> Unknown lab. Rejoin</p>
             </div>
           )}
+          {isMasked && (
+            <div className="absolute top-0 left-0 w-full h-full bg-black opacity-100 z-50 pointer-events-none flex items-center justify-center transition-all duration-300 ease-in-out">
+              <p className='text-white font-semibold'>Masked</p> </div>
+          )}
+          </div>
         </div>
         {/* Chart stuff*/}
-        <div className="w-full mt-4 bg-gray-200 h-auto rounded-md flex flex-col items-center justify-center text-gray-500 p-4">
+        <div className="bg-gray-200 rounded-md text-gray-500 p-4 overflow-auto h-[45vh]">
           <div className="w-full">
             {activeChart === "heartRateChart" ? (
               <div>
@@ -371,8 +388,8 @@ export default function ActiveExperiment() {
             )}
           </div>
         </div>
-        <Divider className="my-3" />
-        <div className="mt-4 flex justify-between w-full items-center">
+        {/* <Divider className="my-3" /> */}
+        <div className="mt-2 flex justify-between items-center">
           <p className="font-semibold">
             Nickname: <span className="font-light">{nickname}</span>
           </p>
@@ -420,7 +437,7 @@ export default function ActiveExperiment() {
         </div>
       </div>
       {/* tabs */}
-      <div className="w-1/4 p-4 bg-white shadow-md rounded-lg overflow-y-auto">
+      <div className="hidden lg:block w-full lg:w-1/4 h-full p-4 bg-white shadow-md rounded-lg overflow-y-auto">
         <div className="flex border-b">
           <button
             className={`rounded-lg flex-1 p-2 text-lg flex items-center justify-center ${
@@ -428,7 +445,7 @@ export default function ActiveExperiment() {
             }`}
             onClick={() => setActiveTab("images")}
           >
-            <LuSquareStack className="mr-2" /> Images
+            <LuSquareStack className="mr-2" /> Media
           </button>
           <button
             className={`rounded-lg flex-1 p-2 text-lg flex items-center justify-center ${
@@ -473,7 +490,10 @@ export default function ActiveExperiment() {
         )}
         </div>
           ): (
-            <div className="p-4 text-gray-500"> Chat Feature </div>
+            <div className="flex flex-col h-[60vh] justify-between bg-white rounded-md shadow-md">
+              <ChatBody/>
+              <ChatFooter/>
+            </div>
           )}
           </div>
       </div>
