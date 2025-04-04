@@ -245,6 +245,7 @@ export async function validateRoomCode(roomCode:string): Promise<{isValidRoomCod
 {
 
 	let isValidRoomCode = false;
+	let sessionID = null;
 
 	try{
 		const query = await dbClient.queryObject(`SELECT 
@@ -255,7 +256,7 @@ export async function validateRoomCode(roomCode:string): Promise<{isValidRoomCod
 
 		if (query.rows.length > 0){//result is valid
 			console.log("(database.ts): Validated room code")
-			const sessionID = query.rows[0].sessionid;
+			sessionID = query.rows[0].sessionid;
 			isValidRoomCode = true;
 
 			const roomCodeValidationInfo = {
@@ -263,17 +264,18 @@ export async function validateRoomCode(roomCode:string): Promise<{isValidRoomCod
 				sessionID: sessionID
 			}
 			console.log("roomCodeValidationInfo: ", roomCodeValidationInfo)	
-			return {
-				isValidRoomCode: isValidRoomCode,
-				sessionID: sessionID
-			};
+			// return {
+			// 	isValidRoomCode: isValidRoomCode,
+			// 	sessionID: sessionID
+			// };
 		}
 		else{
 			console.log("(database.ts): Invalid room code");
-			return {
-				isValidRoomCode: isValidRoomCode,
-				sessionID: null
-			}
+		}
+		
+		return {
+			isValidRoomCode: isValidRoomCode,
+			sessionID: sessionID
 		}
 		
 	}

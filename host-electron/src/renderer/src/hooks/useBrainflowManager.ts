@@ -1,6 +1,6 @@
 
 import { session } from "electron"
-import useSessionStore, { IAppState, IUser } from "./useSessionState.tsx"
+import { IAppState, IUser } from "./useSessionState.tsx"
 import { useParams } from "react-router-dom"
 import { useState, useEffect } from "react"
 import { echoProcessAPI } from '../../../preload/index.ts'
@@ -11,10 +11,11 @@ import axios from "axios";
 export default function useBrainflowManager()
 {
     const [isBrainFlowValid, setIsBrainFlowValid] = useState(false);
-    const {users, sessionId} = useSessionStore();
     const ipc = window.api
     console.log("LOOK HERE" , ipc)
     const sessionID = useSessionStore((state: IAppState) => state.sessionID)
+    const users = useSessionStore((state) => state.users);
+    const sessionId = useSessionStore((state) => state.sessionID);
 
     const handleUserLeaveSession = (userId: string) => {
         console.log(`User ${userId} is leaving the session, destroying process...`);
@@ -22,11 +23,12 @@ export default function useBrainflowManager()
     };
     const handleHostEndSession = () => {
         console.log(`Host is ending session ${sessionId}, destroying user processes...`);
-        for(let i = 0; i < users.length; i++){
-            ipc.send('brainflow:destroy-user', users.userId);
-            
-        }
-        ipc.send('brainflow:destroy', sessionId)
+        users.forEach((user) => {
+            if(user.userrole === "joiner"){
+                ipc.send('brainflow:destroy-user', user.userid);
+            }
+        })
+        ipc.send('brainflow:destroy', sessionId);
     };
 
 

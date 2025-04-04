@@ -141,7 +141,7 @@ function verifyEmotiBitUsage(ipAddress: string): IActivityInstance | undefined {
 }
  
 
-function processDestroyer(event, userId: string): void{
+function processDestroyer(event, userId: number): void{
   //const process = echoServers[userId]
   const activitySingleton = ActivitySingleton.getInstance()
   const processEntry = activitySingleton.activityInstances[userId];
@@ -241,9 +241,14 @@ ipcMain.on(
     })
   }
 )
-ipcMain.on('echo-server:destroy-user', processDestroyer);
-ipcMain.on('echo-server:status', processStatus);
+
+function destroyAllProcesses(event){
+  console.log("Brainflow proccesses being destroyed. Good day.");
+}
+ipcMain.on('brainflow:destroy-user', processDestroyer);
+ipcMain.on('brainflow:status', processStatus);
 ipcMain.on('activity:viewUser', handleViewUser);
+ipcMain.on('brainflow:destroy', destroyAllProcesses)
 
 ipcMain.on('session:send-to-window', (event) => {
   const sessionData = useSessionStore.getState();

@@ -87,6 +87,7 @@ export default function ActivityHost() {
   )
   const [isPlaying, setIsPlaying] = useState(false)
   const playerRef = useRef(null)
+
   const [latestSeekTime, setLatestSeekTime] = useState(0)
   const handleMaskAll = () => {
     //Mask all button
@@ -115,6 +116,7 @@ export default function ActivityHost() {
     //insert socket logic to kick user here
     console.log('Kicking user...')
   }
+
   const handleViewUser = (userId, experimentType) => {
     ipc.send('activity:viewUser', sessionId, String(userId), experimentType)
   }
@@ -125,7 +127,6 @@ export default function ActivityHost() {
 
     socket.emit('end-experiment')
     setTimeout(() => {
-      //-----HARDCODED FOR TESTING-------
       navigateTo('/summary')
     }, 2000)
   }
@@ -167,16 +168,6 @@ export default function ActivityHost() {
       return
     }
   }
-  // useEffect(() => {
-  //   const getSessionID = async () => {
-  //     const response = await axios.get(`http://localhost:3000/joiner/validateRoomCode/${roomCode}`)
-  //     if (response.status === 200) {
-  //       setSessionID(response.data.sessionID)
-  //     }
-  //   }
-
-  //   getSessionID()
-  // }, [])
 
   useEffect(() => {
     if (!useSessionStore.getState().sessionId) return

@@ -77,45 +77,42 @@ export default function JoinPage() {
       const isValidRoomCode = await validateRoomCode(StudentInputRoomCode);
       const canSpectate = await checkSpectatorsAllowed(useJoinerStore.getState().sessionId);
 
-      console.log("can spectate?", canSpectate)
-      if (isValidRoomCode && isValidName) {
-        if(isJoiningAsSpectator && !canSpectate){
-          console.log("Joining as spectator but spectators are not allowed")
-          toast.error("Cannot join as a spectator. Try again.");
-          setisJoiningAsSpectator(false);
-        }
-        else{
-          if (isJoiningAsSpectator && canSpectate) {
-            toast.success("Room code valid. Password is needed...");
-            //Set global store 'userRole' to 'spectator'
-            setUserRole("spectator");
-            console.log("global user role: ", userRole);
-            
-          } 
-          else {
-            //when they input the password, navigate to the waiting room
-            console.log("joiner");
-            setUserRole("student");
-            toast.success("Room code valid. Password is needed...");
-          }
-          //navigate them to the password page
-          setTimeout(() => {
-            navigateTo("/enter-password");
-          }, 2000);
-        }
-      } else if (isValidRoomCode && !isValidName) {
-        toast.error(
-          "Nickname not acceptable. Please refrain from profane language!"
-        );
-      } else {
-        toast.error(
-          "Connection failed. Looks like we couldn't get you connected. Please check your room code and try again."
-        );
+      if(!isValidName){
+        toast.error("Nickname not acceptable. Please refrain from profane language!");
+        return;
       }
+
+      if(!isValidRoomCode){
+        toast.error("Connection failed. Looks like we couldn't get you connected. Please check your room code and try again.");
+        return;
+      }
+
+      if(isJoiningAsSpectator && !canSpectate) {
+        toast.error("Cannot join as a spectator. Try again.");
+        setisJoiningAsSpectator(false);
+        return;
+      }
+
+      if(isJoiningAsSpectator && canSpectate){
+        //Set global store 'userRole' to 'spectator'
+        setUserRole("spectator");
+        console.log("global user role: ", userRole);
+      }
+      else{
+        //when they input the password, navigate to the waiting room
+        console.log("joiner");
+        setUserRole("student");
+        
+      }
+      toast.success("Room code valid. Password is needed...");
+      setTimeout(() => {
+            navigateTo("/enter-password");
+      }, 2000);
+
     } catch (error) {
       console.error("Error verifying code:", error);
       toast.error(
-        "Connection failed. Looks like we couldn't get you connected. Please check your room code and try again."
+        "Connection failed. Looks like we couldn't get you connected. Please try again."
       );
     }
   };
@@ -157,16 +154,19 @@ export default function JoinPage() {
         setSessionId(response.data.sessionID); // Store sessionID when room code is valid
         setRoomCode(StudentInputRoomCode);
         setNickname(nickName);
-        //launchProcess();
         console.log("Response from validate room code", response.data);
         return true;
       }
-      toast.error("Could not validate code due to an API error...");
-      return false;
     } catch (error) {
-      console.error("Could not validate room code due to an API Error", error);
-      toast.error("Could not validate code due to an API error...");
-      return false;
+      if(error.status === 400){
+        console.log("Room code is invalid");
+        return false;
+      }
+      else{
+        console.error("Could not validate room code due to an API Error", error);
+        toast.error("Could not validate code due to an API error...");
+        return false;
+      }
     }
   };
 

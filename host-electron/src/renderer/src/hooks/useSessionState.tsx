@@ -3,7 +3,7 @@ import {create} from "zustand";
 
 export interface IUser {
     userId: string; //serial
-    socketId: string; //Frontend socket ID 
+    socketId: string | null; //Frontend socket ID 
     nickname: string | null;
     associatedDevice: IDevice | null;
 }
@@ -11,7 +11,8 @@ export interface IUser {
 export interface IDevice {
     serialNumber: string;
     ipAddress: string;
-    socketID: string;
+    socketID: string | null;
+    isConnected: boolean;
 }
 
 export interface IExperiment {
