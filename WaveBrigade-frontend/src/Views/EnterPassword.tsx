@@ -19,7 +19,7 @@ export default function EnterFunction() {
     const navigateTo = useNavigate();
     const [users, setUsers] = useState<string[]>([]) //list of users to send to waiting room
     const [socketID, setSocketID] = useState("");
-    const { roomCode, sessionId, socketId} = useJoinerStore()
+    const { roomCode, sessionId, socketId, nickname} = useJoinerStore()
     const [ password, setPassword]  = useState("");
     const [type, setType] = useState('password')
     const [icon, setIcon] = useState(eyeOff)
@@ -54,8 +54,14 @@ export default function EnterFunction() {
             console.log("User role: ", userRole)
             if (userRole === "spectator") {
 
-              toast.success("Joining session...");
+              toast.success("Joining session as a spectator...");
               console.log("Joining as spectator...");
+
+              axios.post("http://localhost:3000/joiner/join-as-spectator", {
+                socketID: socketId,
+                nickname: nickname,
+                roomCode: roomCode
+              })
 
               navigateTo('/waiting-room')
               
