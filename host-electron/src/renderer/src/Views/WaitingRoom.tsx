@@ -634,8 +634,8 @@ export default function WaitingRoom() {
         modalTitle="Connect Emotibits"
         button="Connect Emotibits"
         button2="Begin"
-        isButtonDisabled={isBeginDisabled}
-        isButton1Disabled={isConnectEmotibitDisabled}
+        // isButtonDisabled={isBeginDisabled}
+        // isButton1Disabled={isConnectEmotibitDisabled}
       >
         <div className="mb-6">
           <h1 className="text-md text-gray-700 mb-2">
