@@ -78,6 +78,7 @@ export default function JoinPage() {
       const canSpectate = await checkSpectatorsAllowed(useJoinerStore.getState().sessionId);
 
       if(!isValidName){
+        console.log("Inside if statement");
         toast.error("Nickname not acceptable. Please refrain from profane language!");
         return;
       }

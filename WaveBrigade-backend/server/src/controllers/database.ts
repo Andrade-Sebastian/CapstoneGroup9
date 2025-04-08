@@ -259,11 +259,11 @@ export async function validateRoomCode(roomCode:string): Promise<{isValidRoomCod
 			sessionID = query.rows[0].sessionid;
 			isValidRoomCode = true;
 
-			const roomCodeValidationInfo = {
-				isValidRoomCode: isValidRoomCode,
-				sessionID: sessionID
-			}
-			console.log("roomCodeValidationInfo: ", roomCodeValidationInfo)	
+			// const roomCodeValidationInfo = {
+			// 	isValidRoomCode: isValidRoomCode,
+			// 	sessionID: sessionID
+			// }
+			// console.log("roomCodeValidationInfo: ", roomCodeValidationInfo)	
 			// return {
 			// 	isValidRoomCode: isValidRoomCode,
 			// 	sessionID: sessionID
@@ -283,7 +283,7 @@ export async function validateRoomCode(roomCode:string): Promise<{isValidRoomCod
 		console.log("(database.ts): No valid room code: " + error)
 		return {
 			isValidRoomCode: isValidRoomCode,
-			sessionID: ""
+			sessionID: sessionID
 		}
 	}
 }
