@@ -42,12 +42,19 @@ joinerRouter.get("/session/allows-spectators/:sessionId", async (req: Request, r
 
     try{
 
-        const query = await dbClient.queryObject(`SELECT isspectatorsallowed FROM SESSION WHERE sessionid = ${sessionID}`);
+        const query = await dbClient.queryObject(`SELECT isspectatorsallowed FROM SESSION WHERE sessionid = $1`,
+            [sessionID]
+        );
 
         if(query.rows.length === 0){
             return res.status(400).send({
                 "message": "Session not found for sessionID: " + sessionID
             })
+        }
+        else{
+            return res.status(200).send({
+                "allowsSpectators": query.rows[0].isspectatorsallowed
+            });
         }
 
     }catch(error){
@@ -57,9 +64,7 @@ joinerRouter.get("/session/allows-spectators/:sessionId", async (req: Request, r
     finally{    
     }
     
-    return res.status(200).send({
-        "allowsSpectators": true
-    });
+    
 })
 
 
@@ -332,8 +337,13 @@ joinerRouter.get("/verify-code/:roomCode", async (req: Request, res: Response) =
                 sessionID: sessionID
             })
         }
+        else{
+            return res.status(400).json({
+                sessionID: sessionID
+            })
+        }
     } catch (error) {
-        return res.status(400).json({ error: error });
+        return res.status(500).json({ error: error });
     }
 
    
