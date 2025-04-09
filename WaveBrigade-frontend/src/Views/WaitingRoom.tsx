@@ -129,18 +129,19 @@ export default function WaitingRoom() {
 
       if (userRole === "spectator"){
         console.log(`removing spectator from session ${sessionId} with socketID ${socketId}`)
-        axios.post("http://localhost:3000/joiner/remove-spectator-from-session", 
-          {
-            sessionID: sessionId,
-            socketID: socketId
-          }
-        ).then(() => {  
-          console.log("Successfully removed from database");
-          navigateTo("/");})
-        .catch(error =>{
-        console.log("Error removing user from database", error)
-      })
-
+      //   axios.post("http://localhost:3000/joiner/remove-spectator-from-session", 
+      //     {
+      //       sessionID: sessionId,
+      //       socketID: socketId
+      //     }
+      //   ).then(() => {  
+      //     console.log("Successfully removed from database");
+      //     navigateTo("/");})
+      //   .catch(error =>{
+      //   console.log("Error removing user from database", error)
+      // })
+        console.log("Successfully removed from database");
+        navigateTo("/")
         return () => {
           socket.off("kick", kickUser);
         }

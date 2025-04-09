@@ -51,7 +51,7 @@ CREATE TABLE IF NOT EXISTS Device
 CREATE TABLE IF NOT EXISTS "User"
 (
     UserID serial PRIMARY KEY,
-    Nickname varchar(100) NOT NULL,
+    Nickname varchar(100) NOT NULL UNIQUE,
     Device int REFERENCES Device(DeviceID), --nullable
     SessionID int REFERENCES Session(SessionID),
     isMasked BOOLEAN,

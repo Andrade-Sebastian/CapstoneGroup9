@@ -396,6 +396,7 @@ export default function WaitingRoom() {
         }
         
         console.log(`<<HOST 389>>trying to kick spectator , sending sessionID ${sessionId} and socketID ${nicknameSocketID}` )
+        
         axios.post(`http://localhost:3000/joiner/remove-spectator-from-session`,
           {
             "sessionID": sessionId,
@@ -536,7 +537,7 @@ export default function WaitingRoom() {
           userMap.set(user.nickname, user.frontendsocketid);
         });
 
-        console.log(userMap)
+        console.log("Rendering", userMap)
         setTheUserMap(userMap);
         setCurrentUsers(users);
         setNickNames(nicknames);
@@ -743,7 +744,7 @@ export default function WaitingRoom() {
         >
         <div className="mb-6">
           <h1 className="text-md text-gray-700 mb-2">
-            Are you sure you want to kick this joiner?
+            Are you sure you want to kick this joiner? 
           </h1>
         </div>
         </ModalComponent>

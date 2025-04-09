@@ -55,9 +55,19 @@ export default function JoinPage() {
   	})
   }, []);
 
+  async function checkNicknameIsUnique(nickname: string, sessionID: number): Promise<boolean> {
+    console.log(`making request at http://localhost:3000/database/unique-nickname/${sessionID}/${nickname}`)
+    const response = await axios.get(
+      `http://localhost:3000/database/unique-nickname/${sessionID}/${nickname}`
+    );
+    console.log("Is the nickname unique?", response.data.isUnique)
+
+    return response.data.isUnique
+  }
+
 
   const handleSubmit = async (e) => {
-	console.log(new Date().toLocaleTimeString(), "Current socketID in Zustand: ", socketId)
+	  console.log(new Date().toLocaleTimeString(), "Current socketID in Zustand: ", socketId)
     setRoomCode(StudentInputRoomCode);
     e.preventDefault();
 
@@ -65,6 +75,7 @@ export default function JoinPage() {
       console.error("Please enter both a nickname and a room code...");
       return;
     } else {
+
       if (StudentInputRoomCode.length !== 5) {
         toast.error("Error. Please enter a valid room code.");
         console.error("Please enter a valid room code");
@@ -73,13 +84,19 @@ export default function JoinPage() {
     }
 
     try {
-      const isValidName = await checkNickName(nickName);
+
+      const isValidName = await checkNickName(nickName); //checks for profanity
       const isValidRoomCode = await validateRoomCode(StudentInputRoomCode);
       const canSpectate = await checkSpectatorsAllowed(useJoinerStore.getState().sessionId);
+      const nicknameIsUnique = await checkNicknameIsUnique(nickName, useJoinerStore.getState().sessionId); //checks if the username is unique for the session
 
       if(!isValidName){
         console.log("Inside if statement");
         toast.error("Nickname not acceptable. Please refrain from profane language!");
+        return;
+      }
+      if (!nicknameIsUnique){
+        toast.error("Nickname taken... Please try another nickname")
         return;
       }
 

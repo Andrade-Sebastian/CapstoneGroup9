@@ -79,7 +79,7 @@ export async function joinSessionAsSpectator(socketID: string, nickname: string,
 		
 		const query = await dbClient.queryObject(`SELECT * from Join_Session_Without_EmotiBit($1, $2, $3, $4)`,
 			[
-				nickname, 
+				capitalizeFirstLetter(nickname), 
 				socketID, 
 				roomCode, 
 				userRole
@@ -681,13 +681,15 @@ export async function addUserToSession(initializationInfo: IAddUserToSessionInfo
 		serialNumberLastFour,
 		deviceID
 	} = initializationInfo;
+
+	
 	const userRole = "joiner";
 	
 	try{
 
 		//add the user to the session with the emotibit
 		const query = await dbClient.queryObject(`SELECT * FROM Join_Session($1, $2, $3, $4, $5, $6)`,
-			[nickname, socketID, roomCode, userRole, serialNumberLastFour, deviceID]
+			[capitalizeFirstLetter(nickname), socketID, roomCode, userRole, serialNumberLastFour, deviceID]
 		);
 		
 
@@ -927,8 +929,8 @@ export async function removeSpectatorFromSession(sessionID: number, socketID: st
 	try{
 		const validateUser = await dbClient.queryObject(`SELECT userid FROM "User" WHERE sessionID = $1 AND frontendsocketid = $2 AND userrole = 'spectator'`, 
 			[sessionID, socketID])
-		console.log("User obj: ", validateUser.rows[0])
-		userExistsInSession = validateUser.rows[0] !== undefined
+		console.log("User obj: ", validateUser.rows[0]);
+		userExistsInSession = validateUser.rows.length > 0;
 		console.log("User exists in session? ", userExistsInSession)
 
 		if (!userExistsInSession){
@@ -953,6 +955,46 @@ export async function removeSpectatorFromSession(sessionID: number, socketID: st
 		return false;
 	}
 
+
+}
+
+function capitalizeFirstLetter(nickname: string | null): string{
+	if (!nickname){
+		return "";
+	}else{
+		const newNickname = nickname.trim()  //remove white space at beginning and end
+							.split(/\s+/) //Splits on each space
+							.map(word => word[0]?.toUpperCase() + word.slice(1).toLowerCase()) // Capitalize the first letter of each word and make the rest of the letters lowercase
+							.join(" ") //Combine all words in the name after capitalization
+		return newNickname
+	}
+}
+
+
+export async function isNicknameUnique(sessionID: string, nickname: string): Promise<boolean> {
+	// const testStr1 = "joiner hello"
+	// const testStr2 = "Joiner";
+	// const testStr3 = "joIneR";
+	// const testStr4 = "JOINER";
+	// const testStr5 = "   JOINER   ";
+
+	// console.log("Capitalizing first letter in 'joiner' (Should return 'Joiner'): " + capitalizeFirstLetter(testStr1));
+	// console.log("Capitalizing first letter in 'Joiner' (Should return 'Joiner'): " + capitalizeFirstLetter(testStr2));
+	// console.log("Capitalizing first letter in 'joIneR' (Should return 'Joiner'): " + capitalizeFirstLetter(testStr3));
+	// console.log("Capitalizing first letter in 'JOINER' (Should return 'Joiner'): " + capitalizeFirstLetter(testStr4));
+	// console.log("Capitalizing first letter in '   JOINER   ' (Should return 'Joiner'): " + capitalizeFirstLetter(testStr5.trim()));
+
+	const query = await dbClient.queryObject(`SELECT * FROM "User" WHERE sessionid = $1 AND nickname = $2`, [sessionID, capitalizeFirstLetter(nickname)])
+	console.log(query);
+
+	const isUnique = (query.rows.length === 0)
+	console.log("Database.ts: isSpectatorUnique(): ", isUnique)
+
+	if (isUnique) {
+		return true;
+	}else{
+		return false
+	}
 
 }
 
