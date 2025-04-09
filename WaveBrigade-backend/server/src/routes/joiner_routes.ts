@@ -325,7 +325,6 @@ joinerRouter.get("/verify-code/:roomCode", async (req: Request, res: Response) =
    
     console.log("Room Code: ", roomCode);
     
-    
     try {
         const {
             isValidRoomCode,
@@ -433,7 +432,6 @@ joinerRouter.post("/remove-spectator-from-session", async(req: Request, res: Res
         socketID
     } = req.body;
 
-    
     const wasRemoved: boolean = await removeSpectatorFromSession(sessionID, socketID);
     
     if(wasRemoved){

@@ -129,36 +129,36 @@ export default function WaitingRoom() {
 
       if (userRole === "spectator"){
         console.log(`removing spectator from session ${sessionId} with socketID ${socketId}`)
-        axios.post("http://localhost:3000/joiner/remove-spectator-from-session", 
-          {
-            sessionID: sessionId,
-            socketID: socketId
-          }
-        ).then(() => {  
-          console.log("Successfully removed from database");
-          navigateTo("/");})
-        .catch(error =>{
-        console.log("Error removing user from database", error)
-      })
-
+      //   axios.post("http://localhost:3000/joiner/remove-spectator-from-session", 
+      //     {
+      //       sessionID: sessionId,
+      //       socketID: socketId
+      //     }
+      //   ).then(() => {  
+      //     console.log("Successfully removed from database");
+      //     navigateTo("/");})
+      //   .catch(error =>{
+      //   console.log("Error removing user from database", error)
+      // })
+        console.log("Successfully removed from database");
+        clearInterval(interval)
+        navigateTo("/")
         return () => {
           socket.off("kick", kickUser);
         }
-      }
-
-
-      axios.post('http://localhost:3000/joiner/leave-room', {
-        sessionID: sessionId,
-        socketID: socketId
-      })
-      .then(() =>{
-        console.log("Successfully removed from database");
-        navigateTo("/");
-      })
-      .catch(error =>{
-        console.log("Error removing user from database", error)
-      })
-    }
+      }else{
+        axios.post('http://localhost:3000/joiner/leave-room', {
+          sessionID: sessionId,
+          socketID: socketId
+        })
+        .then(() =>{
+          console.log("Successfully removed from database");
+          navigateTo("/");
+        })
+        .catch(error =>{
+          console.log("Error removing user from database", error)
+        })
+      }}
     
     return () => {
       socket.off("kick", kickUser);
@@ -203,7 +203,7 @@ export default function WaitingRoom() {
   }, []);
 
 
-
+  let interval;
   useEffect(() => {
     if (!sessionID) return;
 
@@ -214,22 +214,27 @@ export default function WaitingRoom() {
         const response = await axios.get(
           `http://localhost:3000/joiner/room-users/${sessionId}`
         );
-        console.log("got ", response.data.users)
+        console.log("got ", JSON.stringify(response.data.users))
         const users = response.data.users; //Array of IUser objects
 
-        const nicknames = []; //holds only the nicknames of those IUser Objects
+        // const nicknames = []; //holds only the nicknames of those IUser Objects
 
+        const nicknames = users.map((user) =>
+          user.userrole === "spectator" ? `${user.nickname} (Spectator)` : user.nickname
+        );
+  
         // initialize nicknames array
-        for (let i = 0; i < users.length; i++) {
-          if (userRole === "spectator"){
-            nicknames.push(users[i].nickname + " (Spectator)");
+        // for (let i = 0; i < users.length; i++) {
+        //   if (users[i].userrole === "spectator"){
+        //     nicknames.push(users[i].nickname + " (Spectator)");
 
-          }else{
-            nicknames.push(users[i].nickname)
-          }
-          console.log(nicknames.length)
-          setNickNames(nicknames);
-        }
+        //   }else{
+        //     nicknames.push(users[i].nickname)
+        //   }
+        //   console.log("nicknames: " + JSON.stringify(nicknames) + "Length: " + nicknames.length)
+        //   setNickNames(nicknames);
+        // }
+        setNickNames(nicknames)
 
       } catch (error) {
         console.error("Error fetching users:", error);
@@ -237,7 +242,7 @@ export default function WaitingRoom() {
     };
 
     fetchUsers();
-    const interval = setInterval(fetchUsers, 5000); // Refresh users every 5 seconds
+    interval = setInterval(fetchUsers, 5000); // Refresh users every 5 seconds
 
     return () => clearInterval(interval);
   }, [sessionID]); //Don't fetch any data until sessionID is set
