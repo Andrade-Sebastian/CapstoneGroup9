@@ -680,13 +680,11 @@ export default function WaitingRoom() {
       </ModalComponent>
       <ModalComponent
         onAction={handleRemoveEmoti}
-        onAction2={handleRemoveUser}
         // onAction3={handleUpdate}
         isOpen={isModalOpenSettings}
         onCancel={handleCloseModalSettings}
         modalTitle="EmotiBit Settings"
         button="Remove EmotiBit"
-        button2="Remove User"
         // button3="Update"
       >
         <div className="mb-6">
