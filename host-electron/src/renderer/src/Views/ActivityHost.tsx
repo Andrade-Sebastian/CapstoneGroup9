@@ -126,6 +126,10 @@ export default function ActivityHost() {
     console.log('in handle submit')
 
     socket.emit('end-experiment')
+
+    //delete all info pertaining to the session from the database
+    axios.post(`http://localhost:3000/database/remove-session/${sessionId}`);
+
     setTimeout(() => {
       navigateTo('/summary')
     }, 2000)

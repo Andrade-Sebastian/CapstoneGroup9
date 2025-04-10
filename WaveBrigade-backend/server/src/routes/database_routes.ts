@@ -428,5 +428,45 @@ databaseRouter.get("/unique-nickname/:sessionid/:nickname", async (req: Request,
 
 })
 
+
+databaseRouter.post("/remove-session/:sessionID", async (req: Request, res: Response) => {
+
+    const sessionID = req.params.sessionID;
+
+    console.log(`POST: In /remove-session/${sessionID}`)
+
+    try{
+        console.log(`Query: select Remove_Session(${sessionID})`);
+
+        const query = await dbClient.queryObject(`SELECT Remove_Session($1)`, [sessionID])
+
+        console.log("After the query", query.rows[0].remove_session)
+
+        const wasRemoved: boolean = query.rows[0].remove_session;
+ 
+        if (wasRemoved){
+            res.status(200).send({
+                "message": "In /remove-session/:sessionID",
+                "huh": `Successfully removed session ${sessionID}`
+            });
+        }else{
+            res.status(400).send({
+                "Message": "Invalid sessionid..."
+            })
+        }
+
+
+    }catch(error: unknown){
+        console.log(error);
+    
+        res.status(500).send({
+            "Error": error
+        })
+        return;
+     }
+
+
+})
+
 export default databaseRouter;
 
