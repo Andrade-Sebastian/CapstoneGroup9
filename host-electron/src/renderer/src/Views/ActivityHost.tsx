@@ -98,7 +98,8 @@ export default function ActivityHost() {
   }
   const handleOpenModal = () => setIsModalOpen(true)
   const handleCloseModal = () => setIsModalOpen(false)
-  const handleAction = () => {
+  const handleAction = async () => {
+    await axios.post(`http://localhost:3000/database/remove-session/${sessionId}`)
     console.log('Sending to Summary...')
     handleSubmit()
     handleCloseModal()
