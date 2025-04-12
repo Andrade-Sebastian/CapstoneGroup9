@@ -119,7 +119,7 @@ function spawnBrainFlow(
     serialNumber,
     backendIp,
     String(userId),
-    frontEndSocketId
+    frontEndSocketId,
   ])
   activity[userId] = {
     brainflowProcess: instance,
@@ -193,6 +193,9 @@ ipcMain.on(
     frontEndSocketId: string,
     sessionId: string
   ) => {
+    console.log("BRAINFOW START HIT: ", emotibitIpAddress, serialNumber);
+    const found = verifyEmotiBitUsage(emotibitIpAddress);
+    console.log("EmotiBit found: ", found);
     if(verifyEmotiBitUsage(emotibitIpAddress) !== undefined) return 
     const activitySingleton = ActivitySingleton.getInstance()
     const brainflowInstance = spawnBrainFlow(emotibitIpAddress, serialNumber, backendIp, userId, frontEndSocketId, sessionId)
@@ -232,7 +235,7 @@ ipcMain.on(
 
     //check if data is being recieved
     brainflowInstance.stdout.on("data", (message) =>{
-      console.log("INSIDE STDOUT: ", brainflowInstance.pid, message.toString());
+      //console.log("INSIDE STDOUT: ", brainflowInstance.pid, message.toString());
     })
 
     //log any errors from brainflow script

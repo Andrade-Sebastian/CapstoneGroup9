@@ -744,7 +744,8 @@ export async function registerDevice(initializationInfo: IRegisterDeviceInfo){
 
 export async function getUsersFromSession(sessionID: string){
 	try{
-		const query = await dbClient.queryObject(`SELECT * FROM "User" 
+		const query = await dbClient.queryObject(`SELECT "User".*, device.ipaddress, device.serialnumber FROM "User"
+			JOIN device on "User".device = device.deviceid
 			WHERE "User".sessionid = $1`,
 			[sessionID]
 		);
@@ -753,7 +754,7 @@ export async function getUsersFromSession(sessionID: string){
 	}
 	catch(error){
 		console.log("Unable to retrieve users");
-	}
+	} 
 }
 
 export async function removeUserFromSession(sessionID: string, socketID: string){
