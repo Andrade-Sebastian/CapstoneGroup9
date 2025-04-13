@@ -14,6 +14,7 @@ interface IDataType {
 }
 let max = 98;
 let min = 93;
+let average = 0;
 const now: Date = new Date();
 
 export default function ChartComponent(props: IDataType) {
@@ -76,11 +77,12 @@ export default function ChartComponent(props: IDataType) {
                 max = current_data;
                 min = max - 1;
             }
-        }, 10000);
+        }, 5000);
 
         if(numOfPoints === 100){
             console.log("100 POINTS RECIEVED");
             const temp_plot = [...plotState];
+            average = calculateAverage(temp_plot);
             temp_plot.shift();
             temp_plot.push(current_data);
             acceptPlotDataState(temp_plot);
@@ -92,6 +94,15 @@ export default function ChartComponent(props: IDataType) {
         }
         
         
+    }
+
+    function calculateAverage(array){
+        let sum = 0;
+        for(let i = 0; i < array.length; i++){
+            sum = array[i] + sum;
+        }
+        const avg = sum/(array.length);
+        return avg
     }
 
     useEffect(() => {
@@ -153,8 +164,12 @@ export default function ChartComponent(props: IDataType) {
 
     return(
         <div className='h-auto w-auto'>
+            <div className='flex flex-row space-x-4'>
+                <div>Average: {average.toFixed(2)}</div>
+                <div> Low: {min}</div>
+                <div> High: {max}</div>
+            </div>
             <div id="chart">
-                
                 <Plot
                     data={[
                     {

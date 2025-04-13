@@ -354,7 +354,7 @@ export default function ActiveExperiment() {
             {activeChart === "heartRateChart" ? (
               <div>
                 <div className="text-lg font-semibold">
-                  ECG Chart - 33 BPM Average
+                  ECG Chart
                 </div>
                 <ChartComponent
                   chart_type={1}
@@ -365,8 +365,9 @@ export default function ActiveExperiment() {
               </div>
             ) : activeChart === "temperatureChart" ? (
               <div>
-                {" "}
-                <p>temperature chart</p>{" "}
+                <div className="text-lg font-semibold">
+                  Temperature Chart
+                </div>
                 <ChartComponent
                   chart_type={2}
                   chart_name="°F"
@@ -376,8 +377,9 @@ export default function ActiveExperiment() {
               </div>
             ) : (
               <div>
-                {" "}
-                <p> GSR/EDA </p>{" "}
+                <div className="text-lg font-semibold">
+                    GSR/EDA
+                </div>
                 <ChartComponent
                   chart_type={3}
                   chart_name="EDA"
