@@ -2,6 +2,7 @@ import React, { ReactElement, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import { IoVideocam, IoNewspaper } from 'react-icons/io5'
+import { GiSandCastle } from "react-icons/gi";
 import { RiGalleryFill } from "react-icons/ri";
 import { TiCamera } from 'react-icons/ti'
 import { LiaSatelliteSolid } from 'react-icons/lia'
@@ -52,6 +53,13 @@ export default function HostSelectLabPage() {
       description:
         'Create an article lab experiment. Insert your own PDF or include a link for the experiment.',
       iconPath: <IoNewspaper className="size-8" />
+    },
+    {
+      id: '5',
+      name: 'Sandbox',
+      description:
+        'Create an experiment without any type of media.',
+      iconPath: <GiSandCastle className="size-8" />
     }
   ]
 
@@ -72,6 +80,9 @@ export default function HostSelectLabPage() {
       } else if (selectedLab.id === '4'){
         setExperimentType(4);
         navigateTo('/host/article-lab')
+      } else if (selectedLab.id === '5'){
+        setExperimentType(5);
+        navigateTo('/waiting-room')
       }else {
         toast.error("Error, select another option.")
         //toast
@@ -104,7 +115,7 @@ export default function HostSelectLabPage() {
         <SideComponent
           icon={<LiaSatelliteSolid style={{ fontSize: '200px' }} />}
           headingTitle="Create an Experiment"
-          description="Time to choose a lab template! Pick between a video, image, or gallery lab"
+          description="Time to choose a lab template! Pick between a video, image, gallery, or article lab. Pick sandbox if you want to create an experiment without any media!"
         />
       </div>
       {/* Templates Container*/}

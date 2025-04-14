@@ -23,6 +23,7 @@ import { ipcRenderer, session } from 'electron';
 import { isDeepStrictEqual } from 'util';
 import { IUserInfo } from "../store/useSessionStore";
 import { GalleryComponent} from "../components/GalleryComponent.tsx";
+import { GiSandCastle } from "react-icons/gi";
 
 
 export default function WaitingRoom() {
@@ -33,6 +34,8 @@ export default function WaitingRoom() {
     users,
     roomCode,
     experimentType,
+    setExperimentTitle,
+    setExperimentDesc,
     experimentTypeString,
     setExperimentTypeString,
     setSessionId,
@@ -94,10 +97,17 @@ export default function WaitingRoom() {
     } else if (experimentType === 4){
       setExperimentTypeString('ArticleLab')
       setExperimentIcon(<IoNewspaper style={{ fontSize: '20px' }} />)
+    } else if (experimentType === 5){
+      setExperimentTypeString('Sandbox')
+      setExperimentIcon(<GiSandCastle style={{ fontSize: '20px' }} />)
+      setExperimentTitle("Sandbox Lab")
+      setExperimentDesc('Play with your EmotiBits without any media to react to!')
     } else {
       console.log("Invalid experiment type");
     }
   }, [experimentType])
+
+
 
   //Modal Handlers
   const handleOpenModal = () => {
