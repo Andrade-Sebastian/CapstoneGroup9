@@ -29,7 +29,7 @@ const ancHeaders = ['Package', 'EDA', 'Temperature', 'Thermistor', 'Timestamp', 
 // const auxFilePath = './operationParameters.userId/aux_data.csv';
 
 //initializes the board 
-const board = new BoardShim(BoardIds.EMOTIBIT_BOARD, {});
+const board = new BoardShim(BoardIds.EMOTIBIT_BOARD, {serialNumber: operationParameters.serialNumber});
 const board_id = BoardIds.EMOTIBIT_BOARD;
 
 //prepares files to be written to
