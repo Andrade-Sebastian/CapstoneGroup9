@@ -363,7 +363,7 @@ export default function WaitingRoom() {
         }
       } catch (error) {
         toast.error("Failed to receive gallery data");
-        console.log("Error receiving photolab data in joiner fe: ", error);
+        console.log("Error receiving gallerylab data in joiner fe: ", error);
       }
     };
     const getArticleData = async () => {
