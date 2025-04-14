@@ -467,10 +467,12 @@ export default function WaitingRoom() {
     socket.on("joiner-connected", async ({ socketID, nickname, lastFourSerial }) => {
       console.log(`Joiner Connected Event received: Joiner-${nickname}, SocketID-${socketID}, Last Four of Serial ${lastFourSerial}`);
       try{
-
         setCurrentDevices(currentDevices => {
           const newState = currentDevices.map(device => {
-            if (device.associatedDevice && device.associatedDevice.serialNumber === lastFourSerial) {
+            console.log("device.associatedDevice,",device.associatedDevice, "device.associatedDevice.serialNumber", device.associatedDevice.serialNumber, "lastFourSerial", lastFourSerial);
+            const trimmedText = device.associatedDevice.serialNumber.trim();
+            const updatedLastFour = trimmedText.slice(-4);
+            if (device.associatedDevice && updatedLastFour === lastFourSerial) {
               return { 
                 ...device, 
                 socketId: socketID,
@@ -482,9 +484,9 @@ export default function WaitingRoom() {
                 } : null
               }
             }
+            console.log("device", device)
             return device;
           });
-        
           console.log("React state after new joiner:", newState); // Logs the correct state before updating
           return newState;
         });
@@ -571,6 +573,9 @@ export default function WaitingRoom() {
     navigateTo('/activity-room');
   }
   
+  useEffect(() =>{
+    console.log("Current Devices",currentDevices)
+  },[currentDevices] )
   return (
     <div className="flex flex-col items-center justify-center px-4 mx:px-8 w-full">
       <div className="flex flex-col md:flex-row items-start justify-between w-full max-w-6xl gap-8">
