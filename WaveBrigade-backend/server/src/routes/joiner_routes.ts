@@ -4,6 +4,7 @@ import { addSocketToSession } from "../sessionMappings.ts";
 import {addUserToSession, getUsersFromSession, validateRoomCode, removeUserFromSession, validDeviceSerial, validatePassword, getPhotoLabInfo, getVideoLabInfo, getGalleryLabInfo, getArticleLabInfo, joinSessionAsSpectator, removeSpectatorFromSession} from "../controllers/database.ts";
 import {Filter} from "npm:bad-words";
 import dbClient from "../controllers/dbClient.ts";
+import * as bcrypt from "https://deno.land/x/bcrypt/mod.ts";
 
 const app = express();
 const joinerRouter = express.Router();
@@ -385,7 +386,8 @@ joinerRouter.post("/validatePassword", async (req: Request, res: Response) => {
     const {sessionID, password} = req.body;
     
     try{
-        const isValidPassword = await validatePassword(sessionID, password);
+        const sessionPassword = await validatePassword(sessionID);
+        const isValidPassword = await bcrypt.compare(password, sessionPassword.password);
         if(isValidPassword){
             return res.status(200).json({success: true})
         }
