@@ -6,6 +6,7 @@ import socket from '../Views/socket.tsx';
 //ECG Heart Rate - 1
 //Body Temperature - 2
 //Skin Response - 3
+
 interface IDataType {
     chart_type: number;
     chart_name: string;
@@ -62,6 +63,7 @@ export default function ChartComponent(props: IDataType) {
             console.log("Invalid Chart Type");
             return 0;
         }
+        
 
         let counter = 0;
         const intervalId = setInterval(() => {
@@ -95,6 +97,8 @@ export default function ChartComponent(props: IDataType) {
     }
 
     useEffect(() => {
+        acceptPlotDataState([]);
+    acceptTimeState([]);
 
         function brainflowConnect(){
             console.log("(chartComponent.ts): Emitting brainflow-assignment with socketId:", socket.id);
@@ -111,11 +115,11 @@ export default function ChartComponent(props: IDataType) {
 
         function onUpdate(payload){
             const {ancData, auxData, heartRate, ipAddress, serialNumber, backendIp, hostSessionId, userId, frontEndSocketId, assignSocketId} = payload;
-            const selectedUser = Number(userId);
-            if(props.user_id === selectedUser){
+            const selectedUser = String(userId);
+            if(props.user_id && String(props.user_id) === String(selectedUser)){
                 addDataPoint(ancData, auxData, heartRate, ancData.timestamp);
             }
-        }
+        };
         //brainflowConnect();
         socket.on("brainflow-assignment", brainflowConnect);
         //Plot.relayout(Chart, onUpdate);
@@ -149,16 +153,17 @@ export default function ChartComponent(props: IDataType) {
             //clearInterval(intervalId);
             //clearInterval(interval);
         };
-    }, [addDataPoint, timeState]);
+    }, [addDataPoint, timeState, props.user_id]);
 
     return(
         <div className='h-auto w-auto'>
             <div id="chart">
+                <p> The user_id is: {props.user_id} </p>
                 
                 <Plot
                     data={[
                     {
-                        //x: timeState,
+                        x: timeState,
                         y: plotState,
                         mode: 'lines',          // Line chart
                         type: 'line',

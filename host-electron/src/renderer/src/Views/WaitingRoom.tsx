@@ -660,8 +660,8 @@ export default function WaitingRoom() {
         modalTitle="Connect Emotibits"
         button="Connect Emotibits"
         button2="Begin"
-        isButtonDisabled={isBeginDisabled}
-        isButton1Disabled={isConnectEmotibitDisabled}
+        // isButtonDisabled={isBeginDisabled}
+        // isButton1Disabled={isConnectEmotibitDisabled}
       >
         <div className="mb-6">
           <h1 className="text-md text-gray-700 mb-2">
@@ -706,13 +706,11 @@ export default function WaitingRoom() {
       </ModalComponent>
       <ModalComponent
         onAction={handleRemoveEmoti}
-        onAction2={handleRemoveUser}
         // onAction3={handleUpdate}
         isOpen={isModalOpenSettings}
         onCancel={handleCloseModalSettings}
         modalTitle="EmotiBit Settings"
         button="Remove EmotiBit"
-        button2="Remove User"
         // button3="Update"
       >
         <div className="mb-6">

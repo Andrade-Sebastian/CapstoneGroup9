@@ -8,114 +8,89 @@ import { ipcRenderer, session } from 'electron';
 //Body Temperature - 2
 //Skin Response - 3
 interface IUserDataType {
-    chart_type: number;
-    chart_name: string;
-    chart_color: string;
+    chart_types: string[];
     user_id: number;
 }
 
 const now: Date = new Date();
 
+const MAX_POINTS = 100;
+
 export default function ChartComponent(props: IUserDataType) {
     let lastDataType = 0;
     
-    const [plotState, acceptPlotDataState] = useState<Array<number>>([]);
+    const [plotState, setPlotData] = useState<{[key:string]: number[]}> ({
+       heartRate: [],
+       temperature: [],
+       gsr: [], 
+    });
+
     const [timeState, acceptTimeState] = useState<Array<number>>([]);
     //const [edaState, acceptEdaDataState] = useState<Array<number>>([]);
     // const [min, setMin] = useState(93);
     // const [max, setMax] = useState(98);
-    let min = 93;
-    let max = 98;
+    const [min, setMin] = useState(0);
+    const [max, setMax] = useState(100);
     const ipc = window.api;
+
+    const chartMeta = {
+        heartRate : { name: "BPM", color: "rgb(255,0,0)", type: 1},
+        temperature : { name: "°F", color: "rgb(0,0,255)", type: 2},
+        gsr : { name: "EDA", color: "rgb(75,0,130)", type: 3}
+
+    };
     
+    const updateSeries = (key: string, newVal: number) => {
+        setPlotData((prev) => {
+            const updated = [...prev[key], newVal];
+            return {
+                ...prev,
+                [key]: updated.length > MAX_POINTS ? updated.slice(-MAX_POINTS) : updated
+            };
+        });
+    };
 
     console.log("CHART TYPE: ", props.chart_type);
 
-    function addDataPoint(ancDataFrame, auxDataFrame, timeStamp: number){
-        
-        const numOfPoints = plotState.length;
-        const numOfTimeStamps = timeState.length;
-        let current_data = 0;
-        
+    const addDataPoint = (type: string, value: number, ancDataFrame, auxDataFrame, timeStamp: number) => {
 
-        console.log("LENGTH OF ARRAY: ", numOfPoints);
+        setPlotData((prev) => {
+            const updated = [...prev[type], value];
+            return {
+                ...prev,
+                [type]: updated.length > MAX_POINTS ? updated.slice(-MAX_POINTS) : updated
+            };
+        });
 
-        // if(numOfTimeStamps == 10){
-        //     timeState.shift();
-        //     acceptTimeState(timeState => [...timeState, timeStamp * 1000]);
-        // }
-        // else{
-        //     acceptTimeState(timeState => [...timeState, timeStamp * 1000]);
-        // }
+        setMax((prevMax) => Math.max(prevMax, Math.round(value)));
+        setMin((prevMin) => Math.min(prevMin, Math.round(value) - 1));
 
-        // CHART TYPE IF STATEMENTS  
-        if(props.chart_type === 1){
-            console.log( "ECG CHART")
-        }  
-        else if(props.chart_type === 2){
-            // setMin(80);
-            // setMax(98);
-            min = 80;
-            max = 98;
-            current_data = (ancDataFrame.data2 * 1.8) + 32;
-            console.log("TEMP CHART: ", current_data);
-        }
-        else if(props.chart_type === 3){
-            // setMin(2);
-            // setMax(0);
-            min = 0;
-            max = 2;
-            current_data = (ancDataFrame.data1)
-            console.log("EDA CHART" , current_data);
-        }
-        else{
-            console.log("Invalid Chart Type");
-            return 0;
-        }
-
-        let counter = 0;
-        const intervalId = setInterval(() => {
-            counter++
-            const temp_max = Math.max(max, Math.round(current_data))
-            max = temp_max;
-           // const temp_min = temp_max - 1;
-            //setMin(temp_min);
-            min = max - 1;
-            //console.log("MAX: ", max);
-            //console.log("MIN: ", min);
-
-            if(counter >= 5){
-                clearInterval(intervalId);
-                max = current_data;
-                min = max - 1;
-                // setMax(current_data);
-                // const temp_max = max;
-                // const temp_min = temp_max - 1;
-                // setMin(temp_min);
-            }
-        }, 10000);
-
-        if(numOfPoints === 100){
-            console.log("100 POINTS RECIEVED");
-            const temp_plot = [...plotState];
-            temp_plot.shift();
-            temp_plot.push(current_data);
-            acceptPlotDataState(temp_plot);
-            //acceptPlotDataState(plotState => plotState.slice(0, (100 - plotState.length)));
-           // acceptPlotDataState(plotState => [...plotState, current_data]);
-        }
-        else{
-            acceptPlotDataState(plotState => [...plotState, current_data]);
-        }
-        
         
     }
 
     useEffect(() => {
-        function onUpdate(payload){
-            const {ancData, auxData, ipAddress, serialNumber, backendIp, hostSessionId, userId, frontEndSocketId, assignSocketId} = payload;
-            if(props.user_id === Number(userId)){
-                addDataPoint(ancData, auxData, ancData.timestamp);
+
+        setPlotData({
+            heartRate: [],
+            temperature: [],
+            gsr: []
+        });
+
+        const onUpdate = (payload) => {
+            const {ancData, auxData, ipAddress, serialNumber, backendIp, hostSessionId, userId, heartRate, frontEndSocketId, assignSocketId} = payload;
+            if(String(props.user_id) !== String(userId)){
+                return;
+            }
+            if(props.chart_types.includes('heartRate')){
+                addDataPoint('heartRate', heartRate, ancData, auxData, ancData.timestamp)
+            }
+            if(props.chart_types.includes('temperature')){
+                const temp = ancData.data2  * 1.8 + 32;
+                addDataPoint('temperature', temp, ancData, auxData, ancData.timestamp);
+            }
+            if(props.chart_types.includes('gsr')){
+                const gsrVal = ancData.data1;
+                addDataPoint('gsr', gsrVal, ancData, auxData, ancData.timestamp);
             }
         }
         socket.on('update', onUpdate);
@@ -123,23 +98,24 @@ export default function ChartComponent(props: IUserDataType) {
         return () => {
             socket.off('update', onUpdate);
         };
-    }, [addDataPoint, timeState, props.user_id]);
+    }, [addDataPoint, timeState, props.user_id, props.chart_types]);
 
     return(
         <div className='w-full h-full'>
-            <div id={"chart-${props.chart_type}"}>
+            <div id={`chart-${props.user_id}`}>
                 
                 <Plot
-                    data={[
-                    {
-                        //x: timeState,
-                        y: plotState,
-                        mode: 'lines',          // Line chart
-                        type: 'line',
-                        name: props.chart_name, // Label for the trace
-                        line: {color: props.chart_color} //'rgb(255, 99, 132)'} // Line color
-                    },
-                    // {
+                    data={props.chart_types
+                        .filter((type) => chartMeta[type]) 
+                        .map((type) => ({
+                          y: plotState[type],
+                          type: 'line',
+                          mode: 'lines',
+                          name: chartMeta[type].name,
+                          line: { color: chartMeta[type].color },
+                        }))
+                      }
+                    // {u
                     //     x: timeState,
                     //     y: edaState,
                     //     xaxis: 'x2',
@@ -149,7 +125,6 @@ export default function ChartComponent(props: IUserDataType) {
                     //     name: 'EDA', // Label for the trace
                     //     line: {color: 'rgb(75,0,130)'} // Line color
                     // }
-                    ]}
                     layout = {{
                         autosize: true,
                         responsive: true,
@@ -157,8 +132,8 @@ export default function ChartComponent(props: IUserDataType) {
                         height: 350,
                         margin: {l:40, r: 10, b: 40, t: 10},
                         yaxis: {
-                            title: props.chart_name,
-                            range: [min, max + 1],
+                            title: "Sensor Values",
+                            range: [min, max + 5],
                             tick: 1,
                         },
                         showlegend: true,

@@ -232,6 +232,7 @@ export default function JoinPage() {
                 className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 onChange={(e) => setNickName(e.target.value)}
                 value={nickName}
+                placeholder="Enter Name"
               />
             </div>
             <div className="mt-4">
@@ -247,6 +248,7 @@ export default function JoinPage() {
                 className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 onChange={(e) => setStudentInputRoomCode(e.target.value)}
                 value={StudentInputRoomCode}
+                placeholder="Enter Code"
               />
             </div>
             <div className="flex flex-col gap-4 mt-2">
@@ -280,7 +282,7 @@ export default function JoinPage() {
             <button
               disabled={!nickName.trim() || !StudentInputRoomCode.trim()}
               type="submit"
-              className={`mt-8 font-semibold py-3 px-6 rounded-md shadow-md transition duration-300 ease-in-out ${
+              className={`mt-8 font-semibold py-3 px-6 rounded-md shadow-md transition duration-300 ease-in-out cursor-pointer ${
                 nickName.trim() && StudentInputRoomCode.trim()
                   ? "bg-[#7F56D9] hover:bg-violet-500 text-white"
                   : "bg-gray-400 text-white cursor-not-allowed"
