@@ -4,8 +4,6 @@ services:
       context: ./database
       dockerfile: Dockerfile
     container_name: wb-backend-database
-    ports:
-      - "5432:5432"
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
@@ -15,8 +13,6 @@ services:
       context: ./WaveBrigade-backend
       dockerfile: Dockerfile
     container_name: wb-backend-express
-    ports:
-      - "3000:3000"
     depends_on:
       - database
       - backend-grpc
@@ -27,18 +23,29 @@ services:
       context: ./grpc
       dockerfile: Dockerfile
     container_name: wb-backend-grpc
-    ports:
-      - "50051:50051"
   joiner-frontend:
     build:
       context: ./WaveBrigade-frontend
       dockerfile: Dockerfile
     container_name: wb-joiner-frontend
-    ports:
-      - "4500:4500"
     volumes:
       - ./WaveBrigade-frontend/src:/app/joiner/frontend/src
     depends_on:
       - database 
       - backend-express
       - backend-grpc
+  nginx:
+    container_name: wb-nginx
+    image: nginx:latest
+    ports:
+        - 8081:80
+        - 4430:443
+    volumes:
+        - ./nginx.conf:/etc/nginx/nginx.conf
+    environment:
+        - HOSTNAME=capstone.azaremehrjardi.dev
+    depends_on:
+      - backend-express 
+      - database
+      - backend-grpc
+      - joiner-frontend

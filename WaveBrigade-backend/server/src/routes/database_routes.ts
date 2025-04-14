@@ -1,8 +1,8 @@
 import express from "express";
 import type { Request, Response } from "express";
-import { createPhotoLabInDatabase, createVideoLabInDatabase, createGalleryLabInDatabase, getSessionIDFromSocketID, addUserToSession, IUserDatabaseInfo, getSessionState, getPhotoLabInfo, assignExperimentToSession, createArticleLabInDatabase} from "../controllers/database.ts";
+import { createPhotoLabInDatabase, createVideoLabInDatabase, createGalleryLabInDatabase, getSessionIDFromSocketID, addUserToSession, IUserDatabaseInfo, getSessionState, getPhotoLabInfo, assignExperimentToSession, createArticleLabInDatabase, isNicknameUnique} from "../controllers/database.ts";
 import multer from "multer";
-import fs from 'node:fs';
+import fs, { rmSync } from 'node:fs';
 import { determineFileExtension, getNumberFilesInDirectory } from "../controllers/photolab_controller.ts";
 import axios from 'axios';
 
@@ -406,6 +406,26 @@ databaseRouter.get("/device-id/:socketID", async (req: Request, res: Response) =
     }
     
     res.status(200).send({"deviceID": deviceID})
+})
+
+
+databaseRouter.get("/unique-nickname/:sessionid/:nickname", async (req: Request, res: Response) => {
+
+    const sessionID: string = req.params.sessionid;
+    const nickname: string = req.params.nickname.trim();
+    
+    let isUnique: boolean = false;
+
+    console.log(`http://localhost:3000/database/unique-nickname/${sessionID}/${nickname}`)
+
+    isUnique = await isNicknameUnique(sessionID, nickname);
+    console.log("ROUTE, recieved ", isUnique)
+
+   
+    res.status(200).json({isUnique})
+    
+
+
 })
 
 export default databaseRouter;

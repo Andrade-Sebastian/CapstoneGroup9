@@ -2,12 +2,12 @@ import "./App.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
 import { Outlet, BrowserRouter as Router } from "react-router-dom";
-import NavigationBar from "./Components/NavigationBar";
+import NavigationBar from "./Components/NavigationBar.tsx";
 import { useEffect, useState, useRef } from "react";
 import socket from "./Views/socket.tsx";
 import { useJoinerStore, } from "./hooks/stores/useJoinerStore.ts";
 import React from "react";
-import ModalComponent from "./components/ModalComponent.tsx";
+import ModalComponent from "./Components/ModalComponent.tsx";
 
 function App() {
   const {
