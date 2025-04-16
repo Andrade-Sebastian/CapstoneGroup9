@@ -158,7 +158,7 @@ export default function ChartComponent(props: IDataType) {
     return(
         <div className='h-auto w-auto'>
             <div id="chart">
-                <p> The user_id is: {props.user_id} </p>
+                {/* <p> The user_id is: {props.user_id} </p> */}
                 
                 <Plot
                     data={[

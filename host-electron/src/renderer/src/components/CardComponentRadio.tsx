@@ -16,7 +16,7 @@ export default function CardComponent(props: ICardComponent){
 
 
     return(
-        <label className="bg-white-100 flex flex-col items-center max-w-[500px] text-black rounded-xl px-4 py-2 border has-[:checked]:bg-purple-200 border-purple-800 h-[200px] hover:bg-neutral-200 transition-colors has-[:checked]:text-indigo-900 has-[:checked]:ring-indigo-200 .. ">
+        <label className="bg-white-100 cursor-pointer flex flex-col items-center max-w-[500px] text-black rounded-xl px-4 py-2 border has-[:checked]:bg-purple-200 border-purple-800 h-[200px] hover:bg-neutral-200 transition-colors has-[:checked]:text-indigo-900 has-[:checked]:ring-indigo-200 .. ">
                   <input className="appearance-none" type="radio" onChange={() => props.handler()} checked={props.selectedLab?.id === props.value.id} value={props.value.id}/>
                   <div className="flex align-content-start gap-4 items-center">
                       {props.icon}

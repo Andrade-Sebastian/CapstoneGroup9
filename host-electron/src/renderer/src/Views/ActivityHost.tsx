@@ -286,12 +286,12 @@ export default function ActivityHost() {
               <span className="font-semibold text-[#894DD6] "> NICKNAME </span>
               <span>{hostName}</span>
             </div>
-            <div className="flex items-center space-x-2 text-lg">
+            {/* <div className="flex items-center space-x-2 text-lg">
               <HiOutlineSignal size={24} />
               <p className="text-lg">
                 <span className="font-semibold text-[#894DD6]">SOCKET</span> 
               </p>
-            </div>
+            </div> */}
             <div className="flex items-center space-x-2 text-lg">
               <CiUser size={24} />
               <p className="text-lg">
@@ -395,7 +395,7 @@ export default function ActivityHost() {
       <Divider className="my-6" />
       <hr></hr>
       <div className="flex flex-col items-center">
-        <div className="flex space-x-4 mt-2">
+        <div className="flex space-x-9 mt-2">
           {(userObjects || []).map((user, index) => (
             <button
               key={index}
@@ -406,7 +406,7 @@ export default function ActivityHost() {
             </button>
           ))}
         </div>
-        <div className="absolute bottom-2 flex space-x-6 mt-6">
+        <div className="relative bottom-2 flex space-x-6 mt-6">
           <button
             type="button"
             onClick={handleMaskAll}

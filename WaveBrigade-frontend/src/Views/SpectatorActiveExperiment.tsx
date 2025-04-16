@@ -19,6 +19,8 @@ import ModalComponent from '../Components/ModalComponent.tsx'
 import toast, { Toaster } from "react-hot-toast";
 import GalleryViewer from "../Components/GalleryViewer.tsx";
 import ReactPlayer from "react-player";
+import ChatBody from "../Components/ChatBody.tsx";
+import ChatFooter from "../Components/ChatFooter.tsx";
 
 export interface IJoiner {
     id: string;
@@ -74,7 +76,7 @@ export default function SpectatorActiveExperiment() {
  
   const handleSubmit =() => {
         console.log('in handle submit')
-        toast.success("NOW NEED TO GO TO THIS JOINER'S LAB")
+        toast.success("Now viewing joiner")
       }
   
     useEffect(() => {
@@ -557,7 +559,10 @@ export default function SpectatorActiveExperiment() {
               />)))}
             </div>
            ): (
-            <div className="p-4 text-gray-500"> Chat Feature </div>
+            <div className="flex flex-col h-[60vh] justify-between bg-white rounded-md shadow-md">
+              <ChatBody/>
+              <ChatFooter/>
+            </div>
           )}
         </div>
       </div>
