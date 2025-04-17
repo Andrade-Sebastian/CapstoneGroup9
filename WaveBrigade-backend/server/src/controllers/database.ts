@@ -819,7 +819,7 @@ export async function validatePassword(sessionID:string){
 		}
 	}
 	catch(error){
-		console.log("Password is not valid", error);
+		console.log("Session is not valid", error);
 	}
 }
 

@@ -91,11 +91,12 @@ export default function EnterFunction() {
             }
           );
           console.log("RESPONSE RECIEVED: ", response.data.success);
+          console.log("STATUS: ", response.data.status);
           if (response.status === 200) {
             console.log("Password is valid");
             return true;
           }
-          else if(response.status === 400){
+          if(response.status === 400){
             console.log("Password is invalid");
             return false;
           }

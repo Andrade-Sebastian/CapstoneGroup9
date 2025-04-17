@@ -189,7 +189,7 @@ export default function HostCreateRoom() {
             <button
               type="submit"
               disabled={!userName.trim() || !password.trim()}
-              className={`mt-6 font-semibold py-3 px-6 rounded-md shadow-md transition duration-300 ease-in-out ${
+              className={`mt-6 font-semibold py-3 px-6 rounded-md shadow-md transition duration-300 ease-in-out cursor-pointer ${
                 userName.trim() && password.trim()
                   ? 'bg-[#7F56D9] hover:bg-violet-500 text-white'
                   : 'bg-gray-400 text-white cursor-not-allowed'
