@@ -320,7 +320,7 @@ io.on("connection", (socket) => {
       frontEndSocketId,
       assignSocketId,
     } = payload;
-    console.log("Update Event: Received data:", JSON.stringify(heartRate));
+    //console.log("Update Event: Received data:", JSON.stringify(heartRate));
     io.emit("update", payload);
   });
 

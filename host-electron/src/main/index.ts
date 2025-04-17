@@ -267,3 +267,14 @@ ipcMain.on('session:request-data', (event) => {
   event.sender.send('session:sync', sessionData);
 });
 
+ipcMain.on('activity:closeAllWindows', (event) => {
+  BrowserWindow.getAllWindows().forEach(window => {
+    if(window.title === 'WaveBrigade'){
+      return;
+    }
+    else{
+      window.close()
+    }
+  })
+})
+

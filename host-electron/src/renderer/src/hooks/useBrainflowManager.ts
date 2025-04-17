@@ -29,6 +29,7 @@ export default function useBrainflowManager()
             }
         })
         ipc.send('brainflow:destroy', sessionId);
+        ipc.send('activity:closeAllWindows');
     };
 
 
