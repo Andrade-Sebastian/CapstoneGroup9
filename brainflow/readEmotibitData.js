@@ -65,7 +65,7 @@ var operationParameters = {
     sessionId: process.argv[7],
     assignSocketId: null
 };
-var ancHeaders = ['Package', 'EDA', 'Temperature', 'Thermistor', 'Timestamp', 'Unknown']; //create a list of headers for the csv
+//const ancHeaders = ['Package', 'EDA', 'Temperature', 'Thermistor', 'Timestamp', 'Unknown']; //create a list of headers for the csv
 // const ancFilePath = './operationParameters.userId/anc_data.csv';
 // const auxHeaders = ['Package', 'PPG_Red', 'PPG_Infa_Red', 'PPG_Green', 'Timestamp', 'Unknown'];
 // const auxFilePath = './operationParameters.userId/aux_data.csv';
@@ -168,7 +168,6 @@ function sendData(socket) {
                             brainflow_1.DataFilter.performBandPass(ppg_ir, 500, 5, 10, 2, 0, 0);
                             brainflow_1.DataFilter.performBandPass(ppg_r, 500, 5, 10, 2, 0, 0);
                             heart_rate = brainflow_1.DataFilter.getHeartRate(ppg_ir.slice(-1024), ppg_r.slice(-1024), 500, 1024);
-                            console.log("HEART RATE: ", heart_rate);
                         }
                         ancData = {
                             package: anc_data[0][0],
