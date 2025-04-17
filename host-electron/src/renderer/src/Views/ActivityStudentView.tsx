@@ -23,8 +23,8 @@ export default function ActivityStudentView(): ReactElement {
   const echoProcessAPI = window.api
   const [selectedButton, setSelectedButton] = useState('heartRate')
   const [activeTab, setActiveTab] = useState('images')
-  const [activeChart, setActiveChart] = useState('heartRateChart')
-  const [recievedData, setRecievedData] = useState<number[]>([])
+  const [activeCharts, setActiveCharts] = useState<string[]>([]);
+  const [recievedData, setRecievedData] = useState<number[]>([]);
   const [currentUser, setCurrentUser] = useState('')
   const [currentUserId, setCurrentUserId] = useState(0)
   const [currentPath, setCurrentPath] = useState('')
@@ -675,6 +675,13 @@ export default function ActivityStudentView(): ReactElement {
     return () => clearInterval(interval)
   }, [latestSeekTime])
 
+  const toggleChart = (chartType: string) => {
+    setActiveCharts((prev) => 
+    prev.includes(chartType)
+  ? prev.filter((chart) => chart !== chartType)
+  : [...prev, chartType])
+  }
+
   // useEffect(()=>{
   //   //debug
   //   console.log("Experiment Type", experimentType, "Photolab:",photoLabImageSource)
@@ -793,62 +800,33 @@ export default function ActivityStudentView(): ReactElement {
             <label className="inline-flex items-center gap-2">
               <input
                 type="checkbox"
-                checked={activeChart === 'heartRateChart'}
-                onChange={() => setActiveChart('heartRateChart')}
+                checked={activeCharts.includes('heartRate')}
+                onChange={() => toggleChart('heartRate')}
               />
               <span> Heart Rate</span>
             </label>
             <label className="inline-flex items-center gap-2">
               <input
                 type="checkbox"
-                checked={activeChart === 'temperatureChart'}
-                onChange={() => setActiveChart('temperatureChart')}
+                checked={activeCharts.includes('temperatureChart')}
+                onChange={() => toggleChart('temperatureChart')}
               />
               <span> Temperature </span>
             </label>
             <label className="inline-flex items-center gap-2">
               <input
                 type="checkbox"
-                checked={activeChart === 'gsrChart'}
-                onChange={() => setActiveChart('gsrChart')}
+                checked={activeCharts.includes('gsrChart')}
+                onChange={() => toggleChart('gsrChart')}
               />
               <span> Skin Response (GSR) </span>
             </label>
           </div>
           <div className="bg-white shadow-md rounded-lg p-4 flex-grow">
-            {activeChart === 'heartRateChart' && (
-              <div>
-                <p className="text-lg font-semibold">ECG Chart - {bpmAvg || '33'} BPM Average</p>
-                <ChartComponent
-                  chart_type={1}
-                  chart_name="BPM"
-                  chart_color="rgb(255,0,0)"
+          <ChartComponent
                   user_id={currentUserId}
+                  chart_types={activeCharts}
                 />
-              </div>
-            )}
-            {activeChart === 'temperatureChart' && (
-              <div>
-                <p className="text-lg font-semibold">Body Temp - {tempAvg ||'98'}°F Average</p>
-                <ChartComponent
-                  chart_type={1}
-                  chart_name="°F"
-                  chart_color="rgb(0,0,255)"
-                  user_id={currentUserId}
-                />
-              </div>
-            )}
-            {activeChart === 'gsrChart' && (
-              <div>
-                <p className="text-lg font-semibold">Skin Response - {gsrAvg || '3.4'} μS Average</p>
-                <ChartComponent
-                  chart_type={1}
-                  chart_name="EDA"
-                  chart_color="rgb(75,0,130)"
-                  user_id={currentUserId}
-                />
-              </div>
-            )}
           </div>
         </div>
         {/* <div className="bg-white shadow-md rounded-lg p-4">
