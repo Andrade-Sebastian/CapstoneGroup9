@@ -73,6 +73,7 @@ export default function ChartComponent(props: IDataType) {
             //console.log("MIN: ", min);
 
             if(counter >= 5){
+                console.log("Clearing interval");
                 clearInterval(intervalId);
                 max = current_data;
                 min = max - 1;
@@ -104,6 +105,12 @@ export default function ChartComponent(props: IDataType) {
         const avg = sum/(array.length);
         return avg
     }
+
+    useEffect(() => {
+        console.log("Clearing arrays");
+        acceptPlotDataState([]);
+        average = 0;
+    }, [props.chart_type]);
 
     useEffect(() => {
 
