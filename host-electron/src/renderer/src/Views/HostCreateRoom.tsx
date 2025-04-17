@@ -122,8 +122,9 @@ export default function HostCreateRoom() {
   // <div className="bg-white rounded-xl p-8 shadow-lg w-4/5 min-h-[1000px] place-content-center">
   //   <form onSubmit={handleSubmit} className="flex flex-col gap-14">
   return (
-    <div className="flex h-screen">
-      <div className="flex flex-col md:flex-row max-sm:hidden items-center justify-center md:w-2/5 lg:w-2/5">
+    <div className="h-full flex place-content-center ">
+      <div className='flex md:flex-row md:gap-4 lg:gap-[300px] mx-6'>
+      <div className="flex flex-col md:flex-row max-sm:hidden items-center justify-center">
       <Toaster position="top-right" />
         <SideComponent
           icon={<IoEarthOutline style={{ fontSize: '200px' }} />}
@@ -131,8 +132,8 @@ export default function HostCreateRoom() {
           description="Provide your name and a password to begin. Check the box if you want to have spectators."
         />
       </div>
-      <div className="flex flex-col items-center justify-center w-full md:w-3/5 lg:w-3/5 p-6">
-        <form onSubmit={handleSubmit} className="w-full max-w-md">
+      <div className="flex flex-col items-center justify-center w-fit p-6 ">
+        <form onSubmit={handleSubmit} className="max-w-md w-[400px]">
           <div className="mb-6">
             <label htmlFor="userName" className="block text-sm font-medium text-gray-700 mb-2">
               Enter your name <span className="text-purple-500">*</span>
@@ -200,6 +201,7 @@ export default function HostCreateRoom() {
             {/*This will redirect to Media Page */}
           </div>
         </form>
+      </div>
       </div>
     </div>
   )
