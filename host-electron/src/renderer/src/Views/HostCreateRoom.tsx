@@ -176,7 +176,7 @@ export default function HostCreateRoom() {
               <input
                 type="checkbox"
                 id="allowSpectators"
-                className="h-4 w-4 accent-[#7F56D9]"
+                className="h-4 w-4 accent-[#7F56D9] cursor-pointer"
                 checked={allowSpectators}
                 onChange={() => setAllowSpectators(!allowSpectators)}
               />

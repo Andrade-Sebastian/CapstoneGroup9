@@ -256,7 +256,7 @@ export default function JoinPage() {
                 <input
                   id="allow-spectators"
                   type="checkbox"
-                  className="h-4 w-4 accent-[#7F56D9]"
+                  className="h-4 w-4 accent-[#7F56D9] cursor-pointer"
                   checked={isJoiningAsSpectator}
                   onChange={() => {
                     //fixes issue where the checkbox shows the opposite boolean value when clicked on
