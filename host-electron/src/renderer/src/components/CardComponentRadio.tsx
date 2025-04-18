@@ -20,7 +20,7 @@ export default function CardComponent(props: ICardComponent){
                   <input className="appearance-none" type="radio" onChange={() => props.handler()} checked={props.selectedLab?.id === props.value.id} value={props.value.id}/>
                   <div className="flex align-content-start gap-4 items-center">
                       {props.icon}
-                      <p className="text-4xl leading-none text-center font-medium text-black"> {props.headingTitle}</p>
+                      <p className="sm:text-4xl md:text-2xl lg:text-4xl text-bold leading-none text-center font-medium text-black"> {props.headingTitle}</p>
                   </div>
                   <div className="flex flex-col content-center h-full">
                     <p className="text-xl my-auto text-black">{props.description}</p>
