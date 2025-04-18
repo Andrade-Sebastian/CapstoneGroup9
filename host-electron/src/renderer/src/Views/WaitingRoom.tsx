@@ -105,8 +105,8 @@ export default function WaitingRoom() {
   //Modal Handlers
   const handleOpenModal = () => {
     setIsModalOpen(true);
-    setIsBeginDisabled(true); //set to false to test
-    setIsConnectEmotibitDisabled(false); //set to true to test
+    setIsBeginDisabled(false); //set to false to test
+    setIsConnectEmotibitDisabled(true); //set to true to test
     console.log(`[HandleOpenModal]Begin is ${isBeginDisabled} and ConnectEmotibitDisabled is ${isConnectEmotibitDisabled}`)
   }
   const handleCloseModal = () => setIsModalOpen(false)
@@ -115,7 +115,7 @@ export default function WaitingRoom() {
     if(nicknames.length != 0){
       handleSubmit()
       handleCloseModal()
-      setAllDevicesConnected(false); //set to true to test
+      setAllDevicesConnected(true); //set to true to test
     }
     else{
       toast.error("Please wait for people to join");

@@ -392,10 +392,10 @@ export default function SpectatorActiveExperiment() {
   })
 
   return (
-    <div className="flex flex-col lg:flex-row w-full bg-white px-2 py-1 gap-4">
+    <div className="flex flex-col lg:flex-row w-full max-h-full bg-white px-2 py-1 gap-4">
       <Toaster position="top-right"/>
-      <div className="flex flex-col w-full lg:w-3/4 gap-4 h-[90vh]">
-      <div className="relative w-full bg-white shadow-md flex-grow rounded-lg overflow-hidden pt-[35%]">
+      <div className="grid grid-cols-1 grid-rows-12 w-full lg:w-3/4 gap-4 h-full">
+      <div className="row-start-1 row-end-6 relative w-full shadow-md flex-grow rounded-lg overflow-hidden">
           <div className="absolute top-0 left-0 w-full h-full">
           {experimentType == 1 && isMediaAFile ? (
               <ReactPlayer ref={playerRef} url={videoPath} playing={isPlaying} controls={true} className="rounded-lg"/>
@@ -432,45 +432,52 @@ export default function SpectatorActiveExperiment() {
           </div>
           </div>
         {/* Chart stuff*/}
-        <div className="bg-gray-200 rounded-md text-gray-500 p-4 overflow-auto h-[45vh]">
-          <div className="w-full">
+        <div className="flex row-start-6 row-end-11 bg-gray-200 rounded-md text-gray-500 overflow-auto">
+          <div className="flex max-h-full w-full">
             {activeChart === "heartRateChart" ? (
-              <div>
-                <div className="text-lg font-semibold">
-                  ECG Chart - 33 BPM Average
-                </div>
+              <div className="flex flex-col w-full h-full max-h-full">
+              <div className="text-lg font-semibold">
+                ECG Chart - 33 BPM Average
+              </div>
                 <ChartComponent
                   chart_type={1}
                   chart_name="BPM"
                   chart_color="rgb(23, 190, 207)"
                   user_id={selectedJoiner?.id}
+                  className="w-full h-full"
                 />
               </div>
             ) : activeChart === "temperatureChart" ? (
-              <div>
-                <p>temperature chart</p>
+              <div className="flex flex-col w-full h-full max-h-full">
+              <div className="text-lg font-semibold">
+                Temperature Chart
+              </div>
                 <ChartComponent
                   chart_type={2}
                   chart_name="°F"
                   chart_color="rgb(255, 99, 132)"
                   user_id={selectedJoiner?.id}
+                  className="w-full h-full"
                 />
               </div>
             ) : (
-              <div>
-                <p> GSR/EDA </p>
+              <div className="flex flex-col w-full h-full max-h-full">
+              <div className="text-lg font-semibold">
+                GSR / EDA
+              </div>
                 <ChartComponent
                   chart_type={3}
                   chart_name="EDA"
                   chart_color="rgb(75,0,130)"
                   user_id={selectedJoiner?.id}
+                  className="w-full h-full"
                 />
               </div>
             )}
           </div>
         </div>
-        <Divider className="my-3" />
-        <div className="mt-4 flex justify-between w-full items-center">
+        {/* <Divider className="my-3" /> */}
+        <div className="h-min flex justify-between items-center align-middle row-start-11 row-end-12 mr-5">
           <p className="font-semibold">
             Nickname: <span className="font-light">{nickname}</span>
           </p>
@@ -479,7 +486,7 @@ export default function SpectatorActiveExperiment() {
           </div>
           <div className="flex space-x-4">
             <button
-              className={`text-3xl p-4 rounded-lg ${
+              className={`text-xl p-2 rounded-lg ${
                 selectedButton === "heartRate"
                   ? "bg-[#7F56D9] text-white"
                   : "bg-gray-300"
@@ -492,7 +499,7 @@ export default function SpectatorActiveExperiment() {
               <TbHeartRateMonitor />
             </button>
             <button
-              className={`text-3xl p-4 rounded-lg ${
+              className={`text-xl p-2 rounded-lg ${
                 selectedButton === "temperature"
                   ? "bg-[#7F56D9] text-white"
                   : "bg-gray-300"
@@ -505,7 +512,7 @@ export default function SpectatorActiveExperiment() {
               <FaThermometerEmpty />
             </button>
             <button
-              className={`text-3xl p-4 rounded-lg ${
+              className={`text-xl p-2 rounded-lg ${
                 selectedButton === "skin"
                   ? "bg-[#7F56D9] text-white"
                   : "bg-gray-300"

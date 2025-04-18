@@ -123,7 +123,7 @@ export default function HostCreateRoom() {
   //   <form onSubmit={handleSubmit} className="flex flex-col gap-14">
   return (
     <div className="h-full flex place-content-center ">
-      <div className='flex md:flex-row md:gap-4 lg:gap-[300px] mx-6'>
+      <div className='flex md:flex-row md:gap-4 lg:gap-[90px] mx-6 lg:max-w-[1024px]'>
       <div className="flex flex-col md:flex-row max-sm:hidden items-center justify-center">
       <Toaster position="top-right" />
         <SideComponent
