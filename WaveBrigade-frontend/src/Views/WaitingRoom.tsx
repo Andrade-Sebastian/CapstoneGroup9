@@ -76,6 +76,7 @@ export default function WaitingRoom() {
   //   };
   // }, [nickName, roomCode]);
 
+
   useEffect(() => {
     const handleExperimentType = (data) => {
       console.log("Received experiment type from the host...");
@@ -227,13 +228,19 @@ export default function WaitingRoom() {
     if (!sessionID) return;
 
     const fetchUsers = async () => {
+      console.log("****user role:" + userRole)
       try {
+
         console.log(
           "Trying to get users from session " + sessionId,
           "type | ",
           typeof sessionId
         );
         console.log("Socket ID when getting users: ", socketId);
+
+        //SOCKET ID ISNT BEING SET - 4/17
+        console.log("****socketId when getting users: " + socketId);
+        console.log("Trying to get users from session " + sessionId);
         const response = await axios.get(
           `http://${
             import.meta.env.VITE_BACKEND_PATH

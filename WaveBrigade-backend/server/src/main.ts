@@ -53,7 +53,7 @@ import fs from "node:fs";
 import { fileURLToPath } from "node:url";
 import { off } from "node:process";
 import dbClient from "./controllers/dbClient.ts";
-
+import {removeSpectatorFromSession, removeUserFromSession, getUserSessionIDFromSocketID} from "./controllers/database.ts"
 const app = express();
 
 // app.get('/get-ip', (req, res) => {
@@ -366,9 +366,28 @@ io.on("connection", (socket) => {
 
     console.log("User disconnected: ", socket.id);
     console.log("Reason: ", data);
+
     delete userStates[socket.id];
     const sessionID = getSessionBySocket(socket.id);
 
+    const sessionIDnum: number | null = await getUserSessionIDFromSocketID(socket.id)
+    const sessionIDstr = String(sessionIDnum)
+
+    try {
+      console.log("trying to remove joiner with sessionid " + sessionIDnum + "and socketid " + socket.id)
+      await removeUserFromSession(sessionIDstr, socket.id);
+    } catch (err) {
+      console.error("Error removing joiner from session:", err);
+    }
+
+    try {
+      console.log("removing spectator with sessionid " + sessionID + "and socketid" + socket.id)
+      await removeSpectatorFromSession(sessionIDnum, socket.id);
+    } catch (err) {
+      console.error("Error removing spectator from session:", err);
+    }
+
+    
     if (sessionID) {
       try {
         const response = await axios.post(

@@ -21,19 +21,30 @@ export default function JoinPage() {
   const [experimentActive, setExperimentActive] = useState(false);
 
   const {
-    userRole,
+    userRole, 
+    setUserRole,
     sessionId,
     wasKicked,
     socketId,
-    setUserRole,
     setSessionId,
     setNickname,
     setRoomCode,
+
     setUserSocketId,
   } = useJoinerStore();
 
   useEffect(() => {
     socket.connect();
+
+
+	  setUserSocketId,
+  } = useJoinerStore();
+
+
+
+  useEffect(() => {
+	socket.connect()
+    console.log("SOCKET.connect() Setting user role to student")
 
     setUserRole("student");
     console.log("Global wasKicked variable: ", wasKicked);
@@ -42,6 +53,7 @@ export default function JoinPage() {
       console.log("JoinPage.tsx: User was kicked");
       toast.error("You were kicked from the room");
     }
+
 
     socket.emit("client-assignment");
     socket.on("experiment-active", (data) => {
@@ -54,6 +66,9 @@ export default function JoinPage() {
         // toast.error("Experiment in progress, cannot join...")
       }
     });
+
+	  socket.emit("client-assignment", );
+
 
     socket.on("client-assignment", async (data) => {
       console.log(
@@ -90,11 +105,14 @@ export default function JoinPage() {
   }
 
   const handleSubmit = async (e) => {
+
     console.log(
       new Date().toLocaleTimeString(),
       "Current socketID in Zustand: ",
       socketId
     );
+
+	  console.log(new Date().toLocaleTimeString(), "(Join Page) Current socketID in Zustand: ", socketId)
     setRoomCode(StudentInputRoomCode);
     e.preventDefault();
 
@@ -153,10 +171,12 @@ export default function JoinPage() {
       if (isJoiningAsSpectator && canSpectate) {
         //Set global store 'userRole' to 'spectator'
         setUserRole("spectator");
+        console.log("if(isJoiningAsSpectator && canSpectate) Setting user role to spectator")
         console.log("global user role: ", userRole);
       } else {
         //when they input the password, navigate to the waiting room
         console.log("joiner");
+        console.log("(else) Setting user role to student")
         setUserRole("student");
       }
       toast.success("Room code valid. Password is needed...");
