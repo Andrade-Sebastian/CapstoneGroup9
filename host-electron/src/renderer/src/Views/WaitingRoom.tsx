@@ -112,10 +112,14 @@ export default function WaitingRoom() {
   const handleCloseModal = () => setIsModalOpen(false)
   const handleAction = () => {
     console.log('Creating lobby...')
+    handleSubmit()
+    handleCloseModal()
+    setAllDevicesConnected(true); //set to true to test
+  }
+
+  const checkUsers = () => {
     if(nicknames.length != 0){
-      handleSubmit()
-      handleCloseModal()
-      setAllDevicesConnected(true); //set to true to test
+      handleOpenModal();
     }
     else{
       toast.error("Please wait for people to join");
@@ -653,7 +657,7 @@ export default function WaitingRoom() {
         </button>
         <button
           type="button"
-          onClick={handleOpenModal}
+          onClick={checkUsers}
           className="mt-6 font-semibold py-3 px-6 rounded-md shadow-md transition duration-300 ease-in-out bg-[#7F56D9] hover:bg-violet-500 text-white cursor-pointer"
         >
           Begin
