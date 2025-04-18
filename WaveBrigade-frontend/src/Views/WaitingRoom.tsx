@@ -4,6 +4,10 @@ import { CiPlay1 } from "react-icons/ci";
 import { TfiGallery } from 'react-icons/tfi'
 import { TiCamera } from 'react-icons/ti'
 import { IoVideocam, IoNewspaper } from 'react-icons/io5'
+import { PiCrownSimpleThin } from 'react-icons/pi'
+import { HiOutlineSignal } from 'react-icons/hi2'
+import { PiPlugsConnectedThin } from "react-icons/pi";
+import { CiUser } from 'react-icons/ci'
 import socket from "./socket.tsx";
 import axios from "axios";
 import { Divider } from "@heroui/divider";
@@ -363,7 +367,7 @@ export default function WaitingRoom() {
         }
       } catch (error) {
         toast.error("Failed to receive gallery data");
-        console.log("Error receiving photolab data in joiner fe: ", error);
+        console.log("Error receiving gallerylab data in joiner fe: ", error);
       }
     };
     const getArticleData = async () => {
@@ -437,18 +441,24 @@ export default function WaitingRoom() {
           </h1>
           <p className="text-4xl sm:text-5xl font-bold text-[#894DD6] break-words">{roomCode}</p>
           <div className="space-y-2">
-            <p className="text-base sm:text-lg">
-              <span className="font-semibold"> NICKNAME:</span> {nickname}
-            </p>
+            <div className="flex items-center space-x-2 text-lg">
+              <PiCrownSimpleThin size={24} />
+              <span className="font-semibold text-[#894DD6] "> NICKNAME </span>
+              <span>{nickname}</span>
+            </div>
             {!isSpectator && ( 
             
               <>
-              <p className="text-base sm:text-lg">
-                <span className="font-semibold">SENSOR SERIAL NUMBER:</span>
-                {serial}
+<div className="flex items-center space-x-2 text-lg">
+              <HiOutlineSignal size={24} />
+              <p className="text-lg">
+                <span className="font-semibold text-[#894DD6]">SENSOR SERIAL NUMBER</span>  {serial}
               </p>
+            </div>
+            <div className="flex items-center space-x-2 text-lg">
+            <PiPlugsConnectedThin size={24}/>
               <p className="text-base sm:text-lg flex flex-col sm:flex-row sm:items-center">
-                <span className="font-semibold">SENSOR STATUS: </span>
+                <span className="font-semibold text-[#894DD6]">SENSOR STATUS </span>
                 <div>
                   {isConnected ? (
                     <span className="text-green-500 font-bold ml-1"> CONNECTED</span>
@@ -457,6 +467,7 @@ export default function WaitingRoom() {
                   )}
                 </div>
               </p>
+              </div>
               </>
             )}
           </div>

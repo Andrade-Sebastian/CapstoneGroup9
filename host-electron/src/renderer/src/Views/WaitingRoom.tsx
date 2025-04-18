@@ -4,6 +4,9 @@ import { CiPlay1 } from 'react-icons/ci'
 import { TfiGallery } from 'react-icons/tfi'
 import { TiCamera } from 'react-icons/ti'
 import { IoVideocam, IoNewspaper } from 'react-icons/io5'
+import { PiCrownSimpleThin } from 'react-icons/pi'
+import { HiOutlineSignal } from 'react-icons/hi2'
+import { CiUser } from 'react-icons/ci'
 import { FaUserXmark } from "react-icons/fa6";
 import socket from './socket'
 import axios from 'axios'
@@ -102,8 +105,8 @@ export default function WaitingRoom() {
   //Modal Handlers
   const handleOpenModal = () => {
     setIsModalOpen(true);
-    setIsBeginDisabled(true); 
-    setIsConnectEmotibitDisabled(false);
+    setIsBeginDisabled(true); //set to false to test
+    setIsConnectEmotibitDisabled(false); //set to true to test
     console.log(`[HandleOpenModal]Begin is ${isBeginDisabled} and ConnectEmotibitDisabled is ${isConnectEmotibitDisabled}`)
   }
   const handleCloseModal = () => setIsModalOpen(false)
@@ -112,7 +115,7 @@ export default function WaitingRoom() {
     if(nicknames.length != 0){
       handleSubmit()
       handleCloseModal()
-      setAllDevicesConnected(false);
+      setAllDevicesConnected(false); //set to true to test
     }
     else{
       toast.error("Please wait for people to join");
@@ -467,10 +470,12 @@ export default function WaitingRoom() {
     socket.on("joiner-connected", async ({ socketID, nickname, lastFourSerial }) => {
       console.log(`Joiner Connected Event received: Joiner-${nickname}, SocketID-${socketID}, Last Four of Serial ${lastFourSerial}`);
       try{
-
         setCurrentDevices(currentDevices => {
           const newState = currentDevices.map(device => {
-            if (device.associatedDevice && device.associatedDevice.serialNumber === lastFourSerial) {
+            console.log("device.associatedDevice,",device.associatedDevice, "device.associatedDevice.serialNumber", device.associatedDevice.serialNumber, "lastFourSerial", lastFourSerial);
+            const trimmedText = device.associatedDevice.serialNumber.trim();
+            const updatedLastFour = trimmedText.slice(-4);
+            if (device.associatedDevice && updatedLastFour === lastFourSerial) {
               return { 
                 ...device, 
                 socketId: socketID,
@@ -482,9 +487,9 @@ export default function WaitingRoom() {
                 } : null
               }
             }
+            console.log("device", device)
             return device;
           });
-        
           console.log("React state after new joiner:", newState); // Logs the correct state before updating
           return newState;
         });
@@ -571,6 +576,9 @@ export default function WaitingRoom() {
     navigateTo('/activity-room');
   }
   
+  useEffect(() =>{
+    console.log("Current Devices",currentDevices)
+  },[currentDevices] )
   return (
     <div className="flex flex-col items-center justify-center px-4 mx:px-8 w-full">
       <div className="flex flex-col md:flex-row items-start justify-between w-full max-w-6xl gap-8">
@@ -580,13 +588,18 @@ export default function WaitingRoom() {
           <h1 className="text-2xl md:text-3xl font-semibold text-gray-800 mt-6">Welcome to Session</h1>
           <p className="text-6xl md:text-6xl font-bold text-[#894DD6] break-words">{roomCode}</p>
           <div className="space-y-2">
-            <p className="text-base md:text-lg">
-              <span className="font-semibold"> NICKNAME:</span> {hostName}
-            </p>
-            <p className="text-base md:text-lg">
-              <span className="font-semibold">PARTICIPANTS: </span>
-              <span className="md:text-sm font-light">{nicknames.length}</span>
-            </p>
+            <div className="flex items-center space-x-2 text-lg">
+              <PiCrownSimpleThin size={24} />
+              <span className="font-semibold text-[#894DD6] "> NICKNAME </span>
+              <span>{hostName}</span>
+            </div>
+<div className="flex items-center space-x-2 text-lg">
+              <CiUser size={24} />
+              <p className="text-lg">
+                <span className="font-semibold text-[#894DD6]">PARTICIPANTS</span>{' '}
+                <span>{nicknames.length}</span>
+              </p>
+            </div>
           </div>
         </div>
         {/* right section */}
@@ -606,7 +619,7 @@ export default function WaitingRoom() {
               currentDevices.map((device) => {
                 // if (device.nickname !== null && device.associatedDevice.isConnected === true){
                   return(
-                    <EmotiBitList key={device.userId} user={device} onAction={() => handleOpenModalSettings(user.userid)} />
+                    <EmotiBitList key={device.userId} user={device} onAction={() => handleOpenModalSettings(device.userid)} />
                   );
                 //}
               })
@@ -655,8 +668,8 @@ export default function WaitingRoom() {
         modalTitle="Connect Emotibits"
         button="Connect Emotibits"
         button2="Begin"
-        isButtonDisabled={isBeginDisabled}
-        isButton1Disabled={isConnectEmotibitDisabled}
+        // isButtonDisabled={isBeginDisabled}
+        // isButton1Disabled={isConnectEmotibitDisabled}
       >
         <div className="mb-6">
           <h1 className="text-md text-gray-700 mb-2">
@@ -701,13 +714,11 @@ export default function WaitingRoom() {
       </ModalComponent>
       <ModalComponent
         onAction={handleRemoveEmoti}
-        onAction2={handleRemoveUser}
         // onAction3={handleUpdate}
         isOpen={isModalOpenSettings}
         onCancel={handleCloseModalSettings}
         modalTitle="EmotiBit Settings"
         button="Remove EmotiBit"
-        button2="Remove User"
         // button3="Update"
       >
         <div className="mb-6">

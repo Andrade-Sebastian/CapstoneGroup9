@@ -130,7 +130,7 @@ export default function HostSelectLabPage() {
           <button
             type="submit"
             disabled={!selectedLab}
-            className={`w-full md:w-auto mt-6 font-semibold py-3 px-6 rounded-md shadow-md transition duration-300 ease-in-out ${
+            className={`w-full md:w-auto mt-6 font-semibold py-3 px-6 rounded-md shadow-md transition duration-300 ease-in-out cursor-pointer ${
               selectedLab
                 ? 'bg-[#7F56D9] hover:bg-violet-500 text-white'
                 : 'bg-gray-400 text-white cursor-not-allowed'
