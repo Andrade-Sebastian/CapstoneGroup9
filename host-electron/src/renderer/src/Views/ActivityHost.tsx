@@ -98,7 +98,8 @@ export default function ActivityHost() {
   }
   const handleOpenModal = () => setIsModalOpen(true)
   const handleCloseModal = () => setIsModalOpen(false)
-  const handleAction = () => {
+  const handleAction = async () => {
+    await axios.post(`http://localhost:3000/database/remove-session/${sessionId}`)
     console.log('Sending to Summary...')
     handleSubmit()
     handleCloseModal()
@@ -126,6 +127,10 @@ export default function ActivityHost() {
     console.log('in handle submit')
 
     socket.emit('end-experiment')
+
+    //delete all info pertaining to the session from the database
+    axios.post(`http://localhost:3000/database/remove-session/${sessionId}`);
+
     setTimeout(() => {
       navigateTo('/summary')
     }, 2000)

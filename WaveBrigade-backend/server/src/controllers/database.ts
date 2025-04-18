@@ -748,7 +748,7 @@ export async function getUsersFromSession(sessionID: string){
 			WHERE "User".sessionid = $1`,
 			[sessionID]
 		);
-		console.log("<><><><><><> Users retrieved from sessionid", sessionID, query);
+		// console.log("<><><><><><> Users retrieved from sessionid", sessionID, query);
 		return query.rows;
 	}
 	catch(error){
