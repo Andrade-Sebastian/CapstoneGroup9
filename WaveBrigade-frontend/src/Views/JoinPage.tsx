@@ -18,6 +18,7 @@ export default function JoinPage() {
   const navigateTo = useNavigate();
   const [sessionID, setSessionID] = useState("");
   const [isJoiningAsSpectator, setisJoiningAsSpectator] = useState(false);
+  const [experimentActive, setExperimentActive] = useState(false);
 
   const {
     userRole,
@@ -44,16 +45,27 @@ export default function JoinPage() {
 	}
 
 	socket.emit("client-assignment", );
+  socket.on("experiment-active", (data) => {
+    if(data.isActive === true){
+      setExperimentActive(data.isActive);
+      toast.error("Experiment in progress, cannot join...")
+      return;
+    }
+    else{
+      setExperimentActive(false);
+    }
+  })
 
     socket.on("client-assignment", async (data) => {
 		console.log(new Date().toLocaleTimeString(), "(JoinPage.tsx): got a client-assignment event in JoinPage.tsx, recieved: ", data)
 		await setUserSocketId(data.socketId);
 		
 		return () => {
+      socket.off("experiment-active")
 			socket.off("client-assignment")
 		}
   	})
-  }, []);
+  }, [setExperimentActive]);
 
   async function checkNicknameIsUnique(nickname: string, sessionID: number): Promise<boolean> {
     console.log(`making request at http://localhost:3000/database/unique-nickname/${sessionID}/${nickname}`)
@@ -70,6 +82,10 @@ export default function JoinPage() {
 	  console.log(new Date().toLocaleTimeString(), "Current socketID in Zustand: ", socketId)
     setRoomCode(StudentInputRoomCode);
     e.preventDefault();
+
+    if(experimentActive === true){
+      return;
+    }
 
     if (!StudentInputRoomCode && !nickName) {
       console.error("Please enter both a nickname and a room code...");

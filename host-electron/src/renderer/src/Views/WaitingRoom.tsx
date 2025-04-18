@@ -41,7 +41,8 @@ export default function WaitingRoom() {
     setSessionId,
     removeDevice,
     experimentTitle,
-    experimentDesc
+    experimentDesc,
+    setIsActive
   } = useSessionStore()
   const [ isBeginDisabled, setIsBeginDisabled] = useState(false);
   const [ isConnectEmotibitDisabled, setIsConnectEmotibitDisabled] = useState(false);
@@ -577,6 +578,10 @@ export default function WaitingRoom() {
       //-----HARDCODED FOR TESTING-------
     socket.emit("session-start");
     socket.emit("session-start-spectator")
+    setIsActive(true);
+    socket.emit("experiment-active", {
+      isActive: true
+    });
     navigateTo('/activity-room');
   }
   
