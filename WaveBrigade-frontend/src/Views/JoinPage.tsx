@@ -20,21 +20,22 @@ export default function JoinPage() {
   const [isJoiningAsSpectator, setisJoiningAsSpectator] = useState(false);
 
   const {
-    userRole,
-    sessionId,
-	wasKicked,
-    socketId,
+    userRole, 
     setUserRole,
+    sessionId,
+	  wasKicked,
+    socketId,
     setSessionId,
     setNickname,
     setRoomCode,
-	setUserSocketId,
+	  setUserSocketId,
   } = useJoinerStore();
+
 
 
   useEffect(() => {
 	socket.connect()
-
+    console.log("SOCKET.connect() Setting user role to student")
     setUserRole("student");
 	console.log("Global wasKicked variable: ", wasKicked)
 
@@ -43,7 +44,7 @@ export default function JoinPage() {
 		toast.error("You were kicked from the room")
 	}
 
-	socket.emit("client-assignment", );
+	  socket.emit("client-assignment", );
 
     socket.on("client-assignment", async (data) => {
 		console.log(new Date().toLocaleTimeString(), "(JoinPage.tsx): got a client-assignment event in JoinPage.tsx, recieved: ", data)
@@ -67,7 +68,7 @@ export default function JoinPage() {
 
 
   const handleSubmit = async (e) => {
-	  console.log(new Date().toLocaleTimeString(), "Current socketID in Zustand: ", socketId)
+	  console.log(new Date().toLocaleTimeString(), "(Join Page) Current socketID in Zustand: ", socketId)
     setRoomCode(StudentInputRoomCode);
     e.preventDefault();
 
@@ -114,11 +115,13 @@ export default function JoinPage() {
       if(isJoiningAsSpectator && canSpectate){
         //Set global store 'userRole' to 'spectator'
         setUserRole("spectator");
+        console.log("if(isJoiningAsSpectator && canSpectate) Setting user role to spectator")
         console.log("global user role: ", userRole);
       }
       else{
         //when they input the password, navigate to the waiting room
         console.log("joiner");
+        console.log("(else) Setting user role to student")
         setUserRole("student");
         
       }
