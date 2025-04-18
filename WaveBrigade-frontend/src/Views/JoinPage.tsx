@@ -47,12 +47,13 @@ export default function JoinPage() {
 	socket.emit("client-assignment", );
   socket.on("experiment-active", (data) => {
     if(data.isActive === true){
-      setExperimentActive(data.isActive);
       toast.error("Experiment in progress, cannot join...")
+      setExperimentActive(data.isActive);
       return;
     }
     else{
       setExperimentActive(false);
+      // toast.error("Experiment in progress, cannot join...")
     }
   })
 
@@ -84,6 +85,7 @@ export default function JoinPage() {
     e.preventDefault();
 
     if(experimentActive === true){
+      toast.error("Cannot join room, experiment is active...")
       return;
     }
 
@@ -192,6 +194,7 @@ export default function JoinPage() {
         return true;
       }
     } catch (error) {
+      toast.error(`ERROR: Cannot join room ${error}`)
       if(error.status === 400){
         console.log("Room code is invalid");
         return false;

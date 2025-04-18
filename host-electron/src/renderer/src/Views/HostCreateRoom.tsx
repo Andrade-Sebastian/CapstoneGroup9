@@ -151,7 +151,7 @@ export default function HostCreateRoom() {
 
           <div className="mb-6">
             <label htmlFor="Password" className="block text-sm font-medium text-gray-700 mb-2">
-              Password <span className="text-purple-500">*</span>
+              Set a password <span className="text-purple-500">*</span>
             </label>
             <div className="relative">
               <input
