@@ -1,13 +1,13 @@
 import { Navigate, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { CiPlay1 } from "react-icons/ci";
-import { TfiGallery } from 'react-icons/tfi'
-import { TiCamera } from 'react-icons/ti'
-import { IoVideocam, IoNewspaper } from 'react-icons/io5'
-import { PiCrownSimpleThin } from 'react-icons/pi'
-import { HiOutlineSignal } from 'react-icons/hi2'
+import { TfiGallery } from "react-icons/tfi";
+import { TiCamera } from "react-icons/ti";
+import { IoVideocam, IoNewspaper } from "react-icons/io5";
+import { PiCrownSimpleThin } from "react-icons/pi";
+import { HiOutlineSignal } from "react-icons/hi2";
 import { PiPlugsConnectedThin } from "react-icons/pi";
-import { CiUser } from 'react-icons/ci'
+import { CiUser } from "react-icons/ci";
 import socket from "./socket.tsx";
 import axios from "axios";
 import { Divider } from "@heroui/divider";
@@ -18,7 +18,6 @@ import React from "react";
 import toast, { Toaster } from "react-hot-toast";
 import { user } from "@heroui/react";
 
-
 // -----JOINER=--------------------------//
 export default function WaitingRoom() {
   const [nicknames, setNickNames] = useState<string[]>([]);
@@ -26,8 +25,8 @@ export default function WaitingRoom() {
   const [experimentID, setExperimentID] = useState(0);
   const [isSpectator, setIsSpectator] = useState(false);
   const [experimentIcon, setExperimentIcon] = useState<JSX.Element>(
-    <CiPlay1 style={{ fontSize: '20px' }} />
-  )
+    <CiPlay1 style={{ fontSize: "20px" }} />
+  );
   const navigateTo = useNavigate();
   const {
     isConnected,
@@ -77,13 +76,15 @@ export default function WaitingRoom() {
   //   };
   // }, [nickName, roomCode]);
 
-  
   useEffect(() => {
-    const handleExperimentType = (data) =>{
-      console.log("Received experiment type from the host...")
+    const handleExperimentType = (data) => {
+      console.log("Received experiment type from the host...");
       setExperimentType(data);
       console.log("Here is the experiment type sent by the host");
-      console.log("Experiment Type set to:", useJoinerStore.getState().experimentType)
+      console.log(
+        "Experiment Type set to:",
+        useJoinerStore.getState().experimentType
+      );
     };
     socket.on("experiment-type", handleExperimentType);
     return () => {
@@ -110,102 +111,116 @@ export default function WaitingRoom() {
   //     socket.off("experiment-data", handleGalleryImageData);
   //   };
   // },[]);
-  
+
   useEffect(() => {
-    console.log("Trying to get experiment type. Currently set to: ", experimentType)
+    console.log(
+      "Trying to get experiment type. Currently set to: ",
+      experimentType
+    );
     socket.emit("join-room");
-  },[experimentType])
+  }, [experimentType]);
 
   useEffect(() => {
     socket.on("kick", kickUser);
     console.log("Listening for 'kick event");
-    
-    function kickUser()
-    {
+
+    function kickUser() {
       //Global store that keeps track of whether the user has been previously kicked or not
       setWasKicked(true);
-      console.log("Kick function. Here is the socketID and sessionID", socketId, sessionId)
+      console.log(
+        "Kick function. Here is the socketID and sessionID",
+        socketId,
+        sessionId
+      );
       //removes user from database
-      
 
       console.log("Kicking user from database in sessionID: ", sessionId);
       //is sessionID the global one? or a useState?
 
-      if (userRole === "spectator"){
-        console.log(`removing spectator from session ${sessionId} with socketID ${socketId}`)
-      //   axios.post("http://localhost:3000/joiner/remove-spectator-from-session", 
-      //     {
-      //       sessionID: sessionId,
-      //       socketID: socketId
-      //     }
-      //   ).then(() => {  
-      //     console.log("Successfully removed from database");
-      //     navigateTo("/");})
-      //   .catch(error =>{
-      //   console.log("Error removing user from database", error)
-      // })
+      if (userRole === "spectator") {
+        console.log(
+          `removing spectator from session ${sessionId} with socketID ${socketId}`
+        );
+        //   axios.post("http://${import.meta.env.VITE_BACKEND_PATH}/joiner/remove-spectator-from-session",
+        //     {
+        //       sessionID: sessionId,
+        //       socketID: socketId
+        //     }
+        //   ).then(() => {
+        //     console.log("Successfully removed from database");
+        //     navigateTo("/");})
+        //   .catch(error =>{
+        //   console.log("Error removing user from database", error)
+        // })
         console.log("Successfully removed from database");
-        clearInterval(interval)
-        navigateTo("/")
+        clearInterval(interval);
+        navigateTo("/");
         return () => {
           socket.off("kick", kickUser);
-        }
-      }else{
-        axios.post('http://localhost:3000/joiner/leave-room', {
-          sessionID: sessionId,
-          socketID: socketId
-        })
-        .then(() =>{
-          console.log("Successfully removed from database");
-          navigateTo("/");
-        })
-        .catch(error =>{
-          console.log("Error removing user from database", error)
-        })
-      }}
-    
+        };
+      } else {
+        axios
+          .post(
+            `http://${import.meta.env.VITE_BACKEND_PATH}/joiner/leave-room`,
+            {
+              sessionID: sessionId,
+              socketID: socketId,
+            }
+          )
+          .then(() => {
+            console.log("Successfully removed from database");
+            navigateTo("/");
+          })
+          .catch((error) => {
+            console.log("Error removing user from database", error);
+          });
+      }
+    }
+
     return () => {
       socket.off("kick", kickUser);
-  }}, []);
+    };
+  }, []);
 
   useEffect(() => {
-    if(userRole === "student"){
-    socket.on("session-start", () => {
-      console.log("joiner - ONsession start");
-      navigateTo("/active-experiment");
-    });
-    return () => {
-      socket.off("session-start");
-    };
-  }
-  else{
-    socket.on("session-start-spectator", () => {
-      console.log("spectator in waiting room");
-      navigateTo("/active-experiment-spectator")
-    })
-    return () => {
-      socket.off("session-start-spectator");
-    };
-  }
+    if (userRole === "student") {
+      socket.on("session-start", () => {
+        console.log("joiner - ONsession start");
+        navigateTo("/active-experiment");
+      });
+      return () => {
+        socket.off("session-start");
+      };
+    } else {
+      socket.on("session-start-spectator", () => {
+        console.log("spectator in waiting room");
+        navigateTo("/active-experiment-spectator");
+      });
+      return () => {
+        socket.off("session-start-spectator");
+      };
+    }
   }, [navigateTo, userRole]);
 
   useEffect(() => {
     const getSessionID = async () => {
-      console.log("verify-code, room code: ", roomCode)
+      console.log("verify-code, room code: ", roomCode);
       const response = await axios
-        .get(`http://localhost:3000/joiner/verify-code/${roomCode}`)
+        .get(
+          `http://${
+            import.meta.env.VITE_BACKEND_PATH
+          }/joiner/verify-code/${roomCode}`
+        )
         .then((response) => {
           setSessionID(response.data.sessionID);
-          setSessionId(response.data.sessionID)
+          setSessionId(response.data.sessionID);
         });
-    }; 
-
+    };
 
     setIsSpectator(userRole === "spectator");
     console.log("SPECTATOR AHH: ", isSpectator);
     getSessionID();
   }, []);
-
 
   let interval;
   useEffect(() => {
@@ -213,20 +228,28 @@ export default function WaitingRoom() {
 
     const fetchUsers = async () => {
       try {
-        console.log("Trying to get users from session " + sessionId, "type | ", typeof(sessionId));
+        console.log(
+          "Trying to get users from session " + sessionId,
+          "type | ",
+          typeof sessionId
+        );
         console.log("Socket ID when getting users: ", socketId);
         const response = await axios.get(
-          `http://localhost:3000/joiner/room-users/${sessionId}`
+          `http://${
+            import.meta.env.VITE_BACKEND_PATH
+          }/joiner/room-users/${sessionId}`
         );
-        console.log("got ", JSON.stringify(response.data.users))
+        console.log("got ", JSON.stringify(response.data.users));
         const users = response.data.users; //Array of IUser objects
 
         // const nicknames = []; //holds only the nicknames of those IUser Objects
 
         const nicknames = users.map((user) =>
-          user.userrole === "spectator" ? `${user.nickname} (Spectator)` : user.nickname
+          user.userrole === "spectator"
+            ? `${user.nickname} (Spectator)`
+            : user.nickname
         );
-  
+
         // initialize nicknames array
         // for (let i = 0; i < users.length; i++) {
         //   if (users[i].userrole === "spectator"){
@@ -238,8 +261,7 @@ export default function WaitingRoom() {
         //   console.log("nicknames: " + JSON.stringify(nicknames) + "Length: " + nicknames.length)
         //   setNickNames(nicknames);
         // }
-        setNickNames(nicknames)
-
+        setNickNames(nicknames);
       } catch (error) {
         console.error("Error fetching users:", error);
       }
@@ -251,12 +273,13 @@ export default function WaitingRoom() {
     return () => clearInterval(interval);
   }, [sessionID]); //Don't fetch any data until sessionID is set
 
-
   useEffect(() => {
     const getExperimentData = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:3000/joiner/session/getInfo/${roomCode}`
+          `http://${
+            import.meta.env.VITE_BACKEND_PATH
+          }/joiner/session/getInfo/${roomCode}`
         );
         if (response.status === 200) {
           console.log("EXPERIMENT ID RETURNED: ", response.data.experimentid);
@@ -272,33 +295,42 @@ export default function WaitingRoom() {
 
   useEffect(() => {
     const getVideoFileData = async () => {
-      try{
+      try {
         const response = await axios.get(
-          `http://localhost:3000/joiner/getVideoFile/${experimentID}`
+          `http://${
+            import.meta.env.VITE_BACKEND_PATH
+          }/joiner/getVideoFile/${experimentID}`
         );
-        if(response.status === 200){
-          toast.success("Successfully received video lab data.")
+        if (response.status === 200) {
+          toast.success("Successfully received video lab data.");
           console.log("Returned get video data:", response.data);
           const experimentTitle = response.data.name;
           const experimentDesc = response.data.description;
           const path = response.data.path;
-          console.log("RESPONSE DATA VARIABLES:", experimentTitle, experimentDesc, path);
+          console.log(
+            "RESPONSE DATA VARIABLES:",
+            experimentTitle,
+            experimentDesc,
+            path
+          );
           setExperimentId(experimentID);
           setExperimentTitle(experimentTitle);
           setExperimentDesc(experimentDesc);
           setExperimentPath(path);
         }
-      } catch(error){
+      } catch (error) {
         toast.error("Failed to receive video data");
         console.log("Error receiving video data in joiner FE:", error);
       }
-    }
+    };
     //if(!experimentID) return;
     const getPhotoData = async () => {
       try {
         console.log("SENDING TO THE ROUTE EXPERIMENT ID: ", experimentID);
         const response = await axios.get(
-          `http://localhost:3000/joiner/getPhoto/${experimentID}`
+          `http://${
+            import.meta.env.VITE_BACKEND_PATH
+          }/joiner/getPhoto/${experimentID}`
         );
         if (response.status === 200) {
           toast.success("Successfully received photo lab data.");
@@ -329,19 +361,21 @@ export default function WaitingRoom() {
       try {
         console.log("SENDING TO THE ROUTE EXPERIMENT ID: ", experimentID);
         const response = await axios.get(
-          `http://localhost:3000/joiner/getGallery/${experimentID}`
+          `http://${
+            import.meta.env.VITE_BACKEND_PATH
+          }/joiner/getGallery/${experimentID}`
         );
         if (response.status === 200) {
           toast.success("Successfully received gallery lab data.");
           console.log("RETURNED GET GALLERY DATA: ", response.data);
           const experimentTitle = response.data.name;
           const experimentDesc = response.data.description;
-          response.data.images.forEach((img,index) =>{
+          response.data.images.forEach((img, index) => {
             addPhoto({
               id: index,
               src: img.path,
-              file:null,
-              caption: img.caption
+              file: null,
+              caption: img.caption,
             });
           });
 
@@ -349,10 +383,8 @@ export default function WaitingRoom() {
           // const captions = response.data.captions;
           // const path = response.data.path;
           //NEED THE EXPERIMENT TYPE
-          console.log(
-            "RETURNED GET GALLERY DATA: ", response.data
-          );
-          console.log("GalleryPhoto data from getGallery", galleryPhotos)
+          console.log("RETURNED GET GALLERY DATA: ", response.data);
+          console.log("GalleryPhoto data from getGallery", galleryPhotos);
           setExperimentId(experimentID);
           setExperimentTitle(experimentTitle);
           setExperimentDesc(experimentDesc);
@@ -374,7 +406,9 @@ export default function WaitingRoom() {
       try {
         console.log("SENDING TO THE ROUTE EXPERIMENT ID: ", experimentID);
         const response = await axios.get(
-          `http://localhost:3000/joiner/getArticleFile/${experimentID}`
+          `http://${
+            import.meta.env.VITE_BACKEND_PATH
+          }/joiner/getArticleFile/${experimentID}`
         );
         if (response.status === 200) {
           toast.success("Successfully received article lab data.");
@@ -399,37 +433,44 @@ export default function WaitingRoom() {
         console.log("Error receiving article lab data in joiner fe: ", error);
       }
     };
-    if(experimentType === 1){
+    if (experimentType === 1) {
       getVideoFileData();
     }
-    if(experimentType === 2){
+    if (experimentType === 2) {
       getPhotoData();
     }
-    if(experimentType === 3){
+    if (experimentType === 3) {
       getGalleryData();
     }
-    if(experimentType === 4){
+    if (experimentType === 4) {
       getArticleData();
     }
-  }, [experimentID, setExperimentDesc, setExperimentId, setExperimentTitle, setExperimentPath, experimentType]);
+  }, [
+    experimentID,
+    setExperimentDesc,
+    setExperimentId,
+    setExperimentTitle,
+    setExperimentPath,
+    experimentType,
+  ]);
 
   useEffect(() => {
     if (experimentType === 1) {
-      setExperimentTypeString('VideoLab')
-      setExperimentIcon(<IoVideocam style={{ fontSize: '20px' }} />)
+      setExperimentTypeString("VideoLab");
+      setExperimentIcon(<IoVideocam style={{ fontSize: "20px" }} />);
     } else if (experimentType === 2) {
-      setExperimentTypeString('PhotoLab')
-      setExperimentIcon(<TiCamera style={{ fontSize: '20px' }} />)
+      setExperimentTypeString("PhotoLab");
+      setExperimentIcon(<TiCamera style={{ fontSize: "20px" }} />);
     } else if (experimentType === 3) {
-      setExperimentTypeString('GalleryLab')
-      setExperimentIcon(<TfiGallery style={{ fontSize: '20px' }} />)
+      setExperimentTypeString("GalleryLab");
+      setExperimentIcon(<TfiGallery style={{ fontSize: "20px" }} />);
     } else if (experimentType === 4) {
-      setExperimentTypeString('ArticleLab')
-      setExperimentIcon(<IoNewspaper style={{ fontSize: '20px' }} />)
+      setExperimentTypeString("ArticleLab");
+      setExperimentIcon(<IoNewspaper style={{ fontSize: "20px" }} />);
     } else {
       console.log("Invalid experiment type");
     }
-  }, [experimentType, setExperimentTypeString])
+  }, [experimentType, setExperimentTypeString]);
   return (
     <div className="flex flex-col items-center justify-center px-4 md:px-8 py-8">
       <Toaster position="top-right" />
@@ -439,35 +480,47 @@ export default function WaitingRoom() {
           <h1 className="text-2xl sm:text-3xl font-semibold text-gray-800">
             Welcome to Session
           </h1>
-          <p className="text-4xl sm:text-5xl font-bold text-[#894DD6] break-words">{roomCode}</p>
+          <p className="text-4xl sm:text-5xl font-bold text-[#894DD6] break-words">
+            {roomCode}
+          </p>
           <div className="space-y-2">
             <div className="flex items-center space-x-2 text-lg">
               <PiCrownSimpleThin size={24} />
               <span className="font-semibold text-[#894DD6] "> NICKNAME </span>
               <span>{nickname}</span>
             </div>
-            {!isSpectator && ( 
-            
+            {!isSpectator && (
               <>
-<div className="flex items-center space-x-2 text-lg">
-              <HiOutlineSignal size={24} />
-              <p className="text-lg">
-                <span className="font-semibold text-[#894DD6]">SENSOR SERIAL NUMBER</span>  {serial}
-              </p>
-            </div>
-            <div className="flex items-center space-x-2 text-lg">
-            <PiPlugsConnectedThin size={24}/>
-              <p className="text-base sm:text-lg flex flex-col sm:flex-row sm:items-center">
-                <span className="font-semibold text-[#894DD6]">SENSOR STATUS </span>
-                <div>
-                  {isConnected ? (
-                    <span className="text-green-500 font-bold ml-1"> CONNECTED</span>
-                  ) : (
-                    <span className="text-red-500 font-bold ml-1">  NOT CONNECTED</span>
-                  )}
+                <div className="flex items-center space-x-2 text-lg">
+                  <HiOutlineSignal size={24} />
+                  <p className="text-lg">
+                    <span className="font-semibold text-[#894DD6]">
+                      SENSOR SERIAL NUMBER
+                    </span>{" "}
+                    {serial}
+                  </p>
                 </div>
-              </p>
-              </div>
+                <div className="flex items-center space-x-2 text-lg">
+                  <PiPlugsConnectedThin size={24} />
+                  <p className="text-base sm:text-lg flex flex-col sm:flex-row sm:items-center">
+                    <span className="font-semibold text-[#894DD6]">
+                      SENSOR STATUS{" "}
+                    </span>
+                    <div>
+                      {isConnected ? (
+                        <span className="text-green-500 font-bold ml-1">
+                          {" "}
+                          CONNECTED
+                        </span>
+                      ) : (
+                        <span className="text-red-500 font-bold ml-1">
+                          {" "}
+                          NOT CONNECTED
+                        </span>
+                      )}
+                    </div>
+                  </p>
+                </div>
               </>
             )}
           </div>
@@ -483,10 +536,15 @@ export default function WaitingRoom() {
           ></WaitingRoomCardComponent>
         </div>
       </div>
-      <Divider className="my-6" w-full max-w-4xl/>
+      <Divider className="my-6" w-full max-w-4xl />
       <div className="flex flex-wrap justify-center gap-4 text-base sm:text-lg font-medium w-full text-gray-800 max-w-4xl">
         {nicknames.map((name, index) => (
-          <p className='flex items-center border-black font-medium rounded-md bg-[#E6E6E6] px-4 py-1.5 text-black font-light gap-2.5' key={index}>{name}</p>
+          <p
+            className="flex items-center border-black font-medium rounded-md bg-[#E6E6E6] px-4 py-1.5 text-black font-light gap-2.5"
+            key={index}
+          >
+            {name}
+          </p>
         ))}
       </div>
     </div>

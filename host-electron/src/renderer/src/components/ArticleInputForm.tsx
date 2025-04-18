@@ -9,7 +9,6 @@ import React from 'react'
 
 //pdf to try:https://arxiv.org/pdf/quant-ph/0410100.pdf
 
-
 interface IArticleInputForm {
   width: number
   height: number
@@ -42,7 +41,7 @@ export default function ArticleInputForm(props: IArticleInputForm) {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [file, setFile] = useState<File | null>(null)
   const [usingLink, setUsingLink] = useState(false)
-  const [isTheURLValid, setIsTheURLValid] = useState(false);
+  const [isTheURLValid, setIsTheURLValid] = useState(false)
   const [article_filename, set_article_filename] = useState<string | null>(null)
 
   const navigateTo = useNavigate()
@@ -81,9 +80,9 @@ export default function ArticleInputForm(props: IArticleInputForm) {
   useEffect(() => {
     if (!articleURL.trim()) {
       console.log('Article link was cleared, allowing for file upload.')
-      setUsingLink(false);
-      clearArticleLinks();
-      setIsTheURLValid(false);
+      setUsingLink(false)
+      clearArticleLinks()
+      setIsTheURLValid(false)
     }
   }, [articleURL])
 
@@ -96,22 +95,26 @@ export default function ArticleInputForm(props: IArticleInputForm) {
 
   const handleLinkSubmission = async (event) => {
     if (event.key === 'Enter' || event.type === 'click') {
-      try{
-        const urlObj = new URL(articleURL);
-        const isPDF = urlObj.pathname.endsWith('.pdf');
-        const response = await fetch(articleURL, { method: 'GET', mode: "no-cors", headers: { "Content-Type": "application/pdf"}});
+      try {
+        const urlObj = new URL(articleURL)
+        const isPDF = urlObj.pathname.endsWith('.pdf')
+        const response = await fetch(articleURL, {
+          method: 'GET',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/pdf' }
+        })
         if (urlObj) {
-          setIsTheURLValid(true);
+          setIsTheURLValid(true)
           toast.success('Your link is valid!')
           clearFileSelection()
-          setUsingLink(true);
+          setUsingLink(true)
         } else {
-          setIsTheURLValid(false);
+          setIsTheURLValid(false)
           toast.error('URL is not a valid link.')
         }
-      }catch(error){
-        console.log("Not valid link for Article", error)
-        toast.error("Invalid URL format or unreachable.")
+      } catch (error) {
+        console.log('Not valid link for Article', error)
+        toast.error('Invalid URL format or unreachable.')
       }
     }
   }
@@ -148,9 +151,13 @@ export default function ArticleInputForm(props: IArticleInputForm) {
     try {
       //create a article lab
       console.log('Sending data', [...data])
-      const response = await axios.post('http://localhost:3000/database/article-lab', data, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      })
+      const response = await axios.post(
+        `http://${import.meta.env.VITE_BACKEND_PATH}/database/article-lab`,
+        data,
+        {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        }
+      )
       console.log('After /article-lab, ', JSON.stringify(response.data))
 
       if (response.status === 200) {
@@ -200,9 +207,9 @@ export default function ArticleInputForm(props: IArticleInputForm) {
       //makes sure that the file is an pdf
       setError('Please upload a valid pdf file.')
       props.onFileSelected(false) //no file selected. set to false so host cannot continue without selecting an image
-      return;
+      return
     }
-    console.log('Here is the file type:', file.type);
+    console.log('Here is the file type:', file.type)
     clearArticleLinks()
     setFile(file)
     setError(null)
@@ -220,8 +227,8 @@ export default function ArticleInputForm(props: IArticleInputForm) {
   }
 
   useEffect(() => {
-    console.log("Updated article source:", articleLabSource)
-  },[articleLabSource])
+    console.log('Updated article source:', articleLabSource)
+  }, [articleLabSource])
 
   return (
     <>
@@ -287,33 +294,32 @@ export default function ArticleInputForm(props: IArticleInputForm) {
               {usingLink ? (
                 <div>
                   <iframe src={articleURL} width="100%" height="300px"></iframe>
-                  </div>
-              ) : (
-            <div className="flex flex-col justify-center items-center border p-4 rounded-md shadow-md size-">
-              <input
-                ref={inputRef}
-                className="flex flex-col justify-center items-center border"
-                type="file"
-                onChange={(e) => {
-                  handleFileChange(e)
-                  setFile(e.target.files?.[0] || null)
-                }}
-                accept=".pdf" //restricts just these article files
-              />
-
-              {error && <p className="text-red-500 text-sm mt-2"> {error}</p>}
-              {/* article Preview */}
-              {articleLabSource && (
-                <div className="mt-4">
-                  <iframe src={articleLabSource} width="400px" height="400px"></iframe>
                 </div>
-              )}
-              <div className="mt-4 text-sm text-gray-600">
-                {articleLabSource ? 'Article selected' : ' Please select an article'}
-                {/* show url or if there isn't anything, then just show nothing selected text */}
-              </div>
-            </div>
+              ) : (
+                <div className="flex flex-col justify-center items-center border p-4 rounded-md shadow-md size-">
+                  <input
+                    ref={inputRef}
+                    className="flex flex-col justify-center items-center border"
+                    type="file"
+                    onChange={(e) => {
+                      handleFileChange(e)
+                      setFile(e.target.files?.[0] || null)
+                    }}
+                    accept=".pdf" //restricts just these article files
+                  />
 
+                  {error && <p className="text-red-500 text-sm mt-2"> {error}</p>}
+                  {/* article Preview */}
+                  {articleLabSource && (
+                    <div className="mt-4">
+                      <iframe src={articleLabSource} width="400px" height="400px"></iframe>
+                    </div>
+                  )}
+                  <div className="mt-4 text-sm text-gray-600">
+                    {articleLabSource ? 'Article selected' : ' Please select an article'}
+                    {/* show url or if there isn't anything, then just show nothing selected text */}
+                  </div>
+                </div>
               )}
             </div>
           </div>
@@ -338,9 +344,9 @@ export default function ArticleInputForm(props: IArticleInputForm) {
             </button>
           </div>
         </form>
-
         {/* Modal that appears after submitting */}
-        <span className="text-red-500">*Warning*</span> For link uploads, not all links will work. Downloading, then uploading is heavily recommended
+        <span className="text-red-500">*Warning*</span> For link uploads, not all links will work.
+        Downloading, then uploading is heavily recommended
       </div>
       <ModalComponent
         onAction={handleAction} //put new stuff in handleAction

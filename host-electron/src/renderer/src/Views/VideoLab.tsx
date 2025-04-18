@@ -6,6 +6,7 @@ import socket from './socket'
 import axios from 'axios'
 import { useSessionStore } from '../store/useSessionStore.tsx'
 import VideoInputForm from '../components/VideoInputForm.tsx'
+
 // import ScrollAreaComponent from '../components/ScrollAreaComponent.tsx'
 
 export default function VideoLab() {
@@ -26,11 +27,14 @@ export default function VideoLab() {
     experimentId: string
   ) => {
     try {
-      const response = await axios.post('http://localhost:3000/host/send-experiment', {
-        experimentTitle,
-        experimentDesc,
-        experimentId
-      })
+      const response = await axios.post(
+        `http://${import.meta.env.VITE_BACKEND_PATH}/host/send-experiment`,
+        {
+          experimentTitle,
+          experimentDesc,
+          experimentId
+        }
+      )
       console.log('Post response data from sendExperimentData', response.data)
     } catch (error) {
       console.error('Error:', error)
@@ -56,12 +60,12 @@ export default function VideoLab() {
           description="Start creating your experiment with videos. Choose a title, write a description, and select a a video to get started"
         />
       </div>
-        <VideoInputForm
-          width={500}
-          height={250}
-          onFileSelected={setIsFileSelected}
-          videoSource={JSON.stringify(videoLabSource)}
-        />
+      <VideoInputForm
+        width={500}
+        height={250}
+        onFileSelected={setIsFileSelected}
+        videoSource={JSON.stringify(videoLabSource)}
+      />
       {/* <ScrollAreaComponent className='w-full h-screen p-4'>
         <div className='w-full'>
         </div>

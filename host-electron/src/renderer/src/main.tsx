@@ -21,106 +21,112 @@ import ActivityRoom from './Views/ActivityHost';
 import Summary from './Views/Summary';
 import ActivityHost from './Views/ActivityHost';
 import ActivityStudentView from './Views/ActivityStudentView';
-
-
-const router = createBrowserRouter([
-  {
-    path: "/",
-    element: <App />,
-    children:[
-      {
-        index: true, 
-        element: <HostCreateRoom/> //Example/Placeholder
-      },
-      {
-        path: "host",
-          element: <HostRoot/>,
-          children: [
-            {
-              path: "create",
-              element: <HostCreateRoom/>,
-            },
-            {
-              path: "select-lab",
-              element: <HostSelectLabPage/>,
-            },
-            {
-              path: ":room",
-              element: <HostView/>,
-            },
-            {
-              path: "photo-lab",
-              element: <PhotoLab/>,
-            },
-            {
-              path: "video-lab",
-              element: <VideoLab/>,
-            },
-            {
-              path: "gallery-lab",
-              element: <GalleryLab/>
-            },
-            {
-              path: "article-lab",
-              element: <ArticleLab/>
-            },
-            {
-              path:"past-experiments",
-              element: <PreviouslyMadeExperiments/>
-            }
-
-          ]
-      },
-      {
-        path:"waiting-room",
-        element: <WaitingRoom/>
-      },
-      {
-        path:"activity-room",
-        element: <ActivityRoom/>
-      },
-      {
-        path:"summary",
-        element: <Summary/>
-      },
+const routing = 
+  [
     {
-      path: "/activity/:sessionId/:userId/:experimentType/",
-      element: <ActivityStudentView/>,
+      path: "/",
+      element: <App />,
       children:[
         {
-          path: "photo-lab",
-          element: <PhotoLab/>,
+          index: true, 
+          element: <HostCreateRoom/> //Example/Placeholder
         },
         {
-          path: "video-lab",
-          element: <VideoLab/>,
+          path: "host",
+            element: <HostRoot/>,
+            children: [
+              {
+                path: "create",
+                element: <HostCreateRoom/>,
+              },
+              {
+                path: "select-lab",
+                element: <HostSelectLabPage/>,
+              },
+              {
+                path: ":room",
+                element: <HostView/>,
+              },
+              {
+                path: "photo-lab",
+                element: <PhotoLab/>,
+              },
+              {
+                path: "video-lab",
+                element: <VideoLab/>,
+              },
+              {
+                path: "gallery-lab",
+                element: <GalleryLab/>
+              },
+              {
+                path: "article-lab",
+                element: <ArticleLab/>
+              },
+              {
+                path:"past-experiments",
+                element: <PreviouslyMadeExperiments/>
+              }
+  
+            ]
         },
         {
-          path: "gallery-lab",
-          element: <GalleryLab/>
+          path:"waiting-room",
+          element: <WaitingRoom/>
         },
         {
-          path: "article-lab",
-          element: <ArticleLab/>
-        }
-    ]
-  },]
-  },
-  {
-          path: "create-lab",
-          element: <ExperimentCreaterRoot/>,
-          children: [
-            {
-              path: "select-lab",
-              element: <HostSelectLabPage/>,
-            },
-            {
-              index: true,
-              element: <PreviouslyMadeExperiments/>,
-            }]
-    }])
+          path:"activity-room",
+          element: <ActivityRoom/>
+        },
+        {
+          path:"summary",
+          element: <Summary/>
+        },
+      {
+        path: "/activity/:sessionId/:userId/:experimentType/",
+        element: <ActivityStudentView/>,
+        children:[
+          {
+            path: "photo-lab",
+            element: <PhotoLab/>,
+          },
+          {
+            path: "video-lab",
+            element: <VideoLab/>,
+          },
+          {
+            path: "gallery-lab",
+            element: <GalleryLab/>
+          },
+          {
+            path: "article-lab",
+            element: <ArticleLab/>
+          }
+      ]
+    },]
+    },
+    {
+            path: "create-lab",
+            element: <ExperimentCreaterRoot/>,
+            children: [
+              {
+                path: "select-lab",
+                element: <HostSelectLabPage/>,
+              },
+              {
+                index: true,
+                element: <PreviouslyMadeExperiments/>,
+              }]
+      }]
+
+
+
+const router = import.meta.env.MODE === 'production' ? createHashRouter(routing) : createBrowserRouter(routing)
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
+  <React.StrictMode>
     <RouterProvider router={router} />
+  </React.StrictMode>
+
 
 );

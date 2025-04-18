@@ -43,7 +43,7 @@
    if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
      mainWindow.loadURL(join(process.env['ELECTRON_RENDERER_URL'], "/"))
    } else {
-     const buildLocation = `file://${join(__dirname, `../renderer/index.html#/${"/"}`)}`
+     const buildLocation = `file://${join(__dirname, `../renderer/index.html#/`)}`
      mainWindow.loadURL(buildLocation)
    }
    return mainWindow

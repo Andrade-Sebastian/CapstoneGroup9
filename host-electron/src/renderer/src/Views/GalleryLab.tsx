@@ -9,7 +9,17 @@ import toast, { Toaster } from 'react-hot-toast'
 import { useSessionStore } from '../store/useSessionStore.tsx'
 
 export default function GalleryLab() {
-  const { experimentId, roomCode, addPhoto, addPhotos,removePhoto,clearPhotos,setCurrentGalleryIndex,galleryPhotos, currentGalleryIndex } = useSessionStore();
+  const {
+    experimentId,
+    roomCode,
+    addPhoto,
+    addPhotos,
+    removePhoto,
+    clearPhotos,
+    setCurrentGalleryIndex,
+    galleryPhotos,
+    currentGalleryIndex
+  } = useSessionStore()
   const [experimentTitle, setExperimentTitle] = useState('')
   const [experimentDesc, setExperimentDesc] = useState('')
   const [file, setFile] = useState()
@@ -17,10 +27,10 @@ export default function GalleryLab() {
   const [caption, setCaption] = useState()
   const [imageSource, setImageSource] = useState<string | null>(null)
   const [tempImage, setTempImage] = useState<string | null>(null)
-  const [imageList, setImageList] = useState<{url: string; caption: string} []>([])
+  const [imageList, setImageList] = useState<{ url: string; caption: string }[]>([])
   const navigateTo = useNavigate()
   const [isFileSelected, setIsFileSelected] = useState(false)
-  
+
   // const handleOpenModal = () => setIsModalOpen(true)
   // const handleCloseModal = () => {
   //   setTempImage(null)
@@ -52,27 +62,31 @@ export default function GalleryLab() {
     }
   }, [galleryPhotos])
 
-
-
-  const sendExperimentData = async(experimentTitle: string, experimentDesc: string, experimentId: string) => {
-    try{
-        const response = await axios.post("http://localhost:3000/host/send-experiment", {
+  const sendExperimentData = async (
+    experimentTitle: string,
+    experimentDesc: string,
+    experimentId: string
+  ) => {
+    try {
+      const response = await axios.post(
+        `http://${import.meta.env.VITE_BACKEND_PATH}/host/send-experiment`,
+        {
           experimentTitle,
           experimentDesc,
           experimentId
-        });
-        console.log("Post response data from sendExperimentData", response.data);
-    }
-    catch(error){
-      console.error("Error:", error);
+        }
+      )
+      console.log('Post response data from sendExperimentData', response.data)
+    } catch (error) {
+      console.error('Error:', error)
     }
   }
-  
+
   async function handleSubmit() {
     // console.log("image source", photoLabImageSource);
-    console.log("caption", caption);
-    console.log("experimentTitle", experimentTitle);
-    console.log("experimentDesc", experimentDesc);
+    console.log('caption', caption)
+    console.log('experimentTitle', experimentTitle)
+    console.log('experimentDesc', experimentDesc)
 
     const loadingToastId = toast.loading('Creating Lab...')
     if (isSubmitting) return
@@ -99,15 +113,14 @@ export default function GalleryLab() {
           description="Start creating your experiment with pictures. Choose a title, write a description, and select multiple photos to get started"
         />
       </div>
-      <div className='w-2/3'>
-      <GalleryInputForm
-        width={500}
-        height={250}
-        onFileSelected={setIsFileSelected}
-        imageSource={JSON.stringify(imageSource)}
-      />
+      <div className="w-2/3">
+        <GalleryInputForm
+          width={500}
+          height={250}
+          onFileSelected={setIsFileSelected}
+          imageSource={JSON.stringify(imageSource)}
+        />
       </div>
-
     </div>
   )
 }

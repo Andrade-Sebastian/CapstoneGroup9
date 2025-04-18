@@ -26,8 +26,9 @@ import useBrainflowManager from '../hooks/useBrainflowManager.ts'
 import { io } from 'socket.io-client'
 import ReactPlayer from 'react-player'
 import GalleryComponent from '../components/GalleryComponent.tsx'
-import ChatFooter from '../components/ChatFooter.tsx';
-import ChatBody from '../components/ChatBody.tsx';
+import ChatFooter from '../components/ChatFooter.tsx'
+import ChatBody from '../components/ChatBody.tsx'
+
 
 export default function ActivityHost() {
   const {
@@ -54,9 +55,9 @@ export default function ActivityHost() {
   const [isMasked, setIsMasked] = useState(false)
   const [isModalOpenKick, setIsModalOpenKick] = useState(false)
   const [activeTab, setActiveTab] = useState('images')
-  const [theUserMap, setTheUserMap] = useState(new Map());
+  const [theUserMap, setTheUserMap] = useState(new Map())
   const [focusedUser, setFocusedUser] = useState('')
-  const [currentDevices, setCurrentDevices] = useState<IUser[]>([]);
+  const [currentDevices, setCurrentDevices] = useState<IUser[]>([])
   const [IPAddress, setIPAddress] = useState('')
   const [isModalUserOptionsOpen, setIsModalUserOptionsOpen] = useState(false)
   const [selectedEmotiBitId, setSelectedEmotiBitId] = useState<string | null>(null)
@@ -112,121 +113,117 @@ export default function ActivityHost() {
     handleCloseModalUserOptions()
   }
 
- //Handling kicking a user
- const handleOpenModalKick = (e) => {
-  console.log("HANDLE KICK", e.target.closest('button').querySelector('p').textContent);
-  setIsModalOpenKick(true)
-  setFocusedUser(e.target.closest('button').querySelector('p').textContent.trim());
+  //Handling kicking a user
+  const handleOpenModalKick = (e) => {
+    console.log('HANDLE KICK', e.target.closest('button').querySelector('p').textContent)
+    setIsModalOpenKick(true)
+    setFocusedUser(e.target.closest('button').querySelector('p').textContent.trim())
+  }
+  const handleCloseModalKick = () => {
+    setIsModalOpenKick(false)
+  }
 
-};
-  const handleCloseModalKick = () => {setIsModalOpenKick(false)};
-  
-  
   const handleKickUser = async () => {
-    console.log("focused user in handleKickUser():", focusedUser)
-    console.log("!!ATTEMPTING TO KICK USER!!")
-    if(!focusedUser){
-      console.log("No user selected for kicking.")
-      return;
+    console.log('focused user in handleKickUser():', focusedUser)
+    console.log('!!ATTEMPTING TO KICK USER!!')
+    if (!focusedUser) {
+      console.log('No user selected for kicking.')
+      return
     }
-    console.log("User Map at Kick Time:", theUserMap);
-    console.log("Focused User at Kick Time:", focusedUser);
+    console.log('User Map at Kick Time:', theUserMap)
+    console.log('Focused User at Kick Time:', focusedUser)
     // const nicknameSocketID = theUserMap.get(focusedUser);
     // console.log("Kicking user with socket ID: ", nicknameSocketID);
-    console.log("HERE IS THE USER MAP BEFORE EMIT KICKING", theUserMap);
-    
+    console.log('HERE IS THE USER MAP BEFORE EMIT KICKING', theUserMap)
 
-    let nicknameSocketID = "";
+    let nicknameSocketID = ''
 
-    if (focusedUser.includes(" (Spectator)")){
+    if (focusedUser.includes(' (Spectator)')) {
       // Remove "(Spectator)" from the string
-      const userFocused = focusedUser.replace(" (Spectator)", "").trim()
-      setFocusedUser(focusedUser.replace(" (Spectator)", "").trim());
-      console.log("in IF")
-      nicknameSocketID = theUserMap.get(userFocused.replace("(Spectator)", "").trim());
-      
-      if(!nicknameSocketID){
-        console.log("Cannot kick SPECTATOR: there is no socket id found.", userFocused)
-        return;
-      }else{
-        console.log("Kicking user with socketID:", nicknameSocketID);
-        
-        console.log("Emitted kick event");
+      const userFocused = focusedUser.replace(' (Spectator)', '').trim()
+      setFocusedUser(focusedUser.replace(' (Spectator)', '').trim())
+      console.log('in IF')
+      nicknameSocketID = theUserMap.get(userFocused.replace('(Spectator)', '').trim())
+
+      if (!nicknameSocketID) {
+        console.log('Cannot kick SPECTATOR: there is no socket id found.', userFocused)
+        return
+      } else {
+        console.log('Kicking user with socketID:', nicknameSocketID)
+
+        console.log('Emitted kick event')
       }
-      
-      console.log(`<<HOST 389>>trying to kick spectator , sending sessionID ${sessionId} and socketID ${nicknameSocketID}` )
-      
-      axios.post(`http://localhost:3000/joiner/remove-spectator-from-session`,
-        {
-          "sessionID": sessionId,
-          "socketID": nicknameSocketID
-        }
+
+      console.log(
+        `<<HOST 389>>trying to kick spectator , sending sessionID ${sessionId} and socketID ${nicknameSocketID}`
       )
-      socket.emit("kick", nicknameSocketID);
-    }else{
-      nicknameSocketID = theUserMap.get(focusedUser);
-      if(!nicknameSocketID){
-        console.log("Cannot kick JOINER: there is no socket id found.", focusedUser)
-        return;
-      }else{
-      console.log("Kicking user with socketID:", nicknameSocketID);
 
-      socket.emit("kick", nicknameSocketID);
-    
-      console.log("Emitted kick event");
-    }}
+      axios.post(`http://${import.meta.env.VITE_BACKEND_PATH}/joiner/remove-spectator-from-session`, {
+        sessionID: sessionId,
+        socketID: nicknameSocketID
+      })
+      socket.emit('kick', nicknameSocketID)
+    } else {
+      nicknameSocketID = theUserMap.get(focusedUser)
+      if (!nicknameSocketID) {
+        console.log('Cannot kick JOINER: there is no socket id found.', focusedUser)
+        return
+      } else {
+        console.log('Kicking user with socketID:', nicknameSocketID)
 
+        socket.emit('kick', nicknameSocketID)
 
-    console.log("User Map at Kick Time:", theUserMap);
-    console.log("Focused User at Kick Time:", focusedUser);
-
-    if(!nicknameSocketID){
-      console.log("Cannot kick user: there is no socket id found.", focusedUser)
-      return;
+        console.log('Emitted kick event')
+      }
     }
-  
-    setTheUserMap(prevMap => {
-      const newMap = new Map(prevMap);
-      newMap.delete(focusedUser);
-      return newMap;
-    });
-    console.log("Here is the usermap after kicking", theUserMap);
 
-    setCurrentDevices(currentDevices => {
-      const newState = currentDevices.map(device => {
+    console.log('User Map at Kick Time:', theUserMap)
+    console.log('Focused User at Kick Time:', focusedUser)
+
+    if (!nicknameSocketID) {
+      console.log('Cannot kick user: there is no socket id found.', focusedUser)
+      return
+    }
+
+    setTheUserMap((prevMap) => {
+      const newMap = new Map(prevMap)
+      newMap.delete(focusedUser)
+      return newMap
+    })
+    console.log('Here is the usermap after kicking', theUserMap)
+
+    setCurrentDevices((currentDevices) => {
+      const newState = currentDevices.map((device) => {
         if (device.nickname === focusedUser) {
-          return { 
-            ...device, 
+          return {
+            ...device,
             socketId: null,
             nickname: null,
             associatedDevice: device.associatedDevice
-            ? { 
-              ...device.associatedDevice, 
-              isConnected: false 
-            }
-            : null
-          };
+              ? {
+                  ...device.associatedDevice,
+                  isConnected: false
+                }
+              : null
+          }
         }
-        return device;
-      });
-    
-      console.log("React state after kick:", newState); // Logs the correct state before updating
-      return newState;
-    });
-  
-    setIsModalOpenKick(false);
-    
-  };
+        return device
+      })
 
-  const handleViewUser = (e,userId, userrole, experimentType, nickname) => {
-    if(userrole !== "spectator"){
+      console.log('React state after kick:', newState) // Logs the correct state before updating
+      return newState
+    })
+
+    setIsModalOpenKick(false)
+  }
+
+  const handleViewUser = (e, userId, userrole, experimentType, nickname) => {
+    if (userrole !== 'spectator') {
       ipc.send('activity:viewUser', sessionId, String(userId), experimentType)
-    }
-    else{
-      setFocusedUser(nickname);
+    } else {
+      setFocusedUser(nickname)
       handleOpenModalKick(e)
     }
-    
   }
 
   function handleSubmit() {
@@ -284,7 +281,7 @@ export default function ActivityHost() {
     const fetchUsers = async () => {
       try {
         console.log('Trying to get users from session ' + sessionID)
-        const response = await axios.get(`http://localhost:3000/joiner/room-users/${sessionID}`)
+        const response = await axios.get(`http://${import.meta.env.VITE_BACKEND_PATH}/joiner/room-users/${sessionID}`)
         const users = response.data.users //Array of IUser objects
         const rawUsers = response.data.users
 
@@ -495,8 +492,8 @@ export default function ActivityHost() {
         </div>
         <div className="hidden lg:block w-full lg:w-1/4 p-4 bg-white shadow-md rounded-lg">
           <div className="flex flex-col h-[60vh] justify-between bg-white rounded-md shadow-md">
-            <ChatBody/>
-            <ChatFooter/>
+            <ChatBody />
+            <ChatFooter />
           </div>
         </div>
       </div>
@@ -507,7 +504,9 @@ export default function ActivityHost() {
           {(userObjects || []).map((user, index) => (
             <button
               key={index}
-              onClick={(e) => handleViewUser(e, user.userId, user.userRole, experimentType, user.nickname)}
+              onClick={(e) =>
+                handleViewUser(e, user.userId, user.userRole, experimentType, user.nickname)
+              }
               className="flex items-center border-black font-medium rounded-md bg-[#E6E6E6] hover:bg-[#CECECE] px-4 py-1.5 text-black font-light cursor-pointer gap-2.5"
             >
               <p>{user.nickname}</p>
@@ -562,18 +561,18 @@ export default function ActivityHost() {
         </div>
       </ModalComponent>
       <ModalComponent
-              onAction={handleKickUser}
-              isOpen={isModalOpenKick}
-              onCancel={handleCloseModalKick}
-              modalTitle="Kick this Spectator?"
-              button="Remove Spectator"
-              >
-              <div className="mb-6">
-                <h1 className="text-md text-gray-700 mb-2">
-                  Are you sure you want to kick this spectator? 
-                </h1>
-              </div>
-              </ModalComponent>
+        onAction={handleKickUser}
+        isOpen={isModalOpenKick}
+        onCancel={handleCloseModalKick}
+        modalTitle="Kick this Spectator?"
+        button="Remove Spectator"
+      >
+        <div className="mb-6">
+          <h1 className="text-md text-gray-700 mb-2">
+            Are you sure you want to kick this spectator?
+          </h1>
+        </div>
+      </ModalComponent>
     </div>
   )
 }
