@@ -24,7 +24,7 @@ export default function EnterFunction() {
     const [type, setType] = useState('password')
     const [icon, setIcon] = useState(eyeOff)
 
-    const { userRole, setUserRole} = useJoinerStore();
+    const { userRole} = useJoinerStore();
 
     function handleToggle() {
         //have eye open if text is censored, if not then eye closed
