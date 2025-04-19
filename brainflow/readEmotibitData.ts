@@ -170,10 +170,8 @@ async function sendData(socket: Socket): Promise<void>
                 
                 //heart rate can only start collecting if there are enough data samples
                 if(ppg_ir.length >= 1024 && ppg_r.length >= 1024){
-                   DataFilter.performBandPass(ppg_ir, 500, 5, 10, 2, 0, 0);
-                   DataFilter.performBandPass(ppg_r, 500, 5, 10, 2, 0, 0);
-        
-                    heart_rate = DataFilter.getHeartRate(ppg_ir.slice(-1024), ppg_r.slice(-1024), 500, 1024);
+                    heart_rate = DataFilter.getHeartRate(ppg_ir.slice(-1024), ppg_r.slice(-1024), 25, 1024);
+                    console.log("HR: ", heart_rate);
                 }
                 
                 ancData = {
