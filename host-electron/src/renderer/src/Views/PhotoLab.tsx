@@ -5,16 +5,17 @@ import toast, { Toaster } from 'react-hot-toast'
 import SideComponent from '../components/SideComponent'
 import axios from 'axios'
 import socket from './socket'
-import PhotoInputForm from '../components/PhotoInputForm.tsx'
+import PhotoInputForm from '../components/PhotoInputForm.tsx' 
 
 export default function PhotoLab() {
-  const { //Global state
+  const {
+    //Global state
     experimentType,
     experimentTitle,
     experimentDesc,
     setExperimentPath,
-    photoLabImageSource,
-   } = useSessionStore();
+    photoLabImageSource
+  } = useSessionStore()
 
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [caption, setCaption] = useState('')
@@ -26,25 +27,27 @@ export default function PhotoLab() {
     }
   }, [photoLabImageSource])
 
-  const sendExperimentData = async(experimentTitle: string, experimentDesc: string, experimentId: string) => {
-    try{
-        const response = await axios.post("http://localhost:3000/host/send-experiment", {
-          experimentTitle,
-          experimentDesc,
-          experimentId
-        });
-        console.log("Post response data from sendExperimentData", response.data);
-    }
-    catch(error){
-      console.error("Error:", error);
+  const sendExperimentData = async (
+    experimentTitle: string,
+    experimentDesc: string,
+    experimentId: string
+  ) => {
+    try {
+      const response = await axios.post(`http://${import.meta.env.VITE_BACKEND_PATH}/host/send-experiment`, {
+        experimentTitle,
+        experimentDesc,
+        experimentId
+      })
+      console.log('Post response data from sendExperimentData', response.data)
+    } catch (error) {
+      console.error('Error:', error)
     }
   }
   async function handleSubmit(e) {
-    console.log("image source", photoLabImageSource);
-    console.log("caption", caption);
-    console.log("experimentTitle", experimentTitle);
-    console.log("experimentDesc", experimentDesc);
-
+    console.log('image source', photoLabImageSource)
+    console.log('caption', caption)
+    console.log('experimentTitle', experimentTitle)
+    console.log('experimentDesc', experimentDesc)
 
     const loadingToastId = toast.loading('Creating Lab...')
     if (isSubmitting) return
@@ -52,9 +55,8 @@ export default function PhotoLab() {
     setIsSubmitting(true)
   }
 
-
   return (
-    <div className="flex h-screen">
+    <div className="flex ">
       <Toaster position="top-right" />
       <div className="flex flex-col max-sm:hidden items-center justify-center w-2/5">
         <SideComponent
@@ -70,7 +72,6 @@ export default function PhotoLab() {
         onFileSelected={setIsFileSelected}
         imageSource={JSON.stringify(photoLabImageSource)}
       />
-
     </div>
   )
 }

@@ -8,6 +8,9 @@ import socket from "./Views/socket.tsx";
 import { useJoinerStore, } from "./hooks/stores/useJoinerStore.ts";
 import React from "react";
 import ModalComponent from "./Components/ModalComponent.tsx";
+import { TbDeviceMobileX } from "react-icons/tb";
+import {isMobile} from 'react-device-detect';
+
 
 function App() {
   const {
@@ -64,9 +67,19 @@ function App() {
         onOpenSettings={() => setIsModalSettingsOpen(true)}
         onOpenInfo={() => setIsModalInfoOpen(true)}
       />
+      {!isMobile ? (
         <div className="flex flex-col grow h-full overflow-auto">
           <Outlet />
         </div>
+      ) : (
+        <div className="flex flex-col">
+          <TbDeviceMobileX/>
+          <p>Sorry, mobile devices are not compatible இ௰இ </p>
+        </div>
+
+      )
+
+      }
         <ModalComponent
         onAction={handleSettingsAction}
         onAction2={handleLeaveAction}

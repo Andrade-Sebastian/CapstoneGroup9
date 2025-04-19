@@ -3,13 +3,14 @@ import { Outlet, Navigate } from "react-router-dom";
 import { useJoinerStore } from '../hooks/stores/useJoinerStore.ts';
 
 const PrivateRoute = (props: {children: ReactElement}) =>{
-    const {secret} = useJoinerStore();
-    console.log( "This is my secret", secret)
-    if(secret !== undefined){
+    const {sessionId} = useJoinerStore();
+    console.log( "This is the sessionId", sessionId)
+    if(sessionId){
+        console.log("There exists a sessionId")
         return props.children
     }
     else{
-        console.error("Error, secret is null")
+        console.error("Error, sessionId is null")
         return <Navigate to='/'/>;
     }
 };

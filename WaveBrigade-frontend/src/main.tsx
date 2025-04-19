@@ -45,28 +45,28 @@ const router = createBrowserRouter([
       },
       {
         path: "enter-password",
-        // element: <PrivateRoute><EnterPassword /></PrivateRoute>
-        element: <EnterPassword/>
+        element: <PrivateRoute><EnterPassword /></PrivateRoute>
+        // element: <EnterPassword/>
       },
       {
         path: "connect-emotibit",
-        //element: <PrivateRoute><ConnectEmotiBit /></PrivateRoute>
-        element: <ConnectEmotiBit/>
+        element: <PrivateRoute><ConnectEmotiBit /></PrivateRoute>
+        // element: <ConnectEmotiBit/>
       },
       {
         path: "waiting-room",
-        //element: <PrivateRoute><WaitingRoom /></PrivateRoute>
-        element: <WaitingRoom/>
+        element: <PrivateRoute><WaitingRoom /></PrivateRoute>
+        // element: <WaitingRoom/>
       },
       {
         path:"active-experiment",
-        // element: <PrivateRoute><ActiveExperiment /></PrivateRoute>
-        element: <ActiveExperiment/>
+        element: <PrivateRoute><ActiveExperiment /></PrivateRoute>
+        // element: <ActiveExperiment/>
       },
       {
         path:"active-experiment-spectator",
-        // element: <PrivateRoute><ActiveExperiment /></PrivateRoute>
-        element: <SpectatorActiveExperiment/>
+        element: <PrivateRoute><ActiveExperiment /></PrivateRoute>
+        // element: <SpectatorActiveExperiment/>
       },
   ]
       

@@ -7,9 +7,9 @@ import axios from "axios";
 import SideComponent from "../Components/SideComponent.tsx";
 import socket from "./socket.tsx";
 // import useBrainflowManager from "../../../host-electron/src/renderer/src/hooks/useBrainflowManager.ts";
-import {io} from "socket.io-client";
+import { io } from "socket.io-client";
 
-// const SERVER_URL = "http://localhost:3000";
+// const SERVER_URL = `http://${import.meta.env.VITE_BACKEND_PATH}`;
 // const newSocket = io(SERVER_URL);
 
 export default function JoinPage() {
@@ -18,16 +18,25 @@ export default function JoinPage() {
   const navigateTo = useNavigate();
   const [sessionID, setSessionID] = useState("");
   const [isJoiningAsSpectator, setisJoiningAsSpectator] = useState(false);
+  const [experimentActive, setExperimentActive] = useState(false);
 
   const {
     userRole, 
     setUserRole,
     sessionId,
-	  wasKicked,
+    wasKicked,
     socketId,
     setSessionId,
     setNickname,
     setRoomCode,
+
+    setUserSocketId,
+  } = useJoinerStore();
+
+  useEffect(() => {
+    socket.connect();
+
+
 	  setUserSocketId,
   } = useJoinerStore();
 
@@ -36,47 +45,86 @@ export default function JoinPage() {
   useEffect(() => {
 	socket.connect()
     console.log("SOCKET.connect() Setting user role to student")
-    setUserRole("student");
-	console.log("Global wasKicked variable: ", wasKicked)
 
-	if(wasKicked){
-		console.log("JoinPage.tsx: User was kicked")
-		toast.error("You were kicked from the room")
-	}
+    setUserRole("student");
+    console.log("Global wasKicked variable: ", wasKicked);
+
+    if (wasKicked) {
+      console.log("JoinPage.tsx: User was kicked");
+      toast.error("You were kicked from the room");
+    }
+
+
+    socket.emit("client-assignment");
+    socket.on("experiment-active", (data) => {
+      if (data.isActive === true) {
+        toast.error("Experiment in progress, cannot join...");
+        setExperimentActive(data.isActive);
+        return;
+      } else {
+        setExperimentActive(false);
+        // toast.error("Experiment in progress, cannot join...")
+      }
+    });
 
 	  socket.emit("client-assignment", );
 
+
     socket.on("client-assignment", async (data) => {
-		console.log(new Date().toLocaleTimeString(), "(JoinPage.tsx): got a client-assignment event in JoinPage.tsx, recieved: ", data)
-		await setUserSocketId(data.socketId);
-		
-		return () => {
-			socket.off("client-assignment")
-		}
-  	})
-  }, []);
+      console.log(
+        new Date().toLocaleTimeString(),
+        "(JoinPage.tsx): got a client-assignment event in JoinPage.tsx, recieved: ",
+        data
+      );
+      await setUserSocketId(data.socketId);
 
-  async function checkNicknameIsUnique(nickname: string, sessionID: number): Promise<boolean> {
-    console.log(`making request at http://localhost:3000/database/unique-nickname/${sessionID}/${nickname}`)
-    const response = await axios.get(
-      `http://localhost:3000/database/unique-nickname/${sessionID}/${nickname}`
+      return () => {
+        socket.off("experiment-active");
+        socket.off("client-assignment");
+      };
+    });
+  }, [setExperimentActive]);
+
+  async function checkNicknameIsUnique(
+    nickname: string,
+    sessionID: number
+  ): Promise<boolean> {
+    console.log(
+      `making request at http://${
+        import.meta.env.VITE_BACKEND_PATH
+      }/database/unique-nickname/${sessionID}/${nickname}`
     );
-    console.log("Is the nickname unique?", response.data.isUnique)
+    const response = await axios.get(
+      `http://${
+        import.meta.env.VITE_BACKEND_PATH
+      }/database/unique-nickname/${sessionID}/${nickname}`
+    );
+    console.log("Is the nickname unique?", response.data.isUnique);
 
-    return response.data.isUnique
+    return response.data.isUnique;
   }
 
-
   const handleSubmit = async (e) => {
+
+    console.log(
+      new Date().toLocaleTimeString(),
+      "Current socketID in Zustand: ",
+      socketId
+    );
+
 	  console.log(new Date().toLocaleTimeString(), "(Join Page) Current socketID in Zustand: ", socketId)
     setRoomCode(StudentInputRoomCode);
     e.preventDefault();
+
+    if (experimentActive === true) {
+      toast.error("Cannot join room, experiment is active...");
+      return;
+    }
 
     if (!StudentInputRoomCode && !nickName) {
       console.error("Please enter both a nickname and a room code...");
       return;
     } else {
-
       if (StudentInputRoomCode.length !== 5) {
         toast.error("Error. Please enter a valid room code.");
         console.error("Please enter a valid room code");
@@ -85,51 +133,56 @@ export default function JoinPage() {
     }
 
     try {
-
       const isValidName = await checkNickName(nickName); //checks for profanity
       const isValidRoomCode = await validateRoomCode(StudentInputRoomCode);
-      const canSpectate = await checkSpectatorsAllowed(useJoinerStore.getState().sessionId);
-      const nicknameIsUnique = await checkNicknameIsUnique(nickName, useJoinerStore.getState().sessionId); //checks if the username is unique for the session
+      const canSpectate = await checkSpectatorsAllowed(
+        useJoinerStore.getState().sessionId
+      );
+      const nicknameIsUnique = await checkNicknameIsUnique(
+        nickName,
+        useJoinerStore.getState().sessionId
+      ); //checks if the username is unique for the session
 
-      if(!isValidName){
+      if (!isValidName) {
         console.log("Inside if statement");
-        toast.error("Nickname not acceptable. Please refrain from profane language!");
+        toast.error(
+          "Nickname not acceptable. Please refrain from profane language!"
+        );
         return;
       }
-      if (!nicknameIsUnique){
-        toast.error("Nickname taken... Please try another nickname")
-        return;
-      }
-
-      if(!isValidRoomCode){
-        toast.error("Connection failed. Looks like we couldn't get you connected. Please check your room code and try again.");
+      if (!nicknameIsUnique) {
+        toast.error("Nickname taken... Please try another nickname");
         return;
       }
 
-      if(isJoiningAsSpectator && !canSpectate) {
+      if (!isValidRoomCode) {
+        toast.error(
+          "Connection failed. Looks like we couldn't get you connected. Please check your room code and try again."
+        );
+        return;
+      }
+
+      if (isJoiningAsSpectator && !canSpectate) {
         toast.error("Cannot join as a spectator. Try again.");
         setisJoiningAsSpectator(false);
         return;
       }
 
-      if(isJoiningAsSpectator && canSpectate){
+      if (isJoiningAsSpectator && canSpectate) {
         //Set global store 'userRole' to 'spectator'
         setUserRole("spectator");
         console.log("if(isJoiningAsSpectator && canSpectate) Setting user role to spectator")
         console.log("global user role: ", userRole);
-      }
-      else{
+      } else {
         //when they input the password, navigate to the waiting room
         console.log("joiner");
         console.log("(else) Setting user role to student")
         setUserRole("student");
-        
       }
       toast.success("Room code valid. Password is needed...");
       setTimeout(() => {
-            navigateTo("/enter-password");
+        navigateTo("/enter-password");
       }, 2000);
-
     } catch (error) {
       console.error("Error verifying code:", error);
       toast.error(
@@ -142,7 +195,9 @@ export default function JoinPage() {
     try {
       console.log("Checking nickname: ", nickName);
       const response = await axios.get(
-        `http://localhost:3000/joiner/check-name/${nickName}`
+        `http://${
+          import.meta.env.VITE_BACKEND_PATH
+        }/joiner/check-name/${nickName}`
       );
       console.log("RESPONSE STATUS RETURNED: ", response.status);
       if (response.status === 200) {
@@ -165,7 +220,9 @@ export default function JoinPage() {
       setRoomCode(StudentInputRoomCode); // Store the room code in global state
 
       const response = await axios.get(
-        `http://localhost:3000/joiner/verify-code/${StudentInputRoomCode}`
+        `http://${
+          import.meta.env.VITE_BACKEND_PATH
+        }/joiner/verify-code/${StudentInputRoomCode}`
       );
       console.log("Session ID: ", response.data.sessionID);
       console.log("Response status: ", response.status);
@@ -179,12 +236,15 @@ export default function JoinPage() {
         return true;
       }
     } catch (error) {
-      if(error.status === 400){
+      toast.error(`ERROR: Cannot join room ${error}`);
+      if (error.status === 400) {
         console.log("Room code is invalid");
         return false;
-      }
-      else{
-        console.error("Could not validate room code due to an API Error", error);
+      } else {
+        console.error(
+          "Could not validate room code due to an API Error",
+          error
+        );
         toast.error("Could not validate code due to an API error...");
         return false;
       }
@@ -193,21 +253,23 @@ export default function JoinPage() {
 
   //checks if spectators are allowed for the specific session
   const checkSpectatorsAllowed = async (sessionId: string) => {
-    try{
+    try {
       console.log("Checking if spectators allowed");
       const response = await axios.get(
-          `http://localhost:3000/joiner/session/allows-spectators/${sessionId}`
+        `http://${
+          import.meta.env.VITE_BACKEND_PATH
+        }/joiner/session/allows-spectators/${sessionId}`
       );
-      if(response.status === 200){ //returns true or false
+      if (response.status === 200) {
+        //returns true or false
         console.log("Spectators Allowed: ", response.data.allowsSpectators);
-          return response.data.allowsSpectators;
-        }
+        return response.data.allowsSpectators;
       }
-      catch(error){
-        console.log("Unable to check if spectators are allowed");
-        return false;
-      }
-  }
+    } catch (error) {
+      console.log("Unable to check if spectators are allowed");
+      return false;
+    }
+  };
   return (
     <div className="flex h-screen">
       <div className="flex flex-col max-sm:hidden items-center justify-center w-2/5">
@@ -259,7 +321,7 @@ export default function JoinPage() {
                 <input
                   id="allow-spectators"
                   type="checkbox"
-                  className="h-4 w-4 accent-[#7F56D9]"
+                  className="h-4 w-4 accent-[#7F56D9] cursor-pointer"
                   checked={isJoiningAsSpectator}
                   onChange={() => {
                     //fixes issue where the checkbox shows the opposite boolean value when clicked on
