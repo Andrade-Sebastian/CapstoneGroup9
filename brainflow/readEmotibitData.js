@@ -66,9 +66,9 @@ var operationParameters = {
     assignSocketId: null
 };
 var ancHeaders = ['Package', 'EDA', 'Temperature', 'Thermistor', 'Timestamp', 'Unknown']; //create a list of headers for the csv
-// const ancFilePath = './anc_from_streamer.csv';
+// const ancFilePath = './operationParameters.userId/anc_data.csv';
 // const auxHeaders = ['Package', 'PPG_Red', 'PPG_Infa_Red', 'PPG_Green', 'Timestamp', 'Unknown'];
-// const auxFilePath = './aux_from_streamer.csv';
+// const auxFilePath = './operationParameters.userId/aux_data.csv';
 //initializes the board 
 var board = new brainflow_1.BoardShim(brainflow_1.BoardIds.EMOTIBIT_BOARD, {});
 var board_id = brainflow_1.BoardIds.EMOTIBIT_BOARD;
@@ -160,24 +160,13 @@ function sendData(socket) {
                     if (!true) return [3 /*break*/, 4];
                     anc_data = board.getBoardData(500, brainflow_1.BrainFlowPresets.ANCILLARY_PRESET);
                     aux_data = board.getBoardData(500, brainflow_1.BrainFlowPresets.AUXILIARY_PRESET);
-                    // if(ppg_ir !== null && ppg_r !== null){
-                    //     console.log("PPG_RED: ", ppg_r.length);
-                    //     //const heart_rate = DataFilter.getHeartRate(ppg_ir, ppg_r, 500, 8192);
-                    //     //console.log(heart_rate);
-                    // }
                     if (anc_data.length !== 0) { //doesn't log data if it is empty
                         ppg_ir = ppg_ir.concat(anc_data[2]);
                         ppg_r = ppg_r.concat(anc_data[1]);
-                        //console.log("PPG_IR Length:", ppg_ir);
-                        // console.log("PPG_R Length:", ppg_r);
+                        //heart rate can only start collecting if there are enough data samples
                         if (ppg_ir.length >= 1024 && ppg_r.length >= 1024) {
-                            //    DataFilter.performLowPass(ppg_ir, 500, 5, 2, 0, 0);
                             brainflow_1.DataFilter.performBandPass(ppg_ir, 500, 5, 10, 2, 0, 0);
                             brainflow_1.DataFilter.performBandPass(ppg_r, 500, 5, 10, 2, 0, 0);
-                            // DataFilter.performHighPass(ppg_ir, 500, 5, 3, 0, 0);
-                            // DataFilter.performHighPass(ppg_r, 500, 5, 3, 0, 0);
-                            //     //console.log("PPG_IR Length:", ppg_ir);
-                            //     DataFilter.performLowPass(ppg_r, 500, 5, 2, 0, 0,);
                             heart_rate = brainflow_1.DataFilter.getHeartRate(ppg_ir.slice(-1024), ppg_r.slice(-1024), 500, 1024);
                             console.log("HEART RATE: ", heart_rate);
                         }
@@ -202,7 +191,6 @@ function sendData(socket) {
                         };
                     }
                     ;
-                    //console.log("DATA :", ancData.data1);
                     //emit to socket an object that holds data and op parameters
                     socket.emit('update', __assign({ ancData: ancData, auxData: auxData, heartRate: heart_rate }, operationParameters));
                     return [4 /*yield*/, sleep(200)];
@@ -238,7 +226,7 @@ function main() {
             switch (_a.label) {
                 case 0:
                     connectionSuccessful = null;
-                    socket = (0, socket_io_client_1.io)("http://localhost:3000");
+                    socket = (0, socket_io_client_1.io)(operationParameters.backendIp);
                     _a.label = 1;
                 case 1:
                     _a.trys.push([1, 3, , 4]);

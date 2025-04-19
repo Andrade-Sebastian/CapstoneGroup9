@@ -227,7 +227,7 @@ function successfulLaunch(socket: Socket){
 
 async function main(): Promise<number>{
     let connectionSuccessful: null | string = null;
-    const socket = io(`http://localhost:3000`);
+    const socket = io(operationParameters.backendIp);
     try{
        connectionSuccessful = await requestSocketID(socket);
         console.log("Stored SocketID:", operationParameters.assignSocketId);
