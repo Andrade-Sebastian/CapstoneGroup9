@@ -1,5 +1,6 @@
 import { Card, CardHeader, CardBody, CardFooter, Divider } from '@heroui/react'
 import { IUser } from '@renderer/hooks/useSessionState'
+import { json } from 'node:stream/consumers';
 import { ReactElement } from 'react'
 import { CiSettings, CiCircleCheck, CiCircleQuestion } from 'react-icons/ci'
 
@@ -10,6 +11,8 @@ interface IEmotiBitList {
 }
 
 export default function EmotiBitList(props: IEmotiBitList) {
+  console.log("EmotiBitList: " + JSON.stringify(props))
+  console.log("props.user.associatedDevice?.serialNumber: " + JSON.stringify(props.user.associatedDevice?.serialNumber))
   const shownIcon = props.user.associatedDevice?.isConnected ? (<CiCircleCheck className='text-green-500 ' size={35}/>) :( <CiCircleQuestion className='text-gray-500 text-xl' size={35}/>)
   return (
     <Card onPress={props.onClick} className="border shadow-lg rounded-lg max-w-[400px] bg-white">

@@ -53,6 +53,7 @@ export default function EnterFunction() {
           toast.success("Joining session as a spectator...");
           console.log("Joining as spectator...");
 
+
           axios.post(
             `http://${import.meta.env.VITE_BACKEND_PATH}/joiner/join-as-spectator`,
             {
@@ -61,6 +62,9 @@ export default function EnterFunction() {
               roomCode: roomCode,
             }
           );
+
+    const { userRole} = useJoinerStore();
+
 
           navigateTo("/waiting-room");
         } else {
