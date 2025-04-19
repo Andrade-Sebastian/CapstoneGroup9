@@ -118,8 +118,8 @@ export default function ActivityHost() {
     console.log('Kicking user...')
   }
 
-  const handleViewUser = (userId, experimentType) => {
-    ipc.send('activity:viewUser', sessionId, String(userId), experimentType)
+  const handleViewUser = (userId, nickName, experimentType) => {
+    ipc.send('activity:viewUser', sessionId, String(userId), nickName, experimentType)
   }
 
   function handleSubmit() {
@@ -278,6 +278,25 @@ export default function ActivityHost() {
     return () => clearInterval(interval)
   }, [latestSeekTime])
 
+  useEffect(() => {
+    const kickSelectedUser = (userId) => {
+      userObjects.forEach(user =>{
+        console.log("Comparing: ", typeof(userId), typeof(user.userId));
+        if(userId === String(user.userId)){
+          console.log("Found the user to kick!");
+          socket.emit("kick", user.frontendSocketId)
+          ipc.send("activity:closeUserWindow", user.nickname);
+        }
+      })
+    } 
+    socket.on("kick-active-student", kickSelectedUser);
+    
+
+    return() => {
+      socket.off("kick-active-student");
+    }
+  }, [userObjects])
+
   return (
     <div className="flex flex-col w-full px-8 pt-6">
       <Toaster position="top-right" />
@@ -404,7 +423,7 @@ export default function ActivityHost() {
           {(userObjects || []).map((user, index) => (
             <button
               key={index}
-              onClick={() => handleViewUser(user.userId, experimentType)}
+              onClick={() => handleViewUser(user.userId, user.nickname, experimentType)}
               className="flex items-center border-black font-medium rounded-md bg-[#E6E6E6] hover:bg-[#CECECE] px-4 py-1.5 text-black font-light cursor-pointer gap-2.5"
             >
               <p>{user.nickname}</p>

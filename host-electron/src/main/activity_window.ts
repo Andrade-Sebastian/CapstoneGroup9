@@ -29,13 +29,13 @@ function loadEchoServerBinary(): string{
   else return //echo_server_binary_x86_64_pc_windows//windows
 }
 
-function createProcessWindow(sessionId: string, userId: string, experimentType: number): BrowserWindow {
+function createProcessWindow(sessionId: string, userId: string, nickName:string, experimentType: number): BrowserWindow {
   const processWindow = new BrowserWindow({
     width: 900,
     height: 900,
     show: false,
     resizable: true,
-    title: `SessionID ${sessionId}`,
+    title: `${nickName}`,
     autoHideMenuBar: true,
     ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
