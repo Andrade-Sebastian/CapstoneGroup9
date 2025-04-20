@@ -410,7 +410,7 @@ joinerRouter.post("/validatePassword", async (req: Request, res: Response) => {
             return res.status(200).json({success: true})
         }
         else{
-            return res.status(400).json({success: false})
+            return res.status(205).json({success: false})
         }
     }
     catch(error){
