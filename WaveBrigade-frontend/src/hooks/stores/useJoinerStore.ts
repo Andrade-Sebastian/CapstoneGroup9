@@ -67,6 +67,7 @@ interface JoinerState{
     userRole: string;
     wasKicked: boolean;
     messages: [];
+    
 
     setJoinerId: (id: string) => void;
     setNickname: (nickname: string | null) => void;

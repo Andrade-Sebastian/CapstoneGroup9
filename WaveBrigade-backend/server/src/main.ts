@@ -53,7 +53,7 @@ import fs from "node:fs";
 import { fileURLToPath } from "node:url";
 import { off } from "node:process";
 import dbClient from "./controllers/dbClient.ts";
-
+import {removeSpectatorFromSession, removeUserFromSession, getUserSessionIDFromSocketID} from "./controllers/database.ts"
 const app = express();
 
 // app.get('/get-ip', (req, res) => {
@@ -212,6 +212,11 @@ io.on("connection", (socket) => {
     console.log("Here is the message:", data);
     io.emit("message", data);
   })
+
+  socket.on("experiment-active", (data) => {
+    console.log("The experiment is", data);
+    io.emit("experiment-active", data);
+  })
   
   socket.on("kick", async (nicknameSocketID) => {
     console.log("Received kick event for", nicknameSocketID);
@@ -231,6 +236,11 @@ io.on("connection", (socket) => {
     
     // io.emit("kick", socketID);
     
+  })
+
+  socket.on("kick-active-student", (data) => {
+    console.log("Recieved active student: ", data);
+    io.emit("kick-active-student", data);
   })
   
   socket.on("joiner-connected", async (data) => {
@@ -349,11 +359,6 @@ io.on("connection", (socket) => {
     console.log("Ending experiment");
     io.emit("end-experiment");
   });
-  //console.log("Running Script");
-  // socket.on("update", (data) => {
-  //     console.log(data);
-  //     io.emit("update", data);
-  // })
 
   socket.on("disconnect", async (data) => {
     // console.log(`(main.ts): User Disconnected | socketID: ${socket.id}`);
@@ -361,9 +366,28 @@ io.on("connection", (socket) => {
 
     console.log("User disconnected: ", socket.id);
     console.log("Reason: ", data);
+
     delete userStates[socket.id];
     const sessionID = getSessionBySocket(socket.id);
 
+    const sessionIDnum: number | null = await getUserSessionIDFromSocketID(socket.id)
+    const sessionIDstr = String(sessionIDnum)
+
+    try {
+      console.log("trying to remove joiner with sessionid " + sessionIDnum + "and socketid " + socket.id)
+      await removeUserFromSession(sessionIDstr, socket.id);
+    } catch (err) {
+      console.error("Error removing joiner from session:", err);
+    }
+
+    try {
+      console.log("removing spectator with sessionid " + sessionID + "and socketid" + socket.id)
+      await removeSpectatorFromSession(sessionIDnum, socket.id);
+    } catch (err) {
+      console.error("Error removing spectator from session:", err);
+    }
+
+    
     if (sessionID) {
       try {
         const response = await axios.post(

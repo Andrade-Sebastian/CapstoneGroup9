@@ -41,7 +41,8 @@ export default function WaitingRoom() {
     setSessionId,
     removeDevice,
     experimentTitle,
-    experimentDesc
+    experimentDesc,
+    setIsActive
   } = useSessionStore()
   const [ isBeginDisabled, setIsBeginDisabled] = useState(false);
   const [ isConnectEmotibitDisabled, setIsConnectEmotibitDisabled] = useState(false);
@@ -105,17 +106,21 @@ export default function WaitingRoom() {
   //Modal Handlers
   const handleOpenModal = () => {
     setIsModalOpen(true);
-    setIsBeginDisabled(true); //set to false to test
-    setIsConnectEmotibitDisabled(false); //set to true to test
+    setIsBeginDisabled(false); //set to false to test
+    setIsConnectEmotibitDisabled(true); //set to true to test
     console.log(`[HandleOpenModal]Begin is ${isBeginDisabled} and ConnectEmotibitDisabled is ${isConnectEmotibitDisabled}`)
   }
   const handleCloseModal = () => setIsModalOpen(false)
   const handleAction = () => {
     console.log('Creating lobby...')
+    handleSubmit()
+    handleCloseModal()
+    setAllDevicesConnected(true); //set to true to test
+  }
+
+  const checkUsers = () => {
     if(nicknames.length != 0){
-      handleSubmit()
-      handleCloseModal()
-      setAllDevicesConnected(false); //set to true to test
+      handleOpenModal();
     }
     else{
       toast.error("Please wait for people to join");
@@ -565,7 +570,7 @@ export default function WaitingRoom() {
   const handleSubmit =() => {
     console.log('Attempting to start experiment...');
     //const allEmotiBitsConnected = emotiBits.every((user) => user.nickname && user.isConnected);
-    if(!allDevicesConnected){
+    if(!allDevicesConnected){ 
       toast.error("Cannot start experiment. Not all EmotiBits are connected!");
       return;
     }
@@ -573,6 +578,10 @@ export default function WaitingRoom() {
       //-----HARDCODED FOR TESTING-------
     socket.emit("session-start");
     socket.emit("session-start-spectator")
+    setIsActive(true);
+    socket.emit("experiment-active", {
+      isActive: true
+    });
     navigateTo('/activity-room');
   }
   
@@ -653,7 +662,7 @@ export default function WaitingRoom() {
         </button>
         <button
           type="button"
-          onClick={handleOpenModal}
+          onClick={checkUsers}
           className="mt-6 font-semibold py-3 px-6 rounded-md shadow-md transition duration-300 ease-in-out bg-[#7F56D9] hover:bg-violet-500 text-white cursor-pointer"
         >
           Begin

@@ -1,6 +1,6 @@
-import Plot from 'react-plotly.js';
-import React, {useState, useEffect} from 'react';
-import socket from '../Views/socket.tsx';
+import Plot from "react-plotly.js";
+import React, { useState, useEffect } from "react";
+import socket from "../Views/socket.tsx";
 
 //Chart Types
 //ECG Heart Rate - 1
@@ -8,10 +8,11 @@ import socket from '../Views/socket.tsx';
 //Skin Response - 3
 
 interface IDataType {
-    chart_type: number;
-    chart_name: string;
-    chart_color: string;
-    user_id: string;
+  chart_type: number;
+  chart_name: string;
+  chart_color: string;
+  user_id: string;
+  className?: string;
 }
 let max = 98;
 let min = 93;
@@ -21,27 +22,31 @@ let high = 0;
 const now: Date = new Date();
 
 export default function ChartComponent(props: IDataType) {
-    let lastDataType = 0;
-    
-    const [plotState, acceptPlotDataState] = useState<Array<number>>([]);
-    const [timeState, acceptTimeState] = useState<Array<number>>([]);
-    //const [edaState, acceptEdaDataState] = useState<Array<number>>([]);
+  let lastDataType = 0;
 
-    function addDataPoint(ancDataFrame, auxDataFrame, heartRate, timeStamp: number){
-        
-        const numOfPoints = plotState.length;
-        const numOfTimeStamps = timeState.length;
-        let current_data = 0;
+  const [plotState, acceptPlotDataState] = useState<Array<number>>([]);
+  const [timeState, acceptTimeState] = useState<Array<number>>([]);
+  //const [edaState, acceptEdaDataState] = useState<Array<number>>([]);
 
-        console.log("LENGTH OF ARRAY: ", numOfPoints);
+  function addDataPoint(
+    ancDataFrame,
+    auxDataFrame,
+    heartRate,
+    timeStamp: number
+  ) {
+    const numOfPoints = plotState.length;
+    const numOfTimeStamps = timeState.length;
+    let current_data = 0;
 
-        // if(numOfTimeStamps == 10){
-        //     timeState.shift();
-        //     acceptTimeState(timeState => [...timeState, timeStamp * 1000]);
-        // }
-        // else{
-        //     acceptTimeState(timeState => [...timeState, timeStamp * 1000]);
-        // }
+    console.log("LENGTH OF ARRAY: ", numOfPoints);
+
+    // if(numOfTimeStamps == 10){
+    //     timeState.shift();
+    //     acceptTimeState(timeState => [...timeState, timeStamp * 1000]);
+    // }
+    // else{
+    //     acceptTimeState(timeState => [...timeState, timeStamp * 1000]);
+    // }
 
         // CHART TYPE IF STATEMENTS  
         if(props.chart_type === 1){
@@ -124,18 +129,21 @@ export default function ChartComponent(props: IDataType) {
 
     useEffect(() => {
 
-        function brainflowConnect(){
-            console.log("(chartComponent.ts): Emitting brainflow-assignment with socketId:", socket.id);
-            socket.emit("brainflow-client-assign", {socketId: socket.id});
-        }
+    function brainflowConnect() {
+      console.log(
+        "(chartComponent.ts): Emitting brainflow-assignment with socketId:",
+        socket.id
+      );
+      socket.emit("brainflow-client-assign", { socketId: socket.id });
+    }
 
-        // function simulateData(){
-        //     const randomTemp = Math.random(); // Random temperature between 0 and 40
-        //     const randomEda = Math.random() * 2; // Random EDA value between 0 and 2
-        //     const currentTime = Date.now() / 1000; // Current timestamp in seconds
+    // function simulateData(){
+    //     const randomTemp = Math.random(); // Random temperature between 0 and 40
+    //     const randomEda = Math.random() * 2; // Random EDA value between 0 and 2
+    //     const currentTime = Date.now() / 1000; // Current timestamp in seconds
 
-        //     //addTempDataPoint(randomTemp, currentTime);
-        // }
+    //     //addTempDataPoint(randomTemp, currentTime);
+    // }
 
         function onUpdate(payload){
             const {ancData, auxData, heartRate, ipAddress, serialNumber, backendIp, hostSessionId, userId, frontEndSocketId, assignSocketId} = payload;
@@ -154,22 +162,20 @@ export default function ChartComponent(props: IDataType) {
         //     simulateData();
         //     Plot.extendTraces(Chart, { y: plotState, x: timeState});
 
-        //     if(counter > 100){
-        //         Plot.relayout(Chart, {
-        //             xaxis: {
-        //                 range: [counter - 100, counter],
-        //             }
-        //         })
-        //     }
-        // }, 50);
+    //     if(counter > 100){
+    //         Plot.relayout(Chart, {
+    //             xaxis: {
+    //                 range: [counter - 100, counter],
+    //             }
+    //         })
+    //     }
+    // }, 50);
 
-        //recieve emotibit data
-        socket.on('update', onUpdate);
-        // socket.on("connect", () => {
-        //     console.log("Connect");
-        // })
-
-        
+    //recieve emotibit data
+    socket.on("update", onUpdate);
+    // socket.on("connect", () => {
+    //     console.log("Connect");
+    // })
 
         return () => {
             socket.off("brainflow-assignment", brainflowConnect);
@@ -199,18 +205,23 @@ export default function ChartComponent(props: IDataType) {
                     },
                     ]}
                     layout = {{
-                        width: 1000,
-                        height: 320,
                         yaxis: {
                             title: 'Temperature (°F)',//props.chart_name,,
                             range: [min, max + 1],
                             tick: 1,
                         },
+                        margin: {
+                          l: 0,
+                          r: 0,
+                          b: 0,
+                          t: 0,
+                        },
                         showlegend: true,
-                        //responsive: true,
+                        responsive: true,
                     }}
                     config={{
-                        displayModeBar: false 
+                        displayModeBar: false,
+                        scrollZoom: false 
                       }}
                 />
             </div> 

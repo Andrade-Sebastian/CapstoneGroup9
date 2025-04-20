@@ -9,7 +9,7 @@ interface ISideComponent {
 
 export default function SideComponent(props: ISideComponent){
     return(
-        <div className="flex flex-col items-center text-center">
+        <div className="flex flex-col items-center text-center w-fit">
             <div className="flex justify-center items-center mb-2">
             <div className="object-cover rounded-xl">
             {props.icon}

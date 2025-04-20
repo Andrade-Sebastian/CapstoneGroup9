@@ -18,23 +18,25 @@ export default function JoinPage() {
   const navigateTo = useNavigate();
   const [sessionID, setSessionID] = useState("");
   const [isJoiningAsSpectator, setisJoiningAsSpectator] = useState(false);
+  const [experimentActive, setExperimentActive] = useState(false);
 
   const {
-    userRole,
-    sessionId,
-	wasKicked,
-    socketId,
+    userRole, 
     setUserRole,
+    sessionId,
+	  wasKicked,
+    socketId,
     setSessionId,
     setNickname,
     setRoomCode,
-	setUserSocketId,
+	  setUserSocketId,
   } = useJoinerStore();
+
 
 
   useEffect(() => {
 	socket.connect()
-
+    console.log("SOCKET.connect() Setting user role to student")
     setUserRole("student");
 	console.log("Global wasKicked variable: ", wasKicked)
 
@@ -44,16 +46,28 @@ export default function JoinPage() {
 	}
 
 	socket.emit("client-assignment", );
+  socket.on("experiment-active", (data) => {
+    if(data.isActive === true){
+      toast.error("Experiment in progress, cannot join...")
+      setExperimentActive(data.isActive);
+      return;
+    }
+    else{
+      setExperimentActive(false);
+      // toast.error("Experiment in progress, cannot join...")
+    }
+  })
 
     socket.on("client-assignment", async (data) => {
 		console.log(new Date().toLocaleTimeString(), "(JoinPage.tsx): got a client-assignment event in JoinPage.tsx, recieved: ", data)
 		await setUserSocketId(data.socketId);
 		
 		return () => {
+      socket.off("experiment-active")
 			socket.off("client-assignment")
 		}
   	})
-  }, []);
+  }, [setExperimentActive]);
 
   async function checkNicknameIsUnique(nickname: string, sessionID: number): Promise<boolean> {
     console.log(`making request at http://localhost:3000/database/unique-nickname/${sessionID}/${nickname}`)
@@ -67,9 +81,14 @@ export default function JoinPage() {
 
 
   const handleSubmit = async (e) => {
-	  console.log(new Date().toLocaleTimeString(), "Current socketID in Zustand: ", socketId)
+	  console.log(new Date().toLocaleTimeString(), "(Join Page) Current socketID in Zustand: ", socketId)
     setRoomCode(StudentInputRoomCode);
     e.preventDefault();
+
+    if(experimentActive === true){
+      toast.error("Cannot join room, experiment is active...")
+      return;
+    }
 
     if (!StudentInputRoomCode && !nickName) {
       console.error("Please enter both a nickname and a room code...");
@@ -114,11 +133,13 @@ export default function JoinPage() {
       if(isJoiningAsSpectator && canSpectate){
         //Set global store 'userRole' to 'spectator'
         setUserRole("spectator");
+        console.log("if(isJoiningAsSpectator && canSpectate) Setting user role to spectator")
         console.log("global user role: ", userRole);
       }
       else{
         //when they input the password, navigate to the waiting room
         console.log("joiner");
+        console.log("(else) Setting user role to student")
         setUserRole("student");
         
       }
@@ -176,6 +197,7 @@ export default function JoinPage() {
         return true;
       }
     } catch (error) {
+      toast.error(`ERROR: Cannot join room ${error}`)
       if(error.status === 400){
         console.log("Room code is invalid");
         return false;
@@ -256,7 +278,7 @@ export default function JoinPage() {
                 <input
                   id="allow-spectators"
                   type="checkbox"
-                  className="h-4 w-4 accent-[#7F56D9]"
+                  className="h-4 w-4 accent-[#7F56D9] cursor-pointer"
                   checked={isJoiningAsSpectator}
                   onChange={() => {
                     //fixes issue where the checkbox shows the opposite boolean value when clicked on
