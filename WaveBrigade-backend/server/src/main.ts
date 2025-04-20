@@ -391,7 +391,7 @@ io.on("connection", (socket) => {
     if (sessionID) {
       try {
         const response = await axios.post(
-          `http://localhost:3000/joiner/leave-room`,
+          `http://${import.meta.env.VITE_BACKEND_PATH}/joiner/leave-room`,
           {
             sessionID: sessionID,
             socketID: socket.id,

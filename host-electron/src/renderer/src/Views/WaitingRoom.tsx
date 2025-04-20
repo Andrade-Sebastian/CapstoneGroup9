@@ -287,39 +287,29 @@ export default function WaitingRoom() {
     console.log('after axios')
     console.log('removing emotibit')
 
-    const serialNumberToRemove = serialNumber
+    const serialNumberToRemove = serialNumber;
     console.log(selectedEmotiBitId + "selectedEmotiBitId")
     // if(!selectedEmotiBitId) return;
 
-    console.log("(handleRemoveEmoti): emotibit serial: " + focusedDeviceSerial + " IP: " + focusedDeviceIP)
-    console.log("Removed emotibit with serial " + focusedDeviceSerial + " and deviceIP" + focusedDeviceIP )
+    // console.log("(handleRemoveEmoti): emotibit serial: " + focusedDeviceSerial + " IP: " + focusedDeviceIP)
+    // console.log("Removed emotibit with serial " + focusedDeviceSerial + " and deviceIP" + focusedDeviceIP )
     
     console.log("after axios")
     console.log("removing emotibit")
 
-    const serialNumberToRemove = serialNumber;
+
 
     setCurrentDevices(currentDevices => 
       currentDevices.filter(device => device.associatedDevice.serialNumber !== serialNumberToRemove)
     );
     setIsModalOpenSettings(false);
   } 
+  
   const handleOpenModalSettings = (userId: string) => {
     setSelectedEmotiBitId(userId);
     setIsModalOpenSettings(true);
   };
 
-    setCurrentDevices((currentDevices) =>
-      currentDevices.filter(
-        (device) => device.associatedDevice.serialNumber !== serialNumberToRemove
-      )
-    )
-    setIsModalOpenSettings(false)
-  }
-  const handleOpenModalSettings = (userId: string) => {
-    setSelectedEmotiBitId(userId)
-    setIsModalOpenSettings(true)
-  }
 
   const handleCloseModalSettings = () => {
     setIsModalOpenSettings(false)
@@ -619,6 +609,7 @@ export default function WaitingRoom() {
   useEffect(() => {
     console.log('Current Devices', currentDevices)
   }, [currentDevices])
+
   return (
     <div className="flex flex-col items-center justify-center px-4 mx:px-8 w-full">
       <div className="flex flex-col md:flex-row items-start justify-between w-full max-w-6xl gap-8">
@@ -638,7 +629,7 @@ export default function WaitingRoom() {
             <div className="flex items-center space-x-2 text-lg">
               <CiUser size={24} />
               <p className="text-lg">
-                <span className="font-semibold text-[#894DD6]">PARTICIPANTS</span>{' '}
+                <span className="font-semibold text-[#894DD6]">PARTICIPANTS</span>
                 <span>{nicknames.length}</span>
               </p>
             </div>
@@ -656,7 +647,6 @@ export default function WaitingRoom() {
         </div>
         <div className="w-full flex flex-col mt-6">
           <h2 className="text-xl lg:text-2xl font-semibold text-gray-800 mb-4">
-            {' '}
             Connected EmotiBits
           </h2>
           <div className="flex-col gap-4 overflow-y-auto max-h-[300px] md:max-h-[400px] p-4 border rounded-md shadow-md ">

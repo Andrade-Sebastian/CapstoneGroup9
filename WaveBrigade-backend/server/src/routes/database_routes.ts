@@ -416,7 +416,7 @@ databaseRouter.get("/unique-nickname/:sessionid/:nickname", async (req: Request,
     
     let isUnique: boolean = false;
 
-    console.log(`http://localhost:3000/database/unique-nickname/${sessionID}/${nickname}`)
+    console.log(`http://${import.meta.env.VITE_BACKEND_PATH}/database/unique-nickname/${sessionID}/${nickname}`)
 
     isUnique = await isNicknameUnique(sessionID, nickname);
     console.log("ROUTE, recieved ", isUnique)

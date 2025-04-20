@@ -34,15 +34,6 @@ export default function JoinPage() {
   } = useJoinerStore();
 
   useEffect(() => {
-    socket.connect();
-
-
-	  setUserSocketId,
-  } = useJoinerStore();
-
-
-
-  useEffect(() => {
 	socket.connect()
     console.log("SOCKET.connect() Setting user role to student")
 
