@@ -221,7 +221,7 @@ export default function ActivityHost() {
 
   const handleViewUser = (e,userId, userrole, experimentType, nickname) => {
     if(userrole !== "spectator"){
-      ipc.send('activity:viewUser', sessionId, String(userId), experimentType)
+      ipc.send('activity:viewUser', sessionId, String(userId), nickname, experimentType)
     }
     else{
       setFocusedUser(nickname);
