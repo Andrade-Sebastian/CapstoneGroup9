@@ -30,7 +30,8 @@ export default function NavigationBar(props: INavbarProps) {
       <Navbar
         isBordered={true}
         position="static"
-        className="bg-gradient-to-br from-purple-700 to-violet-400 text-white h-20 px-4"
+        className="flex justify-between bg-gradient-to-br from-purple-700 to-violet-400 text-white h-20 px-4"
+        maxWidth="full"
       >
         <NavbarBrand className="flex items-center">
           <RiPulseFill style={{ fontSize: "24px" }} />
@@ -43,9 +44,9 @@ export default function NavigationBar(props: INavbarProps) {
         <button className="md:hidden text-white cursor-pointer text-3xl" onClick={() => setMenuOpen(!menuOpen)}>
           <IoMdMenu/>
         </button>
-        <NavbarContent className="hidden ml-auto md:flex items-center justify-end">
+        <NavbarContent className="hidden md:w-[100px] justify-end md:flex items-center" justify="end">
             {/* Settings */}
-          <NavbarItem className="flex gap-6 items-center justify-end w-full max-w-md">
+          <NavbarItem className="flex items-center ">
             <div className="flex gap-10 items-center justify-center">
                 <button onClick={props.onOpenSettings} className="border cursor-pointer font-semibold px-6 py-2 flex items-center gap-2 rounded-md shadow-md transition duration-300 ease-in-out">
                     SETTINGS
@@ -55,8 +56,9 @@ export default function NavigationBar(props: INavbarProps) {
                 />
                 </button>
             </div>
+            </NavbarItem>
 
-
+            <NavbarItem className="flex items-center ">
             <div className="flex gap-10 items-center justify-center">
               <button
                 onClick={props.onOpenInfo}

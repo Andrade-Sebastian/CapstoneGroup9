@@ -90,7 +90,7 @@ export default function GalleryLab() {
   //   }
   // }, [imageSource]);
   return (
-    <div className="flex h-screen w-full">
+    <div className="flex w-full">
       <Toaster position="top-right" />
       <div className="flex flex-col max-sm:hidden items-center justify-center w-1/3">
         <SideComponent

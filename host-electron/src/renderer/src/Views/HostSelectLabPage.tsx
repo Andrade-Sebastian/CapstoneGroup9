@@ -108,7 +108,7 @@ export default function HostSelectLabPage() {
         />
       </div>
       {/* Templates Container*/}
-      <div className="flex flex-col items-center justify-center w-full md:w-3/5 lg:w-2/3 p-6">
+      <div className="flex flex-col items-center justify-center w-full md:w-3/5 lg:w-2/3 p-1">
         <form onSubmit={handleSubmit} className="flex flex-col gap-8 w-full max-w-2xl">
           {/* LAB TEMPLATES */}
           <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 grid-rows-2 gap-6 items-center">

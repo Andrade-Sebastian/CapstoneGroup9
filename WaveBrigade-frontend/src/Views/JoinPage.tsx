@@ -18,6 +18,7 @@ export default function JoinPage() {
   const navigateTo = useNavigate();
   const [sessionID, setSessionID] = useState("");
   const [isJoiningAsSpectator, setisJoiningAsSpectator] = useState(false);
+  const [experimentActive, setExperimentActive] = useState(false);
 
   const {
     userRole, 
@@ -44,17 +45,29 @@ export default function JoinPage() {
 		toast.error("You were kicked from the room")
 	}
 
-	  socket.emit("client-assignment", );
+	socket.emit("client-assignment", );
+  socket.on("experiment-active", (data) => {
+    if(data.isActive === true){
+      toast.error("Experiment in progress, cannot join...")
+      setExperimentActive(data.isActive);
+      return;
+    }
+    else{
+      setExperimentActive(false);
+      // toast.error("Experiment in progress, cannot join...")
+    }
+  })
 
     socket.on("client-assignment", async (data) => {
 		console.log(new Date().toLocaleTimeString(), "(JoinPage.tsx): got a client-assignment event in JoinPage.tsx, recieved: ", data)
 		await setUserSocketId(data.socketId);
 		
 		return () => {
+      socket.off("experiment-active")
 			socket.off("client-assignment")
 		}
   	})
-  }, []);
+  }, [setExperimentActive]);
 
   async function checkNicknameIsUnique(nickname: string, sessionID: number): Promise<boolean> {
     console.log(`making request at http://localhost:3000/database/unique-nickname/${sessionID}/${nickname}`)
@@ -71,6 +84,11 @@ export default function JoinPage() {
 	  console.log(new Date().toLocaleTimeString(), "(Join Page) Current socketID in Zustand: ", socketId)
     setRoomCode(StudentInputRoomCode);
     e.preventDefault();
+
+    if(experimentActive === true){
+      toast.error("Cannot join room, experiment is active...")
+      return;
+    }
 
     if (!StudentInputRoomCode && !nickName) {
       console.error("Please enter both a nickname and a room code...");
@@ -179,6 +197,7 @@ export default function JoinPage() {
         return true;
       }
     } catch (error) {
+      toast.error(`ERROR: Cannot join room ${error}`)
       if(error.status === 400){
         console.log("Room code is invalid");
         return false;
@@ -259,7 +278,7 @@ export default function JoinPage() {
                 <input
                   id="allow-spectators"
                   type="checkbox"
-                  className="h-4 w-4 accent-[#7F56D9]"
+                  className="h-4 w-4 accent-[#7F56D9] cursor-pointer"
                   checked={isJoiningAsSpectator}
                   onChange={() => {
                     //fixes issue where the checkbox shows the opposite boolean value when clicked on
