@@ -212,6 +212,11 @@ io.on("connection", (socket) => {
     console.log("Here is the message:", data);
     io.emit("message", data);
   })
+
+  socket.on("experiment-active", (data) => {
+    console.log("The experiment is", data);
+    io.emit("experiment-active", data);
+  })
   
   socket.on("kick", async (nicknameSocketID) => {
     console.log("Received kick event for", nicknameSocketID);

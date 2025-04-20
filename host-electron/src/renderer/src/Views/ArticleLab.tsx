@@ -55,7 +55,7 @@ export default function ArticleLab() {
 
 
   return (
-    <div className="flex h-screen">
+    <div className="flex">
       <Toaster position="top-right" />
       <div className="flex flex-col max-sm:hidden items-center justify-center w-2/5">
         <SideComponent

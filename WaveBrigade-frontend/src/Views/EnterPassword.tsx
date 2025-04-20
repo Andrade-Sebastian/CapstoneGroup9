@@ -23,8 +23,15 @@ export default function EnterFunction() {
     const [ password, setPassword]  = useState("");
     const [type, setType] = useState('password')
     const [icon, setIcon] = useState(eyeOff)
+    const [isDisabled, setDisabled] = useState(false);
 
     const { userRole} = useJoinerStore();
+
+    let passwordCooldown = 0;
+
+    function sleep(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms))
+    }
 
     function handleToggle() {
         //have eye open if text is censored, if not then eye closed
@@ -74,7 +81,16 @@ export default function EnterFunction() {
             }
           }
         else{
-          toast.error("Connection failed. Looks like we couldn't get you connected. Please check the password and try again.");
+          if(passwordCooldown == 3){
+            setDisabled(true);
+            toast.error("You have entered the wrong password too many times! Please wait to try again");
+            await sleep (5000);
+            passwordCooldown = 0;
+            setDisabled(false);
+          }
+          else{
+            toast.error("Connection failed. Looks like we couldn't get you connected. Please check the password and try again.");
+          }
         }
         }catch(error){
           console.error("Error verifying code:", error);
@@ -96,8 +112,10 @@ export default function EnterFunction() {
             console.log("Password is valid");
             return true;
           }
-          if(response.status === 400){
+          if(response.status === 205){
             console.log("Password is invalid");
+            passwordCooldown++;
+            console.log(passwordCooldown);
             return false;
           }
         } catch (error) {
@@ -131,6 +149,7 @@ export default function EnterFunction() {
                 className="w-full p-2 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 onChange={(e) => setPassword(e.target.value)}
                 value={password}
+                disabled={isDisabled}
               />
 
               <span

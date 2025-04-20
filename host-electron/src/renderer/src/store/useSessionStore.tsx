@@ -63,6 +63,7 @@ interface SessionState{
     experimentTypeString: string;
 
     spectators: boolean;
+    isActive: boolean;
 
 
     setSessionId: (id: string) => void;
@@ -98,6 +99,7 @@ interface SessionState{
     setExperimentTypeString: (experimentTypeString: string) => void;
     setSpectators: (spectators: boolean) => void;
     updateDevice: (updatedDevice: IDevice) => void;
+    setIsActive: (isActive: boolean) => void;
 }
 
 export const useSessionStore = create<SessionState>()(
@@ -123,6 +125,7 @@ export const useSessionStore = create<SessionState>()(
             experimentType: 0,
             experimentTypeString: '',
             spectators: false,
+            isActive: false,
             
 
             setSessionId: (id: string): void => set(() => ({ sessionId: id})),
@@ -171,5 +174,6 @@ export const useSessionStore = create<SessionState>()(
             })),
             setExperimentType: (experimentType: number): void => set(() => ({ experimentType: experimentType})),
             setExperimentTypeString: (experimentTypeString: string): void => set(() => ({experimentTypeString: experimentTypeString})),
-            setSpectators: (isAllowed: boolean): void => set(() => ({spectators: isAllowed}))
+            setSpectators: (isAllowed: boolean): void => set(() => ({spectators: isAllowed})),
+            setIsActive: (isActive: boolean): void => set(()=>({isActive: isActive}))
         }));
