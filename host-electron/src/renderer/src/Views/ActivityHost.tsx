@@ -221,7 +221,7 @@ export default function ActivityHost() {
 
   const handleViewUser = (e,userId, userrole, experimentType, nickname) => {
     if(userrole !== "spectator"){
-      ipc.send('activity:viewUser', sessionId, String(userId), experimentType)
+      ipc.send('activity:viewUser', sessionId, String(userId), nickname, experimentType)
     }
     else{
       setFocusedUser(nickname);
@@ -291,7 +291,8 @@ export default function ActivityHost() {
         console.log('Trying to get users from session ' + sessionID)
         const response = await axios.get(`http://localhost:3000/joiner/room-users/${sessionID}`)
         const users = response.data.users //Array of IUser objects
-        const rawUsers = response.data.users
+        const rawUsers = response.data.users;
+        const userMap = new Map();
 
         const normalizedUsers = rawUsers.map((u) => ({
           device: u.device,
@@ -317,6 +318,11 @@ export default function ActivityHost() {
 
         setNickNames(nicknames)
         console.log('Fetched users from backend:', response.data.users)
+
+        users.forEach(user => {
+          userMap.set(user.nickname, user.frontendsocketid);
+        });
+        setTheUserMap(userMap);
 
         //setUserObjects(response.data.users)
 
@@ -385,6 +391,25 @@ export default function ActivityHost() {
     }, 1000)
     return () => clearInterval(interval)
   }, [latestSeekTime])
+
+  useEffect(() => {
+    const kickSelectedUser = (userId) => {
+      userObjects.forEach(user =>{
+        console.log("Comparing: ", typeof(userId), typeof(user.userId));
+        if(userId === String(user.userId)){
+          console.log("Found the user to kick!");
+          socket.emit("kick", user.frontendSocketId)
+          ipc.send("activity:closeUserWindow", user.nickname);
+        }
+      })
+    } 
+    socket.on("kick-active-student", kickSelectedUser);
+    
+
+    return() => {
+      socket.off("kick-active-student");
+    }
+  }, [userObjects])
 
   return (
     <div className="flex flex-col w-full px-8 pt-6">

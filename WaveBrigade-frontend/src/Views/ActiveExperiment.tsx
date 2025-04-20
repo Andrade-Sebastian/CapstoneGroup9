@@ -48,6 +48,10 @@ export default function ActiveExperiment() {
     experimentTitle,
     experimentDesc,
     experimentType,
+    sessionId,
+    socketId,
+    setWasKicked,
+    userRole
   } = useJoinerStore();
   const navigateTo = useNavigate();
 
@@ -335,6 +339,59 @@ export default function ActiveExperiment() {
       socket.off("toggle-mask");
     };
   });
+
+
+  useEffect(() => {
+    socket.on("kick", kickUser);
+    console.log("Listening for 'kick event");
+    
+    function kickUser()
+    {
+      //Global store that keeps track of whether the user has been previously kicked or not
+      setWasKicked(true);
+      console.log("Kick function. Here is the socketID and sessionID", socketId, sessionId)
+      //removes user from database
+      
+
+      console.log("Kicking user from database in sessionID: ", sessionId);
+      //is sessionID the global one? or a useState?
+
+      if (userRole === "spectator"){
+        console.log(`removing spectator from session ${sessionId} with socketID ${socketId}`)
+      //   axios.post("http://localhost:3000/joiner/remove-spectator-from-session", 
+      //     {
+      //       sessionID: sessionId,
+      //       socketID: socketId
+      //     }
+      //   ).then(() => {  
+      //     console.log("Successfully removed from database");
+      //     navigateTo("/");})
+      //   .catch(error =>{
+      //   console.log("Error removing user from database", error)
+      // })
+        console.log("Successfully removed from database");
+        clearInterval(interval)
+        navigateTo("/")
+        return () => {
+          socket.off("kick", kickUser);
+        }
+      }else{
+        axios.post('http://localhost:3000/joiner/leave-room', {
+          sessionID: sessionId,
+          socketID: socketId
+        })
+        .then(() =>{
+          console.log("Successfully removed from database");
+          navigateTo("/");
+        })
+        .catch(error =>{
+          console.log("Error removing user from database", error)
+        })
+      }}
+    
+    return () => {
+      socket.off("kick", kickUser);
+  }}, []);
 
   return (
     <div className="flex flex-col lg:flex-row w-full max-h-full bg-white px-2 py-1 gap-4">
