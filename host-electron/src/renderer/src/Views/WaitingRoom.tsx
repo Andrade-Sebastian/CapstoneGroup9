@@ -9,7 +9,7 @@ import { HiOutlineSignal } from 'react-icons/hi2'
 import { CiUser } from 'react-icons/ci'
 
 import { FaUserXmark } from "react-icons/fa6";
-import socket from './socket.tsx'
+import socket from './socket'
 import axios from 'axios'
 import { Divider } from '@heroui/divider'
 import WaitingRoomCardComponent from '../components/WaitingRoomCardComponent'
@@ -58,9 +58,6 @@ export default function WaitingRoom() {
   const [socketID, setSocketID] = useState('')
   const [theUserMap, setTheUserMap] = useState(new Map())
   const [focusedUser, setFocusedUser] = useState('')
-  const [focusedDeviceSerial, setFocusedDeviceSerial] = useState("")
-  const [focusedDeviceIP, setFocusedDeviceIP] = useState("")
-  const [focusedAssociatedUser, setFocusedAssociatedUser] = useState("");
   const [experimentIcon, setExperimentIcon] = useState<JSX.Element>(
     <CiPlay1 style={{ fontSize: '20px' }} />
   )
@@ -300,25 +297,15 @@ export default function WaitingRoom() {
     console.log("after axios")
     console.log("removing emotibit")
 
-    const serialNumberToRemove = focusedDeviceSerial;
+    const serialNumberToRemove = serialNumber;
 
     setCurrentDevices(currentDevices => 
       currentDevices.filter(device => device.associatedDevice.serialNumber !== serialNumberToRemove)
     );
     setIsModalOpenSettings(false);
   } 
-  const handleOpenModalSettings = (userId: string, associatedDevice: JSON, wholeObj: JSON) => {
-    console.log("nruh" + JSON.stringify(associatedDevice));
-    setFocusedDeviceSerial(associatedDevice.serialNumber)
-    setFocusedDeviceIP(associatedDevice.ipAddress)
-    setFocusedAssociatedUser(wholeObj.nickname)
-    
-    if (!userId){
-      console.log("Selected emotibit is not associated to a user, userid is "+ userId)
-    }
-
+  const handleOpenModalSettings = (userId: string) => {
     setSelectedEmotiBitId(userId);
-    console.log("selected emotibit" + selectedEmotiBitId)
     setIsModalOpenSettings(true);
   };
 
@@ -567,8 +554,6 @@ export default function WaitingRoom() {
     setSessionID(useSessionStore.getState().sessionId)
     const fetchUsers = async () => {
       try {
-        console.log("devices: " + JSON.stringify(devices))
-        console.log(devices)
         // console.log('Trying to get users from session ' + sessionID);
         const response = await axios.get(
           `http://${import.meta.env.VITE_BACKEND_PATH}/joiner/room-users/${sessionID}`
@@ -679,7 +664,7 @@ export default function WaitingRoom() {
               currentDevices.map((device) => {
                 // if (device.nickname !== null && device.associatedDevice.isConnected === true){
                   return(
-                    <EmotiBitList key={device.userId} user={device} onAction={() =>{ handleOpenModalSettings(device.userid, device.associatedDevice, device); console.log("HERE" + JSON.stringify(device))}} />
+                    <EmotiBitList key={device.userId} user={device} onAction={() => handleOpenModalSettings(device.userid)} />
                   );
                 //}
               })
@@ -767,7 +752,7 @@ export default function WaitingRoom() {
         </div>
         <div className="mb-6">
           <label htmlFor="ipAddress" className="block text-sm font-medium text-gray-700 mb-2">
-            IP Address 
+            IP Address
           </label>
           <input
             type="text"
@@ -788,34 +773,28 @@ export default function WaitingRoom() {
         // button3="Update"
       >
         <div className="mb-6">
-          {/* //Put this styling back: className="block text-sm font-medium text-gray-700 mb-2" */}
-          <label htmlFor="associated-user" className="block text-sm font-medium text-gray-700 mb-2">
-            Associated To: {focusedAssociatedUser}
-          </label>
           <label htmlFor="serialNumber" className="block text-sm font-medium text-gray-700 mb-2">
-            Serial Number: {focusedDeviceSerial}
+            Serial Number
           </label>
-          <label htmlFor="ipAddress" className="block text-sm font-medium text-gray-700 mb-2">
-            IP Address: {focusedDeviceIP}
-          </label>
-          {/* <input
+          <input
             type="text"
             id="serialNumber"
             className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
             value={serialNumber}
             onChange={(e) => setSerialNumber(e.target.value)}
-          /> */}
+          />
         </div>
         <div className="mb-6">
-          {/* //Put this styling back: className="block text-sm font-medium text-gray-700 mb-2" */}
-
-          {/* <input
+          <label htmlFor="ipAddress" className="block text-sm font-medium text-gray-700 mb-2">
+            IP Address
+          </label>
+          <input
             type="text"
             id="ipAddress"
             className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
             value={IPAddress}
             onChange={(e) => setIPAddress(e.target.value)}
-          /> */}
+          />
         </div>
       </ModalComponent>
       <ModalComponent
