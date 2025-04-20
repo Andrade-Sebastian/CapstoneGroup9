@@ -276,3 +276,11 @@ ipcMain.on('activity:closeAllWindows', (event) => {
   })
 })
 
+ipcMain.on('activity:closeUserWindow', (event, nickName) => {
+  BrowserWindow.getAllWindows().forEach(window =>{
+    if(window.title === nickName){
+      window.close();
+    }
+  })
+})
+

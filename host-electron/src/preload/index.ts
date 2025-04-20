@@ -26,7 +26,7 @@ export type ActivityEvents =
   "brainflow:connectedEmotibit"|
   "brainflow:disconnectEmotibit"|  //disconnect emotibit
   "activity:closeUserWindow"|
-  "activity:closeAllWindows"| //close all active user windows
+  "activity:closeAllWindows" //close all active user windows
   
 
 
