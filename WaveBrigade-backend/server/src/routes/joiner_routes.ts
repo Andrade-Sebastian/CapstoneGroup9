@@ -483,7 +483,7 @@ joinerRouter.post("/remove-spectator-from-session", async(req: Request, res: Res
         sessionID,
         socketID
     } = req.body;
-
+    console.log("remove-spectator-from-session recieved: ", req.body)
     const wasRemoved: boolean = await removeSpectatorFromSession(sessionID, socketID);
     
     if(wasRemoved){
@@ -499,6 +499,18 @@ joinerRouter.post("/remove-spectator-from-session", async(req: Request, res: Res
         })
     }
 
+})
+
+joinerRouter.post("/debug-log/:message", (req: Request, res: Response) => {
+    const message: string = req.params.message;
+    const now: Date = new Date();
+    const time: string = now.toLocaleTimeString();
+    console.log(time);
+
+    console.log(`${message}`);
+    res.status(200).send({
+        "message": "successfully logged bruh"
+    })
 })
 
 

@@ -25,7 +25,7 @@ export default function EnterFunction() {
     const [icon, setIcon] = useState(eyeOff)
     const [isDisabled, setDisabled] = useState(false);
 
-    const { userRole, setUserRole} = useJoinerStore();
+    const { userRole} = useJoinerStore();
 
     let passwordCooldown = 0;
 
