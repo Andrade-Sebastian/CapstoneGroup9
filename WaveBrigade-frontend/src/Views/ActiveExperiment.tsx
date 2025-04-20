@@ -47,7 +47,7 @@ export default function ActiveExperiment() {
     galleryPhotos,
     experimentTitle,
     experimentDesc,
-    experimentType,,
+    experimentType,
     sessionId,
     socketId,
     setWasKicked,

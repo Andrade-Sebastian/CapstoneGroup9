@@ -291,7 +291,8 @@ export default function ActivityHost() {
         console.log('Trying to get users from session ' + sessionID)
         const response = await axios.get(`http://localhost:3000/joiner/room-users/${sessionID}`)
         const users = response.data.users //Array of IUser objects
-        const rawUsers = response.data.users
+        const rawUsers = response.data.users;
+        const userMap = new Map();
 
         const normalizedUsers = rawUsers.map((u) => ({
           device: u.device,
@@ -317,6 +318,11 @@ export default function ActivityHost() {
 
         setNickNames(nicknames)
         console.log('Fetched users from backend:', response.data.users)
+
+        users.forEach(user => {
+          userMap.set(user.nickname, user.frontendsocketid);
+        });
+        setTheUserMap(userMap);
 
         //setUserObjects(response.data.users)
 
