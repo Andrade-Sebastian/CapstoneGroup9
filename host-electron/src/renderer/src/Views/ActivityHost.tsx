@@ -509,11 +509,11 @@ export default function ActivityHost() {
             ) : experimentType == 4 && isMediaAFile ? (
               // Not a huge bug but the source should be the article lab source, it's flip flopped, don't know why
               <div>
-                <iframe src={articleLabSource} width="800px" height="500px"></iframe>
+                <iframe src={articleLabSource} width="600px" height="500px"></iframe>
               </div>
             ) : experimentType == 4 && !isMediaAFile ? (
               <div>
-                <iframe src={articleURL} width="800px" height="500px"></iframe>
+                <iframe src={articleURL} width="700px" height="500px"></iframe>
               </div>
             ) : (
               <div>

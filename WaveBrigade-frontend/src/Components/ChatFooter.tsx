@@ -41,7 +41,7 @@ export default function ChatFooter() {
   const checkMessage = async (message: string) => {
     try {
       const response = await axios.get(
-        `http://localhost:3000/joiner/check-message/`, {
+        `${import.meta.env.VITE_BACKEND_PATH}/joiner/check-message/`, {
         params: {message},
       });
       console.log("RESPONSE STATUS RETURNED: ", response.status);

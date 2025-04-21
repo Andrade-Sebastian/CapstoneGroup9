@@ -51,7 +51,7 @@ export default function ActiveExperiment() {
     sessionId,
     socketId,
     setWasKicked,
-    userRole
+    userRole,
   } = useJoinerStore();
   const navigateTo = useNavigate();
 
@@ -354,64 +354,70 @@ export default function ActiveExperiment() {
     };
   });
 
-
   useEffect(() => {
     socket.on("kick", kickUser);
     console.log("Listening for 'kick event");
-    
-    function kickUser()
-    {
+
+    function kickUser() {
       //Global store that keeps track of whether the user has been previously kicked or not
       setWasKicked(true);
-      console.log("Kick function. Here is the socketID and sessionID", socketId, sessionId)
+      console.log(
+        "Kick function. Here is the socketID and sessionID",
+        socketId,
+        sessionId
+      );
       //removes user from database
-      
 
       console.log("Kicking user from database in sessionID: ", sessionId);
       //is sessionID the global one? or a useState?
 
-      if (userRole === "spectator"){
-        console.log(`removing spectator from session ${sessionId} with socketID ${socketId}`)
-      //   axios.post("http://localhost:3000/joiner/remove-spectator-from-session", 
-      //     {
-      //       sessionID: sessionId,
-      //       socketID: socketId
-      //     }
-      //   ).then(() => {  
-      //     console.log("Successfully removed from database");
-      //     navigateTo("/");})
-      //   .catch(error =>{
-      //   console.log("Error removing user from database", error)
-      // })
+      if (userRole === "spectator") {
+        console.log(
+          `removing spectator from session ${sessionId} with socketID ${socketId}`
+        );
+        //   axios.post("http://localhost:3000/joiner/remove-spectator-from-session",
+        //     {
+        //       sessionID: sessionId,
+        //       socketID: socketId
+        //     }
+        //   ).then(() => {
+        //     console.log("Successfully removed from database");
+        //     navigateTo("/");})
+        //   .catch(error =>{
+        //   console.log("Error removing user from database", error)
+        // })
         console.log("Successfully removed from database");
-        clearInterval(interval)
-        navigateTo("/")
+        clearInterval(interval);
+        navigateTo("/");
         return () => {
           socket.off("kick", kickUser);
-        }
-      }else{
-        axios.post('http://localhost:3000/joiner/leave-room', {
-          sessionID: sessionId,
-          socketID: socketId
-        })
-        .then(() =>{
-          console.log("Successfully removed from database");
-          navigateTo("/");
-        })
-        .catch(error =>{
-          console.log("Error removing user from database", error)
-        })
-      }}
-    
+        };
+      } else {
+        axios
+          .post(`${import.meta.env.VITE_BACKEND_PATH}/joiner/leave-room`, {
+            sessionID: sessionId,
+            socketID: socketId,
+          })
+          .then(() => {
+            console.log("Successfully removed from database");
+            navigateTo("/");
+          })
+          .catch((error) => {
+            console.log("Error removing user from database", error);
+          });
+      }
+    }
+
     return () => {
       socket.off("kick", kickUser);
-  }}, []);
+    };
+  }, []);
 
   return (
-    <div className="flex flex-col lg:flex-row w-full max-h-full bg-white px-2 py-1 gap-4">
+    <div className="flex flex-col lg:flex-row w-full h-full max-h-full bg-white px-2 py-1 gap-4">
       <Toaster position="top-right" />
       <div className="grid grid-cols-1 grid-rows-12 w-full lg:w-3/4 gap-4 h-full">
-        <div className="row-start-1 row-end-6 relative w-full shadow-md flex-grow rounded-lg overflow-hidden ">
+        <div className="row-start-1 row-end-7 relative w-full shadow-md flex-grow rounded-lg overflow-hidden ">
           <div className="absolute top-0 left-0 w-full h-full">
             {experimentType == 1 && isMediaAFile ? (
               <ReactPlayer
@@ -483,50 +489,51 @@ export default function ActiveExperiment() {
           </div>
         </div>
         {/* Chart stuff*/}
-        <div className="flex row-start-6 row-end-11 bg-gray-200 rounded-md text-gray-500 overflow-auto">
-          <div className="max-h-full flex w-full">
-            {activeChart === "heartRateChart" ? (
-              <div className="flex flex-col w-full h-full max-h-full">
-                <div className="text-lg font-semibold">
-                  ECG Chart
-                </div>
+        <div className="flex flex-col row-start-7 row-end-12 bg-gray-200 rounded-md text-gray-500 overflow-auto">
+          {activeChart === "heartRateChart" ? (
+            <div className="flex flex-col h-full max-h-full">
+              <p className="text-lg font-semibold">ECG Chart</p>
+              <div className=" w-full h-full max-h-full">
                 <ChartComponent
                   chart_type={1}
                   chart_name="BPM"
                   chart_color="rgb(23, 190, 207)"
                   user_id={joinerId}
-                  className="w-full h-full"
                 />
               </div>
-            ) : activeChart === "temperatureChart" ? (
-              <div className="flex flex-col w-full h-full max-h-full">
-                <div className="text-lg font-semibold">Temperature Chart</div>
-                <ChartComponent
-                  chart_type={2}
-                  chart_name="°F"
-                  chart_color="rgb(255, 99, 132)"
-                  user_id={joinerId}
-                  className="w-full h-full"
-                />
+            </div>
+          ) : activeChart === "temperatureChart" ? (
+            <div className="flex flex-col h-full max-h-full">
+              <p className="text-lg font-semibold">Temperature Chart</p>
+              <div className=" w-full h-full max-h-full">
+              <ChartComponent
+                chart_type={2}
+                chart_name="°F"
+                chart_color="rgb(255, 99, 132)"
+                user_id={joinerId}
+                className="w-full h-full"
+              />
               </div>
-            ) : (
-              <div className="flex flex-col w-full h-full max-h-full">
-                <div className="text-lg font-semibold">
-                  <p> GSR/EDA </p>
-                </div>
-                <ChartComponent
-                  chart_type={3}
-                  chart_name="EDA"
-                  chart_color="rgb(75,0,130)"
-                  user_id={joinerId}
-                  className="w-full h-full"
-                />
-              </div>
-            )}
-          </div>
+            </div>
+          ) : (
+            <div className="flex flex-col h-full max-h-full">
+              <p className="text-lg font-semibold">
+          GSR/EDA 
+              </p>
+              <div className=" w-full h-full max-h-full">
+              <ChartComponent
+                chart_type={3}
+                chart_name="EDA"
+                chart_color="rgb(75,0,130)"
+                user_id={joinerId}
+                className="w-full h-full"
+              />
+            </div>
+            </div>
+          )}
         </div>
         {/* <Divider className="my-3" /> */}
-        <div className="h-min flex justify-between items-center row-start-11 row-end-12 mr-5">
+        <div className="h-min flex justify-between items-center row-start-12 row-end-13 mr-5">
           <p className="font-semibold">
             Nickname: <span className="font-light">{nickname}</span>
           </p>
@@ -576,64 +583,19 @@ export default function ActiveExperiment() {
       {/* tabs */}
       <div className="hidden lg:block w-full lg:w-1/4 h-full p-4 bg-white shadow-md rounded-lg overflow-y-auto">
         <div className="flex border-b">
-          <button
-            className={`rounded-lg flex-1 p-2 text-lg flex items-center justify-center ${
-              activeTab === "images" ? "bg-[#7F56D9] text-white" : "bg-gray-300"
-            }`}
-            onClick={() => setActiveTab("images")}
-          >
-            <LuSquareStack className="mr-2" /> Media
-          </button>
-          <button
-            className={`rounded-lg flex-1 p-2 text-lg flex items-center justify-center ${
-              activeTab === "chat" ? "bg-[#7F56D9] text-white" : "bg-gray-300"
-            }`}
+          <div
+            className=" rounded-lg flex-1 p-2 text-lg flex items-center justify-center bg-[#7F56D9] text-white" 
+            
             onClick={() => setActiveTab("chat")}
           >
             <BsChatSquareText className="mr-2" /> Chat
-          </button>
+          </div>
         </div>
         <div className="mt-4">
-          {activeTab === "images" ? (
-            <div className="flex justify-center w-full">
-              {experimentType == 1 && isMediaAFile ? (
-                <div>
-                  <p>Local Video: {videoPath}</p>
-                </div>
-              ) : experimentType == 1 && !isMediaAFile ? (
-                <div>
-                  <p>
-                    YouTube Video: https://www.youtube.com/watch?v={videoID}{" "}
-                  </p>
-                </div>
-              ) : experimentType == 2 ? (
-                <div>
-                  <p>Image: {photoPath}</p>
-                </div>
-              ) : experimentType == 3 ? (
-                <div>
-                  <p>Gallery lab stuff</p>
-                </div>
-              ) : experimentType == 4 && isMediaAFile ? (
-                <div>
-                  <p> Local Article: {articlePath}</p>
-                </div>
-              ) : experimentType == 4 && !isMediaAFile ? (
-                <div>
-                  <p> Article Link : {articleURL}</p>
-                </div>
-              ) : (
-                <div>
-                  <p> Unknown lab. Rejoin</p>
-                </div>
-              )}
-            </div>
-          ) : (
             <div className="flex flex-col h-[60vh] justify-between bg-white rounded-md shadow-md">
               <ChatBody />
               <ChatFooter />
             </div>
-          )}
         </div>
       </div>
     </div>
