@@ -122,11 +122,13 @@ export default function HostSelectLabPage() {
       <div className="flex flex-col items-center justify-center w-full md:w-3/5 lg:w-2/3 p-6">
         <form onSubmit={handleSubmit} className="flex flex-col gap-8 w-full max-w-2xl">
           {/* LAB TEMPLATES */}
-          <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 grid-rows-2 gap-6 items-center">
+          <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 grid-rows-2 gap-6 items-center w-full">
             {/* Video Lab Checkbox and Description */}
 
             {/*A Single lab */}
-            {labs.map((lab) => (
+            {labs
+              .filter((lab) => lab.id !== '5')
+              .map((lab) => (
               <CardComponentRadio
                 key={lab.id}
                 selectedLab={selectedLab}
@@ -137,6 +139,19 @@ export default function HostSelectLabPage() {
                 description={lab.description}
               />
             ))}
+            <div className="col-span-full flex justify-center">
+              <div className='w-full sm:w-3/4 md:w-2/3 lg: w-1/2'>
+              <CardComponentRadio
+              key="5"
+              selectedLab={selectedLab}
+              handler={() => setSelectedLab(labs.find((lab) => lab.id === '5')!)}
+              value={labs.find((lab) => lab.id === '5')!}
+              headingTitle="Sandbox"
+              icon={<GiSandCastle className='size-8'/>}
+              description="Create an experiment without any type of media."
+              />
+              </div>
+            </div>
           </div>
           <button
             type="submit"

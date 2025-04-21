@@ -13,6 +13,7 @@ import { useJoinerStore } from "../hooks/stores/useJoinerStore.ts";
 import React from "react";
 import toast, { Toaster } from "react-hot-toast";
 import { user } from "@heroui/react";
+import { GiSandCastle } from "react-icons/gi";
 
 
 // -----JOINER=--------------------------//
@@ -407,6 +408,9 @@ export default function WaitingRoom() {
     if(experimentType === 4){
       getArticleData();
     }
+    if(experimentType === 5){
+      setExperimentId(experimentID);
+    }
   }, [experimentID, setExperimentDesc, setExperimentId, setExperimentTitle, setExperimentPath, experimentType]);
 
   useEffect(() => {
@@ -422,6 +426,11 @@ export default function WaitingRoom() {
     } else if (experimentType === 4) {
       setExperimentTypeString('ArticleLab')
       setExperimentIcon(<IoNewspaper style={{ fontSize: '20px' }} />)
+    } else if (experimentType === 5){
+      setExperimentTypeString('Sandbox')
+      setExperimentIcon(<GiSandCastle style={{ fontSize: '20px' }} />)
+      setExperimentTitle("Sandbox Lab")
+      setExperimentDesc('Play with your EmotiBits without any media to react to!')
     } else {
       console.log("Invalid experiment type");
     }

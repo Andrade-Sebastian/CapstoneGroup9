@@ -337,7 +337,12 @@ export default function ActiveExperiment() {
               <iframe src={articlePath} width="800px" height="500px" className="w-full max-w-4xl h-[400px] rounded-md"></iframe>
           ) : experimentType == 4 && !isMediaAFile ?(
               <iframe src={articleURL} width="800px" height="500px" className="w-full max-w-4xl h-[400px] rounded-md"></iframe>
-          ) :(
+          ) : experimentType == 5 ?( 
+            <div className="flex flex-col justify-center items-center w-full h-full rounded-lg">
+            <h1 className='text-bold'>Welcome to the Sandbox!</h1> 
+            </div>
+          )
+           :(
             <div>
               <p> Unknown lab. Rejoin</p>
             </div>

@@ -195,7 +195,6 @@ export default function SpectatorActiveExperiment() {
               </div>
             ) : (
               <div>
-                {" "}
                 <p> GSR/EDA </p>{" "}
                 <ChartComponent
                   chart_type={3}

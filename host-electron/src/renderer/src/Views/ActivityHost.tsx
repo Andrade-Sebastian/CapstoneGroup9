@@ -28,6 +28,7 @@ import ReactPlayer from 'react-player'
 import GalleryComponent from '../components/GalleryComponent.tsx'
 import ChatFooter from '../components/ChatFooter.tsx';
 import ChatBody from '../components/ChatBody.tsx';
+import { GiSandCastle } from "react-icons/gi";
 
 export default function ActivityHost() {
   const {
@@ -234,7 +235,9 @@ export default function ActivityHost() {
     } else if (experimentType === 4) {
       checkArticleMediaType()
       setExperimentIcon(<IoNewspaper style={{ fontSize: '20px' }} />)
-    } else {
+    } else if (experimentType === 5){
+          setExperimentIcon(<GiSandCastle style={{ fontSize: '20px' }} />)
+    }else {
       console.log('Invalid experiment ID')
     }
   }, [experimentType, videoLabSource, videoID])
@@ -378,7 +381,11 @@ export default function ActivityHost() {
               <div>
                 <iframe src={articleURL} width="800px" height="500px"></iframe>
               </div>
-            ) : (
+            )  : experimentType == 5 ?(
+              <div className="flex flex-col justify-center items-center w-full h-full rounded-lg">
+                <h1 className='text-bold'>Welcome to the Sandbox!</h1> 
+                </div>
+            ): (
               <div>
                 <p className="text-red-500">Invalid experiment type... </p>
               </div>
