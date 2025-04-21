@@ -187,7 +187,7 @@ const { hostName, roomCode} = useSessionStore();
   // }, [toast]);
 
 
-
+console.log(import.meta.env.VITE_BACKEND_PATH)
 
   return (
     <div className="flex flex-col h-screen max-h-screen overflow-auto bg-white">

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { PiAlienLight } from "react-icons/pi";
+import { PiAlienLight } from 'react-icons/pi'
 import { useSessionStore } from '../store/useSessionStore'
 import toast, { Toaster } from 'react-hot-toast'
 import SideComponent from '../components/SideComponent'
@@ -10,13 +10,14 @@ import axios from 'axios'
 import socket from './socket'
 
 export default function ArticleLab() {
-  const { //Global state
+  const {
+    //Global state
     experimentType,
     experimentTitle,
     experimentDesc,
     setExperimentPath,
-    articleLabSource,
-   } = useSessionStore();
+    articleLabSource
+  } = useSessionStore()
 
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isFileSelected, setIsFileSelected] = useState(false)
@@ -27,25 +28,30 @@ export default function ArticleLab() {
     }
   }, [articleLabSource])
 
-  const sendExperimentData = async(experimentTitle: string, experimentDesc: string, experimentId: string) => {
-    try{
-        const response = await axios.post("http://localhost:3000/host/send-experiment", {
+  const sendExperimentData = async (
+    experimentTitle: string,
+    experimentDesc: string,
+    experimentId: string
+  ) => {
+    try {
+      const response = await axios.post(
+        `${import.meta.env.VITE_BACKEND_PATH}/host/send-experiment`,
+        {
           experimentTitle,
           experimentDesc,
           experimentId
-        });
-        console.log("Post response data from sendExperimentData", response.data);
-    }
-    catch(error){
-      console.error("Error:", error);
+        }
+      )
+      console.log('Post response data from sendExperimentData', response.data)
+    } catch (error) {
+      console.error('Error:', error)
     }
   }
 
   async function handleSubmit(e) {
-    console.log("article source", articleLabSource);
-    console.log("experimentTitle", experimentTitle);
-    console.log("experimentDesc", experimentDesc);
-
+    console.log('article source', articleLabSource)
+    console.log('experimentTitle', experimentTitle)
+    console.log('experimentDesc', experimentDesc)
 
     const loadingToastId = toast.loading('Creating Lab...')
     if (isSubmitting) return
@@ -53,9 +59,8 @@ export default function ArticleLab() {
     setIsSubmitting(true)
   }
 
-
   return (
-    <div className="flex h-screen">
+    <div className="flex">
       <Toaster position="top-right" />
       <div className="flex flex-col max-sm:hidden items-center justify-center w-2/5">
         <SideComponent
@@ -71,7 +76,6 @@ export default function ArticleLab() {
         onFileSelected={setIsFileSelected}
         articleSource={JSON.stringify(articleLabSource)}
       />
-
     </div>
   )
 }
