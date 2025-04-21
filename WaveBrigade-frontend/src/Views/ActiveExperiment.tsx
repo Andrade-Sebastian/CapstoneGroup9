@@ -488,7 +488,7 @@ export default function ActiveExperiment() {
             {activeChart === "heartRateChart" ? (
               <div className="flex flex-col w-full h-full max-h-full">
                 <div className="text-lg font-semibold">
-                  ECG Chart - 33 BPM Average
+                  ECG Chart
                 </div>
                 <ChartComponent
                   chart_type={1}

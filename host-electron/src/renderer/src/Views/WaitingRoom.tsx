@@ -325,12 +325,11 @@ export default function WaitingRoom() {
   }
 
   //function to start a brainflow process for each emotibit
-  async function launchProcesses() {
-    console.log('INSIDE LAUNCH PROCESS')
-    for (let i = 0; i < currentUsers.length; i++) {
-      console.log('CURRENT USER PASSED INTO IPC: ', currentUsers[i])
-      ipc.send(
-        'brainflow:launch',
+  async function launchProcesses(){
+    console.log("INSIDE LAUNCH PROCESS: ", currentUsers);
+    for(let i = 0; i < currentUsers.length; i++){
+      console.log("CURRENT USER PASSED INTO IPC: ", currentUsers[i]);
+      ipc.send("brainflow:launch", 
         currentUsers[i].ipaddress,
         currentUsers[i].serialnumber,
         `${import.meta.env.VITE_BACKEND_PATH}`,

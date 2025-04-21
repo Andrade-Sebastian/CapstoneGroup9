@@ -69,8 +69,9 @@ var ancHeaders = ['Package', 'EDA', 'Temperature', 'Thermistor', 'Timestamp', 'U
 // const ancFilePath = './operationParameters.userId/anc_data.csv';
 // const auxHeaders = ['Package', 'PPG_Red', 'PPG_Infa_Red', 'PPG_Green', 'Timestamp', 'Unknown'];
 // const auxFilePath = './operationParameters.userId/aux_data.csv';
+// const auxFilePath = './operationParameters.userId/aux_data.csv';
 //initializes the board 
-var board = new brainflow_1.BoardShim(brainflow_1.BoardIds.EMOTIBIT_BOARD, {});
+var board = new brainflow_1.BoardShim(brainflow_1.BoardIds.EMOTIBIT_BOARD, { serialNumber: operationParameters.serialNumber });
 var board_id = brainflow_1.BoardIds.EMOTIBIT_BOARD;
 function sleep(ms) {
     return new Promise(function (resolve) {

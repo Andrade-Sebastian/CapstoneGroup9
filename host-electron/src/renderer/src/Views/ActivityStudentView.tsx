@@ -834,16 +834,16 @@ export default function ActivityStudentView(): ReactElement {
             <label className="inline-flex items-center gap-2">
               <input
                 type="checkbox"
-                checked={activeCharts.includes('temperatureChart')}
-                onChange={() => toggleChart('temperatureChart')}
+                checked={activeCharts.includes('temperature')}
+                onChange={() => toggleChart('temperature')}
               />
               <span> Temperature </span>
             </label>
             <label className="inline-flex items-center gap-2">
               <input
                 type="checkbox"
-                checked={activeCharts.includes('gsrChart')}
-                onChange={() => toggleChart('gsrChart')}
+                checked={activeCharts.includes('gsr')}
+                onChange={() => toggleChart('gsr')}
               />
               <span> Skin Response (GSR) </span>
             </label>

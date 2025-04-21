@@ -201,16 +201,15 @@ export default function WaitingRoom() {
 
   useEffect(() => {
     const getSessionID = async () => {
-      console.log("verify-code, room code: ", roomCode);
-      const response = await axios
-        .get(
-          `${import.meta.env.VITE_BACKEND_PATH}/joiner/verify-code/${roomCode}`
-        )
-        .then((response) => {
-          setSessionID(response.data.sessionID);
-          setSessionId(response.data.sessionID);
-        });
-    };
+      console.log("verify-code, room code: ", roomCode)
+      const response = await axios.get(`${import.meta.env.VITE_BACKEND_PATH}/joiner/verify-code/${roomCode}`);
+
+      if(response.status === 200){
+        setSessionID(response.data.sessionID);
+        setSessionId(response.data.sessionID)
+      }
+    }; 
+
 
     setIsSpectator(userRole === "spectator");
     console.log("SPECTATOR AHH: ", isSpectator);
@@ -233,7 +232,7 @@ export default function WaitingRoom() {
 
         //SOCKET ID ISNT BEING SET - 4/17
         console.log("****socketId when getting users: " + socketId);
-        console.log("Trying to get users from session " + sessionId);
+        console.log("Trying to get users from session " + sessionID);
         const response = await axios.get(
           `${import.meta.env.VITE_BACKEND_PATH}/joiner/room-users/${sessionId}`
         );
