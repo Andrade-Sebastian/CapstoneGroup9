@@ -44,6 +44,15 @@ function App() {
   };
 
   useEffect(() => {
+    console.log(`${import.meta.env.VITE_BACKEND_PATH}/joiner/debug`)
+    fetch(`${import.meta.env.VITE_BACKEND_PATH}/joiner/debug`).then( (response) => {
+      if(response.ok){
+        console.log("Response is")
+      }
+    }).catch(error => console.log(error))
+  }, [])
+
+  useEffect(() => {
 
     socket.on("clear-session", () => {
       console.log("Clearing session storage due to disconnection");

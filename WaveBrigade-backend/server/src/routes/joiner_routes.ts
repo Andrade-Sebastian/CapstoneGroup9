@@ -165,6 +165,24 @@ joinerRouter.get("/check-name/:nickName", async (req: Request, res: Response) =>
     }
 })
 
+//checks profanity in messages
+joinerRouter.get("/check-message", async (req: Request, res: Response) => {
+    const message = req.query.message as string;
+    // console.log("/check-message/:message: ", message);
+    
+    try{
+        const isProfane = filter.isProfane(message);
+        if(!isProfane){
+            return res.status(200).json({success: true})
+        }
+        else{
+            return res.status(400).json({success: false, message: "No profanity allowed!"});
+        }
+    } catch(error){
+        return res.status(500).json({success: false, message: "Internal server error"});
+    }
+})
+
 joinerRouter.get("/validateRoomCode/:roomCode", async (req: Request, res: Response) => {
     const roomCode = req.params.roomCode;
     console.log("Roomcode: ", roomCode);
@@ -371,7 +389,7 @@ joinerRouter.get("/verify-code/:roomCode", async (req: Request, res: Response) =
         }
         else{
             return res.status(400).json({
-                sessionID: sessionID
+                sessionID: null
             })
         }
     } catch (error) {
@@ -392,7 +410,7 @@ joinerRouter.post("/validatePassword", async (req: Request, res: Response) => {
             return res.status(200).json({success: true})
         }
         else{
-            return res.status(400).json({success: false})
+            return res.status(205).json({success: false})
         }
     }
     catch(error){

@@ -6,7 +6,6 @@ import { IoEarthOutline } from 'react-icons/io5'
 import { Icon } from 'react-icons-kit'
 import { eyeOff } from 'react-icons-kit/feather/eyeOff'
 import { eye } from 'react-icons-kit/feather/eye'
- 
 
 // This is where the host will create the room
 

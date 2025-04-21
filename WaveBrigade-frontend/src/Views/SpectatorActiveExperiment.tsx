@@ -61,6 +61,9 @@ export default function SpectatorActiveExperiment() {
     experimentTitle,
     experimentDesc,
     experimentType,
+    setWasKicked,
+    userRole,
+    socketId
   } = useJoinerStore();
   const navigateTo = useNavigate();
 
@@ -146,9 +149,8 @@ export default function SpectatorActiveExperiment() {
     const getPhotoInfo = async () => {
       const response = await axios
         .get(
-          `${
-            import.meta.env.VITE_BACKEND_PATH
-          }joiner/getPhoto/${experimentId}`
+          `${import.meta.env.VITE_BACKEND_PATH}/joiner/getPhoto/${experimentId}`
+
         )
         .then((response) => {
           //THERE IS NOTHING BEING SET HERE
@@ -159,9 +161,8 @@ export default function SpectatorActiveExperiment() {
     const getVideoInfo = async () => {
       const response = await axios
         .get(
-          `${
-            import.meta.env.VITE_BACKEND_PATH
-          }joiner/getVideoFile/${experimentId}`
+          `${import.meta.env.VITE_BACKEND_PATH}/joiner/getVideoFile/${experimentId}`
+
         )
         .then((response) => {
           //THERE IS NOTHING BEING SET HERE
@@ -173,9 +174,7 @@ export default function SpectatorActiveExperiment() {
     const getGalleryInfo = async () => {
       const response = await axios
         .get(
-          `${
-            import.meta.env.VITE_BACKEND_PATH
-          }joiner/getGallery/${experimentId}`
+          `${import.meta.env.VITE_BACKEND_PATH}/joiner/getGallery/${experimentId}`
         )
         .then((response) => {
           //THERE IS NOTHING BEING SET HERE
@@ -186,9 +185,7 @@ export default function SpectatorActiveExperiment() {
     const getArticleInfo = async () => {
       const response = await axios
         .get(
-          `${
-            import.meta.env.VITE_BACKEND_PATH
-          }joiner/getArticleFile/${experimentId}`
+          `${import.meta.env.VITE_BACKEND_PATH}/joiner/getArticleFile/${experimentId}`
         )
         .then((response) => {
           //THERE IS NOTHING BEING SET HERE
@@ -236,9 +233,8 @@ export default function SpectatorActiveExperiment() {
     const getSessionID = async () => {
       const response = await axios
         .get(
-          `${
-            import.meta.env.VITE_BACKEND_PATH
-          }joiner/verify-code/${roomCode}`
+          `${import.meta.env.VITE_BACKEND_PATH}/joiner/verify-code/${roomCode}`
+
         )
         .then((response) => {
           setSessionID(response.data.sessionID);
@@ -254,11 +250,10 @@ export default function SpectatorActiveExperiment() {
 
     const fetchUsers = async () => {
       try {
-        console.log("Trying to get users from session " + sessionID);
+        console.log("Trying to get users from session " + sessionId);
         const response = await axios.get(
-          `${
-            import.meta.env.VITE_BACKEND_PATH
-          }joiner/room-users/${sessionID}`
+          `${import.meta.env.VITE_BACKEND_PATH}/joiner/room-users/${sessionID}`
+
         );
         console.log("HERE IS THE RESPONSE", response);
         const users: IJoiner[] = response.data.users
@@ -286,9 +281,8 @@ export default function SpectatorActiveExperiment() {
     const getExperimentData = async () => {
       try {
         const response = await axios.get(
-          `${
-            import.meta.env.VITE_BACKEND_PATH
-          }joiner/session/getInfo/${roomCode}`
+          `${import.meta.env.VITE_BACKEND_PATH}/joiner/session/getInfo/${roomCode}`
+
         );
         if (response.status === 200) {
           console.log("EXPERIMENT ID RETURNED: ", response.data.experimentid);
@@ -323,9 +317,8 @@ export default function SpectatorActiveExperiment() {
       const filename = experimentPath.split("/").pop();
       try {
         const response = await axios.get(
-          `${
-            import.meta.env.VITE_BACKEND_PATH
-          }get-videoFile/${filename}`
+          `${import.meta.env.VITE_BACKEND_PATH}/get-videoFile/${filename}`
+
         );
         if (response.status === 200) {
           console.log("Fetched video path:", response.config.url);
@@ -354,9 +347,8 @@ export default function SpectatorActiveExperiment() {
       const filename = experimentPath.split("/").pop();
       try {
         const response = await axios.get(
-          `${
-            import.meta.env.VITE_BACKEND_PATH
-          }get-articleFile/${filename}`
+          `${import.meta.env.VITE_BACKEND_PATH}/get-articleFile/${filename}`
+
         );
         if (response.status === 200) {
           console.log("Fetched article path:", response.config.url);
@@ -442,10 +434,45 @@ export default function SpectatorActiveExperiment() {
       }
     });
     // setIsMasked(true);
+    return() =>{
+      socket.off("toggle-mask")
+    }
+  })
+
+  useEffect(() => {
+    socket.on("kick", kickUser);
+    console.log("Listening for 'kick event");
+    
+    function kickUser()
+    {
+      //Global store that keeps track of whether the user has been previously kicked or not
+      setWasKicked(true);
+      console.log("Kick function. Here is the socketID and sessionID", socketId, sessionId)
+      //removes user from database
+      
+
+      console.log("Kicking user from database in sessionID: ", sessionId);
+      //is sessionID the global one? or a useState?
+
+      console.log(`removing spectator from session ${sessionId} with socketID ${socketId}`)
+      axios.post(`${import.meta.env.VITE_BACKEND_PATH}/joiner/remove-spectator-from-session`, 
+          {
+            sessionID: sessionId,
+            socketID: socketId
+          }
+        ).then(() => {  
+          console.log("Successfully removed from database");
+        })
+        .catch(error =>{
+        console.log("Error removing user from database", error)
+      })
+      navigateTo('/');
+    }
+  
     return () => {
-      socket.off("toggle-mask");
-    };
-  });
+      socket.off("kick", kickUser);
+  }}, [setWasKicked]);
+
 
   return (
     <div className="flex flex-col lg:flex-row w-full max-h-full bg-white px-2 py-1 gap-4">

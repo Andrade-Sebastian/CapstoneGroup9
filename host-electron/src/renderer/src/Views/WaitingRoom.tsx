@@ -8,8 +8,8 @@ import { PiCrownSimpleThin } from 'react-icons/pi'
 import { HiOutlineSignal } from 'react-icons/hi2'
 import { CiUser } from 'react-icons/ci'
 
-import { FaUserXmark } from "react-icons/fa6";
-import socket from './socket.tsx'
+import { FaUserXmark } from 'react-icons/fa6'
+import socket from './socket'
 import axios from 'axios'
 import { Divider } from '@heroui/divider'
 import WaitingRoomCardComponent from '../components/WaitingRoomCardComponent'
@@ -58,9 +58,6 @@ export default function WaitingRoom() {
   const [socketID, setSocketID] = useState('')
   const [theUserMap, setTheUserMap] = useState(new Map())
   const [focusedUser, setFocusedUser] = useState('')
-  const [focusedDeviceSerial, setFocusedDeviceSerial] = useState("")
-  const [focusedDeviceIP, setFocusedDeviceIP] = useState("")
-  const [focusedAssociatedUser, setFocusedAssociatedUser] = useState("");
   const [experimentIcon, setExperimentIcon] = useState<JSX.Element>(
     <CiPlay1 style={{ fontSize: '20px' }} />
   )
@@ -324,7 +321,6 @@ export default function WaitingRoom() {
   };
 
 
-
   const handleCloseModalSettings = () => {
     setIsModalOpenSettings(false)
     setSelectedEmotiBitId(null)
@@ -340,15 +336,15 @@ export default function WaitingRoom() {
   }
 
   //function to start a brainflow process for each emotibit
-  async function launchProcesses() {
-    console.log('INSIDE LAUNCH PROCESS')
-    for (let i = 0; i < currentUsers.length; i++) {
-      console.log('CURRENT USER PASSED INTO IPC: ', currentUsers[i])
-      ipc.send(
-        'brainflow:launch',
+  async function launchProcesses(){
+    console.log("INSIDE LAUNCH PROCESS: ", currentUsers);
+    for(let i = 0; i < currentUsers.length; i++){
+      console.log("CURRENT USER PASSED INTO IPC: ", currentUsers[i]);
+      ipc.send("brainflow:launch", 
         currentUsers[i].ipaddress,
         currentUsers[i].serialnumber,
-        `${import.meta.env.VITE_BACKEND_PATH}/`,
+        `${import.meta.env.VITE_BACKEND_PATH}`,
+
         currentUsers[i].userid,
         currentUsers[i].frontendsocketid,
         currentUsers[i].sessionid
@@ -363,14 +359,12 @@ export default function WaitingRoom() {
       console.log('IPC RECIEVE STATUS: ', status)
       if (status === 'success') {
         try {
-          await axios.post(
-            `${import.meta.env.VITE_BACKEND_PATH}/host/update-device-connection`,
-            {
-              serial: serialNumber,
-              socket: sessionStorage.getItem('socketID'),
-              connection: true
-            }
-          )
+          await axios.post(`${import.meta.env.VITE_BACKEND_PATH}/host/update-device-connection`, {
+            serial: serialNumber,
+            socket: sessionStorage.getItem('socketID'),
+            connection: true
+          })
+
           console.log('All devices successfully updated')
         } catch (error) {
           console.error('Failed to update device status', error)
@@ -430,13 +424,12 @@ export default function WaitingRoom() {
         `<<HOST 389>>trying to kick spectator , sending sessionID ${sessionId} and socketID ${nicknameSocketID}`
       )
 
-      axios.post(
-        `${import.meta.env.VITE_BACKEND_PATH}/joiner/remove-spectator-from-session`,
-        {
-          sessionID: sessionId,
-          socketID: nicknameSocketID
-        }
-      )
+
+      axios.post(`${import.meta.env.VITE_BACKEND_PATH}/joiner/remove-spectator-from-session`, {
+        sessionID: sessionId,
+        socketID: nicknameSocketID
+      })
+
       socket.emit('kick', nicknameSocketID)
     } else {
       nicknameSocketID = theUserMap.get(focusedUser)
@@ -558,8 +551,6 @@ export default function WaitingRoom() {
     setSessionID(useSessionStore.getState().sessionId)
     const fetchUsers = async () => {
       try {
-        console.log("devices: " + JSON.stringify(devices))
-        console.log(devices)
         // console.log('Trying to get users from session ' + sessionID);
         const response = await axios.get(
           `${import.meta.env.VITE_BACKEND_PATH}/joiner/room-users/${sessionID}`
@@ -607,9 +598,9 @@ export default function WaitingRoom() {
   const handleSubmit = () => {
     console.log('Attempting to start experiment...')
     //const allEmotiBitsConnected = emotiBits.every((user) => user.nickname && user.isConnected);
-    if(!allDevicesConnected){ 
-      toast.error("Cannot start experiment. Not all EmotiBits are connected!");
-      return;
+    if (!allDevicesConnected) {
+      toast.error('Cannot start experiment. Not all EmotiBits are connected!')
+      return
     }
     console.log('Starting experiment...')
     //-----HARDCODED FOR TESTING-------
@@ -624,7 +615,8 @@ export default function WaitingRoom() {
 
   useEffect(() => {
     console.log('Current Devices', currentDevices)
-  }, [currentDevices]);
+  }, [currentDevices])
+
 
   return (
     <div className="flex flex-col items-center justify-center px-4 mx:px-8 w-full">
@@ -645,8 +637,8 @@ export default function WaitingRoom() {
             <div className="flex items-center space-x-2 text-lg">
               <CiUser size={24} />
               <p className="text-lg">
-                <span className="font-semibold text-[#894DD6]">PARTICIPANTS</span>{' '}
-                <span>{nicknames.length}</span>
+                <span className="font-semibold text-[#894DD6]">PARTICIPANTS </span>
+                <span> {nicknames.length}</span>
               </p>
             </div>
           </div>
@@ -663,16 +655,19 @@ export default function WaitingRoom() {
         </div>
         <div className="w-full flex flex-col mt-6">
           <h2 className="text-xl lg:text-2xl font-semibold text-gray-800 mb-4">
-            {' '}
             Connected EmotiBits
           </h2>
           <div className="flex-col gap-4 overflow-y-auto max-h-[300px] md:max-h-[400px] p-4 border rounded-md shadow-md ">
             {Array.isArray(currentDevices) && currentDevices.length > 0 ? (
               currentDevices.map((device) => {
                 // if (device.nickname !== null && device.associatedDevice.isConnected === true){
-                  return(
-                    <EmotiBitList key={device.userId} user={device} onAction={() =>{ handleOpenModalSettings(device.userid, device.associatedDevice, device); console.log("HERE" + JSON.stringify(device))}} />
-                  );
+                return (
+                  <EmotiBitList
+                    key={device.userId}
+                    user={device}
+                    onAction={() => handleOpenModalSettings(device.userid)}
+                  />
+                )
                 //}
               })
             ) : (
@@ -759,7 +754,7 @@ export default function WaitingRoom() {
         </div>
         <div className="mb-6">
           <label htmlFor="ipAddress" className="block text-sm font-medium text-gray-700 mb-2">
-            IP Address 
+            IP Address
           </label>
           <input
             type="text"
@@ -780,34 +775,28 @@ export default function WaitingRoom() {
         // button3="Update"
       >
         <div className="mb-6">
-          {/* //Put this styling back: className="block text-sm font-medium text-gray-700 mb-2" */}
-          <label htmlFor="associated-user" className="block text-sm font-medium text-gray-700 mb-2">
-            Associated To: {focusedAssociatedUser}
-          </label>
           <label htmlFor="serialNumber" className="block text-sm font-medium text-gray-700 mb-2">
-            Serial Number: {focusedDeviceSerial}
+            Serial Number
           </label>
-          <label htmlFor="ipAddress" className="block text-sm font-medium text-gray-700 mb-2">
-            IP Address: {focusedDeviceIP}
-          </label>
-          {/* <input
+          <input
             type="text"
             id="serialNumber"
             className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
             value={serialNumber}
             onChange={(e) => setSerialNumber(e.target.value)}
-          /> */}
+          />
         </div>
         <div className="mb-6">
-          {/* //Put this styling back: className="block text-sm font-medium text-gray-700 mb-2" */}
-
-          {/* <input
+          <label htmlFor="ipAddress" className="block text-sm font-medium text-gray-700 mb-2">
+            IP Address
+          </label>
+          <input
             type="text"
             id="ipAddress"
             className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
             value={IPAddress}
             onChange={(e) => setIPAddress(e.target.value)}
-          /> */}
+          />
         </div>
       </ModalComponent>
       <ModalComponent

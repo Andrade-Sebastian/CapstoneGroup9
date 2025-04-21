@@ -9,7 +9,8 @@ import socket from "./socket.tsx";
 // import useBrainflowManager from "../../../host-electron/src/renderer/src/hooks/useBrainflowManager.ts";
 import { io } from "socket.io-client";
 
-// const SERVER_URL = `http://${import.meta.env.VITE_BACKEND_PATH}/`;
+// const SERVER_URL = `${import.meta.env.VITE_BACKEND_PATH}`;
+
 // const newSocket = io(SERVER_URL);
 
 export default function JoinPage() {
@@ -21,7 +22,7 @@ export default function JoinPage() {
   const [experimentActive, setExperimentActive] = useState(false);
 
   const {
-    userRole, 
+    userRole,
     setUserRole,
     sessionId,
     wasKicked,
@@ -35,12 +36,6 @@ export default function JoinPage() {
 
   useEffect(() => {
     socket.connect();
-  }, [])
-
-
-
-  useEffect(() => {
-	  socket.connect()
     console.log("SOCKET.connect() Setting user role to student")
 
     setUserRole("student");
@@ -51,21 +46,18 @@ export default function JoinPage() {
       toast.error("You were kicked from the room");
     }
 
-
-    socket.emit("client-assignment");
-    socket.on("experiment-active", (data) => {
-      if (data.isActive === true) {
-        toast.error("Experiment in progress, cannot join...");
-        setExperimentActive(data.isActive);
-        return;
-      } else {
-        setExperimentActive(false);
-        // toast.error("Experiment in progress, cannot join...")
-      }
-    });
-
-	  socket.emit("client-assignment", );
-
+	socket.emit("client-assignment", );
+  socket.on("experiment-active", (data) => {
+    if(data.isActive === true){
+      toast.error("Experiment in progress, cannot join...")
+      setExperimentActive(data.isActive);
+      return;
+    }
+    else{
+      setExperimentActive(false);
+      // toast.error("Experiment in progress, cannot join...")
+    }
+  })
 
     socket.on("client-assignment", async (data) => {
       await setUserSocketId(data.socketId);
@@ -81,18 +73,10 @@ export default function JoinPage() {
     nickname: string, 
     sessionID: number
   ): Promise<boolean> {
-
-    console.log("sessionID " + sessionID)
-    console.log("sessionId " + sessionId)
-    console.log(
-      `making request at ${
-        import.meta.env.VITE_BACKEND_PATH
-      }database/unique-nickname/${sessionID}/${nickname}`
+    console.log(`making request at ${import.meta.env.VITE_BACKEND_PATH}/database/unique-nickname/${sessionID}/${nickname}`
     );
-    const response = await axios.get(
-      `${
-        import.meta.env.VITE_BACKEND_PATH
-      }/database/unique-nickname/${sessionID}/${nickname}`
+    const response = await axios.get(`${import.meta.env.VITE_BACKEND_PATH}/database/unique-nickname/${sessionID}/${nickname}`
+
     );
     console.log("Is the nickname unique?", response.data.isUnique);
 
@@ -100,15 +84,19 @@ export default function JoinPage() {
   }
 
   const handleSubmit = async (e) => {
-    console.log("useJoinerStore.getState().sessionId: " + sessionId)
 
     console.log(
       new Date().toLocaleTimeString(),
       "Current socketID in Zustand: ",
       socketId
     );
-    console.log()
-	  console.log(new Date().toLocaleTimeString(), "(Join Page) Current socketID in Zustand: ", socketId)
+
+    console.log(
+      new Date().toLocaleTimeString(),
+      "(Join Page) Current socketID in Zustand: ",
+      socketId
+    );
+
     setRoomCode(StudentInputRoomCode);
     e.preventDefault();
 
@@ -168,12 +156,14 @@ export default function JoinPage() {
       if (isJoiningAsSpectator && canSpectate) {
         //Set global store 'userRole' to 'spectator'
         setUserRole("spectator");
-        console.log("if(isJoiningAsSpectator && canSpectate) Setting user role to spectator")
+        console.log(
+          "if(isJoiningAsSpectator && canSpectate) Setting user role to spectator"
+        );
         console.log("global user role: ", userRole);
       } else {
         //when they input the password, navigate to the waiting room
         console.log("joiner");
-        console.log("(else) Setting user role to student")
+        console.log("(else) Setting user role to student");
         setUserRole("student");
       }
       toast.success("Room code valid. Password is needed...");
@@ -187,15 +177,16 @@ export default function JoinPage() {
       );
     }
   };
-
+  
+  
   const checkNickName = async (nickName: string) => {
     try {
       console.log("Checking nickname: ", nickName);
       const response = await axios.get(
-        `${
-          import.meta.env.VITE_BACKEND_PATH
-        }/joiner/check-name/${nickName}`
+        `${import.meta.env.VITE_BACKEND_PATH}/joiner/check-name/${nickName}`
+
       );
+      console.log(`HERE IS THE ENDPOINT FOR CHECKNICKNAME ${import.meta.env.VITE_BACKEND_PATH}/joiner/check-name/${nickName}`);
       console.log("RESPONSE STATUS RETURNED: ", response.status);
       if (response.status === 200) {
         console.log("Nickname is valid");
@@ -216,7 +207,12 @@ export default function JoinPage() {
       console.log("Validating room code..." + StudentInputRoomCode);
       setRoomCode(StudentInputRoomCode); // Store the room code in global state
 
-      const response = await axios.get(`${import.meta.env.VITE_BACKEND_PATH}/joiner/verify-code/${StudentInputRoomCode}`);
+      const response = await axios.get(
+        `${
+          import.meta.env.VITE_BACKEND_PATH
+        }/joiner/verify-code/${StudentInputRoomCode}`
+      );
+
       console.log("Session ID: ", response.data.sessionID);
       console.log("Response status: ", response.status);
 

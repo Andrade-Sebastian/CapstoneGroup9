@@ -79,7 +79,6 @@ export default function WaitingRoom() {
   //   };
   // }, [nickName, roomCode]);
 
-
   useEffect(() => {
     const handleExperimentType = (data) => {
       console.log("Received experiment type from the host...");
@@ -145,7 +144,7 @@ export default function WaitingRoom() {
         console.log(
           `removing spectator from session ${sessionId} with socketID ${socketId}`
         );
-        //   axios.post("http://${import.meta.env.VITE_BACKEND_PATH}/joiner/remove-spectator-from-session",
+        //   axios.post("${import.meta.env.VITE_BACKEND_PATH}/joiner/remove-spectator-from-session",
         //     {
         //       sessionID: sessionId,
         //       socketID: socketId
@@ -164,13 +163,10 @@ export default function WaitingRoom() {
         };
       } else {
         axios
-          .post(
-            `${import.meta.env.VITE_BACKEND_PATH}/joiner/leave-room`,
-            {
-              sessionID: sessionId,
-              socketID: socketId,
-            }
-          )
+          .post(`${import.meta.env.VITE_BACKEND_PATH}/joiner/leave-room`, {
+            sessionID: sessionId,
+            socketID: socketId,
+          })
           .then(() => {
             console.log("Successfully removed from database");
             navigateTo("/");
@@ -232,12 +228,41 @@ export default function WaitingRoom() {
     if (!sessionID) return;
 
     const fetchUsers = async () => {
-      console.log("****user role:" + userRole)
+      console.log("****user role:" + userRole);
       try {
         console.log("Serial: "+ serial)
         deviceInfo = await axios.get(`${import.meta.env.VITE_BACKEND_PATH}/database/device-info/${serial}`);
         console.log("Recieved Device Info: " + JSON.stringify(deviceInfo.body))
-        //you were gonna rebuild and test the joiner waiting room
+        
+        console.log(
+          "Trying to get users from session " + sessionId,
+          "type | ",
+          typeof sessionId
+        );
+        console.log("Socket ID when getting users: ", socketId);
+
+        //SOCKET ID ISNT BEING SET - 4/17
+        console.log("****socketId when getting users: " + socketId);
+        console.log("Trying to get users from session " + sessionID);
+        const response = await axios.get(
+          `${import.meta.env.VITE_BACKEND_PATH}/joiner/room-users/${sessionId}`
+        );
+        console.log("got ", JSON.stringify(response.data.users));
+        const users = response.data.users; //Array of IUser objects
+
+        // const nicknames = []; //holds only the nicknames of those IUser Objects
+
+        const nicknames = users.map((user) =>
+          user.userrole === "spectator"
+            ? `${user.nickname} (Spectator)`
+            : user.nickname
+        );
+        setNickNames(nicknames);
+
+        // initialize nicknames array
+        // for (let i = 0; i < users.length; i++) {
+        //   if (users[i].userrole === "spectator"){
+        //     nicknames.push(users[i].nickname + " (Spectator)");
       } catch (error) {
         if (error.response?.status === 404) {
           console.log("Device not found.")
@@ -248,35 +273,6 @@ export default function WaitingRoom() {
             console.error("An error occurred:", error);
           }
       }
-      
-
-      
-      //SOCKET ID ISNT BEING SET - 4/17
-      try{
-          console.log(
-            "Trying to get users from session " + sessionId,
-            "type | ",
-            typeof sessionId
-          );
-          console.log("Socket ID when getting users: ", socketId);
-          console.log("****socketId when getting users: " + socketId);
-          console.log("Trying to get users from session " + sessionId);
-          const response = await axios.get(
-            `${
-              import.meta.env.VITE_BACKEND_PATH
-            }/joiner/room-users/${sessionId}`
-          );
-          console.log("got ", JSON.stringify(response.data.users));
-          const users = response.data.users; //Array of IUser objects
-  
-          // const nicknames = []; //holds only the nicknames of those IUser Objects
-          const nicknames = users.map((user) =>
-            user.userrole === "spectator"
-              ? `${user.nickname} (Spectator)`
-              : user.nickname
-          );
-          setNickNames(nicknames);
-
         } catch (error) {
         console.error("Error fetching users:", error);
       }
@@ -342,9 +338,8 @@ export default function WaitingRoom() {
       try {
         console.log("SENDING TO THE ROUTE EXPERIMENT ID: ", experimentID);
         const response = await axios.get(
-          `${
-            import.meta.env.VITE_BACKEND_PATH
-          }joiner/getPhoto/${experimentID}`
+          `${import.meta.env.VITE_BACKEND_PATH}/joiner/getPhoto/${experimentID}`
+
         );
         if (response.status === 200) {
           toast.success("Successfully received photo lab data.");
@@ -518,17 +513,17 @@ export default function WaitingRoom() {
                   <PiPlugsConnectedThin size={24} />
                   <p className="text-base sm:text-lg flex flex-col sm:flex-row sm:items-center">
                     <span className="font-semibold text-[#894DD6]">
-                      SENSOR STATUS{" "}
+                      SENSOR STATUS
                     </span>
                     <div>
                       {isConnected ? (
                         <span className="text-green-500 font-bold ml-1">
-                          {" "}
+
                           CONNECTED
                         </span>
                       ) : (
                         <span className="text-red-500 font-bold ml-1">
-                          {" "}
+
                           NOT CONNECTED
                         </span>
                       )}

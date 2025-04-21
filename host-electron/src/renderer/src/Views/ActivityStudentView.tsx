@@ -110,6 +110,7 @@ export default function ActivityStudentView(): ReactElement {
   const handleUserKick = () => {
     //insert socket logic to kick user here
     console.log('Kicking user...')
+    socket.emit("kick-active-student", userId);
   }
 
   // useEffect(() => {
@@ -811,7 +812,7 @@ export default function ActivityStudentView(): ReactElement {
             >
               {isMasked ? 'Unmask' : 'Mask'}
             </button>
-            <button className="mt-6 font-semibold py-3 px-6 bg-[#F54884] shadow-md transition duration-300 ease-in-out hover:bg-[#F02B70] text-3xl p-4 rounded-xl text-white cursor-pointer">
+            <button className="mt-6 font-semibold py-3 px-6 bg-[#F54884] shadow-md transition duration-300 ease-in-out hover:bg-[#F02B70] text-3xl p-4 rounded-xl text-white cursor-pointer" onClick={handleUserKick}>
               Kick
             </button>
           </div>
@@ -833,16 +834,16 @@ export default function ActivityStudentView(): ReactElement {
             <label className="inline-flex items-center gap-2">
               <input
                 type="checkbox"
-                checked={activeCharts.includes('temperatureChart')}
-                onChange={() => toggleChart('temperatureChart')}
+                checked={activeCharts.includes('temperature')}
+                onChange={() => toggleChart('temperature')}
               />
               <span> Temperature </span>
             </label>
             <label className="inline-flex items-center gap-2">
               <input
                 type="checkbox"
-                checked={activeCharts.includes('gsrChart')}
-                onChange={() => toggleChart('gsrChart')}
+                checked={activeCharts.includes('gsr')}
+                onChange={() => toggleChart('gsr')}
               />
               <span> Skin Response (GSR) </span>
             </label>

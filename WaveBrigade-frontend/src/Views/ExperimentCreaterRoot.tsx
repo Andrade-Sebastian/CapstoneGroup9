@@ -3,8 +3,10 @@ import { useEffect, useState } from "react";
 
 export default function ExperimentCreaterRoot() {
   //Future: put this in the CreateLab Page
-  const EXPERIMENT_LIBRARY_URL =
-    `${import.meta.env.VITE_BACKEND_PATH}/experiments/`;
+  const EXPERIMENT_LIBRARY_URL = `${
+    import.meta.env.VITE_BACKEND_PATH
+  }/experiments/`;
+
   const [experiments, setExperiments] = useState([]);
 
   useEffect(() => {

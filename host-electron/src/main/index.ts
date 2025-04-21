@@ -76,18 +76,13 @@ app.whenReady().then(() => {
 })
 
 app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
     app.quit()
-  }
 })
 
 function handleViewUser(
-  event: Electron.IpcMainEvent,
-  sessionId: string,
-  userId: string,
-  experimentType: number
-) {
-  const newProcessWindow = createProcessWindow(sessionId, userId, experimentType)
+  event: Electron.IpcMainEvent, sessionId: string, userId: string, nickName:string, experimentType: number
+){
+  const newProcessWindow = createProcessWindow(sessionId, userId, nickName, experimentType);
 
   const mainWindow = windows.find((w) => w.type === 'main')?.instance
 
@@ -118,7 +113,7 @@ function spawnBrainFlow(
     serialNumber,
     backendIp,
     String(userId),
-    frontEndSocketId
+    frontEndSocketId,
   ])
   activity[userId] = {
     brainflowProcess: instance,
@@ -193,7 +188,10 @@ ipcMain.on(
     frontEndSocketId: string,
     sessionId: string
   ) => {
-    if (verifyEmotiBitUsage(emotibitIpAddress) !== undefined) return
+    console.log("BRAINFOW START HIT: ", emotibitIpAddress, serialNumber);
+    const found = verifyEmotiBitUsage(emotibitIpAddress);
+    console.log("EmotiBit found: ", found);
+    if(verifyEmotiBitUsage(emotibitIpAddress) !== undefined) return 
     const activitySingleton = ActivitySingleton.getInstance()
     const brainflowInstance = spawnBrainFlow(
       emotibitIpAddress,
@@ -236,8 +234,8 @@ ipcMain.on(
     event.reply('brainflow:launched', { sessionId, serialNumber, status: 'success' })
 
     //check if data is being recieved
-    brainflowInstance.stdout.on('data', (message) => {
-      console.log('INSIDE STDOUT: ', brainflowInstance.pid, message.toString())
+    brainflowInstance.stdout.on("data", (message) =>{
+      //console.log("INSIDE STDOUT: ", brainflowInstance.pid, message.toString());
     })
 
     //log any errors from brainflow script
@@ -266,5 +264,25 @@ ipcMain.on('session:request-data', (event) => {
   const sessionData = useSessionStore.getState() // or however you store your host session
   console.log('💾 Sending session data to student window:', sessionData)
 
-  event.sender.send('session:sync', sessionData)
+  event.sender.send('session:sync', sessionData);
+});
+
+ipcMain.on('activity:closeAllWindows', (event) => {
+  BrowserWindow.getAllWindows().forEach(window => {
+    if(window.title === 'WaveBrigade'){
+      return;
+    }
+    else{
+      window.close()
+    }
+  })
 })
+
+ipcMain.on('activity:closeUserWindow', (event, nickName) => {
+  BrowserWindow.getAllWindows().forEach(window =>{
+    if(window.title === nickName){
+      window.close();
+    }
+  })
+})
+

@@ -5,7 +5,7 @@ import toast, { Toaster } from 'react-hot-toast'
 import SideComponent from '../components/SideComponent'
 import axios from 'axios'
 import socket from './socket'
-import PhotoInputForm from '../components/PhotoInputForm.tsx' 
+import PhotoInputForm from '../components/PhotoInputForm.tsx'
 
 export default function PhotoLab() {
   const {
@@ -33,11 +33,16 @@ export default function PhotoLab() {
     experimentId: string
   ) => {
     try {
-      const response = await axios.post(`${import.meta.env.VITE_BACKEND_PATH}/host/send-experiment`, {
-        experimentTitle,
-        experimentDesc,
-        experimentId
-      })
+
+      const response = await axios.post(
+        `${import.meta.env.VITE_BACKEND_PATH}/host/send-experiment`,
+        {
+          experimentTitle,
+          experimentDesc,
+          experimentId
+        }
+      )
+
       console.log('Post response data from sendExperimentData', response.data)
     } catch (error) {
       console.error('Error:', error)
