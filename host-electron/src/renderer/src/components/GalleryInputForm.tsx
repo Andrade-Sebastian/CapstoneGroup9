@@ -164,6 +164,7 @@ export default function GalleryInputForm(props: IGalleryInput) {
     try {
       //create a gallery lab
       console.log('Sending data', JSON.stringify(data))
+
       const response = await axios.post(
         `${import.meta.env.VITE_BACKEND_PATH}/database/gallery-lab`,
         data,
@@ -171,6 +172,7 @@ export default function GalleryInputForm(props: IGalleryInput) {
           headers: { 'Content-Type': 'multipart/form-data' }
         }
       )
+
       console.log('After /gallery-lab, ', JSON.stringify(response.data))
 
       if (response.status === 200) {

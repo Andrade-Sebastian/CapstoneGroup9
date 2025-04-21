@@ -150,6 +150,7 @@ export default function SpectatorActiveExperiment() {
       const response = await axios
         .get(
           `${import.meta.env.VITE_BACKEND_PATH}/joiner/getPhoto/${experimentId}`
+
         )
         .then((response) => {
           //THERE IS NOTHING BEING SET HERE
@@ -161,6 +162,7 @@ export default function SpectatorActiveExperiment() {
       const response = await axios
         .get(
           `${import.meta.env.VITE_BACKEND_PATH}/joiner/getVideoFile/${experimentId}`
+
         )
         .then((response) => {
           //THERE IS NOTHING BEING SET HERE
@@ -229,6 +231,23 @@ export default function SpectatorActiveExperiment() {
   }, []);
 
   useEffect(() => {
+    const getSessionID = async () => {
+      const response = await axios
+        .get(
+          `${import.meta.env.VITE_BACKEND_PATH}/joiner/verify-code/${roomCode}`
+
+        )
+        .then((response) => {
+          setSessionID(response.data.sessionID);
+          setSessionId(sessionID);
+          console.log("SessionID", sessionID);
+          console.log("SessionID", sessionId);
+        });
+    };
+    getSessionID();
+  }, []);
+
+  useEffect(() => {
     // if (!sessionID) return;
 
     const fetchUsers = async () => {
@@ -236,6 +255,7 @@ export default function SpectatorActiveExperiment() {
         console.log("Trying to get users from session " + sessionId);
         const response = await axios.get(
           `${import.meta.env.VITE_BACKEND_PATH}/joiner/room-users/${sessionId}`
+
         );
         console.log("HERE IS THE RESPONSE", response);
         const users: IJoiner[] = response.data.users
@@ -264,6 +284,7 @@ export default function SpectatorActiveExperiment() {
       try {
         const response = await axios.get(
           `${import.meta.env.VITE_BACKEND_PATH}/joiner/session/getInfo/${roomCode}`
+
         );
         if (response.status === 200) {
           console.log("EXPERIMENT ID RETURNED: ", response.data.experimentid);
@@ -299,6 +320,7 @@ export default function SpectatorActiveExperiment() {
       try {
         const response = await axios.get(
           `${import.meta.env.VITE_BACKEND_PATH}/get-videoFile/${filename}`
+
         );
         if (response.status === 200) {
           console.log("Fetched video path:", response.config.url);
@@ -328,6 +350,7 @@ export default function SpectatorActiveExperiment() {
       try {
         const response = await axios.get(
           `${import.meta.env.VITE_BACKEND_PATH}/get-articleFile/${filename}`
+
         );
         if (response.status === 200) {
           console.log("Fetched article path:", response.config.url);

@@ -286,9 +286,11 @@ export default function ActivityHost() {
     const fetchUsers = async () => {
       try {
         console.log('Trying to get users from session ' + sessionID)
+
         const response = await axios.get(
           `${import.meta.env.VITE_BACKEND_PATH}/joiner/room-users/${sessionID}`
         )
+
         const users = response.data.users //Array of IUser objects
         const rawUsers = response.data.users;
         const userMap = new Map();

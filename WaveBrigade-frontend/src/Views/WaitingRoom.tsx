@@ -53,6 +53,9 @@ export default function WaitingRoom() {
     setUserRole,
     experimentTitle,
     experimentDesc,
+    setSerial,
+    setIsConnected
+    
   } = useJoinerStore();
 
   // useEffect(() => {
@@ -201,15 +204,18 @@ export default function WaitingRoom() {
 
   useEffect(() => {
     const getSessionID = async () => {
-      console.log("verify-code, room code: ", roomCode)
-      const response = await axios.get(`${import.meta.env.VITE_BACKEND_PATH}/joiner/verify-code/${roomCode}`);
-
-      if(response.status === 200){
-        setSessionID(response.data.sessionID);
-        setSessionId(response.data.sessionID)
-      }
-    }; 
-
+      console.log("verify-code, room code: ", roomCode);
+      const response = await axios
+        .get(
+          `${
+            import.meta.env.VITE_BACKEND_PATH
+          }/joiner/verify-code/${roomCode}`
+        )
+        .then((response) => {
+          setSessionID(response.data.sessionID);
+          setSessionId(response.data.sessionID);
+        });
+    };
 
     setIsSpectator(userRole === "spectator");
     console.log("SPECTATOR AHH: ", isSpectator);
@@ -217,12 +223,17 @@ export default function WaitingRoom() {
   }, []);
 
   let interval;
+  let deviceInfo;
   useEffect(() => {
     if (!sessionID) return;
 
     const fetchUsers = async () => {
       console.log("****user role:" + userRole);
       try {
+        console.log("Serial: "+ serial)
+        deviceInfo = await axios.get(`${import.meta.env.VITE_BACKEND_PATH}/database/device-info/${serial}`);
+        console.log("Recieved Device Info: " + JSON.stringify(deviceInfo.body))
+        
         console.log(
           "Trying to get users from session " + sessionId,
           "type | ",
@@ -246,24 +257,23 @@ export default function WaitingRoom() {
             ? `${user.nickname} (Spectator)`
             : user.nickname
         );
+        setNickNames(nicknames);
 
         // initialize nicknames array
         // for (let i = 0; i < users.length; i++) {
         //   if (users[i].userrole === "spectator"){
         //     nicknames.push(users[i].nickname + " (Spectator)");
-
-        //   }else{
-        //     nicknames.push(users[i].nickname)
-        //   }
-        //   console.log("nicknames: " + JSON.stringify(nicknames) + "Length: " + nicknames.length)
-        //   setNickNames(nicknames);
-        // }
-        setNickNames(nicknames);
       } catch (error) {
-        console.error("Error fetching users:", error);
-      }
-    };
+        if (error.response?.status === 404) {
+          console.log("Device not found.")
+          setSerial("");
+          setIsConnected(false)
 
+        }else {
+            console.error("An error occurred:", error);
+          }
+        }
+      }
     fetchUsers();
     interval = setInterval(fetchUsers, 5000); // Refresh users every 5 seconds
 
@@ -276,7 +286,7 @@ export default function WaitingRoom() {
         const response = await axios.get(
           `${
             import.meta.env.VITE_BACKEND_PATH
-          }/joiner/session/getInfo/${roomCode}`
+          }joiner/session/getInfo/${roomCode}`
         );
         if (response.status === 200) {
           console.log("EXPERIMENT ID RETURNED: ", response.data.experimentid);
@@ -296,7 +306,7 @@ export default function WaitingRoom() {
         const response = await axios.get(
           `${
             import.meta.env.VITE_BACKEND_PATH
-          }/joiner/getVideoFile/${experimentID}`
+          }joiner/getVideoFile/${experimentID}`
         );
         if (response.status === 200) {
           toast.success("Successfully received video lab data.");
@@ -326,6 +336,7 @@ export default function WaitingRoom() {
         console.log("SENDING TO THE ROUTE EXPERIMENT ID: ", experimentID);
         const response = await axios.get(
           `${import.meta.env.VITE_BACKEND_PATH}/joiner/getPhoto/${experimentID}`
+
         );
         if (response.status === 200) {
           toast.success("Successfully received photo lab data.");
@@ -358,7 +369,7 @@ export default function WaitingRoom() {
         const response = await axios.get(
           `${
             import.meta.env.VITE_BACKEND_PATH
-          }/joiner/getGallery/${experimentID}`
+          }joiner/getGallery/${experimentID}`
         );
         if (response.status === 200) {
           toast.success("Successfully received gallery lab data.");
@@ -403,7 +414,7 @@ export default function WaitingRoom() {
         const response = await axios.get(
           `${
             import.meta.env.VITE_BACKEND_PATH
-          }/joiner/getArticleFile/${experimentID}`
+          }joiner/getArticleFile/${experimentID}`
         );
         if (response.status === 200) {
           toast.success("Successfully received article lab data.");

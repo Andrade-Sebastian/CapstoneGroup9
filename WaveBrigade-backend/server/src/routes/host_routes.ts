@@ -92,8 +92,29 @@ hostRouter.post("/remove-device", async (req: Request, res: Response) => {
     }
 
     try{
+        const getDeviceIDquery =  await dbClient.queryObject(`
+            SELECT deviceid FROM device WHERE serialnumber = $1 AND ipaddress = $2`
+            , [serialNumber, ipAddress])
+        
+        const deviceID = getDeviceIDquery.rows[0]?.deviceid
+        console.log("IJIJIJIJIIJ deviceid: " + deviceID)
+
+        const getAssociatedUserQuery = await dbClient.queryObject(
+            `SELECT userid FROM "User" WHERE device = $1`, [deviceID]
+        )
+
+        const userID = getAssociatedUserQuery.rows[0]?.userid
+        console.log("IJIJIJIJIIJ userid: " + userID)
+
+        //remove the device from the user
+        const removeDeviceFromUserQuery = await dbClient.queryObject(`
+            UPDATE "User" SET device = null WHERE userid = $1
+            `, [userID])
+
+        //remove the device
         const result = await dbClient.queryObject(
-            `DELETE FROM device where serialnumber = '${serialNumber}' 
+            //remove the associated device from the user
+            `DELETE FROM device WHERE serialnumber = '${serialNumber}' 
             AND ipaddress = '${ipAddress}'`
         );
 
@@ -103,11 +124,6 @@ hostRouter.post("/remove-device", async (req: Request, res: Response) => {
         console.error("Error removing device", error);
         return res.status(500).send(false);
     }
-
-
-
-
-
 })
 
 
