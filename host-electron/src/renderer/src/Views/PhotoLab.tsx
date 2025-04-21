@@ -33,7 +33,7 @@ export default function PhotoLab() {
     experimentId: string
   ) => {
     try {
-      const response = await axios.post(`http://${import.meta.env.VITE_BACKEND_PATH}/host/send-experiment`, {
+      const response = await axios.post(`${import.meta.env.VITE_BACKEND_PATH}/host/send-experiment`, {
         experimentTitle,
         experimentDesc,
         experimentId

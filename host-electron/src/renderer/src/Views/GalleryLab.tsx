@@ -69,7 +69,7 @@ export default function GalleryLab() {
   ) => {
     try {
       const response = await axios.post(
-        `http://${import.meta.env.VITE_BACKEND_PATH}/host/send-experiment`,
+        `${import.meta.env.VITE_BACKEND_PATH}/host/send-experiment`,
         {
           experimentTitle,
           experimentDesc,

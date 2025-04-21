@@ -165,7 +165,7 @@ export default function VideoInputForm(props: IVideoInputForm) {
     try {
       //create a video lab
       console.log('Sending data', JSON.stringify(data))
-      const response = await axios.post(`http://${import.meta.env.VITE_BACKEND_PATH}/database/video-lab`, data, {
+      const response = await axios.post(`${import.meta.env.VITE_BACKEND_PATH}/database/video-lab`, data, {
         headers: { 'Content-Type': 'multipart/form-data' }
       })
       console.log('After /video-lab, ', JSON.stringify(response.data))

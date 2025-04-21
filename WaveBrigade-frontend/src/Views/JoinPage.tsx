@@ -9,7 +9,7 @@ import socket from "./socket.tsx";
 // import useBrainflowManager from "../../../host-electron/src/renderer/src/hooks/useBrainflowManager.ts";
 import { io } from "socket.io-client";
 
-// const SERVER_URL = `http://${import.meta.env.VITE_BACKEND_PATH}`;
+// const SERVER_URL = `http://${import.meta.env.VITE_BACKEND_PATH}/`;
 // const newSocket = io(SERVER_URL);
 
 export default function JoinPage() {
@@ -35,15 +35,12 @@ export default function JoinPage() {
 
   useEffect(() => {
     socket.connect();
-
-
-	  setUserSocketId,
-  } = useJoinerStore();
+  }, [])
 
 
 
   useEffect(() => {
-	socket.connect()
+	  socket.connect()
     console.log("SOCKET.connect() Setting user role to student")
 
     setUserRole("student");
@@ -71,11 +68,6 @@ export default function JoinPage() {
 
 
     socket.on("client-assignment", async (data) => {
-      console.log(
-        new Date().toLocaleTimeString(),
-        "(JoinPage.tsx): got a client-assignment event in JoinPage.tsx, recieved: ",
-        data
-      );
       await setUserSocketId(data.socketId);
 
       return () => {
@@ -86,16 +78,19 @@ export default function JoinPage() {
   }, [setExperimentActive]);
 
   async function checkNicknameIsUnique(
-    nickname: string,
+    nickname: string, 
     sessionID: number
   ): Promise<boolean> {
+
+    console.log("sessionID " + sessionID)
+    console.log("sessionId " + sessionId)
     console.log(
-      `making request at http://${
+      `making request at ${
         import.meta.env.VITE_BACKEND_PATH
-      }/database/unique-nickname/${sessionID}/${nickname}`
+      }database/unique-nickname/${sessionID}/${nickname}`
     );
     const response = await axios.get(
-      `http://${
+      `${
         import.meta.env.VITE_BACKEND_PATH
       }/database/unique-nickname/${sessionID}/${nickname}`
     );
@@ -105,13 +100,14 @@ export default function JoinPage() {
   }
 
   const handleSubmit = async (e) => {
+    console.log("useJoinerStore.getState().sessionId: " + sessionId)
 
     console.log(
       new Date().toLocaleTimeString(),
       "Current socketID in Zustand: ",
       socketId
     );
-
+    console.log()
 	  console.log(new Date().toLocaleTimeString(), "(Join Page) Current socketID in Zustand: ", socketId)
     setRoomCode(StudentInputRoomCode);
     e.preventDefault();
@@ -138,6 +134,7 @@ export default function JoinPage() {
       const canSpectate = await checkSpectatorsAllowed(
         useJoinerStore.getState().sessionId
       );
+      console.log("useJoinerStore.getState().sessionId: " + useJoinerStore.getState().sessionId)
       const nicknameIsUnique = await checkNicknameIsUnique(
         nickName,
         useJoinerStore.getState().sessionId
@@ -195,7 +192,7 @@ export default function JoinPage() {
     try {
       console.log("Checking nickname: ", nickName);
       const response = await axios.get(
-        `http://${
+        `${
           import.meta.env.VITE_BACKEND_PATH
         }/joiner/check-name/${nickName}`
       );
@@ -219,11 +216,7 @@ export default function JoinPage() {
       console.log("Validating room code..." + StudentInputRoomCode);
       setRoomCode(StudentInputRoomCode); // Store the room code in global state
 
-      const response = await axios.get(
-        `http://${
-          import.meta.env.VITE_BACKEND_PATH
-        }/joiner/verify-code/${StudentInputRoomCode}`
-      );
+      const response = await axios.get(`${import.meta.env.VITE_BACKEND_PATH}/joiner/verify-code/${StudentInputRoomCode}`);
       console.log("Session ID: ", response.data.sessionID);
       console.log("Response status: ", response.status);
 
@@ -254,9 +247,9 @@ export default function JoinPage() {
   //checks if spectators are allowed for the specific session
   const checkSpectatorsAllowed = async (sessionId: string) => {
     try {
-      console.log("Checking if spectators allowed");
+      console.log("Checking if spectators allowed in sessionid", sessionId);
       const response = await axios.get(
-        `http://${
+        `${
           import.meta.env.VITE_BACKEND_PATH
         }/joiner/session/allows-spectators/${sessionId}`
       );

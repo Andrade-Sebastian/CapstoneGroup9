@@ -146,9 +146,9 @@ export default function SpectatorActiveExperiment() {
     const getPhotoInfo = async () => {
       const response = await axios
         .get(
-          `http://${
+          `${
             import.meta.env.VITE_BACKEND_PATH
-          }/joiner/getPhoto/${experimentId}`
+          }joiner/getPhoto/${experimentId}`
         )
         .then((response) => {
           //THERE IS NOTHING BEING SET HERE
@@ -159,9 +159,9 @@ export default function SpectatorActiveExperiment() {
     const getVideoInfo = async () => {
       const response = await axios
         .get(
-          `http://${
+          `${
             import.meta.env.VITE_BACKEND_PATH
-          }/joiner/getVideoFile/${experimentId}`
+          }joiner/getVideoFile/${experimentId}`
         )
         .then((response) => {
           //THERE IS NOTHING BEING SET HERE
@@ -173,9 +173,9 @@ export default function SpectatorActiveExperiment() {
     const getGalleryInfo = async () => {
       const response = await axios
         .get(
-          `http://${
+          `${
             import.meta.env.VITE_BACKEND_PATH
-          }/joiner/getGallery/${experimentId}`
+          }joiner/getGallery/${experimentId}`
         )
         .then((response) => {
           //THERE IS NOTHING BEING SET HERE
@@ -186,9 +186,9 @@ export default function SpectatorActiveExperiment() {
     const getArticleInfo = async () => {
       const response = await axios
         .get(
-          `http://${
+          `${
             import.meta.env.VITE_BACKEND_PATH
-          }/joiner/getArticleFile/${experimentId}`
+          }joiner/getArticleFile/${experimentId}`
         )
         .then((response) => {
           //THERE IS NOTHING BEING SET HERE
@@ -236,9 +236,9 @@ export default function SpectatorActiveExperiment() {
     const getSessionID = async () => {
       const response = await axios
         .get(
-          `http://${
+          `${
             import.meta.env.VITE_BACKEND_PATH
-          }/joiner/verify-code/${roomCode}`
+          }joiner/verify-code/${roomCode}`
         )
         .then((response) => {
           setSessionID(response.data.sessionID);
@@ -256,9 +256,9 @@ export default function SpectatorActiveExperiment() {
       try {
         console.log("Trying to get users from session " + sessionID);
         const response = await axios.get(
-          `http://${
+          `${
             import.meta.env.VITE_BACKEND_PATH
-          }/joiner/room-users/${sessionID}`
+          }joiner/room-users/${sessionID}`
         );
         console.log("HERE IS THE RESPONSE", response);
         const users: IJoiner[] = response.data.users
@@ -286,9 +286,9 @@ export default function SpectatorActiveExperiment() {
     const getExperimentData = async () => {
       try {
         const response = await axios.get(
-          `http://${
+          `${
             import.meta.env.VITE_BACKEND_PATH
-          }/joiner/session/getInfo/${roomCode}`
+          }joiner/session/getInfo/${roomCode}`
         );
         if (response.status === 200) {
           console.log("EXPERIMENT ID RETURNED: ", response.data.experimentid);
@@ -307,7 +307,7 @@ export default function SpectatorActiveExperiment() {
       const filename = experimentPath.split("/").pop();
       try {
         const response = await axios.get(
-          `http://${import.meta.env.VITE_BACKEND_PATH}/get-photo/${filename}`
+          `${import.meta.env.VITE_BACKEND_PATH}/get-photo/${filename}`
         );
         if (response.status === 200) {
           console.log("Fetched image path:", response.config.url);
@@ -323,9 +323,9 @@ export default function SpectatorActiveExperiment() {
       const filename = experimentPath.split("/").pop();
       try {
         const response = await axios.get(
-          `http://${
+          `${
             import.meta.env.VITE_BACKEND_PATH
-          }/get-videoFile/${filename}`
+          }get-videoFile/${filename}`
         );
         if (response.status === 200) {
           console.log("Fetched video path:", response.config.url);
@@ -339,7 +339,7 @@ export default function SpectatorActiveExperiment() {
     const fetchStoredGallery = async (filename: string) => {
       try {
         const response = await axios.get(
-          `http://${import.meta.env.VITE_BACKEND_PATH}/get-gallery/${filename}`
+          `${import.meta.env.VITE_BACKEND_PATH}/get-gallery/${filename}`
         );
         if (response.status === 200) {
           console.log("Fetched photo path:", response.config.url);
@@ -354,9 +354,9 @@ export default function SpectatorActiveExperiment() {
       const filename = experimentPath.split("/").pop();
       try {
         const response = await axios.get(
-          `http://${
+          `${
             import.meta.env.VITE_BACKEND_PATH
-          }/get-articleFile/${filename}`
+          }get-articleFile/${filename}`
         );
         if (response.status === 200) {
           console.log("Fetched article path:", response.config.url);

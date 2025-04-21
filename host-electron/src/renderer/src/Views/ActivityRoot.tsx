@@ -71,7 +71,7 @@ export default function HostCreateRoom() {
     console.log('sessionInfo: ' + JSON.stringify(sessionInfo))
 
     axios
-      .post(`http://${import.meta.env.VITE_BACKEND_PATH}/host/session/create`, sessionInfo)
+      .post(`${import.meta.env.VITE_BACKEND_PATH}/host/session/create`, sessionInfo)
       .then((response) => {
         console.log(response.data.configuration)
         navigateTo('/host/select-lab', { state: { userName } }) //for now

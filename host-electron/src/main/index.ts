@@ -40,7 +40,7 @@ app.whenReady().then(() => {
           'Content-Security-Policy': [
             "default-src 'self' 'unsafe-eval' data: blob: filesystem: gap:;",
             "script-src 'self' https://www.youtube.com https://www.youtube-nocookie.com;",
-            "connect-src 'self' https://www.youtube.com https://www.youtube-nocookie.com http://${import.meta.env.${import.meta.env.VITE_BACKEND_PATH}};",
+            "connect-src 'self' https://www.youtube.com https://www.youtube-nocookie.com ${import.meta.env.${import.meta.env.VITE_BACKEND_PATH}/};",
             "frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com;",
             "child-src 'self' https://www.youtube.com https://www.youtube-nocookie.com;"
           ]
@@ -63,7 +63,7 @@ app.whenReady().then(() => {
       responseHeaders: {
         ...details.responseHeaders
         // 'Content-Security-Policy': [
-        //   "default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:filesystem:; connect-src 'self' localhost ws://${import.meta.env.VITE_BACKEND_PATH} http://${import.meta.env.VITE_BACKEND_PATH} http://127.0.0.1:3000;"
+        //   "default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:filesystem:; connect-src 'self' localhost ws://${import.meta.env.VITE_BACKEND_PATH}/ ${import.meta.env.VITE_BACKEND_PATH}/ http://127.0.0.1:3000;"
         // ]
       }
     })

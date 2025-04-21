@@ -124,7 +124,7 @@ export default function ActiveExperiment() {
     const getPhotoInfo = async () => {
       const response = await axios
         .get(
-          `http://${
+          `${
             import.meta.env.VITE_BACKEND_PATH
           }/joiner/getPhoto/${experimentId}`
         )
@@ -137,7 +137,7 @@ export default function ActiveExperiment() {
     const getVideoInfo = async () => {
       const response = await axios
         .get(
-          `http://${
+          `${
             import.meta.env.VITE_BACKEND_PATH
           }/joiner/getVideoFile/${experimentId}`
         )
@@ -151,7 +151,7 @@ export default function ActiveExperiment() {
     const getGalleryInfo = async () => {
       const response = await axios
         .get(
-          `http://${
+          `${
             import.meta.env.VITE_BACKEND_PATH
           }/joiner/getGallery/${experimentId}`
         )
@@ -164,7 +164,7 @@ export default function ActiveExperiment() {
     const getArticleInfo = async () => {
       const response = await axios
         .get(
-          `http://${
+          `${
             import.meta.env.VITE_BACKEND_PATH
           }/joiner/getArticleFile/${experimentId}`
         )
@@ -216,7 +216,7 @@ export default function ActiveExperiment() {
       const filename = experimentPath.split("/").pop();
       try {
         const response = await axios.get(
-          `http://${import.meta.env.VITE_BACKEND_PATH}/get-photo/${filename}`
+          `${import.meta.env.VITE_BACKEND_PATH}/get-photo/${filename}`
         );
         if (response.status === 200) {
           console.log("Fetched image path:", response.config.url);
@@ -232,7 +232,7 @@ export default function ActiveExperiment() {
       const filename = experimentPath.split("/").pop();
       try {
         const response = await axios.get(
-          `http://${
+          `${
             import.meta.env.VITE_BACKEND_PATH
           }/get-videoFile/${filename}`
         );
@@ -248,7 +248,7 @@ export default function ActiveExperiment() {
     const fetchStoredGallery = async (filename: string) => {
       try {
         const response = await axios.get(
-          `http://${import.meta.env.VITE_BACKEND_PATH}/get-gallery/${filename}`
+          `${import.meta.env.VITE_BACKEND_PATH}/get-gallery/${filename}`
         );
         if (response.status === 200) {
           console.log("Fetched photo path:", response.config.url);
@@ -263,7 +263,7 @@ export default function ActiveExperiment() {
       const filename = experimentPath.split("/").pop();
       try {
         const response = await axios.get(
-          `http://${
+          `${
             import.meta.env.VITE_BACKEND_PATH
           }/get-articleFile/${filename}`
         );

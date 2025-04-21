@@ -53,6 +53,9 @@ export default function WaitingRoom() {
     setUserRole,
     experimentTitle,
     experimentDesc,
+    setSerial,
+    setIsConnected
+    
   } = useJoinerStore();
 
   // useEffect(() => {
@@ -162,7 +165,7 @@ export default function WaitingRoom() {
       } else {
         axios
           .post(
-            `http://${import.meta.env.VITE_BACKEND_PATH}/joiner/leave-room`,
+            `${import.meta.env.VITE_BACKEND_PATH}/joiner/leave-room`,
             {
               sessionID: sessionId,
               socketID: socketId,
@@ -208,7 +211,7 @@ export default function WaitingRoom() {
       console.log("verify-code, room code: ", roomCode);
       const response = await axios
         .get(
-          `http://${
+          `${
             import.meta.env.VITE_BACKEND_PATH
           }/joiner/verify-code/${roomCode}`
         )
@@ -224,56 +227,60 @@ export default function WaitingRoom() {
   }, []);
 
   let interval;
+  let deviceInfo;
   useEffect(() => {
     if (!sessionID) return;
 
     const fetchUsers = async () => {
       console.log("****user role:" + userRole)
       try {
-
-        console.log(
-          "Trying to get users from session " + sessionId,
-          "type | ",
-          typeof sessionId
-        );
-        console.log("Socket ID when getting users: ", socketId);
-
-        //SOCKET ID ISNT BEING SET - 4/17
-        console.log("****socketId when getting users: " + socketId);
-        console.log("Trying to get users from session " + sessionId);
-        const response = await axios.get(
-          `http://${
-            import.meta.env.VITE_BACKEND_PATH
-          }/joiner/room-users/${sessionId}`
-        );
-        console.log("got ", JSON.stringify(response.data.users));
-        const users = response.data.users; //Array of IUser objects
-
-        // const nicknames = []; //holds only the nicknames of those IUser Objects
-
-        const nicknames = users.map((user) =>
-          user.userrole === "spectator"
-            ? `${user.nickname} (Spectator)`
-            : user.nickname
-        );
-
-        // initialize nicknames array
-        // for (let i = 0; i < users.length; i++) {
-        //   if (users[i].userrole === "spectator"){
-        //     nicknames.push(users[i].nickname + " (Spectator)");
-
-        //   }else{
-        //     nicknames.push(users[i].nickname)
-        //   }
-        //   console.log("nicknames: " + JSON.stringify(nicknames) + "Length: " + nicknames.length)
-        //   setNickNames(nicknames);
-        // }
-        setNickNames(nicknames);
+        console.log("Serial: "+ serial)
+        deviceInfo = await axios.get(`${import.meta.env.VITE_BACKEND_PATH}/database/device-info/${serial}`);
+        console.log("Recieved Device Info: " + JSON.stringify(deviceInfo.body))
+        //you were gonna rebuild and test the joiner waiting room
       } catch (error) {
+        if (error.response?.status === 404) {
+          console.log("Device not found.")
+          setSerial("");
+          setIsConnected(false)
+
+        }else {
+            console.error("An error occurred:", error);
+          }
+      }
+      
+
+      
+      //SOCKET ID ISNT BEING SET - 4/17
+      try{
+          console.log(
+            "Trying to get users from session " + sessionId,
+            "type | ",
+            typeof sessionId
+          );
+          console.log("Socket ID when getting users: ", socketId);
+          console.log("****socketId when getting users: " + socketId);
+          console.log("Trying to get users from session " + sessionId);
+          const response = await axios.get(
+            `${
+              import.meta.env.VITE_BACKEND_PATH
+            }/joiner/room-users/${sessionId}`
+          );
+          console.log("got ", JSON.stringify(response.data.users));
+          const users = response.data.users; //Array of IUser objects
+  
+          // const nicknames = []; //holds only the nicknames of those IUser Objects
+          const nicknames = users.map((user) =>
+            user.userrole === "spectator"
+              ? `${user.nickname} (Spectator)`
+              : user.nickname
+          );
+          setNickNames(nicknames);
+
+        } catch (error) {
         console.error("Error fetching users:", error);
       }
-    };
-
+    }
     fetchUsers();
     interval = setInterval(fetchUsers, 5000); // Refresh users every 5 seconds
 
@@ -284,9 +291,9 @@ export default function WaitingRoom() {
     const getExperimentData = async () => {
       try {
         const response = await axios.get(
-          `http://${
+          `${
             import.meta.env.VITE_BACKEND_PATH
-          }/joiner/session/getInfo/${roomCode}`
+          }joiner/session/getInfo/${roomCode}`
         );
         if (response.status === 200) {
           console.log("EXPERIMENT ID RETURNED: ", response.data.experimentid);
@@ -304,9 +311,9 @@ export default function WaitingRoom() {
     const getVideoFileData = async () => {
       try {
         const response = await axios.get(
-          `http://${
+          `${
             import.meta.env.VITE_BACKEND_PATH
-          }/joiner/getVideoFile/${experimentID}`
+          }joiner/getVideoFile/${experimentID}`
         );
         if (response.status === 200) {
           toast.success("Successfully received video lab data.");
@@ -335,9 +342,9 @@ export default function WaitingRoom() {
       try {
         console.log("SENDING TO THE ROUTE EXPERIMENT ID: ", experimentID);
         const response = await axios.get(
-          `http://${
+          `${
             import.meta.env.VITE_BACKEND_PATH
-          }/joiner/getPhoto/${experimentID}`
+          }joiner/getPhoto/${experimentID}`
         );
         if (response.status === 200) {
           toast.success("Successfully received photo lab data.");
@@ -368,9 +375,9 @@ export default function WaitingRoom() {
       try {
         console.log("SENDING TO THE ROUTE EXPERIMENT ID: ", experimentID);
         const response = await axios.get(
-          `http://${
+          `${
             import.meta.env.VITE_BACKEND_PATH
-          }/joiner/getGallery/${experimentID}`
+          }joiner/getGallery/${experimentID}`
         );
         if (response.status === 200) {
           toast.success("Successfully received gallery lab data.");
@@ -413,9 +420,9 @@ export default function WaitingRoom() {
       try {
         console.log("SENDING TO THE ROUTE EXPERIMENT ID: ", experimentID);
         const response = await axios.get(
-          `http://${
+          `${
             import.meta.env.VITE_BACKEND_PATH
-          }/joiner/getArticleFile/${experimentID}`
+          }joiner/getArticleFile/${experimentID}`
         );
         if (response.status === 200) {
           toast.success("Successfully received article lab data.");

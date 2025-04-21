@@ -151,7 +151,7 @@ export default function WaitingRoom() {
 
       try {
         const connectedDevices = await axios.get(
-          `http://${import.meta.env.VITE_BACKEND_PATH}/host/check-connected-devices/${sessionId}`
+          `${import.meta.env.VITE_BACKEND_PATH}/host/check-connected-devices/${sessionId}`
         )
         if (connectedDevices.data.success) {
           setAllDevicesConnected(
@@ -238,7 +238,7 @@ export default function WaitingRoom() {
       }
     }
     try {
-      await axios.post(`http://${import.meta.env.VITE_BACKEND_PATH}/host/register-device`, {
+      await axios.post(`${import.meta.env.VITE_BACKEND_PATH}/host/register-device`, {
         sessionID: sessionID,
         serialNumber: serialNumber,
         ipAddress: IPAddress,
@@ -280,18 +280,18 @@ export default function WaitingRoom() {
 
   // Joined EmotiBit Settings Modal
   const handleRemoveEmoti = async () => {
-    if (!selectedEmotiBitId) return
+    console.log("Clicked on 'remove emotibit'")
+    // if (!selectedEmotiBitId) return
 
-    await axios.post(`http://${import.meta.env.VITE_BACKEND_PATH}/host/remove-device`, {
-      serialNumber: serialNumber,
-      ipAddress: IPAddress
+    await axios.post(`${import.meta.env.VITE_BACKEND_PATH}/host/remove-device`, {
+      serialNumber: focusedDeviceSerial,
+      ipAddress: focusedDeviceIP
     })
 
     console.log('after axios')
     console.log('removing emotibit')
 
-    const serialNumberToRemove = serialNumber
-    console.log(selectedEmotiBitId + "selectedEmotiBitId")
+    // console.log(selectedEmotiBitId + "selectedEmotiBitId")
     // if(!selectedEmotiBitId) return;
 
     console.log("(handleRemoveEmoti): emotibit serial: " + focusedDeviceSerial + " IP: " + focusedDeviceIP)
@@ -303,7 +303,7 @@ export default function WaitingRoom() {
     const serialNumberToRemove = focusedDeviceSerial;
 
     setCurrentDevices(currentDevices => 
-      currentDevices.filter(device => device.associatedDevice.serialNumber !== serialNumberToRemove)
+      currentDevices.filter(device => device.associatedDevice.serialNumber !== focusedDeviceSerial)
     );
     setIsModalOpenSettings(false);
   } 
@@ -320,19 +320,10 @@ export default function WaitingRoom() {
     setSelectedEmotiBitId(userId);
     console.log("selected emotibit" + selectedEmotiBitId)
     setIsModalOpenSettings(true);
+    
   };
 
-    setCurrentDevices((currentDevices) =>
-      currentDevices.filter(
-        (device) => device.associatedDevice.serialNumber !== serialNumberToRemove
-      )
-    )
-    setIsModalOpenSettings(false)
-  }
-  const handleOpenModalSettings = (userId: string) => {
-    setSelectedEmotiBitId(userId)
-    setIsModalOpenSettings(true)
-  }
+
 
   const handleCloseModalSettings = () => {
     setIsModalOpenSettings(false)
@@ -357,7 +348,7 @@ export default function WaitingRoom() {
         'brainflow:launch',
         currentUsers[i].ipaddress,
         currentUsers[i].serialnumber,
-        'http://${import.meta.env.VITE_BACKEND_PATH}',
+        `${import.meta.env.VITE_BACKEND_PATH}/`,
         currentUsers[i].userid,
         currentUsers[i].frontendsocketid,
         currentUsers[i].sessionid
@@ -373,7 +364,7 @@ export default function WaitingRoom() {
       if (status === 'success') {
         try {
           await axios.post(
-            `http://${import.meta.env.VITE_BACKEND_PATH}/host/update-device-connection`,
+            `${import.meta.env.VITE_BACKEND_PATH}/host/update-device-connection`,
             {
               serial: serialNumber,
               socket: sessionStorage.getItem('socketID'),
@@ -440,7 +431,7 @@ export default function WaitingRoom() {
       )
 
       axios.post(
-        `http://${import.meta.env.VITE_BACKEND_PATH}/joiner/remove-spectator-from-session`,
+        `${import.meta.env.VITE_BACKEND_PATH}/joiner/remove-spectator-from-session`,
         {
           sessionID: sessionId,
           socketID: nicknameSocketID
@@ -571,7 +562,7 @@ export default function WaitingRoom() {
         console.log(devices)
         // console.log('Trying to get users from session ' + sessionID);
         const response = await axios.get(
-          `http://${import.meta.env.VITE_BACKEND_PATH}/joiner/room-users/${sessionID}`
+          `${import.meta.env.VITE_BACKEND_PATH}/joiner/room-users/${sessionID}`
         )
         const users = response.data.users //Array of IUser objects
 
@@ -633,7 +624,8 @@ export default function WaitingRoom() {
 
   useEffect(() => {
     console.log('Current Devices', currentDevices)
-  }, [currentDevices])
+  }, [currentDevices]);
+
   return (
     <div className="flex flex-col items-center justify-center px-4 mx:px-8 w-full">
       <div className="flex flex-col md:flex-row items-start justify-between w-full max-w-6xl gap-8">
@@ -829,6 +821,6 @@ export default function WaitingRoom() {
           <h1 className="text-md text-gray-700 mb-2">Are you sure you want to kick this joiner?</h1>
         </div>
       </ModalComponent>
-    </div>
-  )
-}
+  </div>
+  
+)}

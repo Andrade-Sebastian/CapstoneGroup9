@@ -83,7 +83,7 @@ export default function PhotoInputForm(props: IPhotoInputForm) {
     try {
       //create a photo lab
       console.log('Sending data', JSON.stringify(data))
-      const response = await axios.post(`http://${import.meta.env.VITE_BACKEND_PATH}/database/photo-lab`, data, {
+      const response = await axios.post(`${import.meta.env.VITE_BACKEND_PATH}/database/photo-lab`, data, {
         headers: { 'Content-Type': 'multipart/form-data' }
       })
       console.log('After /photo-lab, ', JSON.stringify(response.data))
