@@ -272,11 +272,8 @@ export default function WaitingRoom() {
         }else {
             console.error("An error occurred:", error);
           }
+        }
       }
-        } catch (error) {
-        console.error("Error fetching users:", error);
-      }
-    }
     fetchUsers();
     interval = setInterval(fetchUsers, 5000); // Refresh users every 5 seconds
 
