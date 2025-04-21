@@ -6,6 +6,7 @@ import CardComponent from "../Components/CardComponent.tsx";
 import { io } from "socket.io-client";
 const socket = io(`${import.meta.env.VITE_BACKEND_PATH}`);
 
+
 import { useEffect } from "react";
 
 export default function Home() {

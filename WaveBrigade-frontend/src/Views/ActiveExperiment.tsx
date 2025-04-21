@@ -129,6 +129,7 @@ export default function ActiveExperiment() {
       const response = await axios
         .get(
           `${import.meta.env.VITE_BACKEND_PATH}/joiner/getPhoto/${experimentId}`
+
         )
         .then((response) => {
           //THERE IS NOTHING BEING SET HERE
@@ -235,6 +236,7 @@ export default function ActiveExperiment() {
       try {
         const response = await axios.get(
           `${import.meta.env.VITE_BACKEND_PATH}/get-videoFile/${filename}`
+
         );
         if (response.status === 200) {
           console.log("Fetched video path:", response.config.url);
