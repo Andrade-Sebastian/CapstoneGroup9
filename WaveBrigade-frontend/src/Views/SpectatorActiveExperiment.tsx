@@ -172,9 +172,11 @@ export default function SpectatorActiveExperiment() {
         });
     };
 
-  socket.on("end-experiment", () => {
-    navigateTo("/");
-  });
+    socket.on("end-experiment", (session) => {
+      if(session !== undefined && session === sessionId){
+        navigateTo("/");
+      }
+    });
 
   if(experimentType === 1){
     setVideoPath(experimentPath)

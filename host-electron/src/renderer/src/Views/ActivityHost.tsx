@@ -234,7 +234,7 @@ export default function ActivityHost() {
     handleHostEndSession() //process destruction for all users
     console.log('in handle submit')
 
-    socket.emit('end-experiment')
+    socket.emit('end-experiment', sessionId);
 
     //delete all info pertaining to the session from the database
     axios.post(`http://localhost:3000/database/remove-session/${sessionId}`);
