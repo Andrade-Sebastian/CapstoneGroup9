@@ -55,7 +55,7 @@ export default function ConnectEmotiBit() {
       console.log("stuff: ", nickname, " | ", roomCode, " | ", code);
       //logic for sending code to backend
       const response = await axios.post(
-        `http://${import.meta.env.VITE_BACKEND_PATH}/joiner/verify-serial`,
+        `${import.meta.env.VITE_BACKEND_PATH}/joiner/verify-serial`,
         {
           nickName: nickname,
           roomCode: roomCode,
@@ -109,7 +109,7 @@ export default function ConnectEmotiBit() {
   const joinRoom = async (device: number) => {
     try {
       const response = await axios.post(
-        `http://${import.meta.env.VITE_BACKEND_PATH}/joiner/session/join/`,
+        `${import.meta.env.VITE_BACKEND_PATH}/joiner/session/join/`,
         {
           socketID: socketId,
           nickname: nickname,

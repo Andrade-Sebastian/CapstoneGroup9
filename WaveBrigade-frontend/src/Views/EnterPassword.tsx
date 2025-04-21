@@ -53,9 +53,8 @@ export default function EnterFunction() {
           toast.success("Joining session as a spectator...");
           console.log("Joining as spectator...");
 
-
           axios.post(
-            `http://${import.meta.env.VITE_BACKEND_PATH}/joiner/join-as-spectator`,
+            `${import.meta.env.VITE_BACKEND_PATH}/joiner/join-as-spectator`,
             {
               socketID: socketId,
               nickname: nickname,
@@ -63,8 +62,7 @@ export default function EnterFunction() {
             }
           );
 
-    const { userRole} = useJoinerStore();
-
+          const { userRole } = useJoinerStore();
 
           navigateTo("/waiting-room");
         } else {
@@ -90,7 +88,7 @@ export default function EnterFunction() {
   const validatePassword = async (password: string) => {
     try {
       const response = await axios.post(
-        `http://${import.meta.env.VITE_BACKEND_PATH}/joiner/validatePassword`,
+        `${import.meta.env.VITE_BACKEND_PATH}/joiner/validatePassword`,
         {
           sessionID: sessionId,
           password: password,

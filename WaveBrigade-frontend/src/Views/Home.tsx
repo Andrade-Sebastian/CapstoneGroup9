@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import CardComponent from "../Components/CardComponent.tsx";
 
 import { io } from "socket.io-client";
-const socket = io(`http://${import.meta.env.VITE_BACKEND_PATH}`);
+const socket = io(`${import.meta.env.VITE_BACKEND_PATH}`);
 
 import { useEffect } from "react";
 

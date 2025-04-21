@@ -109,7 +109,7 @@ export default function HostCreateRoom() {
     setUsers([])
 
     axios
-      .post(`http://${import.meta.env.VITE_BACKEND_PATH}/host/session/create`, {
+      .post(`${import.meta.env.VITE_BACKEND_PATH}/host/session/create`, {
         hostSocketID: sessionStorage.getItem('socketID'),
         isPasswordProtected: true,
         password: password,

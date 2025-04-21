@@ -6,7 +6,6 @@ import { IoEarthOutline } from 'react-icons/io5'
 import { Icon } from 'react-icons-kit'
 import { eyeOff } from 'react-icons-kit/feather/eyeOff'
 import { eye } from 'react-icons-kit/feather/eye'
- 
 
 // This is where the host will create the room
 
@@ -71,7 +70,7 @@ export default function HostCreateRoom() {
     console.log('sessionInfo: ' + JSON.stringify(sessionInfo))
 
     axios
-      .post(`http://${import.meta.env.VITE_BACKEND_PATH}/host/session/create`, sessionInfo)
+      .post(`${import.meta.env.VITE_BACKEND_PATH}/host/session/create`, sessionInfo)
       .then((response) => {
         console.log(response.data.configuration)
         navigateTo('/host/select-lab', { state: { userName } }) //for now

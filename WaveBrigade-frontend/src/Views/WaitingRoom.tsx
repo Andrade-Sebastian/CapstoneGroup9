@@ -76,7 +76,6 @@ export default function WaitingRoom() {
   //   };
   // }, [nickName, roomCode]);
 
-
   useEffect(() => {
     const handleExperimentType = (data) => {
       console.log("Received experiment type from the host...");
@@ -142,7 +141,7 @@ export default function WaitingRoom() {
         console.log(
           `removing spectator from session ${sessionId} with socketID ${socketId}`
         );
-        //   axios.post("http://${import.meta.env.VITE_BACKEND_PATH}/joiner/remove-spectator-from-session",
+        //   axios.post("${import.meta.env.VITE_BACKEND_PATH}/joiner/remove-spectator-from-session",
         //     {
         //       sessionID: sessionId,
         //       socketID: socketId
@@ -161,13 +160,10 @@ export default function WaitingRoom() {
         };
       } else {
         axios
-          .post(
-            `http://${import.meta.env.VITE_BACKEND_PATH}/joiner/leave-room`,
-            {
-              sessionID: sessionId,
-              socketID: socketId,
-            }
-          )
+          .post(`${import.meta.env.VITE_BACKEND_PATH}/joiner/leave-room`, {
+            sessionID: sessionId,
+            socketID: socketId,
+          })
           .then(() => {
             console.log("Successfully removed from database");
             navigateTo("/");
@@ -208,9 +204,7 @@ export default function WaitingRoom() {
       console.log("verify-code, room code: ", roomCode);
       const response = await axios
         .get(
-          `http://${
-            import.meta.env.VITE_BACKEND_PATH
-          }/joiner/verify-code/${roomCode}`
+          `${import.meta.env.VITE_BACKEND_PATH}/joiner/verify-code/${roomCode}`
         )
         .then((response) => {
           setSessionID(response.data.sessionID);
@@ -228,9 +222,8 @@ export default function WaitingRoom() {
     if (!sessionID) return;
 
     const fetchUsers = async () => {
-      console.log("****user role:" + userRole)
+      console.log("****user role:" + userRole);
       try {
-
         console.log(
           "Trying to get users from session " + sessionId,
           "type | ",
@@ -242,9 +235,7 @@ export default function WaitingRoom() {
         console.log("****socketId when getting users: " + socketId);
         console.log("Trying to get users from session " + sessionId);
         const response = await axios.get(
-          `http://${
-            import.meta.env.VITE_BACKEND_PATH
-          }/joiner/room-users/${sessionId}`
+          `${import.meta.env.VITE_BACKEND_PATH}/joiner/room-users/${sessionId}`
         );
         console.log("got ", JSON.stringify(response.data.users));
         const users = response.data.users; //Array of IUser objects
@@ -284,7 +275,7 @@ export default function WaitingRoom() {
     const getExperimentData = async () => {
       try {
         const response = await axios.get(
-          `http://${
+          `${
             import.meta.env.VITE_BACKEND_PATH
           }/joiner/session/getInfo/${roomCode}`
         );
@@ -304,7 +295,7 @@ export default function WaitingRoom() {
     const getVideoFileData = async () => {
       try {
         const response = await axios.get(
-          `http://${
+          `${
             import.meta.env.VITE_BACKEND_PATH
           }/joiner/getVideoFile/${experimentID}`
         );
@@ -335,9 +326,7 @@ export default function WaitingRoom() {
       try {
         console.log("SENDING TO THE ROUTE EXPERIMENT ID: ", experimentID);
         const response = await axios.get(
-          `http://${
-            import.meta.env.VITE_BACKEND_PATH
-          }/joiner/getPhoto/${experimentID}`
+          `${import.meta.env.VITE_BACKEND_PATH}/joiner/getPhoto/${experimentID}`
         );
         if (response.status === 200) {
           toast.success("Successfully received photo lab data.");
@@ -368,7 +357,7 @@ export default function WaitingRoom() {
       try {
         console.log("SENDING TO THE ROUTE EXPERIMENT ID: ", experimentID);
         const response = await axios.get(
-          `http://${
+          `${
             import.meta.env.VITE_BACKEND_PATH
           }/joiner/getGallery/${experimentID}`
         );
@@ -413,7 +402,7 @@ export default function WaitingRoom() {
       try {
         console.log("SENDING TO THE ROUTE EXPERIMENT ID: ", experimentID);
         const response = await axios.get(
-          `http://${
+          `${
             import.meta.env.VITE_BACKEND_PATH
           }/joiner/getArticleFile/${experimentID}`
         );

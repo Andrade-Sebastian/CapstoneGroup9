@@ -152,7 +152,7 @@ export default function ArticleInputForm(props: IArticleInputForm) {
       //create a article lab
       console.log('Sending data', [...data])
       const response = await axios.post(
-        `http://${import.meta.env.VITE_BACKEND_PATH}/database/article-lab`,
+        `${import.meta.env.VITE_BACKEND_PATH}/database/article-lab`,
         data,
         {
           headers: { 'Content-Type': 'multipart/form-data' }

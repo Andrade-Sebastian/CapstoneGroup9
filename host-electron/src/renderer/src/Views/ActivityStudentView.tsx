@@ -207,7 +207,7 @@ export default function ActivityStudentView(): ReactElement {
     const getUserData = async () => {
       try {
         const response = await axios.get(
-          `http://${import.meta.env.VITE_BACKEND_PATH}/host/get-user-experiment/${sessionId}/${userId}/${experimentType}`
+          `${import.meta.env.VITE_BACKEND_PATH}/host/get-user-experiment/${sessionId}/${userId}/${experimentType}`
         )
         console.log('RESPONSE RECIEVED IN ACTIVITYSTUDENTVIEW', response.data)
         if (response.status === 200) {
@@ -228,7 +228,7 @@ export default function ActivityStudentView(): ReactElement {
     const fetchExperimentID = async () => {
       try {
         const response = await axios.get(
-          `http://${import.meta.env.VITE_BACKEND_PATH}/joiner/session/getInfo/${roomCode}`
+          `${import.meta.env.VITE_BACKEND_PATH}/joiner/session/getInfo/${roomCode}`
         )
         if (response.status === 200) {
           console.log('EXPERIMENT ID RETURNED: ', response.data.experimentid)
@@ -247,7 +247,7 @@ export default function ActivityStudentView(): ReactElement {
     const getVideoFileData = async () => {
       try {
         const response = await axios.get(
-          `http://${import.meta.env.VITE_BACKEND_PATH}/joiner/getVideoFile/${experimentID}`
+          `${import.meta.env.VITE_BACKEND_PATH}/joiner/getVideoFile/${experimentID}`
         )
         if (response.status === 200) {
           toast.success('Successfully received video lab data.')
@@ -274,7 +274,7 @@ export default function ActivityStudentView(): ReactElement {
       try {
         console.log('SENDING TO THE ROUTE EXPERIMENT ID: ', experimentID)
         const response = await axios.get(
-          `http://${import.meta.env.VITE_BACKEND_PATH}/joiner/getPhoto/${experimentID}`
+          `${import.meta.env.VITE_BACKEND_PATH}/joiner/getPhoto/${experimentID}`
         )
         if (response.status === 200) {
           toast.success('Successfully received photo lab data.')
@@ -299,7 +299,7 @@ export default function ActivityStudentView(): ReactElement {
       try {
         console.log('SENDING TO THE ROUTE EXPERIMENT ID: ', experimentID)
         const response = await axios.get(
-          `http://${import.meta.env.VITE_BACKEND_PATH}/joiner/getGallery/${experimentID}`
+          `${import.meta.env.VITE_BACKEND_PATH}/joiner/getGallery/${experimentID}`
         )
         if (response.status === 200) {
           toast.success('Successfully received gallery lab data.')
@@ -342,7 +342,7 @@ export default function ActivityStudentView(): ReactElement {
       try {
         console.log('SENDING TO THE ROUTE EXPERIMENT ID: ', experimentID)
         const response = await axios.get(
-          `http://${import.meta.env.VITE_BACKEND_PATH}/joiner/getArticleFile/${experimentID}`
+          `${import.meta.env.VITE_BACKEND_PATH}/joiner/getArticleFile/${experimentID}`
         )
         if (response.status === 200) {
           toast.success('Successfully received article lab data.')
@@ -476,7 +476,7 @@ export default function ActivityStudentView(): ReactElement {
         switch (experimentType) {
           case 'photo-lab':
             response = await axios.get(
-              `http://${import.meta.env.VITE_BACKEND_PATH}/joiner/getPhoto/${experimentID}`
+              `${import.meta.env.VITE_BACKEND_PATH}/joiner/getPhoto/${experimentID}`
             )
             if (response.status === 200) {
               setExperimentTitle(response.data.name)
@@ -486,7 +486,7 @@ export default function ActivityStudentView(): ReactElement {
             break
           case 'video-lab':
             response = await axios.get(
-              `http://${import.meta.env.VITE_BACKEND_PATH}/joiner/getVideoFile/${experimentID}`
+              `${import.meta.env.VITE_BACKEND_PATH}/joiner/getVideoFile/${experimentID}`
             )
             if (response.status === 200) {
               setExperimentTitle(response.data.name)
@@ -497,7 +497,7 @@ export default function ActivityStudentView(): ReactElement {
 
           case 'gallery-lab':
             response = await axios.get(
-              `http://${import.meta.env.VITE_BACKEND_PATH}/joiner/getGallery/${experimentID}`
+              `${import.meta.env.VITE_BACKEND_PATH}/joiner/getGallery/${experimentID}`
             )
             if (response.status === 200) {
               setExperimentTitle(response.data.name)
@@ -516,7 +516,7 @@ export default function ActivityStudentView(): ReactElement {
 
           case 'article-lab':
             response = await axios.get(
-              `http://${import.meta.env.VITE_BACKEND_PATH}/joiner/getArticleFile/${experimentID}`
+              `${import.meta.env.VITE_BACKEND_PATH}/joiner/getArticleFile/${experimentID}`
             )
             if (response.status === 200) {
               setExperimentTitle(response.data.name)
@@ -539,7 +539,7 @@ export default function ActivityStudentView(): ReactElement {
       const filename = experimentPath.split('/').pop()
       try {
         const response = await axios.get(
-          `http://${import.meta.env.VITE_BACKEND_PATH}/get-photo/${filename}`
+          `${import.meta.env.VITE_BACKEND_PATH}/get-photo/${filename}`
         )
         if (response.status === 200) {
           console.log('Fetched image path:', response.config.url)
@@ -555,7 +555,7 @@ export default function ActivityStudentView(): ReactElement {
       const filename = experimentPath.split('/').pop()
       try {
         const response = await axios.get(
-          `http://${import.meta.env.VITE_BACKEND_PATH}/get-videoFile/${filename}`
+          `${import.meta.env.VITE_BACKEND_PATH}/get-videoFile/${filename}`
         )
         if (response.status === 200) {
           console.log('Fetched video path:', response.config.url)
@@ -571,7 +571,7 @@ export default function ActivityStudentView(): ReactElement {
     const fetchStoredGallery = async (filename: string) => {
       try {
         const response = await axios.get(
-          `http://${import.meta.env.VITE_BACKEND_PATH}/get-gallery/${filename}`
+          `${import.meta.env.VITE_BACKEND_PATH}/get-gallery/${filename}`
         )
         if (response.status === 200) {
           console.log('Fetched photo path:', response.config.url)
@@ -586,7 +586,7 @@ export default function ActivityStudentView(): ReactElement {
       const filename = experimentPath.split('/').pop()
       try {
         const response = await axios.get(
-          `http://${import.meta.env.VITE_BACKEND_PATH}/get-articleFile/${filename}`
+          `${import.meta.env.VITE_BACKEND_PATH}/get-articleFile/${filename}`
         )
         if (response.status === 200) {
           console.log('Fetched article path:', response.config.url)
