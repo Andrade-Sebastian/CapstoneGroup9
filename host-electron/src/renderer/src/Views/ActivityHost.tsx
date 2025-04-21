@@ -38,7 +38,6 @@ export default function ActivityHost() {
     experimentType,
     experimentTypeString,
     toggleUserMask,
-    
     videoLabSource,
     videoID,
     articleURL,
@@ -53,11 +52,12 @@ export default function ActivityHost() {
   const [sessionID, setSessionID] = useState('')
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [serialNumber, setSerialNumber] = useState('')
-
   const [isMasked, setIsMasked] = useState(false)
-
+  const [isModalOpenKick, setIsModalOpenKick] = useState(false)
   const [activeTab, setActiveTab] = useState('images')
-
+  const [theUserMap, setTheUserMap] = useState(new Map())
+  const [focusedUser, setFocusedUser] = useState('')
+  const [currentDevices, setCurrentDevices] = useState<IUser[]>([])
   const [IPAddress, setIPAddress] = useState('')
   const [isModalUserOptionsOpen, setIsModalUserOptionsOpen] = useState(false)
   const [selectedEmotiBitId, setSelectedEmotiBitId] = useState<string | null>(null)
@@ -99,7 +99,8 @@ export default function ActivityHost() {
   }
   const handleOpenModal = () => setIsModalOpen(true)
   const handleCloseModal = () => setIsModalOpen(false)
-  const handleAction = () => {
+  const handleAction = async () => {
+    await axios.post(`${import.meta.env.VITE_BACKEND_PATH}/database/remove-session/${sessionId}`)
     console.log('Sending to Summary...')
     handleSubmit()
     handleCloseModal()
@@ -113,13 +114,118 @@ export default function ActivityHost() {
     handleCloseModalUserOptions()
   }
 
-  const handleUserKick = () => {
-    //insert socket logic to kick user here
-    console.log('Kicking user...')
+  //Handling kicking a user
+  const handleOpenModalKick = (e) => {
+    console.log('HANDLE KICK', e.target.closest('button').querySelector('p').textContent)
+    setIsModalOpenKick(true)
+    setFocusedUser(e.target.closest('button').querySelector('p').textContent.trim())
+  }
+  const handleCloseModalKick = () => {
+    setIsModalOpenKick(false)
   }
 
-  const handleViewUser = (userId, experimentType) => {
-    ipc.send('activity:viewUser', sessionId, String(userId), experimentType)
+  const handleKickUser = async () => {
+    console.log('focused user in handleKickUser():', focusedUser)
+    console.log('!!ATTEMPTING TO KICK USER!!')
+    if (!focusedUser) {
+      console.log('No user selected for kicking.')
+      return
+    }
+    console.log('User Map at Kick Time:', theUserMap)
+    console.log('Focused User at Kick Time:', focusedUser)
+    // const nicknameSocketID = theUserMap.get(focusedUser);
+    // console.log("Kicking user with socket ID: ", nicknameSocketID);
+    console.log('HERE IS THE USER MAP BEFORE EMIT KICKING', theUserMap)
+
+    let nicknameSocketID = ''
+
+    if (focusedUser.includes(' (Spectator)')) {
+      // Remove "(Spectator)" from the string
+      const userFocused = focusedUser.replace(' (Spectator)', '').trim()
+      setFocusedUser(focusedUser.replace(' (Spectator)', '').trim())
+      console.log('in IF')
+      nicknameSocketID = theUserMap.get(userFocused.replace('(Spectator)', '').trim())
+
+      if (!nicknameSocketID) {
+        console.log('Cannot kick SPECTATOR: there is no socket id found.', userFocused)
+        return
+      } else {
+        console.log('Kicking user with socketID:', nicknameSocketID)
+
+        console.log('Emitted kick event')
+      }
+
+      console.log(
+        `<<HOST 389>>trying to kick spectator , sending sessionID ${sessionId} and socketID ${nicknameSocketID}`
+      )
+
+      axios.post(`${import.meta.env.VITE_BACKEND_PATH}/joiner/remove-spectator-from-session`, {
+        sessionID: sessionId,
+        socketID: nicknameSocketID
+      })
+      socket.emit('kick', nicknameSocketID)
+    } else {
+      nicknameSocketID = theUserMap.get(focusedUser)
+      if (!nicknameSocketID) {
+        console.log('Cannot kick JOINER: there is no socket id found.', focusedUser)
+        return
+      } else {
+        console.log('Kicking user with socketID:', nicknameSocketID)
+
+        socket.emit('kick', nicknameSocketID)
+
+        console.log('Emitted kick event')
+      }
+    }
+
+    console.log('User Map at Kick Time:', theUserMap)
+    console.log('Focused User at Kick Time:', focusedUser)
+
+    if (!nicknameSocketID) {
+      console.log('Cannot kick user: there is no socket id found.', focusedUser)
+      return
+    }
+
+    setTheUserMap((prevMap) => {
+      const newMap = new Map(prevMap)
+      newMap.delete(focusedUser)
+      return newMap
+    })
+    console.log('Here is the usermap after kicking', theUserMap)
+
+    setCurrentDevices((currentDevices) => {
+      const newState = currentDevices.map((device) => {
+        if (device.nickname === focusedUser) {
+          return {
+            ...device,
+            socketId: null,
+            nickname: null,
+            associatedDevice: device.associatedDevice
+              ? {
+                  ...device.associatedDevice,
+                  isConnected: false
+                }
+              : null
+          }
+        }
+        return device
+      })
+
+      console.log('React state after kick:', newState) // Logs the correct state before updating
+      return newState
+    })
+
+    setIsModalOpenKick(false)
+  }
+
+  const handleViewUser = (e,userId, userrole, experimentType, nickname) => {
+    if(userrole !== "spectator"){
+      ipc.send('activity:viewUser', sessionId, String(userId), nickname, experimentType)
+    }
+    else{
+      setFocusedUser(nickname);
+      handleOpenModalKick(e)
+    }
   }
 
   function handleSubmit() {
@@ -127,6 +233,10 @@ export default function ActivityHost() {
     console.log('in handle submit')
 
     socket.emit('end-experiment')
+
+    //delete all info pertaining to the session from the database
+    axios.post(`${import.meta.env.VITE_BACKEND_PATH}/database/remove-session/${sessionId}`)
+
     setTimeout(() => {
       navigateTo('/summary')
     }, 2000)
@@ -177,9 +287,12 @@ export default function ActivityHost() {
     const fetchUsers = async () => {
       try {
         console.log('Trying to get users from session ' + sessionID)
-        const response = await axios.get(`http://localhost:3000/joiner/room-users/${sessionID}`)
+        const response = await axios.get(
+          `${import.meta.env.VITE_BACKEND_PATH}/joiner/room-users/${sessionID}`
+        )
         const users = response.data.users //Array of IUser objects
-        const rawUsers = response.data.users
+        const rawUsers = response.data.users;
+        const userMap = new Map();
 
         const normalizedUsers = rawUsers.map((u) => ({
           device: u.device,
@@ -205,6 +318,11 @@ export default function ActivityHost() {
 
         setNickNames(nicknames)
         console.log('Fetched users from backend:', response.data.users)
+
+        users.forEach(user => {
+          userMap.set(user.nickname, user.frontendsocketid);
+        });
+        setTheUserMap(userMap);
 
         //setUserObjects(response.data.users)
 
@@ -276,6 +394,25 @@ export default function ActivityHost() {
     return () => clearInterval(interval)
   }, [latestSeekTime])
 
+  useEffect(() => {
+    const kickSelectedUser = (userId) => {
+      userObjects.forEach(user =>{
+        console.log("Comparing: ", typeof(userId), typeof(user.userId));
+        if(userId === String(user.userId)){
+          console.log("Found the user to kick!");
+          socket.emit("kick", user.frontendSocketId)
+          ipc.send("activity:closeUserWindow", user.nickname);
+        }
+      })
+    } 
+    socket.on("kick-active-student", kickSelectedUser);
+    
+
+    return() => {
+      socket.off("kick-active-student");
+    }
+  }, [userObjects])
+
   return (
     <div className="flex flex-col w-full px-8 pt-6">
       <Toaster position="top-right" />
@@ -289,12 +426,12 @@ export default function ActivityHost() {
               <span className="font-semibold text-[#894DD6] "> NICKNAME </span>
               <span>{hostName}</span>
             </div>
-            <div className="flex items-center space-x-2 text-lg">
+            {/* <div className="flex items-center space-x-2 text-lg">
               <HiOutlineSignal size={24} />
               <p className="text-lg">
                 <span className="font-semibold text-[#894DD6]">SOCKET</span> 
               </p>
-            </div>
+            </div> */}
             <div className="flex items-center space-x-2 text-lg">
               <CiUser size={24} />
               <p className="text-lg">
@@ -394,26 +531,28 @@ export default function ActivityHost() {
         </div>
         <div className="hidden lg:block w-full lg:w-1/4 p-4 bg-white shadow-md rounded-lg">
           <div className="flex flex-col h-[60vh] justify-between bg-white rounded-md shadow-md">
-            <ChatBody/>
-            <ChatFooter/>
+            <ChatBody />
+            <ChatFooter />
           </div>
         </div>
       </div>
       <Divider className="my-6" />
       <hr></hr>
       <div className="flex flex-col items-center">
-        <div className="flex space-x-4 mt-2">
+        <div className="flex space-x-9 mt-2">
           {(userObjects || []).map((user, index) => (
             <button
               key={index}
-              onClick={() => handleViewUser(user.userId, experimentType)}
+              onClick={(e) =>
+                handleViewUser(e, user.userId, user.userRole, experimentType, user.nickname)
+              }
               className="flex items-center border-black font-medium rounded-md bg-[#E6E6E6] hover:bg-[#CECECE] px-4 py-1.5 text-black font-light cursor-pointer gap-2.5"
             >
               <p>{user.nickname}</p>
             </button>
           ))}
         </div>
-        <div className="absolute bottom-2 flex space-x-6 mt-6">
+        <div className="relative bottom-2 flex space-x-6 mt-6">
           <button
             type="button"
             onClick={handleMaskAll}
@@ -449,7 +588,7 @@ export default function ActivityHost() {
       <ModalComponent
         onAction={handleUserOptions}
         onAction2={handleViewUser}
-        onAction3={handleUserKick}
+        // onAction3={handleUserKick}
         isOpen={isModalUserOptionsOpen}
         onCancel={handleCloseModalUserOptions}
         modalTitle="View Joiner?"
@@ -458,6 +597,19 @@ export default function ActivityHost() {
       >
         <div className="mb-6">
           <h1 className="text-md text-gray-700 mb-2">Do you want to view or kick the joiner?</h1>
+        </div>
+      </ModalComponent>
+      <ModalComponent
+        onAction={handleKickUser}
+        isOpen={isModalOpenKick}
+        onCancel={handleCloseModalKick}
+        modalTitle="Kick this Spectator?"
+        button="Remove Spectator"
+      >
+        <div className="mb-6">
+          <h1 className="text-md text-gray-700 mb-2">
+            Are you sure you want to kick this spectator?
+          </h1>
         </div>
       </ModalComponent>
     </div>

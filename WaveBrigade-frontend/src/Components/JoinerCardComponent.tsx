@@ -29,13 +29,13 @@ export default function JoinerCardComponent(props: IJoinerCardComponent) {
           {props.icon}
         </div>
         <div className="flex flex-col content-center h-full pr-10">
-          <p className="font-bold text-3xl"> Joiner</p>
-          <p className={`text-2xl font-light ${props.isSelected ? "text-white" : "text-black"}`}>{props.joiner.name}</p>
+          <p className="font-bold text-lg"> Joiner</p>
+          <p className={`text-md font-light ${props.isSelected ? "text-white" : "text-black"}`}>{props.joiner.name}</p>
           {props.isSelected && <p className="text-md font-light"> Selected</p>}
         </div>
         <div className="flex flex-col content-center h-full">
-          <p className="font-bold text-3xl">Viewing</p>
-          <p className={`text-2xl font-light ${props.isSelected ? "text-white" : "text-black"}`}>
+          <p className="font-bold text-lg">Viewing</p>
+          <p className={`text-md font-light ${props.isSelected ? "text-white" : "text-black"}`}>
             {props.fileName || "No File"}
           </p>
         </div>

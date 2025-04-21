@@ -359,6 +359,30 @@ export async function getSessionIDFromSocketID(socketID: string){
 
 
 
+export async function getUserSessionIDFromSocketID(socketID: string){
+	const cleanSocketID = socketID.replace(/^"|"$/g, "");
+
+	try {
+
+        const query = await dbClient.queryObject<{ sessionid: number }>(
+            `SELECT sessionid FROM "User" WHERE frontendsocketid = $1`, 
+            [cleanSocketID] 
+        );
+
+        if (query.rows.length > 0) {
+            return query.rows[0].sessionid; 
+        } else {
+            console.warn("No session found for socketID:", socketID);
+            return null; 
+        }
+    } 
+	catch (error) {
+        console.error("Unable to retrieve session id", error);
+        return null; 
+    } 
+}
+
+
 export async function createPhotoLabInDatabase(initializationInfo: IPhotoLabDatabaseInfo, sessionID: null | number=null ): Promise<number>{
 	const {
 		experimentTitle,
@@ -744,19 +768,20 @@ export async function registerDevice(initializationInfo: IRegisterDeviceInfo){
 
 export async function getUsersFromSession(sessionID: string){
 	try{
-		const query = await dbClient.queryObject(`SELECT * FROM "User" 
+		const query = await dbClient.queryObject(`SELECT "User".*, device.ipaddress, device.serialnumber FROM "User"
+			LEFT JOIN device on "User".device = device.deviceid
 			WHERE "User".sessionid = $1`,
 			[sessionID]
 		);
-		console.log("<><><><><><> Users retrieved from sessionid", sessionID, query);
+		//console.log("<><><><><><> Users retrieved from sessionid", sessionID, query);
 		return query.rows;
 	}
 	catch(error){
 		console.log("Unable to retrieve users");
-	}
+	} 
 }
 
-export async function removeUserFromSession(sessionID: string, socketID: string){
+export async function removeUserFromSession(sessionID: string | undefined, socketID: string){
 	try{
 		console.log("in removeUserFromSession, sessionID is ", sessionID, "socketID: " , socketID)
 		const getDevice = await dbClient.queryObject(`SELECT device FROM "User" WHERE sessionID = $1 AND frontendsocketid = $2 AND userrole = $3`,
@@ -818,7 +843,7 @@ export async function validatePassword(sessionID:string){
 		}
 	}
 	catch(error){
-		console.log("Password is not valid", error);
+		console.log("Session is not valid", error);
 	}
 }
 
@@ -921,7 +946,7 @@ export async function getSessionDevices(sessionId: string){
 
 }
 
-export async function removeSpectatorFromSession(sessionID: number, socketID: string): Promise<boolean>{
+export async function removeSpectatorFromSession(sessionID: number | null, socketID: string): Promise<boolean>{
 
 	console.log(`(database.ts): In removeUserFromSession(${sessionID}, ${socketID})`);
 
