@@ -8,6 +8,9 @@ import socket from "./Views/socket.tsx";
 import { useJoinerStore, } from "./hooks/stores/useJoinerStore.ts";
 import React from "react";
 import ModalComponent from "./Components/ModalComponent.tsx";
+import { TbDeviceMobileX } from "react-icons/tb";
+import {isMobile} from 'react-device-detect';
+
 
 function App() {
   const {
@@ -41,6 +44,15 @@ function App() {
   };
 
   useEffect(() => {
+    console.log(`${import.meta.env.VITE_BACKEND_PATH}/joiner/debug`)
+    fetch(`${import.meta.env.VITE_BACKEND_PATH}/joiner/debug`).then( (response) => {
+      if(response.ok){
+        console.log("Response is")
+      }
+    }).catch(error => console.log(error))
+  }, [])
+
+  useEffect(() => {
 
     socket.on("clear-session", () => {
       console.log("Clearing session storage due to disconnection");
@@ -64,16 +76,24 @@ function App() {
         onOpenSettings={() => setIsModalSettingsOpen(true)}
         onOpenInfo={() => setIsModalInfoOpen(true)}
       />
+      {!isMobile ? (
         <div className="flex flex-col grow h-full overflow-auto">
           <Outlet />
         </div>
+      ) : (
+        <div className="flex flex-col">
+          <TbDeviceMobileX/>
+          <p>Sorry, mobile devices are not compatible இ௰இ </p>
+        </div>
+
+      )
+
+      }
         <ModalComponent
         onAction={handleSettingsAction}
-        onAction2={handleLeaveAction}
         isOpen={isModalSettingsOpen}
         onCancel={() => setIsModalSettingsOpen(false)}
         modalTitle="Settings"
-        button="Leave"
       >
         <div className="mb-6">
           <p><span className="font-bold">Nickname:</span> {nickname || ""}</p>

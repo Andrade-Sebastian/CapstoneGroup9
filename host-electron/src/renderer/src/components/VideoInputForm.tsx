@@ -15,11 +15,11 @@ import { clear } from 'console'
 //https://www.youtube.com/watch?v=feZCSrOzhss&ab_channel=CBSSportsGolazo
 
 interface IVideoInputForm {
-  width: number;
-  height: number;
-  onFileSelected: (isFileSelected: boolean) => void;
-  videoSource?: string;
-  imageUrl?: string;
+  width: number
+  height: number
+  onFileSelected: (isFileSelected: boolean) => void
+  videoSource?: string
+  imageUrl?: string
 }
 
 export default function VideoInputForm(props: IVideoInputForm) {
@@ -164,9 +164,14 @@ export default function VideoInputForm(props: IVideoInputForm) {
     try {
       //create a video lab
       console.log('Sending data', JSON.stringify(data))
-      const response = await axios.post('http://localhost:3000/database/video-lab', data, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      })
+      const response = await axios.post(
+        `${import.meta.env.VITE_BACKEND_PATH}/database/video-lab`,
+        data,
+        {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        }
+      )
+
       console.log('After /video-lab, ', JSON.stringify(response.data))
 
       if (response.status === 200) {

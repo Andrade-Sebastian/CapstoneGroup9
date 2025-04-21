@@ -65,9 +65,10 @@ var operationParameters = {
     sessionId: process.argv[7],
     assignSocketId: null
 };
-//const ancHeaders = ['Package', 'EDA', 'Temperature', 'Thermistor', 'Timestamp', 'Unknown']; //create a list of headers for the csv
+var ancHeaders = ['Package', 'EDA', 'Temperature', 'Thermistor', 'Timestamp', 'Unknown']; //create a list of headers for the csv
 // const ancFilePath = './operationParameters.userId/anc_data.csv';
 // const auxHeaders = ['Package', 'PPG_Red', 'PPG_Infa_Red', 'PPG_Green', 'Timestamp', 'Unknown'];
+// const auxFilePath = './operationParameters.userId/aux_data.csv';
 // const auxFilePath = './operationParameters.userId/aux_data.csv';
 //initializes the board 
 var board = new brainflow_1.BoardShim(brainflow_1.BoardIds.EMOTIBIT_BOARD, { serialNumber: operationParameters.serialNumber });
@@ -165,8 +166,10 @@ function sendData(socket) {
                         ppg_r = ppg_r.concat(anc_data[1]);
                         //heart rate can only start collecting if there are enough data samples
                         if (ppg_ir.length >= 1024 && ppg_r.length >= 1024) {
-                            heart_rate = brainflow_1.DataFilter.getHeartRate(ppg_ir.slice(-1024), ppg_r.slice(-1024), 25, 1024);
-                            console.log("HR: ", heart_rate);
+                            brainflow_1.DataFilter.performBandPass(ppg_ir, 500, 5, 10, 2, 0, 0);
+                            brainflow_1.DataFilter.performBandPass(ppg_r, 500, 5, 10, 2, 0, 0);
+                            heart_rate = brainflow_1.DataFilter.getHeartRate(ppg_ir.slice(-1024), ppg_r.slice(-1024), 500, 1024);
+                            console.log("HEART RATE: ", heart_rate);
                         }
                         ancData = {
                             package: anc_data[0][0],
@@ -224,7 +227,7 @@ function main() {
             switch (_a.label) {
                 case 0:
                     connectionSuccessful = null;
-                    socket = (0, socket_io_client_1.io)("http://localhost:3000");
+                    socket = (0, socket_io_client_1.io)(operationParameters.backendIp);
                     _a.label = 1;
                 case 1:
                     _a.trys.push([1, 3, , 4]);

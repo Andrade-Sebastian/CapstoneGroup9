@@ -57,7 +57,7 @@ function createProcessWindow(sessionId: string, userId: string, nickName:string,
   let activityRoute = ""
 
   if(experimentType === 1){
-    activityRoute = `/activity/${sessionId}/${userId}/video-lab`
+    activityRoute = `/activity/${sessionId}/${userId}/video-lab/`
   }
   else if(experimentType ===2){
     activityRoute = `/activity/${sessionId}/${userId}/photo-lab`

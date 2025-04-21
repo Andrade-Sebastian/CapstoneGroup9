@@ -1,92 +1,92 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import axios from "axios";
-import SideComponent from "../components/SideComponent.tsx";
-import { IoEarthOutline } from "react-icons/io5";
-import { Icon } from "react-icons-kit";
-import { eyeOff } from "react-icons-kit/feather/eyeOff";
-import { eye } from "react-icons-kit/feather/eye";
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import axios from 'axios'
+import SideComponent from '../components/SideComponent.tsx'
+import { IoEarthOutline } from 'react-icons/io5'
+import { Icon } from 'react-icons-kit'
+import { eyeOff } from 'react-icons-kit/feather/eyeOff'
+import { eye } from 'react-icons-kit/feather/eye'
 
 // This is where the host will create the room
 
 export default function HostCreateRoom() {
-  const [userName, setUserName] = useState("");
-  const [passwordIsSelected, setPasswordIsSelected] = useState(false);
-  const [allowSpectators, setAllowSpectators] = useState(false);
-  const [password, setPassword] = useState(""); //store this in backend!!
-  const [type, setType] = useState("password");
-  const [icon, setIcon] = useState(eyeOff);
-  const navigateTo = useNavigate();
+  const [userName, setUserName] = useState('')
+  const [passwordIsSelected, setPasswordIsSelected] = useState(false)
+  const [allowSpectators, setAllowSpectators] = useState(false)
+  const [password, setPassword] = useState('') //store this in backend!!
+  const [type, setType] = useState('password')
+  const [icon, setIcon] = useState(eyeOff)
+  const navigateTo = useNavigate()
 
   function handleToggle() {
     //have eye open if text is censored, if not then eye closed
-    if (type === "password") {
-      setIcon(eye);
-      setType("text");
+    if (type === 'password') {
+      setIcon(eye)
+      setType('text')
     } else {
-      setIcon(eyeOff);
-      setType("password");
+      setIcon(eyeOff)
+      setType('password')
     }
   }
 
-  console.log("in activity root")
+  console.log('in activity root')
   //hardcoded to test host/session/create
   const [sessionInfo, setSessionInfo] = useState({
-    sessionName: "",
-    selectedExperimentId: "17", //(ideally this would be undefined)
+    sessionName: '',
+    selectedExperimentId: '17', //(ideally this would be undefined)
     credentials: {
       passwordEnabled: false,
-      password: password,
+      password: password
     },
-    allowSpectators: true,
-  });
+    allowSpectators: true
+  })
 
   const testSessionInfo = {
-    sessionName: "Awesome",
-    selectedExperimentId: "17",
+    sessionName: 'Awesome',
+    selectedExperimentId: '17',
     allowSpectators: true,
     credentials: {
       passwordEnabled: false,
-      password: "",
-    },
-  };
+      password: ''
+    }
+  }
 
   function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+    e.preventDefault()
     {
       /* For now*/
     }
     //this is not setting the values
     setSessionInfo({
-      sessionName: "Awesome", // FUTURE
-      selectedExperimentId: "17", // (ideally this would be undefined)
+      sessionName: 'Awesome', // FUTURE
+      selectedExperimentId: '17', // (ideally this would be undefined)
       credentials: {
         passwordEnabled: passwordIsSelected,
-        password: passwordIsSelected ? password : "", //if enabled, pass will be included
+        password: passwordIsSelected ? password : '' //if enabled, pass will be included
       },
-      allowSpectators: allowSpectators,
-    });
+      allowSpectators: allowSpectators
+    })
 
-    console.log("sessionInfo: " + JSON.stringify(sessionInfo));
+    console.log('sessionInfo: ' + JSON.stringify(sessionInfo))
 
     axios
-      .post("http://localhost:3000/host/session/create", sessionInfo)
+      .post(`${import.meta.env.VITE_BACKEND_PATH}/host/session/create`, sessionInfo)
       .then((response) => {
-        console.log(response.data.configuration);
-        navigateTo("/host/select-lab", { state: { userName } }); //for now
+        console.log(response.data.configuration)
+        navigateTo('/host/select-lab', { state: { userName } }) //for now
       })
       .catch((error) => {
-        console.error("Error creating session:", error);
-      });
+        console.error('Error creating session:', error)
+      })
 
-    console.log("Username: " + userName);
-    console.log("Continue Button clicked");
-    console.log("Navigating to Media");
+    console.log('Username: ' + userName)
+    console.log('Continue Button clicked')
+    console.log('Navigating to Media')
   }
 
-  console.log("Is the password selected? " + passwordIsSelected);
-  console.log("Allow Spectators? " + allowSpectators);
-  console.log("---------");
+  console.log('Is the password selected? ' + passwordIsSelected)
+  console.log('Allow Spectators? ' + allowSpectators)
+  console.log('---------')
   // <div className="flex justify-center items-center min-h-screen h-auto p-4 place-content-center ">
   // <div className="bg-white rounded-xl p-8 shadow-lg w-4/5 min-h-[1000px] place-content-center">
   //   <form onSubmit={handleSubmit} className="flex flex-col gap-14">
@@ -94,7 +94,7 @@ export default function HostCreateRoom() {
     <div className="flex h-screen">
       <div className="flex flex-col max-sm:hidden items-center justify-center md:w-2/5 lg:w-2/5">
         <SideComponent
-          icon={<IoEarthOutline style={{ fontSize: "200px" }} />}
+          icon={<IoEarthOutline style={{ fontSize: '200px' }} />}
           headingTitle="Start an Experiment"
           description="Provide your name, check the box if you want to set a password and/or have spectators"
         />
@@ -103,10 +103,7 @@ export default function HostCreateRoom() {
         <form onSubmit={handleSubmit} className="w-full max-w-md">
           <div className="mb-6">
             <div>
-              <label
-                htmlFor="userName"
-                className="block text-sm font-medium text-gray-700 mb-2"
-              >
+              <label htmlFor="userName" className="block text-sm font-medium text-gray-700 mb-2">
                 Enter your name <span className="text-purple-500">*</span>
               </label>
               <input
@@ -128,10 +125,7 @@ export default function HostCreateRoom() {
                   checked={passwordIsSelected}
                   onChange={() => setPasswordIsSelected(!passwordIsSelected)}
                 />
-                <label
-                  htmlFor="usePassword"
-                  className="text-sm font-medium text-gray-700"
-                >
+                <label htmlFor="usePassword" className="text-sm font-medium text-gray-700">
                   Use Password
                 </label>
               </div>
@@ -155,15 +149,8 @@ export default function HostCreateRoom() {
                           onChange={(e) => setPassword(e.target.value)}
                           value={password}
                         />
-                        <span
-                          className="flex justify-around items-center"
-                          onClick={handleToggle}
-                        >
-                          <Icon
-                            className="absolute mr-10"
-                            icon={icon}
-                            size={25}
-                          />
+                        <span className="flex justify-around items-center" onClick={handleToggle}>
+                          <Icon className="absolute mr-10" icon={icon} size={25} />
                         </span>
                       </div>
                     </div>
@@ -180,10 +167,7 @@ export default function HostCreateRoom() {
                   checked={allowSpectators}
                   onChange={() => setAllowSpectators(!allowSpectators)}
                 />
-                <label
-                  htmlFor="allowSpectators"
-                  className="text-sm font-medium text-gray-700"
-                >
+                <label htmlFor="allowSpectators" className="text-sm font-medium text-gray-700">
                   Allow Spectators
                 </label>
               </div>
@@ -195,8 +179,8 @@ export default function HostCreateRoom() {
               disabled={!userName.trim()}
               className={`mt-6 font-semibold py-3 px-6 rounded-md shadow-md transition duration-300 ease-in-out ${
                 userName.trim()
-                  ? "bg-[#7F56D9] hover:bg-violet-500 text-white"
-                  : "bg-gray-400 text-white cursor-not-allowed"
+                  ? 'bg-[#7F56D9] hover:bg-violet-500 text-white'
+                  : 'bg-gray-400 text-white cursor-not-allowed'
               }`}
             >
               Host Lobby
@@ -206,5 +190,5 @@ export default function HostCreateRoom() {
         </form>
       </div>
     </div>
-  );
+  )
 }

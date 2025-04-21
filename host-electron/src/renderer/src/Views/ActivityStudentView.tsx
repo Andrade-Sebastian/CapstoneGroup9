@@ -14,7 +14,7 @@ import { useJoinerStore } from '../hooks/stores/useJoinerStore.ts'
 import { stringify } from 'postcss'
 import { useNavigate } from 'react-router-dom'
 import { session } from 'electron'
-import toast, { Toaster } from "react-hot-toast";
+import toast, { Toaster } from 'react-hot-toast'
 import ReactPlayer from 'react-player'
 import GalleryComponent from '../components/GalleryComponent.tsx'
 import GalleryViewer from '../components/GalleryViewer.tsx'
@@ -23,28 +23,28 @@ export default function ActivityStudentView(): ReactElement {
   const echoProcessAPI = window.api
   const [selectedButton, setSelectedButton] = useState('heartRate')
   const [activeTab, setActiveTab] = useState('images')
-  const [activeCharts, setActiveCharts] = useState<string[]>([]);
-  const [recievedData, setRecievedData] = useState<number[]>([]);
+  const [activeCharts, setActiveCharts] = useState<string[]>([])
+  const [recievedData, setRecievedData] = useState<number[]>([])
   const [currentUser, setCurrentUser] = useState('')
   const [currentUserId, setCurrentUserId] = useState(0)
   const [currentPath, setCurrentPath] = useState('')
-  const [photoPath, setPhotoPath] = useState("");
-  const [videoPath, setVideoPath] = useState("");
-  const [galleryPath, setGalleryPath] = useState("");
-  const [selectedCaption, setSelectedCaption] = useState("");
-  const [articlePath, setArticlePath] = useState("");
+  const [photoPath, setPhotoPath] = useState('')
+  const [videoPath, setVideoPath] = useState('')
+  const [galleryPath, setGalleryPath] = useState('')
+  const [selectedCaption, setSelectedCaption] = useState('')
+  const [articlePath, setArticlePath] = useState('')
   const [bpmAvg, setBpmAvg] = useState(0)
   const playerRef = useRef(null)
   const [isPlaying, setIsPlaying] = useState(false)
   const [tempAvg, setTempAvg] = useState(0)
   const [gsrAvg, setGsrAvg] = useState(0)
   const [fileName, setFileName] = useState('')
-  const [isMasked, setIsMasked] = useState(false);
-  const [experimentID, setExperimentID] = useState(0);
-  const [isMediaAFile, setIsMediaAFile] = useState(false);
-  const [latestSeekTime, setLatestSeekTime] = useState(0);
-  const [experimentPath, setExperimentPath] = useState('');
-  const [currentGalleryPhotoID, setCurrentGalleryPhotoID] = useState(0);
+  const [isMasked, setIsMasked] = useState(false)
+  const [experimentID, setExperimentID] = useState(0)
+  const [isMediaAFile, setIsMediaAFile] = useState(false)
+  const [latestSeekTime, setLatestSeekTime] = useState(0)
+  const [experimentPath, setExperimentPath] = useState('')
+  const [currentGalleryPhotoID, setCurrentGalleryPhotoID] = useState(0)
   const {
     hostName,
     users,
@@ -77,22 +77,36 @@ export default function ActivityStudentView(): ReactElement {
     galleryPhotos
   } = useSessionStore()
   useEffect(() => {
-    const debug = () =>{
+    const debug = () => {
       console.log(`Session Store: Hostname${hostName}, RoomCode${roomCode}, videoLabSource${videoLabSource}, videoID${videoID}, articleURL${articleURL}, articleLabSource${articleLabSource}
         , photolabImageSource${photoLabImageSource}, experimentId${experimentId}, experimentTitle${experimentTitle}, experimentDesc${experimentDesc}, galleryPhotos${galleryPhotos}, selectedCaption ${selectedCaption}, currentGalleryPhotoID ${currentGalleryPhotoID}
         `)
     }
-    debug();
-  },[hostName, roomCode, videoLabSource, videoID, articleURL, articleLabSource, photoLabImageSource, experimentId, experimentTitle, experimentDesc, galleryPhotos, selectedCaption, currentGalleryPhotoID])
+    debug()
+  }, [
+    hostName,
+    roomCode,
+    videoLabSource,
+    videoID,
+    articleURL,
+    articleLabSource,
+    photoLabImageSource,
+    experimentId,
+    experimentTitle,
+    experimentDesc,
+    galleryPhotos,
+    selectedCaption,
+    currentGalleryPhotoID
+  ])
 
   const { sessionId, userId, experimentType } = useParams()
   console.log('PARAMS RECIEVED: ', sessionId, userId, experimentType)
   const handleMask = (targetUserId) => {
-      const newMaskState = !isMasked;
-      socket.emit("toggle-mask", {userId: targetUserId})
-      setIsMasked(newMaskState)
+    const newMaskState = !isMasked
+    socket.emit('toggle-mask', { userId: targetUserId })
+    setIsMasked(newMaskState)
   }
-  
+
   const handleUserKick = () => {
     //insert socket logic to kick user here
     console.log('Kicking user...')
@@ -106,15 +120,12 @@ export default function ActivityStudentView(): ReactElement {
   //     setWasKicked(true);
   //     console.log("Kick function. Here is the socketID and sessionID", socketId, sessionId)
   //     //removes user from database
-      
 
   //     //sessionid is empty when making this request. Thats causing the bug
   //     console.log("Kicking user from database in sessionID: ", sessionId);
   //     //is sessionID the global one? or a useState?
 
-
-
-  //     axios.post('http://localhost:3000/joiner/leave-room', {
+  //     axios.post('http://VITE_BACKEND_PATH/joiner/leave-room', {
   //       sessionID: sessionId,
   //       socketID: socketId
   //     })
@@ -148,60 +159,56 @@ export default function ActivityStudentView(): ReactElement {
   // },[])
 
   useEffect(() => {
-    const checkVideoMediaType = () =>{
-      console.log("Detecting type of media based on path...   ExperimentPath: ",experimentPath)
-      if(experimentPath){
-        if(experimentPath.length === 11){ //very flimsy way of detecting if the video is a youtube video. All youtube videoIDs have a length of 11 which is why this is done. There must be a better way.....
-          console.log("Detected video as a YouTube link. Path length:", experimentPath.length);
-          setIsMediaAFile(false);
-          return;
+    const checkVideoMediaType = () => {
+      console.log('Detecting type of media based on path...   ExperimentPath: ', experimentPath)
+      if (experimentPath) {
+        if (experimentPath.length === 11) {
+          //very flimsy way of detecting if the video is a youtube video. All youtube videoIDs have a length of 11 which is why this is done. There must be a better way.....
+          console.log('Detected video as a YouTube link. Path length:', experimentPath.length)
+          setIsMediaAFile(false)
+          return
+        } else {
+          console.log('Detected video as a file. Path length:', experimentPath.length)
+          setIsMediaAFile(true)
+          return
         }
-        else{
-          console.log("Detected video as a file. Path length:", experimentPath.length)
-          setIsMediaAFile(true);
-          return;
+      }
+    }
+    const checkArticleMediaType = () => {
+      console.log('Detecting type of media based on path...   ExperimentPath: ', experimentPath)
+      if (experimentPath) {
+        if (experimentPath.startsWith('https://') || experimentPath.startsWith('http://')) {
+          console.log('Detected a link', experimentPath)
+          setArticleURL(experimentPath)
+          setIsMediaAFile(false)
+          return
+        } else {
+          console.log('Detected article as a file.', experimentPath)
+          setIsMediaAFile(true)
+          return
         }
+      } else {
+        console.log('Experiment path is empty', experimentPath)
+        return
+      }
     }
-  }
-    const checkArticleMediaType = () =>{
-      console.log("Detecting type of media based on path...   ExperimentPath: ",experimentPath)
-      if(experimentPath){
-        if(experimentPath.startsWith("https://") || experimentPath.startsWith("http://")){ 
-          console.log("Detected a link", experimentPath);
-          setArticleURL(experimentPath);
-          setIsMediaAFile(false);
-          return;
-        }
-        else{
-          console.log("Detected article as a file.", experimentPath)
-          setIsMediaAFile(true);
-          return;
-        }
-    }
-    else{
-      console.log("Experiment path is empty", experimentPath)
-      return;
-    }
-    }
-    if (experimentType === "video-lab") {
-      console.log("ExperimentType is:", experimentType)
-      checkVideoMediaType();
-    } 
-    else if (experimentType === "article-lab") {
-      console.log("ExperimentType is:", experimentType)
-      checkArticleMediaType();
-    }
-    else {
+    if (experimentType === 'video-lab') {
+      console.log('ExperimentType is:', experimentType)
+      checkVideoMediaType()
+    } else if (experimentType === 'article-lab') {
+      console.log('ExperimentType is:', experimentType)
+      checkArticleMediaType()
+    } else {
       console.log('Invalid experiment ID')
     }
   }, [experimentPath, experimentType, videoPath])
 
-//Gathering data such as RoomCode, user's nickname, filename, and userID
+  //Gathering data such as RoomCode, user's nickname, filename, and userID
   useEffect(() => {
     const getUserData = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:3000/host/get-user-experiment/${sessionId}/${userId}/${experimentType}`
+          `${import.meta.env.VITE_BACKEND_PATH}/host/get-user-experiment/${sessionId}/${userId}/${experimentType}`
         )
         console.log('RESPONSE RECIEVED IN ACTIVITYSTUDENTVIEW', response.data)
         if (response.status === 200) {
@@ -217,116 +224,107 @@ export default function ActivityStudentView(): ReactElement {
     getUserData()
   }, [sessionId, experimentType, userId])
 
-
   //Using roomcode gathered earlier to fetch experimentID
   useEffect(() => {
     const fetchExperimentID = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:3000/joiner/session/getInfo/${roomCode}`
-        );
+          `${import.meta.env.VITE_BACKEND_PATH}/joiner/session/getInfo/${roomCode}`
+        )
         if (response.status === 200) {
-          console.log("EXPERIMENT ID RETURNED: ", response.data.experimentid);
-          setExperimentID(response.data.experimentid);
+          console.log('EXPERIMENT ID RETURNED: ', response.data.experimentid)
+          setExperimentID(response.data.experimentid)
         }
       } catch (error) {
         // toast.error("Failed to get experiment id")
-        console.log("Error retrieving experiment id in joiner fe", error);
+        console.log('Error retrieving experiment id in joiner fe', error)
       }
-    };
-    fetchExperimentID();
-  }, [roomCode]);
+    }
+    fetchExperimentID()
+  }, [roomCode])
 
   //using fetched experimentId to get relevant data
   useEffect(() => {
     const getVideoFileData = async () => {
-      try{
+      try {
         const response = await axios.get(
-          `http://localhost:3000/joiner/getVideoFile/${experimentID}`
-        );
-        if(response.status === 200){
-          toast.success("Successfully received video lab data.")
-          console.log("Returned get video data:", response.data);
-          const experimentTitle = response.data.name;
-          const experimentDesc = response.data.description;
-          const path = response.data.path;
-          console.log("RESPONSE DATA VARIABLES:", experimentTitle, experimentDesc, path);
-          setExperimentId(experimentID);
-          setExperimentTitle(experimentTitle);
-          setExperimentDesc(experimentDesc);
-          setExperimentPath(path);
-          if(path.length === 11){
+          `${import.meta.env.VITE_BACKEND_PATH}/joiner/getVideoFile/${experimentID}`
+        )
+        if (response.status === 200) {
+          toast.success('Successfully received video lab data.')
+          console.log('Returned get video data:', response.data)
+          const experimentTitle = response.data.name
+          const experimentDesc = response.data.description
+          const path = response.data.path
+          console.log('RESPONSE DATA VARIABLES:', experimentTitle, experimentDesc, path)
+          setExperimentId(experimentID)
+          setExperimentTitle(experimentTitle)
+          setExperimentDesc(experimentDesc)
+          setExperimentPath(path)
+          if (path.length === 11) {
             setVideoID(path)
           }
         }
-      } catch(error){
-        toast.error("Failed to receive video data");
-        console.log("Error receiving video data in joiner FE:", error);
+      } catch (error) {
+        toast.error('Failed to receive video data')
+        console.log('Error receiving video data in joiner FE:', error)
       }
     }
     //if(!experimentID) return;
     const getPhotoData = async () => {
       try {
-        console.log("SENDING TO THE ROUTE EXPERIMENT ID: ", experimentID);
+        console.log('SENDING TO THE ROUTE EXPERIMENT ID: ', experimentID)
         const response = await axios.get(
-          `http://localhost:3000/joiner/getPhoto/${experimentID}`
-        );
+          `${import.meta.env.VITE_BACKEND_PATH}/joiner/getPhoto/${experimentID}`
+        )
         if (response.status === 200) {
-          toast.success("Successfully received photo lab data.");
-          console.log("RETURNED GET PHOTO DATA: ", response.data);
-          const experimentTitle = response.data.name;
-          const captions = response.data.captions;
-          const experimentDesc = response.data.description;
-          const path = response.data.path;
+          toast.success('Successfully received photo lab data.')
+          console.log('RETURNED GET PHOTO DATA: ', response.data)
+          const experimentTitle = response.data.name
+          const captions = response.data.captions
+          const experimentDesc = response.data.description
+          const path = response.data.path
           //NEED THE EXPERIMENT TYPE
-          console.log(
-            "RESPONSE DATA VARIABLES: ",
-            captions,
-            experimentDesc,
-            experimentTitle,
-            path
-          );
-          setExperimentId(experimentID);
-          setExperimentTitle(experimentTitle);
-          setExperimentDesc(experimentDesc);
-          setExperimentPath(path);
+          console.log('RESPONSE DATA VARIABLES: ', captions, experimentDesc, experimentTitle, path)
+          setExperimentId(experimentID)
+          setExperimentTitle(experimentTitle)
+          setExperimentDesc(experimentDesc)
+          setExperimentPath(path)
         }
       } catch (error) {
-        toast.error("Failed to receive photo data");
-        console.log("Error receiving photolab data in joiner fe: ", error);
+        toast.error('Failed to receive photo data')
+        console.log('Error receiving photolab data in joiner fe: ', error)
       }
-    };
+    }
     const getGalleryData = async () => {
       try {
-        console.log("SENDING TO THE ROUTE EXPERIMENT ID: ", experimentID);
+        console.log('SENDING TO THE ROUTE EXPERIMENT ID: ', experimentID)
         const response = await axios.get(
-          `http://localhost:3000/joiner/getGallery/${experimentID}`
-        );
+          `${import.meta.env.VITE_BACKEND_PATH}/joiner/getGallery/${experimentID}`
+        )
         if (response.status === 200) {
-          toast.success("Successfully received gallery lab data.");
-          console.log("RETURNED GET GALLERY DATA: ", response.data);
-          const experimentTitle = response.data.name;
-          const experimentDesc = response.data.description;
-          response.data.images.forEach((img,index) =>{
+          toast.success('Successfully received gallery lab data.')
+          console.log('RETURNED GET GALLERY DATA: ', response.data)
+          const experimentTitle = response.data.name
+          const experimentDesc = response.data.description
+          response.data.images.forEach((img, index) => {
             addPhoto({
               id: index,
               src: img.path,
-              file:null,
+              file: null,
               caption: img.caption
-            });
-          });
+            })
+          })
 
           //const images = response.data.images;
           // const captions = response.data.captions;
           // const path = response.data.path;
           //NEED THE EXPERIMENT TYPE
-          console.log(
-            "RETURNED GET GALLERY DATA: ", response.data
-          );
-          console.log("GalleryPhoto data from getGallery", galleryPhotos)
-          setExperimentId(experimentID);
-          setExperimentTitle(experimentTitle);
-          setExperimentDesc(experimentDesc);
+          console.log('RETURNED GET GALLERY DATA: ', response.data)
+          console.log('GalleryPhoto data from getGallery', galleryPhotos)
+          setExperimentId(experimentID)
+          setExperimentTitle(experimentTitle)
+          setExperimentDesc(experimentDesc)
           // images.forEach((image, index) => {
           //   addPhoto({
           //     id: index,
@@ -337,52 +335,54 @@ export default function ActivityStudentView(): ReactElement {
           // })
         }
       } catch (error) {
-        toast.error("Failed to receive gallery data");
-        console.log("Error receiving photolab data in joiner fe: ", error);
+        toast.error('Failed to receive gallery data')
+        console.log('Error receiving photolab data in joiner fe: ', error)
       }
-    };
+    }
     const getArticleData = async () => {
       try {
-        console.log("SENDING TO THE ROUTE EXPERIMENT ID: ", experimentID);
+        console.log('SENDING TO THE ROUTE EXPERIMENT ID: ', experimentID)
         const response = await axios.get(
-          `http://localhost:3000/joiner/getArticleFile/${experimentID}`
-        );
+          `${import.meta.env.VITE_BACKEND_PATH}/joiner/getArticleFile/${experimentID}`
+        )
         if (response.status === 200) {
-          toast.success("Successfully received article lab data.");
-          console.log("RETURNED GET Article DATA: ", response.data);
-          const experimentTitle = response.data.name;
-          const experimentDesc = response.data.description;
-          const path = response.data.path;
+          toast.success('Successfully received article lab data.')
+          console.log('RETURNED GET Article DATA: ', response.data)
+          const experimentTitle = response.data.name
+          const experimentDesc = response.data.description
+          const path = response.data.path
           //NEED THE EXPERIMENT TYPE
-          console.log(
-            "RESPONSE DATA VARIABLES: ",
-            experimentDesc,
-            experimentTitle,
-            path
-          );
-          setExperimentId(experimentID);
-          setExperimentTitle(experimentTitle);
-          setExperimentDesc(experimentDesc);
-          setExperimentPath(path);
+          console.log('RESPONSE DATA VARIABLES: ', experimentDesc, experimentTitle, path)
+          setExperimentId(experimentID)
+          setExperimentTitle(experimentTitle)
+          setExperimentDesc(experimentDesc)
+          setExperimentPath(path)
         }
       } catch (error) {
-        toast.error("Failed to receive Article data");
-        console.log("Error receiving article lab data in joiner fe: ", error);
+        toast.error('Failed to receive Article data')
+        console.log('Error receiving article lab data in joiner fe: ', error)
       }
-    };
-    if(experimentType === "video-lab"){
-      getVideoFileData();
     }
-    if(experimentType === "photo-lab"){
-      getPhotoData();
+    if (experimentType === 'video-lab') {
+      getVideoFileData()
     }
-    if(experimentType === "gallery-lab"){
-      getGalleryData();
+    if (experimentType === 'photo-lab') {
+      getPhotoData()
     }
-    if(experimentType === "article-lab"){
-      getArticleData();
+    if (experimentType === 'gallery-lab') {
+      getGalleryData()
     }
-  }, [experimentID, setExperimentDesc, setExperimentId, setExperimentTitle, setExperimentPath, experimentType]);
+    if (experimentType === 'article-lab') {
+      getArticleData()
+    }
+  }, [
+    experimentID,
+    setExperimentDesc,
+    setExperimentId,
+    setExperimentTitle,
+    setExperimentPath,
+    experimentType
+  ])
 
   // useEffect(() => {
   //   console.log("Running active experiment");
@@ -396,16 +396,15 @@ export default function ActivityStudentView(): ReactElement {
   //   }
   //     const getPhotoInfo = async () => {
   //       const response = await axios
-  //         .get(`http://localhost:3000/joiner/getPhoto/${experimentID}`)
+  //         .get(`http://VITE_BACKEND_PATH/joiner/getPhoto/${experimentID}`)
   //         .then((response) => {//THERE IS NOTHING BEING SET HERE
   //           console.log("Photo lab path in activity page:", response.data.path);
   //         });
   //     };
-    
 
   //     const getVideoInfo = async () => {
   //       const response = await axios
-  //         .get(`http://localhost:3000/joiner/getVideoFile/${experimentID}`)
+  //         .get(`http://VITE_BACKEND_PATH/joiner/getVideoFile/${experimentID}`)
   //         .then((response) => {//THERE IS NOTHING BEING SET HERE
   //           console.log("Video lab path in activity page:", response.data.path);
   //           setVideoID(response.data.path);
@@ -414,15 +413,15 @@ export default function ActivityStudentView(): ReactElement {
   //     };
   //     const getGalleryInfo = async () => {
   //       const response = await axios
-  //         .get(`http://localhost:3000/joiner/getGallery/${experimentID}`)
+  //         .get(`http://VITE_BACKEND_PATH/joiner/getGallery/${experimentID}`)
   //         .then((response) => {//THERE IS NOTHING BEING SET HERE
   //           console.log("Gallery lab path in activity page:", response.data.path);
   //         });
   //     };
-      
+
   //     const getArticleInfo = async () => {
   //       const response = await axios
-  //         .get(`http://localhost:3000/joiner/getArticleFile/${experimentID}`)
+  //         .get(`http://VITE_BACKEND_PATH/joiner/getArticleFile/${experimentID}`)
   //         .then((response) => {//THERE IS NOTHING BEING SET HERE
   //           console.log("Article lab path in activity page:", response.data.path);
   //           setArticleURL(response.data.path);
@@ -466,181 +465,201 @@ export default function ActivityStudentView(): ReactElement {
   //   };
   // }, []);
 
-  useEffect(()=>{
+  useEffect(() => {
     const fetchExperimentData = async () => {
-      if(!experimentID){
-        console.log("There is no experimentID!!! Cannot fetch data...");
-        return;
+      if (!experimentID) {
+        console.log('There is no experimentID!!! Cannot fetch data...')
+        return
       }
-      try{
-        let response;
+      try {
+        let response
 
-        switch(experimentType){
-          case "photo-lab":
-            response = await axios.get(`http://localhost:3000/joiner/getPhoto/${experimentID}`);
-            if(response.status === 200){
-              setExperimentTitle(response.data.name);
-              setExperimentDesc(response.data.description);
-              setPhotoPath(response.data.path);
+        switch (experimentType) {
+          case 'photo-lab':
+            response = await axios.get(
+              `${import.meta.env.VITE_BACKEND_PATH}/joiner/getPhoto/${experimentID}`
+            )
+            if (response.status === 200) {
+              setExperimentTitle(response.data.name)
+              setExperimentDesc(response.data.description)
+              setPhotoPath(response.data.path)
             }
-            break;
-          case "video-lab":
-            response = await axios.get(`http://localhost:3000/joiner/getVideoFile/${experimentID}`);
-            if(response.status === 200){
-              setExperimentTitle(response.data.name);
-              setExperimentDesc(response.data.description);
-              setVideoPath(response.data.path);
+            break
+          case 'video-lab':
+            response = await axios.get(
+              `${import.meta.env.VITE_BACKEND_PATH}/joiner/getVideoFile/${experimentID}`
+            )
+            if (response.status === 200) {
+              setExperimentTitle(response.data.name)
+              setExperimentDesc(response.data.description)
+              setVideoPath(response.data.path)
             }
-            break;
-          
-          case "gallery-lab":
-            response = await axios.get(`http://localhost:3000/joiner/getGallery/${experimentID}`);
-            if(response.status === 200){
-              setExperimentTitle(response.data.name);
-              setExperimentDesc(response.data.description);
-              const images = response.data.images || [];
-              images.forEach((image, index) =>{
+            break
+
+          case 'gallery-lab':
+            response = await axios.get(
+              `${import.meta.env.VITE_BACKEND_PATH}/joiner/getGallery/${experimentID}`
+            )
+            if (response.status === 200) {
+              setExperimentTitle(response.data.name)
+              setExperimentDesc(response.data.description)
+              const images = response.data.images || []
+              images.forEach((image, index) => {
                 addPhoto({
                   id: index,
                   src: image.path,
-                  caption:image.caption,
-                  file:null
-                });
-              });
+                  caption: image.caption,
+                  file: null
+                })
+              })
             }
-            break;
-          
-          case "article-lab":
-            response = await axios.get(`http://localhost:3000/joiner/getArticleFile/${experimentID}`);
-            if(response.status === 200){
-              setExperimentTitle(response.data.name);
-              setExperimentDesc(response.data.description);
-              setArticlePath(response.data.path);
+            break
+
+          case 'article-lab':
+            response = await axios.get(
+              `${import.meta.env.VITE_BACKEND_PATH}/joiner/getArticleFile/${experimentID}`
+            )
+            if (response.status === 200) {
+              setExperimentTitle(response.data.name)
+              setExperimentDesc(response.data.description)
+              setArticlePath(response.data.path)
             }
-            break;
+            break
           default:
-            console.log("Invalid experiment type:", experimentType);
-          
+            console.log('Invalid experiment type:', experimentType)
         }
-      } catch(error){
-        console.log("Error fetching experiment data", error);
+      } catch (error) {
+        console.log('Error fetching experiment data', error)
       }
-    };
-    fetchExperimentData();
+    }
+    fetchExperimentData()
   }, [experimentID, experimentType])
 
-  useEffect(() =>{
-    const fetchStoredPhoto = async () =>{
-      const filename = experimentPath.split("/").pop();
-      try{
-          const response = await axios.get(`http://localhost:3000/get-photo/${filename}`);
-          if(response.status === 200){
-            console.log("Fetched image path:", response.config.url);
-            setPhotoPath(response.config.url);
-            toast.success("Successfully retreived photo!")
-          }
+  useEffect(() => {
+    const fetchStoredPhoto = async () => {
+      const filename = experimentPath.split('/').pop()
+      try {
+        const response = await axios.get(
+          `${import.meta.env.VITE_BACKEND_PATH}/get-photo/${filename}`
+        )
+        if (response.status === 200) {
+          console.log('Fetched image path:', response.config.url)
+          setPhotoPath(response.config.url)
+          toast.success('Successfully retreived photo!')
+        }
+      } catch (error) {
+        console.log('Error retrieving image:', error)
       }
-      catch(error){
-        console.log("Error retrieving image:", error);
-      }
-    };
+    }
 
     const fetchStoredVideo = async () => {
-      const filename = experimentPath.split("/").pop();
-      try{
-        const response = await axios.get(`http://localhost:3000/get-videoFile/${filename}`);
-        if(response.status === 200){
-          console.log("Fetched video path:", response.config.url);
-          setVideoPath(response.config.url);
+      const filename = experimentPath.split('/').pop()
+      try {
+        const response = await axios.get(
+          `${import.meta.env.VITE_BACKEND_PATH}/get-videoFile/${filename}`
+        )
+        if (response.status === 200) {
+          console.log('Fetched video path:', response.config.url)
+          setVideoPath(response.config.url)
           setVideoLabSource(videoPath)
-          console.log("In FetchStoredVideo", videoPath, videoLabSource)
-          toast.success("Successfully retreived video!")
+          console.log('In FetchStoredVideo', videoPath, videoLabSource)
+          toast.success('Successfully retreived video!')
         }
-      }
-      catch(error){
-        console.log("Error retrieving video:", error);
+      } catch (error) {
+        console.log('Error retrieving video:', error)
       }
     }
     const fetchStoredGallery = async (filename: string) => {
-      try{
-        const response = await axios.get(`http://localhost:3000/get-gallery/${filename}`);
-        if(response.status === 200){
-          console.log("Fetched photo path:", response.config.url);
-          setGalleryPath(response.config.url);
-          toast.success("Successfully retreived image!")
+      try {
+        const response = await axios.get(
+          `${import.meta.env.VITE_BACKEND_PATH}/get-gallery/${filename}`
+        )
+        if (response.status === 200) {
+          console.log('Fetched photo path:', response.config.url)
+          setGalleryPath(response.config.url)
+          toast.success('Successfully retreived image!')
         }
-      }
-      catch(error){
-        console.log("Error retrieving image from gallery:", error);
+      } catch (error) {
+        console.log('Error retrieving image from gallery:', error)
       }
     }
     const fetchStoredArticle = async () => {
-      const filename = experimentPath.split("/").pop();
-      try{
-        const response = await axios.get(`http://localhost:3000/get-articleFile/${filename}`);
-        if(response.status === 200){
-          console.log("Fetched article path:", response.config.url);
-          setArticlePath(response.config.url);
-          toast.success("Successfully retreived article!")
+      const filename = experimentPath.split('/').pop()
+      try {
+        const response = await axios.get(
+          `${import.meta.env.VITE_BACKEND_PATH}/get-articleFile/${filename}`
+        )
+        if (response.status === 200) {
+          console.log('Fetched article path:', response.config.url)
+          setArticlePath(response.config.url)
+          toast.success('Successfully retreived article!')
         }
-      }
-      catch(error){
-        console.log("Error retrieving article:", error);
-      }
-    }
-    if(experimentType === "video-lab"){
-      console.log("Fetching video...")
-      fetchStoredVideo();
-    }
-    if(experimentType === "photo-lab"){
-      console.log("Fetching photo...")
-      fetchStoredPhoto();
-    }
-    if(experimentType === "gallery-lab" && galleryPhotos.length > 0){
-      console.log("Fetching gallery...")
-      socket.on("image-selected", (imageData) => {
-      console.log("Gallery image-selected event recieved. Host changed the image, fetching stored gallery...", imageData);
-      setSelectedCaption(imageData.caption);
-      const matchedPhoto = galleryPhotos.find(photo => photo.id === imageData.id);
-      if(matchedPhoto) {
-        setCurrentGalleryPhotoID(matchedPhoto.id)
-        const filename = matchedPhoto.src.split("/").pop();
-        console.log("Here is the matchedPhoto correct filename", filename)
-        fetchStoredGallery(filename);
-      }
-      else{
-        console.log("No matching photo found for caption:", imageData.src);
-      }});
-      return () =>{
-        socket.off("image-selected");
+      } catch (error) {
+        console.log('Error retrieving article:', error)
       }
     }
-    if(experimentType === "article-lab"){
-      console.log("Fetching article...")
-      fetchStoredArticle();
+    if (experimentType === 'video-lab') {
+      console.log('Fetching video...')
+      fetchStoredVideo()
     }
-  },[experimentPath, experimentType, setPhotoPath, setVideoPath, setArticlePath, articlePath, galleryPhotos]);
+    if (experimentType === 'photo-lab') {
+      console.log('Fetching photo...')
+      fetchStoredPhoto()
+    }
+    if (experimentType === 'gallery-lab' && galleryPhotos.length > 0) {
+      console.log('Fetching gallery...')
+      socket.on('image-selected', (imageData) => {
+        console.log(
+          'Gallery image-selected event recieved. Host changed the image, fetching stored gallery...',
+          imageData
+        )
+        setSelectedCaption(imageData.caption)
+        const matchedPhoto = galleryPhotos.find((photo) => photo.id === imageData.id)
+        if (matchedPhoto) {
+          setCurrentGalleryPhotoID(matchedPhoto.id)
+          const filename = matchedPhoto.src.split('/').pop()
+          console.log('Here is the matchedPhoto correct filename', filename)
+          fetchStoredGallery(filename)
+        } else {
+          console.log('No matching photo found for caption:', imageData.src)
+        }
+      })
+      return () => {
+        socket.off('image-selected')
+      }
+    }
+    if (experimentType === 'article-lab') {
+      console.log('Fetching article...')
+      fetchStoredArticle()
+    }
+  }, [
+    experimentPath,
+    experimentType,
+    setPhotoPath,
+    setVideoPath,
+    setArticlePath,
+    articlePath,
+    galleryPhotos
+  ])
 
-
-
-  useEffect(()=> {
-    socket.on("play-video", (data) =>{
-      console.log("Recieved event play-video.", data)
+  useEffect(() => {
+    socket.on('play-video', (data) => {
+      console.log('Recieved event play-video.', data)
       setIsPlaying(data)
-      console.log("The variable isPlaying is set to", isPlaying)
-    } );
+      console.log('The variable isPlaying is set to', isPlaying)
+    })
 
-    socket.on("seek-video", (seconds) =>{
-      console.log("Recieved event seek-video", seconds);
-      if(playerRef.current){
-        playerRef.current.seekTo(seconds, "seconds");
+    socket.on('seek-video', (seconds) => {
+      console.log('Recieved event seek-video', seconds)
+      if (playerRef.current) {
+        playerRef.current.seekTo(seconds, 'seconds')
       }
     })
     return () => {
-      socket.off("play-video")
-      socket.off("seek-video")
+      socket.off('play-video')
+      socket.off('seek-video')
     }
-  },[])
+  }, [])
 
   //Video Synchronization Logic
 
@@ -677,10 +696,9 @@ export default function ActivityStudentView(): ReactElement {
   }, [latestSeekTime])
 
   const toggleChart = (chartType: string) => {
-    setActiveCharts((prev) => 
-    prev.includes(chartType)
-  ? prev.filter((chart) => chart !== chartType)
-  : [...prev, chartType])
+    setActiveCharts((prev) =>
+      prev.includes(chartType) ? prev.filter((chart) => chart !== chartType) : [...prev, chartType]
+    )
   }
 
   // useEffect(()=>{
@@ -745,12 +763,18 @@ export default function ActivityStudentView(): ReactElement {
           ) : experimentType == 'gallery-lab' ? (
             <div>
               {galleryPath ? (
-                <GalleryViewer imageSrc={galleryPath} caption={selectedCaption} index={currentGalleryPhotoID}/>
-
-              ): (
-                <p className="text-xl text-gray-500 font-medium mt-10"> Waiting for host to select a photo...</p>
+                <GalleryViewer
+                  imageSrc={galleryPath}
+                  caption={selectedCaption}
+                  index={currentGalleryPhotoID}
+                />
+              ) : (
+                <p className="text-xl text-gray-500 font-medium mt-10">
+                  {' '}
+                  Waiting for host to select a photo...
+                </p>
               )}
-              </div>
+            </div>
           ) : experimentType == 'article-lab' && isMediaAFile ? (
             // Not a huge bug but the source should be the article lab source, it's flip flopped, don't know why
             <div>
@@ -772,18 +796,19 @@ export default function ActivityStudentView(): ReactElement {
           </p>
           <div className="flex space-x-4">
             <button
-
               className={`mt-6 font-semibold py-3 px-6 rounded-xl shadow-md transition duration-300 ease-in-out text-white text-3xl cursor-pointer ${
-                isMasked ? 'bg-green-500 hover:bg-green-600' : 'bg-[#7F56D9] hover:bg-violet-500'}`}
+                isMasked ? 'bg-green-500 hover:bg-green-600' : 'bg-[#7F56D9] hover:bg-violet-500'
+              }`}
               // onClick={() => {setSelectedButton("heartRate"); setActiveChart("heartRateChart");}}
-              onClick={() => {handleMask(currentUserId)}}
+              onClick={() => {
+                handleMask(currentUserId)
+              }}
 
               //className="bg-[#7F56D9] hover:bg-violet text-3xl p-4 rounded-lg text-white cursor-pointer"
               //onClick={() => {
-                //setSelectedButton('heartRate')
-                //setActiveChart('heartRateChart')
+              //setSelectedButton('heartRate')
+              //setActiveChart('heartRateChart')
               //}}
-
             >
               {isMasked ? 'Unmask' : 'Mask'}
             </button>
@@ -824,10 +849,7 @@ export default function ActivityStudentView(): ReactElement {
             </label>
           </div>
           <div className="bg-white shadow-md rounded-lg p-4 flex-grow">
-          <ChartComponent
-                  user_id={currentUserId}
-                  chart_types={activeCharts}
-                />
+            <ChartComponent user_id={currentUserId} chart_types={activeCharts} />
           </div>
         </div>
         {/* <div className="bg-white shadow-md rounded-lg p-4">
