@@ -25,7 +25,8 @@ export type ActivityEvents =
   "brainflow:connectingEmotibit"|
   "brainflow:connectedEmotibit"|
   "brainflow:disconnectEmotibit"|  //disconnect emotibit
-  "activity:closeUserWindow"
+  "activity:closeUserWindow"|
+  "activity:closeAllWindows" //close all active user windows
   
 
 
@@ -44,6 +45,7 @@ const activityEventsChannels: Array<ActivityEvents> = [
   "brainflow:connectedEmotibit",
   "brainflow:disconnectEmotibit",
   "activity:closeUserWindow",
+  "activity:closeAllWindows",
 ]
 
 // Custom APIs for renderer

@@ -26,6 +26,8 @@ export default function ChartComponent(props: IUserDataType) {
     });
 
     const [timeState, acceptTimeState] = useState<Array<number>>([]);
+    
+
     //const [edaState, acceptEdaDataState] = useState<Array<number>>([]);
     // const [min, setMin] = useState(93);
     // const [max, setMax] = useState(98);
@@ -34,12 +36,12 @@ export default function ChartComponent(props: IUserDataType) {
     const ipc = window.api;
 
     const chartMeta = {
-        heartRate : { name: "BPM", color: "rgb(255,0,0)", type: 1},
-        temperature : { name: "°F", color: "rgb(0,0,255)", type: 2},
+        heartRate : { name: "BPM", color: "rgb(0,0,255)", type: 1},
+        temperature : { name: "°F", color: "rgb(255,0,0)", type: 2},
         gsr : { name: "EDA", color: "rgb(75,0,130)", type: 3}
 
     };
-    
+
     const updateSeries = (key: string, newVal: number) => {
         setPlotData((prev) => {
             const updated = [...prev[key], newVal];
@@ -50,34 +52,40 @@ export default function ChartComponent(props: IUserDataType) {
         });
     };
 
-    console.log("CHART TYPE: ", props.chart_type);
+    // console.log("CHART TYPE: ", props.chart_types);
 
     const addDataPoint = (type: string, value: number, ancDataFrame, auxDataFrame, timeStamp: number) => {
 
         setPlotData((prev) => {
             const updated = [...prev[type], value];
+            
             return {
                 ...prev,
                 [type]: updated.length > MAX_POINTS ? updated.slice(-MAX_POINTS) : updated
             };
         });
 
-        setMax((prevMax) => Math.max(prevMax, Math.round(value)));
-        setMin((prevMin) => Math.min(prevMin, Math.round(value) - 1));
-
-        
+        acceptTimeState(timeState => ([...timeState, timeStamp]));
     }
 
     useEffect(() => {
 
-        setPlotData({
-            heartRate: [],
-            temperature: [],
-            gsr: []
+        setPlotData((prevState) => {
+            const selectedPlots: { [key: string]: number[] } = {};
+            Object.entries(prevState).forEach(([key, value]) => {
+                selectedPlots[key] = props.chart_types.includes(key) ? value : [];
+            });
+        
+              return selectedPlots;
         });
+
+        // props.chart_types.forEach(chart =>{
+        //     if(chart === )
+        // })
 
         const onUpdate = (payload) => {
             const {ancData, auxData, ipAddress, serialNumber, backendIp, hostSessionId, userId, heartRate, frontEndSocketId, assignSocketId} = payload;
+            
             if(String(props.user_id) !== String(userId)){
                 return;
             }
@@ -89,12 +97,12 @@ export default function ChartComponent(props: IUserDataType) {
                 addDataPoint('temperature', temp, ancData, auxData, ancData.timestamp);
             }
             if(props.chart_types.includes('gsr')){
+                console.log("Inside gsr!");
                 const gsrVal = ancData.data1;
                 addDataPoint('gsr', gsrVal, ancData, auxData, ancData.timestamp);
             }
         }
         socket.on('update', onUpdate);
-
         return () => {
             socket.off('update', onUpdate);
         };
@@ -105,26 +113,32 @@ export default function ChartComponent(props: IUserDataType) {
             <div id={`chart-${props.user_id}`}>
                 
                 <Plot
-                    data={props.chart_types
-                        .filter((type) => chartMeta[type]) 
-                        .map((type) => ({
-                          y: plotState[type],
+                    data={[
+                        {
+                          //x: timeState,
+                          y: plotState["heartRate"],
                           type: 'line',
                           mode: 'lines',
-                          name: chartMeta[type].name,
-                          line: { color: chartMeta[type].color },
-                        }))
-                      }
-                    // {u
-                    //     x: timeState,
-                    //     y: edaState,
-                    //     xaxis: 'x2',
-                    //     yaxis: 'y2',
-                    //     mode: 'lines+markers',          // Line chart
-                    //     type: 'line',
-                    //     name: 'EDA', // Label for the trace
-                    //     line: {color: 'rgb(75,0,130)'} // Line color
-                    // }
+                          name: chartMeta["heartRate"].name,
+                          line: { color: chartMeta["heartRate"].color },
+                        },
+                        {
+                            //x: timeState,
+                            y: plotState["temperature"],
+                            type: 'line',
+                            mode: 'lines',
+                            name: chartMeta["temperature"].name,
+                            line: { color: chartMeta["temperature"].color },
+                        },
+                        {
+                            //x: timeState,
+                            y: plotState["gsr"],
+                            type: 'line',
+                            mode: 'lines',
+                            name: chartMeta["gsr"].name,
+                            line: { color: chartMeta["gsr"].color },
+                        },
+                    ]}
                     layout = {{
                         autosize: true,
                         responsive: true,
@@ -133,7 +147,7 @@ export default function ChartComponent(props: IUserDataType) {
                         margin: {l:40, r: 10, b: 40, t: 10},
                         yaxis: {
                             title: "Sensor Values",
-                            range: [min, max + 5],
+                            range: [-20, 100],
                             tick: 1,
                         },
                         showlegend: true,
