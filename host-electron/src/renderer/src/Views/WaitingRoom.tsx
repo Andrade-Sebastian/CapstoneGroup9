@@ -622,8 +622,8 @@ export default function WaitingRoom() {
             <div className="flex items-center space-x-2 text-lg">
               <CiUser size={24} />
               <p className="text-lg">
-                <span className="font-semibold text-[#894DD6]">PARTICIPANTS</span>
-                <span>{nicknames.length}</span>
+                <span className="font-semibold text-[#894DD6]">PARTICIPANTS </span>
+                <span> {nicknames.length}</span>
               </p>
             </div>
           </div>

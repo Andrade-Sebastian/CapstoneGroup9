@@ -500,17 +500,17 @@ export default function WaitingRoom() {
                   <PiPlugsConnectedThin size={24} />
                   <p className="text-base sm:text-lg flex flex-col sm:flex-row sm:items-center">
                     <span className="font-semibold text-[#894DD6]">
-                      SENSOR STATUS{" "}
+                      SENSOR STATUS
                     </span>
                     <div>
                       {isConnected ? (
                         <span className="text-green-500 font-bold ml-1">
-                          {" "}
+
                           CONNECTED
                         </span>
                       ) : (
                         <span className="text-red-500 font-bold ml-1">
-                          {" "}
+
                           NOT CONNECTED
                         </span>
                       )}
