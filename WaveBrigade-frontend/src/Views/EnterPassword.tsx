@@ -13,15 +13,22 @@ import toast, { Toaster } from "react-hot-toast";
 import { user } from "@nextui-org/react";
 
 export default function EnterFunction() {
-  const navigateTo = useNavigate();
-  const [users, setUsers] = useState<string[]>([]); //list of users to send to waiting room
-  const [socketID, setSocketID] = useState("");
-  const { roomCode, sessionId, socketId, nickname } = useJoinerStore();
-  const [password, setPassword] = useState("");
-  const [type, setType] = useState("password");
-  const [icon, setIcon] = useState(eyeOff);
+    const navigateTo = useNavigate();
+    const [users, setUsers] = useState<string[]>([]) //list of users to send to waiting room
+    const [socketID, setSocketID] = useState("");
+    const { roomCode, sessionId, socketId, nickname} = useJoinerStore()
+    const [ password, setPassword]  = useState("");
+    const [type, setType] = useState('password')
+    const [icon, setIcon] = useState(eyeOff)
+    const [isDisabled, setDisabled] = useState(false);
 
-  const { userRole, setUserRole } = useJoinerStore();
+    const { userRole} = useJoinerStore();
+
+    let passwordCooldown = 0;
+
+    function sleep(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms))
+    }
 
   function handleToggle() {
     //have eye open if text is censored, if not then eye closed
@@ -62,54 +69,61 @@ export default function EnterFunction() {
             }
           );
 
-          const { userRole } = useJoinerStore();
-
-          navigateTo("/waiting-room");
-        } else {
-          //Otherwise, navigate to the connect emotibit page
-          toast.success("Joining session...");
-          setTimeout(() => {
-            navigateTo("/connect-emotibit");
-          }, 2000);
+              navigateTo('/waiting-room')
+              
+            }
+            else {//Otherwise, navigate to the connect emotibit page
+              toast.success("Joining session...");
+              setTimeout(() => {
+                navigateTo('/connect-emotibit')
+              }, 2000)
+            }
+          }
+        else{
+          if(passwordCooldown == 3){
+            setDisabled(true);
+            toast.error("You have entered the wrong password too many times! Please wait to try again");
+            await sleep (5000);
+            passwordCooldown = 0;
+            setDisabled(false);
+          }
+          else{
+            toast.error("Connection failed. Looks like we couldn't get you connected. Please check the password and try again.");
+          }
         }
-      } else {
-        toast.error(
-          "Connection failed. Looks like we couldn't get you connected. Please check the password and try again."
-        );
-      }
-    } catch (error) {
-      console.error("Error verifying code:", error);
-      toast.error(
-        "Connection failed. Looks like we couldn't get you connected. Please check the password and try again."
-      );
-    }
-  };
-
-  const validatePassword = async (password: string) => {
-    try {
-      const response = await axios.post(
-        `${import.meta.env.VITE_BACKEND_PATH}/joiner/validatePassword`,
-        {
-          sessionID: sessionId,
-          password: password,
+        }catch(error){
+          console.error("Error verifying code:", error);
+          toast.error("Connection failed. Looks like we couldn't get you connected. Please check the password and try again.")
         }
-      );
-      console.log("RESPONSE RECIEVED: ", response.data.success);
-      console.log("STATUS: ", response.data.status);
-      if (response.status === 200) {
-        console.log("Password is valid");
-        return true;
-      }
-      if (response.status === 400) {
-        console.log("Password is invalid");
-        return false;
-      }
-    } catch (error) {
-      console.error("Could not validate password due to an API Error", error);
-      return false;
-    }
-  };
-
+      };
+    
+      const validatePassword = async (password: string) => {
+        try {
+          const response = await axios.post(
+            `${import.meta.env.VITE_BACKEND_PATH}/joiner/validatePassword`,
+            {
+              sessionID: sessionId,
+              password: password
+            }
+          );
+          console.log("RESPONSE RECIEVED: ", response.data.success);
+          console.log("STATUS: ", response.data.status);
+          if (response.status === 200) {
+            console.log("Password is valid");
+            return true;
+          }
+          if(response.status === 205){
+            console.log("Password is invalid");
+            passwordCooldown++;
+            console.log(passwordCooldown);
+            return false;
+          }
+        } catch (error) {
+          console.error("Could not validate password due to an API Error", error);
+          return false;
+        }
+      };
+          
   return (
     <div className="flex h-screen">
       <div className="flex flex-col max-sm:hidden items-center justify-center w-2/5">
@@ -138,6 +152,7 @@ export default function EnterFunction() {
                 className="w-full p-2 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 onChange={(e) => setPassword(e.target.value)}
                 value={password}
+                disabled={isDisabled}
               />
 
               <span

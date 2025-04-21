@@ -110,6 +110,7 @@ export default function ActivityStudentView(): ReactElement {
   const handleUserKick = () => {
     //insert socket logic to kick user here
     console.log('Kicking user...')
+    socket.emit("kick-active-student", userId);
   }
 
   // useEffect(() => {
@@ -811,7 +812,7 @@ export default function ActivityStudentView(): ReactElement {
             >
               {isMasked ? 'Unmask' : 'Mask'}
             </button>
-            <button className="mt-6 font-semibold py-3 px-6 bg-[#F54884] shadow-md transition duration-300 ease-in-out hover:bg-[#F02B70] text-3xl p-4 rounded-xl text-white cursor-pointer">
+            <button className="mt-6 font-semibold py-3 px-6 bg-[#F54884] shadow-md transition duration-300 ease-in-out hover:bg-[#F02B70] text-3xl p-4 rounded-xl text-white cursor-pointer" onClick={handleUserKick}>
               Kick
             </button>
           </div>

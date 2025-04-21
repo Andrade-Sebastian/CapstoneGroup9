@@ -243,8 +243,14 @@ io.on("connection", (socket) => {
     // io.emit("kick", nicknameSocketID);
 
     // io.emit("kick", socketID);
-  });
+    
+  })
 
+  socket.on("kick-active-student", (data) => {
+    console.log("Recieved active student: ", data);
+    io.emit("kick-active-student", data);
+  })
+  
   socket.on("joiner-connected", async (data) => {
     const { socketID, nickname, lastFourSerial } = data;
     console.log(
@@ -376,11 +382,6 @@ io.on("connection", (socket) => {
     console.log("Ending experiment");
     io.emit("end-experiment");
   });
-  //console.log("Running Script");
-  // socket.on("update", (data) => {
-  //     console.log(data);
-  //     io.emit("update", data);
-  // })
 
   socket.on("disconnect", async (data) => {
     // console.log(`(main.ts): User Disconnected | socketID: ${socket.id}`);

@@ -45,19 +45,18 @@ export default function JoinPage() {
       toast.error("You were kicked from the room");
     }
 
-    socket.emit("client-assignment");
-    socket.on("experiment-active", (data) => {
-      if (data.isActive === true) {
-        toast.error("Experiment in progress, cannot join...");
-        setExperimentActive(data.isActive);
-        return;
-      } else {
-        setExperimentActive(false);
-        // toast.error("Experiment in progress, cannot join...")
-      }
-    });
-
-    socket.emit("client-assignment");
+	socket.emit("client-assignment", );
+  socket.on("experiment-active", (data) => {
+    if(data.isActive === true){
+      toast.error("Experiment in progress, cannot join...")
+      setExperimentActive(data.isActive);
+      return;
+    }
+    else{
+      setExperimentActive(false);
+      // toast.error("Experiment in progress, cannot join...")
+    }
+  })
 
     socket.on("client-assignment", async (data) => {
       console.log(

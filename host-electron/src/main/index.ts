@@ -82,12 +82,9 @@ app.on('window-all-closed', () => {
 })
 
 function handleViewUser(
-  event: Electron.IpcMainEvent,
-  sessionId: string,
-  userId: string,
-  experimentType: number
-) {
-  const newProcessWindow = createProcessWindow(sessionId, userId, experimentType)
+  event: Electron.IpcMainEvent, sessionId: string, userId: string, nickName:string, experimentType: number
+){
+  const newProcessWindow = createProcessWindow(sessionId, userId, nickName, experimentType);
 
   const mainWindow = windows.find((w) => w.type === 'main')?.instance
 
@@ -266,5 +263,14 @@ ipcMain.on('session:request-data', (event) => {
   const sessionData = useSessionStore.getState() // or however you store your host session
   console.log('💾 Sending session data to student window:', sessionData)
 
-  event.sender.send('session:sync', sessionData)
+  event.sender.send('session:sync', sessionData);
+});
+
+ipcMain.on('activity:closeUserWindow', (event, nickName) => {
+  BrowserWindow.getAllWindows().forEach(window =>{
+    if(window.title === nickName){
+      window.close();
+    }
+  })
 })
+
