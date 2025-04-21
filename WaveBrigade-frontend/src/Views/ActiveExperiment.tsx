@@ -127,7 +127,9 @@ export default function ActiveExperiment() {
     }
     const getPhotoInfo = async () => {
       const response = await axios
-        .get(`http://localhost:3000/joiner/getPhoto/${experimentId}`)
+        .get(
+          `${import.meta.env.VITE_BACKEND_PATH}/joiner/getPhoto/${experimentId}`
+        )
         .then((response) => {
           //THERE IS NOTHING BEING SET HERE
           console.log("Photo lab path in activity page:", response.data.path);
@@ -136,7 +138,11 @@ export default function ActiveExperiment() {
 
     const getVideoInfo = async () => {
       const response = await axios
-        .get(`http://localhost:3000/joiner/getVideoFile/${experimentId}`)
+        .get(
+          `${
+            import.meta.env.VITE_BACKEND_PATH
+          }/joiner/getVideoFile/${experimentId}`
+        )
         .then((response) => {
           //THERE IS NOTHING BEING SET HERE
           console.log("Video lab path in activity page:", response.data.path);
@@ -146,7 +152,11 @@ export default function ActiveExperiment() {
     };
     const getGalleryInfo = async () => {
       const response = await axios
-        .get(`http://localhost:3000/joiner/getGallery/${experimentId}`)
+        .get(
+          `${
+            import.meta.env.VITE_BACKEND_PATH
+          }/joiner/getGallery/${experimentId}`
+        )
         .then((response) => {
           //THERE IS NOTHING BEING SET HERE
           console.log("Gallery lab path in activity page:", response.data.path);
@@ -155,7 +165,11 @@ export default function ActiveExperiment() {
 
     const getArticleInfo = async () => {
       const response = await axios
-        .get(`http://localhost:3000/joiner/getArticleFile/${experimentId}`)
+        .get(
+          `${
+            import.meta.env.VITE_BACKEND_PATH
+          }/joiner/getArticleFile/${experimentId}`
+        )
         .then((response) => {
           //THERE IS NOTHING BEING SET HERE
           console.log("Article lab path in activity page:", response.data.path);
@@ -204,7 +218,7 @@ export default function ActiveExperiment() {
       const filename = experimentPath.split("/").pop();
       try {
         const response = await axios.get(
-          `http://localhost:3000/get-photo/${filename}`
+          `${import.meta.env.VITE_BACKEND_PATH}/get-photo/${filename}`
         );
         if (response.status === 200) {
           console.log("Fetched image path:", response.config.url);
@@ -220,7 +234,7 @@ export default function ActiveExperiment() {
       const filename = experimentPath.split("/").pop();
       try {
         const response = await axios.get(
-          `http://localhost:3000/get-videoFile/${filename}`
+          `${import.meta.env.VITE_BACKEND_PATH}/get-videoFile/${filename}`
         );
         if (response.status === 200) {
           console.log("Fetched video path:", response.config.url);
@@ -234,7 +248,7 @@ export default function ActiveExperiment() {
     const fetchStoredGallery = async (filename: string) => {
       try {
         const response = await axios.get(
-          `http://localhost:3000/get-gallery/${filename}`
+          `${import.meta.env.VITE_BACKEND_PATH}/get-gallery/${filename}`
         );
         if (response.status === 200) {
           console.log("Fetched photo path:", response.config.url);
@@ -249,7 +263,7 @@ export default function ActiveExperiment() {
       const filename = experimentPath.split("/").pop();
       try {
         const response = await axios.get(
-          `http://localhost:3000/get-articleFile/${filename}`
+          `${import.meta.env.VITE_BACKEND_PATH}/get-articleFile/${filename}`
         );
         if (response.status === 200) {
           console.log("Fetched article path:", response.config.url);
@@ -485,10 +499,8 @@ export default function ActiveExperiment() {
                 />
               </div>
             ) : activeChart === "temperatureChart" ? (
-                <div className="flex flex-col w-full h-full max-h-full">
-                <div className="text-lg font-semibold">
-                  Temperature Chart
-                </div>
+              <div className="flex flex-col w-full h-full max-h-full">
+                <div className="text-lg font-semibold">Temperature Chart</div>
                 <ChartComponent
                   chart_type={2}
                   chart_name="°F"
@@ -500,7 +512,7 @@ export default function ActiveExperiment() {
             ) : (
               <div className="flex flex-col w-full h-full max-h-full">
                 <div className="text-lg font-semibold">
-                <p> GSR/EDA </p>
+                  <p> GSR/EDA </p>
                 </div>
                 <ChartComponent
                   chart_type={3}
@@ -509,7 +521,7 @@ export default function ActiveExperiment() {
                   user_id={joinerId}
                   className="w-full h-full"
                 />
-                </div>
+              </div>
             )}
           </div>
         </div>

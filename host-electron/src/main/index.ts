@@ -6,10 +6,9 @@ import ActivitySingleton from './activitySingleton.ts'
 import createProcessWindow from './activity_window.ts'
 import { IActivityInstance } from './activitySingleton.ts'
 import axios from 'axios'
-import { useSessionStore } from '../renderer/src/store/useSessionStore.tsx';
+import { useSessionStore } from '../renderer/src/store/useSessionStore.tsx'
 
-
-export const windows:Array<{
+export const windows: Array<{
   instance: BrowserWindow
   type: 'main' | 'process'
   label: string
@@ -38,18 +37,17 @@ app.whenReady().then(() => {
       callback({
         responseHeaders: {
           ...details.responseHeaders,
-          "Content-Security-Policy": [
+          'Content-Security-Policy': [
             "default-src 'self' 'unsafe-eval' data: blob: filesystem: gap:;",
             "script-src 'self' https://www.youtube.com https://www.youtube-nocookie.com;",
-            "connect-src 'self' https://www.youtube.com https://www.youtube-nocookie.com http://localhost:3000;",
+            "connect-src 'self' https://www.youtube.com https://www.youtube-nocookie.com http://${import.meta.env.${import.meta.env.VITE_BACKEND_PATH}};",
             "frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com;",
             "child-src 'self' https://www.youtube.com https://www.youtube-nocookie.com;"
           ]
         }
-      });
-    });
-  });
-  
+      })
+    })
+  })
 
   windows.push({
     instance: createMainWindow('/main'),
@@ -57,16 +55,15 @@ app.whenReady().then(() => {
     label: 'main'
   })
 
-
   // 4343 is the argument that will be passed to the process window
   // createProcessWindow('/process/', '4343')
 
   session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
     callback({
       responseHeaders: {
-        ...details.responseHeaders,
+        ...details.responseHeaders
         // 'Content-Security-Policy': [
-        //   "default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:filesystem:; connect-src 'self' localhost ws://localhost:3000 http://localhost:3000 http://127.0.0.1:3000;"
+        //   "default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:filesystem:; connect-src 'self' localhost ws://${import.meta.env.VITE_BACKEND_PATH} http://${import.meta.env.VITE_BACKEND_PATH} http://127.0.0.1:3000;"
         // ]
       }
     })
@@ -78,7 +75,6 @@ app.whenReady().then(() => {
   })
 })
 
-
 app.on('window-all-closed', () => {
     app.quit()
 })
@@ -88,17 +84,17 @@ function handleViewUser(
 ){
   const newProcessWindow = createProcessWindow(sessionId, userId, nickName, experimentType);
 
-  const mainWindow = windows.find(w => w.type === 'main')?.instance;
+  const mainWindow = windows.find((w) => w.type === 'main')?.instance
 
-  if(mainWindow){
+  if (mainWindow) {
     mainWindow.webContents.send('session:request-data', {
       sessionId,
       userId,
       experimentType,
       targetWindowId: newProcessWindow.webContents.id
-    });
+    })
   }
-  event.reply("activity:viewUser", {userId: userId});
+  event.reply('activity:viewUser', { userId: userId })
 }
 
 function spawnBrainFlow(
@@ -132,56 +128,57 @@ function spawnBrainFlow(
 }
 
 function verifyEmotiBitUsage(ipAddress: string): IActivityInstance | undefined {
-  const activity = ActivitySingleton.getInstance().activityInstances;
-    return Object.values(activity).find(
-      (instance) => instance.ipAddress === ipAddress
-    )
+  const activity = ActivitySingleton.getInstance().activityInstances
+  return Object.values(activity).find((instance) => instance.ipAddress === ipAddress)
 }
- 
 
-function processDestroyer(event, userId: number): void{
+function processDestroyer(event, userId: number): void {
   //const process = echoServers[userId]
   const activitySingleton = ActivitySingleton.getInstance()
-  const processEntry = activitySingleton.activityInstances[userId];
+  const processEntry = activitySingleton.activityInstances[userId]
 
-  if(!processEntry){ //if processEntry is empty
+  if (!processEntry) {
+    //if processEntry is empty
     console.log(`Could not find a process for user: ${userId}`)
-    event.reply('echo-server:destroy-failed', `No process found for userID: ${userId}`);
-    return;
+    event.reply('echo-server:destroy-failed', `No process found for userID: ${userId}`)
+    return
   }
 
   console.log(`Destroying process for userID: ${userId}`)
 
   const successfully_killed = processEntry.brainflowProcess.kill() //returns bool
 
-  if(successfully_killed){
-    delete activitySingleton.activityInstances[userId]; //deletes from echo servers
-    console.log(`Deleted process for userId: ${userId}, ProcessPID ${processEntry.brainflowProcess!.pid}`)
+  if (successfully_killed) {
+    delete activitySingleton.activityInstances[userId] //deletes from echo servers
+    console.log(
+      `Deleted process for userId: ${userId}, ProcessPID ${processEntry.brainflowProcess!.pid}`
+    )
 
-    event.reply('echo-server:destroyed', {userId});
-  }
-  else{
+    event.reply('echo-server:destroyed', { userId })
+  } else {
     console.log(`could not destroy process for userId: ${userId}`)
-    event.reply('echo-server:destroyed-failed', `Failed to destroy process for userId: ${userId}`);
+    event.reply('echo-server:destroyed-failed', `Failed to destroy process for userId: ${userId}`)
   }
 }
 
-function processStatus(event, userId: string): void{
+function processStatus(event, userId: string): void {
   const activitySingleton = ActivitySingleton.getInstance()
-  const processEntry = activitySingleton.activityInstances[userId];
+  const processEntry = activitySingleton.activityInstances[userId]
 
-  if(!processEntry){ 
+  if (!processEntry) {
     console.log(`Could not find a process for user: ${userId}`)
-    event.reply('echo-server:destroy-failed', `No process found for userID: ${userId}`);
-    return;
+    event.reply('echo-server:destroy-failed', `No process found for userID: ${userId}`)
+    return
   }
-  console.log(`Checking status for process of userID: ${userId}, ProcessPID ${processEntry.brainflowProcess!.pid}`)
-  
-  event.reply('echo-server:status', {user: userId}) //what other variables needs to be shared?
+  console.log(
+    `Checking status for process of userID: ${userId}, ProcessPID ${processEntry.brainflowProcess!.pid}`
+  )
+
+  event.reply('echo-server:status', { user: userId }) //what other variables needs to be shared?
 }
 
 ipcMain.on(
-  "brainflow:launch",
+  'brainflow:launch',
   async (
     event: Electron.IpcMainEvent,
     emotibitIpAddress: string,
@@ -196,40 +193,45 @@ ipcMain.on(
     console.log("EmotiBit found: ", found);
     if(verifyEmotiBitUsage(emotibitIpAddress) !== undefined) return 
     const activitySingleton = ActivitySingleton.getInstance()
-    const brainflowInstance = spawnBrainFlow(emotibitIpAddress, serialNumber, backendIp, userId, frontEndSocketId, sessionId)
+    const brainflowInstance = spawnBrainFlow(
+      emotibitIpAddress,
+      serialNumber,
+      backendIp,
+      userId,
+      frontEndSocketId,
+      sessionId
+    )
 
-    
-    brainflowInstance.on("spawn", () => {
-      console.log("launching brainflow", brainflowInstance.pid ?? -1);
-      event.sender.send("brainflow:launched")
+    brainflowInstance.on('spawn', () => {
+      console.log('launching brainflow', brainflowInstance.pid ?? -1)
+      event.sender.send('brainflow:launched')
     })
 
-    brainflowInstance.on("message", (message) => {
-      console.log("Process Message: " , message)
+    brainflowInstance.on('message', (message) => {
+      console.log('Process Message: ', message)
     })
-    
-    brainflowInstance.on("close", (code) => {
-      console.log("CODE: ", code)
-      if (code === 7)
-      {
-        console.log("(main/index.ts): Closing this shit, brainflow broken as shi")
-        const activity = ActivitySingleton.getInstance().activityInstances;
+
+    brainflowInstance.on('close', (code) => {
+      console.log('CODE: ', code)
+      if (code === 7) {
+        console.log('(main/index.ts): Closing this shit, brainflow broken as shi')
+        const activity = ActivitySingleton.getInstance().activityInstances
         const foundInstance = Object.entries(activity).find(
           ([userID, instance]) => instance.brainflowProcess.pid === brainflowInstance.pid
         )
-        if(foundInstance){
-          delete activity[foundInstance[1].userId];
+        if (foundInstance) {
+          delete activity[foundInstance[1].userId]
         }
-        brainflowInstance.kill();
+        brainflowInstance.kill()
       }
     })
 
-    brainflowInstance.on("error", () => {
-      console.log("(main/index.ts): Error in Brainflow script");
-      brainflowInstance.kill();
+    brainflowInstance.on('error', () => {
+      console.log('(main/index.ts): Error in Brainflow script')
+      brainflowInstance.kill()
     })
-    
-    event.reply("brainflow:launched", { sessionId, serialNumber, status: "success"});
+
+    event.reply('brainflow:launched', { sessionId, serialNumber, status: 'success' })
 
     //check if data is being recieved
     brainflowInstance.stdout.on("data", (message) =>{
@@ -237,30 +239,30 @@ ipcMain.on(
     })
 
     //log any errors from brainflow script
-    brainflowInstance.stderr.on("data", (message) => {
-      console.log("INSIDE STDERR: ", brainflowInstance.pid, message.toString());
+    brainflowInstance.stderr.on('data', (message) => {
+      console.log('INSIDE STDERR: ', brainflowInstance.pid, message.toString())
     })
   }
 )
 
-function destroyAllProcesses(event){
-  console.log("Brainflow proccesses being destroyed. Good day.");
+function destroyAllProcesses(event) {
+  console.log('Brainflow proccesses being destroyed. Good day.')
 }
-ipcMain.on('brainflow:destroy-user', processDestroyer);
-ipcMain.on('brainflow:status', processStatus);
-ipcMain.on('activity:viewUser', handleViewUser);
+ipcMain.on('brainflow:destroy-user', processDestroyer)
+ipcMain.on('brainflow:status', processStatus)
+ipcMain.on('activity:viewUser', handleViewUser)
 ipcMain.on('brainflow:destroy', destroyAllProcesses)
 
 ipcMain.on('session:send-to-window', (event) => {
-  const sessionData = useSessionStore.getState();
-  const senderWebContents = event.sender;
+  const sessionData = useSessionStore.getState()
+  const senderWebContents = event.sender
 
-  senderWebContents.send('session:sync', sessionData);
+  senderWebContents.send('session:sync', sessionData)
 })
 
 ipcMain.on('session:request-data', (event) => {
-  const sessionData = useSessionStore.getState(); // or however you store your host session
-  console.log("💾 Sending session data to student window:", sessionData);
+  const sessionData = useSessionStore.getState() // or however you store your host session
+  console.log('💾 Sending session data to student window:', sessionData)
 
   event.sender.send('session:sync', sessionData);
 });

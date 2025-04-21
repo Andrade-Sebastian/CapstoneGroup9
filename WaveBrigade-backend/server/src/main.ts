@@ -53,7 +53,11 @@ import fs from "node:fs";
 import { fileURLToPath } from "node:url";
 import { off } from "node:process";
 import dbClient from "./controllers/dbClient.ts";
-import {removeSpectatorFromSession, removeUserFromSession, getUserSessionIDFromSocketID} from "./controllers/database.ts"
+import {
+  removeSpectatorFromSession,
+  removeUserFromSession,
+  getUserSessionIDFromSocketID,
+} from "./controllers/database.ts";
 const app = express();
 
 // app.get('/get-ip', (req, res) => {
@@ -78,7 +82,7 @@ app.use("/experiment", experimentRouter);
 export const io = new Server(server, {
   cors: {
     origin: [ORIGIN_HOST, ORIGIN_JOINER],
-  }, 
+  },
 });
 
 const rooms: { [key: string]: any } = {};
@@ -126,11 +130,11 @@ app.get("/get-videoFile/:filename", (req: Request, res: Response) => {
   const { filename } = req.params;
   if (filename.includes("..")) {
     return res
-    .status(400)
-    .json({ success: false, message: "Invalid Filename" });
+      .status(400)
+      .json({ success: false, message: "Invalid Filename" });
   }
   const filePath = path.join(__dirname, "/media/video-lab/", filename);
-  
+
   if (fs.existsSync(filePath)) {
     res.sendFile(filePath);
   } else {
@@ -142,11 +146,11 @@ app.get("/get-gallery/:filename", (req: Request, res: Response) => {
   const { filename } = req.params;
   if (filename.includes("..")) {
     return res
-    .status(400)
-    .json({ success: false, message: "Invalid Filename" });
+      .status(400)
+      .json({ success: false, message: "Invalid Filename" });
   }
   const filePath = path.join(__dirname, "/media/gallery-lab/", filename);
-  
+
   if (fs.existsSync(filePath)) {
     res.sendFile(filePath);
   } else {
@@ -159,11 +163,11 @@ app.get("/get-articleFile/:filename", (req: Request, res: Response) => {
   const { filename } = req.params;
   if (filename.includes("..")) {
     return res
-    .status(400)
-    .json({ success: false, message: "Invalid Filename" });
+      .status(400)
+      .json({ success: false, message: "Invalid Filename" });
   }
   const filePath = path.join(__dirname, "/media/article-lab/", filename);
-  
+
   if (fs.existsSync(filePath)) {
     res.sendFile(filePath);
   } else {
@@ -179,17 +183,19 @@ let isMasked = false;
 let userStates = {};
 
 io.on("connection", (socket) => {
-  
   // console.log("(main.ts): User Connected | socketID: " + socket.id)
   // console.log(`(main.ts): Total connections: ${io.engine.clientsCount}`);
   socket.on("register-user", (userId) => {
-    userStates[socket.id] = {userId};
+    userStates[socket.id] = { userId };
     console.log(`User registered: ${userId} with socket ${socket.id}`);
-  })
+  });
 
   socket.on("client-assignment", () => {
-    console.log("(main.ts): Emitting client-assignment with socketId:", socket.id);
-    
+    console.log(
+      "(main.ts): Emitting client-assignment with socketId:",
+      socket.id
+    );
+
     socket.emit("client-assignment", { socketId: socket.id });
   }); // Send socket ID to the client
 
@@ -211,29 +217,31 @@ io.on("connection", (socket) => {
   socket.on("message", (data) => {
     console.log("Here is the message:", data);
     io.emit("message", data);
-  })
+  });
 
   socket.on("experiment-active", (data) => {
     console.log("The experiment is", data);
     io.emit("experiment-active", data);
-  })
-  
+  });
+
   socket.on("kick", async (nicknameSocketID) => {
     console.log("Received kick event for", nicknameSocketID);
     console.log("(main.ts): Current socketSessionMap:", socketSessionMap);
-    
+
     const targetSocket = io.sockets.sockets.get(nicknameSocketID);
-    
+
     if (targetSocket) {
       io.to(nicknameSocketID).emit("kick", nicknameSocketID);
-      console.log("(main.ts) Emitted kick event.")
+      console.log("(main.ts) Emitted kick event.");
       targetSocket.disconnect(true); // Ensures a forced disconnect
-      console.log(`(main.ts): Successfully disconnected socket ${nicknameSocketID}`);
+      console.log(
+        `(main.ts): Successfully disconnected socket ${nicknameSocketID}`
+      );
     } else {
       console.log(`(main.ts): No socket found with ID ${nicknameSocketID}`);
     }
     // io.emit("kick", nicknameSocketID);
-    
+
     // io.emit("kick", socketID);
     
   })
@@ -244,12 +252,14 @@ io.on("connection", (socket) => {
   })
   
   socket.on("joiner-connected", async (data) => {
-    const {socketID, nickname, lastFourSerial} = data;
-    console.log(`Received joiner-connected event in the backend for socket: ${socketID} of the name ${nickname} with their last four serial number being ${lastFourSerial}`)
-    console.log("Now emitting event to host FE")
-    io.emit("joiner-connected", {socketID, nickname, lastFourSerial});
-  })
-  
+    const { socketID, nickname, lastFourSerial } = data;
+    console.log(
+      `Received joiner-connected event in the backend for socket: ${socketID} of the name ${nickname} with their last four serial number being ${lastFourSerial}`
+    );
+    console.log("Now emitting event to host FE");
+    io.emit("joiner-connected", { socketID, nickname, lastFourSerial });
+  });
+
   //send socket Id to brainflow
   socket.on("brainflow-assignment", () => {
     console.log(
@@ -258,64 +268,69 @@ io.on("connection", (socket) => {
     );
     socket.emit("brainflow-assignment", { socketId: socket.id });
   });
-  
+
   socket.on("experiment-type", (data) => {
     console.log("Event received: experiment-type in BE", data);
     latestExperimentType = data;
-    io.emit("experiment-type", data)
+    io.emit("experiment-type", data);
   });
-  
-  socket.on("toggle-mask", ({userId} = {}) => {
-    console.log("Toggling mask...")
+
+  socket.on("toggle-mask", ({ userId } = {}) => {
+    console.log("Toggling mask...");
     isMasked = !isMasked;
-    console.log(`Toggling mask. userId: ${userId}, new mask state: ${isMasked}`);
-    if(!userId){
-      console.log("No userId detected, must be masknig all users")
-      for(const[socketID, info] of Object.entries(userStates)){
+    console.log(
+      `Toggling mask. userId: ${userId}, new mask state: ${isMasked}`
+    );
+    if (!userId) {
+      console.log("No userId detected, must be masknig all users");
+      for (const [socketID, info] of Object.entries(userStates)) {
         io.to(socketID).emit("toggle-mask", {
           userId: info.userId,
           isMasked,
         });
       }
-
-    }else{
-      for(const[socketID, info] of Object.entries(userStates)){
-        console.log(`UserID ${userId} and info.userId ${info.userId}`)
-        console.log(`userId detected, must be maskning one user, ${userId}`)
-        if(info.userId == userId){
+    } else {
+      for (const [socketID, info] of Object.entries(userStates)) {
+        console.log(`UserID ${userId} and info.userId ${info.userId}`);
+        console.log(`userId detected, must be maskning one user, ${userId}`);
+        if (info.userId == userId) {
           io.to(socketID).emit("toggle-mask", {
             userId,
             isMasked,
-        });
-        break;
+          });
+          break;
+        }
       }
     }
-  }})
+  });
 
   socket.on("join-room", () => {
-    console.log("User joined, latest experiment:", latestExperimentType)
+    console.log("User joined, latest experiment:", latestExperimentType);
     const userInfo = userStates[socket.id];
-    if(userInfo && userInfo.userId){
+    if (userInfo && userInfo.userId) {
       socket.emit("toggle-mask", {
         userId: userInfo.userId,
         isMasked: isMasked,
       });
     }
 
-    if(latestExperimentType !== null){
+    if (latestExperimentType !== null) {
       socket.emit("experiment-type", latestExperimentType);
     }
-    if(latestExperimentType === 1){
-      console.log("ExperimentType is a video, sending an emit to joiner to tell them the video state. Is video playing?", isVideoPlaying)
+    if (latestExperimentType === 1) {
+      console.log(
+        "ExperimentType is a video, sending an emit to joiner to tell them the video state. Is video playing?",
+        isVideoPlaying
+      );
       socket.emit("play-video", isVideoPlaying);
       socket.emit("seek-video", latestSeekTime);
     }
-    if(latestExperimentType === 3 && latestExperimentData){
-      console.log("Gallery lab, sending data to joiner")
-      socket.emit("experiment-data", latestExperimentData)
+    if (latestExperimentType === 3 && latestExperimentData) {
+      console.log("Gallery lab, sending data to joiner");
+      socket.emit("experiment-data", latestExperimentData);
     }
   });
-  
+
   //recieve emotibit data
   socket.on("update", (payload) => {
     const {
@@ -336,22 +351,30 @@ io.on("connection", (socket) => {
 
   //Socket Video Player
   socket.on("play-video", (data) => {
-    console.log("[Socket: play-video] Attempting to play/pause video. Data passed:", data)
+    console.log(
+      "[Socket: play-video] Attempting to play/pause video. Data passed:",
+      data
+    );
     isVideoPlaying = data;
-    socket.broadcast.emit("play-video", data) //sending to joiners, not to the host with broadcast.emit
+    socket.broadcast.emit("play-video", data); //sending to joiners, not to the host with broadcast.emit
   });
 
   socket.on("seek-video", (seconds) => {
-    console.log("Socket: seek-video] Attempting to seek video. Seconds passed:", seconds)
+    console.log(
+      "Socket: seek-video] Attempting to seek video. Seconds passed:",
+      seconds
+    );
     latestSeekTime = seconds;
-    socket.broadcast.emit("seek-video", seconds)
-  })
+    socket.broadcast.emit("seek-video", seconds);
+  });
 
   socket.on("image-selected", (image) => {
-    console.log("In event image-selected, now attempting to send image to students");
+    console.log(
+      "In event image-selected, now attempting to send image to students"
+    );
     socket.broadcast.emit("image-selected", image);
     console.log("Broadcasted image to students");
-  })
+  });
 
   session_handlers(io, socket, rooms, isHost);
 
@@ -370,28 +393,39 @@ io.on("connection", (socket) => {
     delete userStates[socket.id];
     const sessionID = getSessionBySocket(socket.id);
 
-    const sessionIDnum: number | null = await getUserSessionIDFromSocketID(socket.id)
-    const sessionIDstr = String(sessionIDnum)
+    const sessionIDnum: number | null = await getUserSessionIDFromSocketID(
+      socket.id
+    );
+    const sessionIDstr = String(sessionIDnum);
 
     try {
-      console.log("trying to remove joiner with sessionid " + sessionIDnum + "and socketid " + socket.id)
+      console.log(
+        "trying to remove joiner with sessionid " +
+          sessionIDnum +
+          "and socketid " +
+          socket.id
+      );
       await removeUserFromSession(sessionIDstr, socket.id);
     } catch (err) {
       console.error("Error removing joiner from session:", err);
     }
 
     try {
-      console.log("removing spectator with sessionid " + sessionID + "and socketid" + socket.id)
+      console.log(
+        "removing spectator with sessionid " +
+          sessionID +
+          "and socketid" +
+          socket.id
+      );
       await removeSpectatorFromSession(sessionIDnum, socket.id);
     } catch (err) {
       console.error("Error removing spectator from session:", err);
     }
 
-    
     if (sessionID) {
       try {
         const response = await axios.post(
-          `http://localhost:3000/joiner/leave-room`,
+          `${import.meta.env.VITE_BACKEND_PATH}/joiner/leave-room`,
           {
             sessionID: sessionID,
             socketID: socket.id,
@@ -429,4 +463,4 @@ server.listen(PORT, HOST, () => {
   );
 });
 
-dbClient.end()
+dbClient.end();

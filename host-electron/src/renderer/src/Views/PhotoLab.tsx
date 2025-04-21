@@ -8,13 +8,14 @@ import socket from './socket'
 import PhotoInputForm from '../components/PhotoInputForm.tsx'
 
 export default function PhotoLab() {
-  const { //Global state
+  const {
+    //Global state
     experimentType,
     experimentTitle,
     experimentDesc,
     setExperimentPath,
-    photoLabImageSource,
-   } = useSessionStore();
+    photoLabImageSource
+  } = useSessionStore()
 
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [caption, setCaption] = useState('')
@@ -26,32 +27,36 @@ export default function PhotoLab() {
     }
   }, [photoLabImageSource])
 
-  const sendExperimentData = async(experimentTitle: string, experimentDesc: string, experimentId: string) => {
-    try{
-        const response = await axios.post("http://localhost:3000/host/send-experiment", {
+  const sendExperimentData = async (
+    experimentTitle: string,
+    experimentDesc: string,
+    experimentId: string
+  ) => {
+    try {
+      const response = await axios.post(
+        `${import.meta.env.VITE_BACKEND_PATH}/host/send-experiment`,
+        {
           experimentTitle,
           experimentDesc,
           experimentId
-        });
-        console.log("Post response data from sendExperimentData", response.data);
-    }
-    catch(error){
-      console.error("Error:", error);
+        }
+      )
+      console.log('Post response data from sendExperimentData', response.data)
+    } catch (error) {
+      console.error('Error:', error)
     }
   }
   async function handleSubmit(e) {
-    console.log("image source", photoLabImageSource);
-    console.log("caption", caption);
-    console.log("experimentTitle", experimentTitle);
-    console.log("experimentDesc", experimentDesc);
-
+    console.log('image source', photoLabImageSource)
+    console.log('caption', caption)
+    console.log('experimentTitle', experimentTitle)
+    console.log('experimentDesc', experimentDesc)
 
     const loadingToastId = toast.loading('Creating Lab...')
     if (isSubmitting) return
 
     setIsSubmitting(true)
   }
-
 
   return (
     <div className="flex ">
@@ -70,7 +75,6 @@ export default function PhotoLab() {
         onFileSelected={setIsFileSelected}
         imageSource={JSON.stringify(photoLabImageSource)}
       />
-
     </div>
   )
 }

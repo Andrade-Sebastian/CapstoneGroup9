@@ -6,14 +6,11 @@ import socket from "./socket.tsx";
 import axios from "axios";
 import { useJoinerStore } from "../hooks/stores/useJoinerStore.ts";
 import { WiCloudy } from "react-icons/wi";
-import { eyeOff } from 'react-icons-kit/feather/eyeOff';
-import { eye } from 'react-icons-kit/feather/eye';
-import { Icon } from 'react-icons-kit'
+import { eyeOff } from "react-icons-kit/feather/eyeOff";
+import { eye } from "react-icons-kit/feather/eye";
+import { Icon } from "react-icons-kit";
 import toast, { Toaster } from "react-hot-toast";
 import { user } from "@nextui-org/react";
-
-
-
 
 export default function EnterFunction() {
     const navigateTo = useNavigate();
@@ -33,42 +30,44 @@ export default function EnterFunction() {
       return new Promise(resolve => setTimeout(resolve, ms))
     }
 
-    function handleToggle() {
-        //have eye open if text is censored, if not then eye closed
-        if (type === 'password') {
-          setIcon(eye)
-          setType('text')
-        } else {
-          setIcon(eyeOff)
-          setType('password')
-        }
-      }
+  function handleToggle() {
+    //have eye open if text is censored, if not then eye closed
+    if (type === "password") {
+      setIcon(eye);
+      setType("text");
+    } else {
+      setIcon(eyeOff);
+      setType("password");
+    }
+  }
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        // const loadingToastId = toast.loading("Verifying Password...");
-        if (!password || password.length < 3) {
-          toast.error("Please enter in a valid password...")
-          console.error("Please enter in a password...");
-          return;
-        }
-        //ONCE VALIDATE PASSWORD IS CREATED REMOVE PASSWORD FROM IF STATEMENTS LINES 49 AND 52
-        try{
-          const isValidPassword = await validatePassword(password);
-          
-          if (isValidPassword === true) {
-            //if the user is a spectator, they will be redirected to the waiting room
-            console.log("User role: ", userRole)
-            if (userRole === "spectator") {
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    // const loadingToastId = toast.loading("Verifying Password...");
+    if (!password || password.length < 3) {
+      toast.error("Please enter in a valid password...");
+      console.error("Please enter in a password...");
+      return;
+    }
+    //ONCE VALIDATE PASSWORD IS CREATED REMOVE PASSWORD FROM IF STATEMENTS LINES 49 AND 52
+    try {
+      const isValidPassword = await validatePassword(password);
 
-              toast.success("Joining session as a spectator...");
-              console.log("Joining as spectator...");
+      if (isValidPassword === true) {
+        //if the user is a spectator, they will be redirected to the waiting room
+        console.log("User role: ", userRole);
+        if (userRole === "spectator") {
+          toast.success("Joining session as a spectator...");
+          console.log("Joining as spectator...");
 
-              axios.post("http://localhost:3000/joiner/join-as-spectator", {
-                socketID: socketId,
-                nickname: nickname,
-                roomCode: roomCode
-              })
+          axios.post(
+            `${import.meta.env.VITE_BACKEND_PATH}/joiner/join-as-spectator`,
+            {
+              socketID: socketId,
+              nickname: nickname,
+              roomCode: roomCode,
+            }
+          );
 
               navigateTo('/waiting-room')
               
@@ -100,7 +99,8 @@ export default function EnterFunction() {
     
       const validatePassword = async (password: string) => {
         try {
-          const response = await axios.post(`http://localhost:3000/joiner/validatePassword`,
+          const response = await axios.post(
+            `${import.meta.env.VITE_BACKEND_PATH}/joiner/validatePassword`,
             {
               sessionID: sessionId,
               password: password
@@ -136,8 +136,11 @@ export default function EnterFunction() {
       </div>
       <div className="flex flex-col items-center justify-center w-2/5">
         <form onSubmit={handleSubmit} className="w-full max-w-md">
-        <div className="mb-6">
-            <label htmlFor="Password" className="block text-sm font-medium text-gray-700 mb-2">
+          <div className="mb-6">
+            <label
+              htmlFor="Password"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
               Password <span className="text-purple-500">*</span>
             </label>
             <div className="relative">
