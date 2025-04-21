@@ -61,7 +61,10 @@ export default function SpectatorActiveExperiment() {
     experimentPath,
     experimentTitle,
     experimentDesc,
-    experimentType
+    experimentType,
+    setWasKicked,
+    userRole,
+    socketId
   } = useJoinerStore();
   const navigateTo = useNavigate();
 
@@ -203,27 +206,15 @@ export default function SpectatorActiveExperiment() {
     //socket.off("update");
   };
 }, []);
-  useEffect(() => {
-    const getSessionID = async () => {
-      const response = await axios
-        .get(`http://localhost:3000/joiner/verify-code/${roomCode}`)
-        .then((response) => {
-          setSessionID(response.data.sessionID);
-          setSessionId(sessionID)
-          console.log("SessionID", sessionID)
-          console.log("SessionID", sessionId)
-        });
-    }; 
-    getSessionID();
-  }, []);
+ 
   useEffect(() => {
     // if (!sessionID) return;
 
     const fetchUsers = async () => {
       try {
-        console.log("Trying to get users from session " + sessionID);
+        console.log("Trying to get users from session " + sessionId);
         const response = await axios.get(
-          `http://localhost:3000/joiner/room-users/${sessionID}`
+          `http://localhost:3000/joiner/room-users/${sessionId}`
         );
         console.log("HERE IS THE RESPONSE", response);
         const users: IJoiner[] = response.data.users
@@ -390,6 +381,41 @@ export default function SpectatorActiveExperiment() {
       socket.off("toggle-mask")
     }
   })
+
+  useEffect(() => {
+    socket.on("kick", kickUser);
+    console.log("Listening for 'kick event");
+    
+    function kickUser()
+    {
+      //Global store that keeps track of whether the user has been previously kicked or not
+      setWasKicked(true);
+      console.log("Kick function. Here is the socketID and sessionID", socketId, sessionId)
+      //removes user from database
+      
+
+      console.log("Kicking user from database in sessionID: ", sessionId);
+      //is sessionID the global one? or a useState?
+
+      console.log(`removing spectator from session ${sessionId} with socketID ${socketId}`)
+      axios.post("http://localhost:3000/joiner/remove-spectator-from-session", 
+          {
+            sessionID: sessionId,
+            socketID: socketId
+          }
+        ).then(() => {  
+          console.log("Successfully removed from database");
+        })
+        .catch(error =>{
+        console.log("Error removing user from database", error)
+      })
+      navigateTo('/');
+    }
+  
+    return () => {
+      socket.off("kick", kickUser);
+  }}, [setWasKicked]);
+
 
   return (
     <div className="flex flex-col lg:flex-row w-full max-h-full bg-white px-2 py-1 gap-4">

@@ -769,11 +769,11 @@ export async function registerDevice(initializationInfo: IRegisterDeviceInfo){
 export async function getUsersFromSession(sessionID: string){
 	try{
 		const query = await dbClient.queryObject(`SELECT "User".*, device.ipaddress, device.serialnumber FROM "User"
-			JOIN device on "User".device = device.deviceid
+			LEFT JOIN device on "User".device = device.deviceid
 			WHERE "User".sessionid = $1`,
 			[sessionID]
 		);
-		// console.log("<><><><><><> Users retrieved from sessionid", sessionID, query);
+		//console.log("<><><><><><> Users retrieved from sessionid", sessionID, query);
 		return query.rows;
 	}
 	catch(error){
