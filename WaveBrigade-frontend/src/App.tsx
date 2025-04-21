@@ -91,11 +91,9 @@ function App() {
       }
         <ModalComponent
         onAction={handleSettingsAction}
-        onAction2={handleLeaveAction}
         isOpen={isModalSettingsOpen}
         onCancel={() => setIsModalSettingsOpen(false)}
         modalTitle="Settings"
-        button="Leave"
       >
         <div className="mb-6">
           <p><span className="font-bold">Nickname:</span> {nickname || ""}</p>
