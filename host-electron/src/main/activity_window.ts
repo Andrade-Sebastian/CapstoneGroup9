@@ -68,6 +68,9 @@ function createProcessWindow(sessionId: string, userId: string, nickName:string,
   else if(experimentType === 4){
     activityRoute = `activity/${sessionId}/${userId}/article-lab`
   }
+  else if(experimentType === 5){
+    activityRoute = `activity/${sessionId}/${userId}/article-lab`
+  }
   else{
     console.log("Invalid experiment type")
   }
