@@ -101,6 +101,10 @@ const routing =
           {
             path: "article-lab",
             element: <ArticleLab/>
+          },
+          {
+            path: "sandbox",
+            element: <ArticleLab/>
           }
       ]
     },]

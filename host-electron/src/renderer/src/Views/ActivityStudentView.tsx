@@ -784,7 +784,11 @@ export default function ActivityStudentView(): ReactElement {
             <div>
               <iframe src={articleURL} width="800px" height="500px"></iframe>
             </div>
-          ) : (
+          ) : experimentType == 'sandbox' ?(
+            <div className="flex flex-col justify-center items-center w-full h-full rounded-lg">
+              <h1 className='text-bold'>Welcome to the Sandbox!</h1> 
+              </div>
+          ):(
             <div>
               <p className="text-red-500">Invalid experiment type... </p>
             </div>
