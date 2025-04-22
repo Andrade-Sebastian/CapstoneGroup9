@@ -63,7 +63,8 @@ export default function SpectatorActiveExperiment() {
     experimentType,
     setWasKicked,
     userRole,
-    socketId
+    socketId,
+    imageCaption
   } = useJoinerStore();
   const navigateTo = useNavigate();
 
@@ -160,7 +161,9 @@ export default function SpectatorActiveExperiment() {
     const getVideoInfo = async () => {
       const response = await axios
         .get(
-          `${import.meta.env.VITE_BACKEND_PATH}/joiner/getVideoFile/${experimentId}`
+          `${
+            import.meta.env.VITE_BACKEND_PATH
+          }/joiner/getVideoFile/${experimentId}`
         )
         .then((response) => {
           //THERE IS NOTHING BEING SET HERE
@@ -172,7 +175,9 @@ export default function SpectatorActiveExperiment() {
     const getGalleryInfo = async () => {
       const response = await axios
         .get(
-          `${import.meta.env.VITE_BACKEND_PATH}/joiner/getGallery/${experimentId}`
+          `${
+            import.meta.env.VITE_BACKEND_PATH
+          }/joiner/getGallery/${experimentId}`
         )
         .then((response) => {
           //THERE IS NOTHING BEING SET HERE
@@ -183,7 +188,9 @@ export default function SpectatorActiveExperiment() {
     const getArticleInfo = async () => {
       const response = await axios
         .get(
-          `${import.meta.env.VITE_BACKEND_PATH}/joiner/getArticleFile/${experimentId}`
+          `${
+            import.meta.env.VITE_BACKEND_PATH
+          }/joiner/getArticleFile/${experimentId}`
         )
         .then((response) => {
           //THERE IS NOTHING BEING SET HERE
@@ -193,8 +200,10 @@ export default function SpectatorActiveExperiment() {
         });
     };
 
-    socket.on("end-experiment", () => {
-      navigateTo("/");
+    socket.on("end-experiment", (session) => {
+      if (session !== undefined && session === sessionId) {
+        navigateTo("/");
+      }
     });
 
     if (experimentType === 1) {
@@ -227,21 +236,7 @@ export default function SpectatorActiveExperiment() {
       //socket.off("update");
     };
   }, []);
-  useEffect(() => {
-    const getSessionID = async () => {
-      const response = await axios
-        .get(
-          `${import.meta.env.VITE_BACKEND_PATH}/joiner/verify-code/${roomCode}`
-        )
-        .then((response) => {
-          setSessionID(response.data.sessionID);
-          setSessionId(sessionID);
-          console.log("SessionID", sessionID);
-          console.log("SessionID", sessionId);
-        });
-    };
-    getSessionID();
-  }, []);
+
   useEffect(() => {
     // if (!sessionID) return;
 
@@ -249,7 +244,7 @@ export default function SpectatorActiveExperiment() {
       try {
         console.log("Trying to get users from session " + sessionId);
         const response = await axios.get(
-          `${import.meta.env.VITE_BACKEND_PATH}/joiner/room-users/${sessionID}`
+          `${import.meta.env.VITE_BACKEND_PATH}/joiner/room-users/${sessionId}`
         );
         console.log("HERE IS THE RESPONSE", response);
         const users: IJoiner[] = response.data.users
@@ -277,7 +272,9 @@ export default function SpectatorActiveExperiment() {
     const getExperimentData = async () => {
       try {
         const response = await axios.get(
-          `${import.meta.env.VITE_BACKEND_PATH}/joiner/session/getInfo/${roomCode}`
+          `${
+            import.meta.env.VITE_BACKEND_PATH
+          }/joiner/session/getInfo/${roomCode}`
         );
         if (response.status === 200) {
           console.log("EXPERIMENT ID RETURNED: ", response.data.experimentid);
@@ -427,51 +424,60 @@ export default function SpectatorActiveExperiment() {
       }
     });
     // setIsMasked(true);
-    return() =>{
-      socket.off("toggle-mask")
-    }
-  })
+    return () => {
+      socket.off("toggle-mask");
+    };
+  });
 
   useEffect(() => {
     socket.on("kick", kickUser);
     console.log("Listening for 'kick event");
-    
-    function kickUser()
-    {
+
+    function kickUser() {
       //Global store that keeps track of whether the user has been previously kicked or not
       setWasKicked(true);
-      console.log("Kick function. Here is the socketID and sessionID", socketId, sessionId)
+      console.log(
+        "Kick function. Here is the socketID and sessionID",
+        socketId,
+        sessionId
+      );
       //removes user from database
-      
 
       console.log("Kicking user from database in sessionID: ", sessionId);
       //is sessionID the global one? or a useState?
 
-      console.log(`removing spectator from session ${sessionId} with socketID ${socketId}`)
-      axios.post(`${import.meta.env.VITE_BACKEND_PATH}/joiner/remove-spectator-from-session`, 
+      console.log(
+        `removing spectator from session ${sessionId} with socketID ${socketId}`
+      );
+      axios
+        .post(
+          `${
+            import.meta.env.VITE_BACKEND_PATH
+          }/joiner/remove-spectator-from-session`,
           {
             sessionID: sessionId,
-            socketID: socketId
+            socketID: socketId,
           }
-        ).then(() => {  
+        )
+        .then(() => {
           console.log("Successfully removed from database");
         })
-        .catch(error =>{
-        console.log("Error removing user from database", error)
-      })
-      navigateTo('/');
+        .catch((error) => {
+          console.log("Error removing user from database", error);
+        });
+      navigateTo("/");
     }
-  
+
     return () => {
       socket.off("kick", kickUser);
-  }}, [setWasKicked]);
-
+    };
+  }, [setWasKicked]);
 
   return (
-    <div className="flex flex-col lg:flex-row w-full max-h-full bg-white px-2 py-1 gap-4">
+    <div className="flex flex-col lg:flex-row w-full h-full max-h-full bg-white px-2 py-1 gap-4">
       <Toaster position="top-right" />
       <div className="grid grid-cols-1 grid-rows-12 w-full lg:w-3/4 gap-4 h-full">
-        <div className="row-start-1 row-end-6 relative w-full shadow-md flex-grow rounded-lg overflow-hidden">
+        <div className="row-start-1 row-end-7 relative w-full shadow-md flex-grow rounded-lg overflow-hidden">
           <div className="absolute top-0 left-0 w-full h-full">
             {experimentType == 1 && isMediaAFile ? (
               <ReactPlayer
@@ -493,13 +499,18 @@ export default function SpectatorActiveExperiment() {
                 className=" rounded-lg"
               />
             ) : experimentType == 2 ? (
-              <div className="flex justify-center items-center w-full h-full rounded-lg">
-                <img
-                  src={photoPath}
-                  className="rounded-lg object-contain max-w-4xl max-h-[55vh]"
-                  alt="Experiment Image"
-                />
-              </div>
+            <div className="flex flex-col items-center justify-center w-full h-full rounded-lg space-y-2">
+              <img
+                src={photoPath}
+                className="rounded-lg object-contain max-w-4xl max-h-[55vh]"
+                alt="Experiment Image"
+              />
+              {imageCaption && (
+                <p className="text-center text-lg font-semibold text-gray-700 px-4">
+                  {imageCaption}
+                </p>
+              )}
+            </div>
             ) : experimentType == 3 ? (
               <div className="flex flex-col justify-center items-center w-full h-full rounded-lg">
                 {galleryPath ? (
@@ -544,24 +555,23 @@ export default function SpectatorActiveExperiment() {
           </div>
         </div>
         {/* Chart stuff*/}
-        <div className="flex row-start-6 row-end-11 bg-gray-200 rounded-md text-gray-500 overflow-auto">
-          <div className="flex max-h-full w-full">
-            {activeChart === "heartRateChart" ? (
-              <div className="flex flex-col w-full h-full max-h-full">
-                <div className="text-lg font-semibold">
-                  ECG Chart - 33 BPM Average
-                </div>
+        <div className="flex flex-col row-start-7 row-end-12 bg-gray-200 rounded-md text-gray-500 overflow-auto">
+          {activeChart === "heartRateChart" ? (
+            <div className="flex flex-col h-full max-h-full">
+              <p className="text-lg font-semibold">ECG Chart</p>
+              <div className=" w-full h-full max-h-full">
                 <ChartComponent
                   chart_type={1}
                   chart_name="BPM"
                   chart_color="rgb(23, 190, 207)"
                   user_id={selectedJoiner?.id}
-                  className="w-full h-full"
                 />
               </div>
-            ) : activeChart === "temperatureChart" ? (
-              <div className="flex flex-col w-full h-full max-h-full">
-                <div className="text-lg font-semibold">Temperature Chart</div>
+            </div>
+          ) : activeChart === "temperatureChart" ? (
+            <div className="flex flex-col h-full max-h-full">
+              <p className="text-lg font-semibold">Temperature Chart</p>
+              <div className=" w-full h-full max-h-full">
                 <ChartComponent
                   chart_type={2}
                   chart_name="°F"
@@ -570,9 +580,11 @@ export default function SpectatorActiveExperiment() {
                   className="w-full h-full"
                 />
               </div>
-            ) : (
-              <div className="flex flex-col w-full h-full max-h-full">
-                <div className="text-lg font-semibold">GSR / EDA</div>
+            </div>
+          ) : (
+            <div className="flex flex-col h-full max-h-full">
+              <p className="text-lg font-semibold">GSR/EDA</p>
+              <div className=" w-full h-full max-h-full">
                 <ChartComponent
                   chart_type={3}
                   chart_name="EDA"
@@ -581,11 +593,11 @@ export default function SpectatorActiveExperiment() {
                   className="w-full h-full"
                 />
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
         {/* <Divider className="my-3" /> */}
-        <div className="h-min flex justify-between items-center align-middle row-start-11 row-end-12 mr-5">
+        <div className="h-min flex justify-between items-center row-start-12 row-end-13 mr-5">
           <p className="font-semibold">
             Nickname: <span className="font-light">{nickname}</span>
           </p>

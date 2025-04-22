@@ -1024,4 +1024,12 @@ export async function isNicknameUnique(sessionID: string, nickname: string): Pro
 }
 
 
+export async function hostDisconnect(socketId: string){
+	console.log("Host socket id: ", socketId);
+	const query = await dbClient.queryObject(`SELECT sessionid FROM session WHERE hostsocketid = $1`,
+		[socketId]
+	)
+	return query.rows[0];
+}
+
 

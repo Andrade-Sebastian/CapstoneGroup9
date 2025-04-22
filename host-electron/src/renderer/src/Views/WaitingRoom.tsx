@@ -62,6 +62,9 @@ export default function WaitingRoom() {
   const [socketID, setSocketID] = useState('')
   const [theUserMap, setTheUserMap] = useState(new Map())
   const [focusedUser, setFocusedUser] = useState('')
+  const [focusedDeviceSerial, setFocusedDeviceSerial] = useState("")
+  const [focusedDeviceIP, setFocusedDeviceIP] = useState("")
+  const [focusedAssociatedUser, setFocusedAssociatedUser] = useState("");
   const [experimentIcon, setExperimentIcon] = useState<JSX.Element>(
     <CiPlay1 style={{ fontSize: '20px' }} />
   )
@@ -113,8 +116,8 @@ export default function WaitingRoom() {
   //Modal Handlers
   const handleOpenModal = () => {
     setIsModalOpen(true)
-    setIsBeginDisabled(false) //set to false to test
-    setIsConnectEmotibitDisabled(true) //set to true to test
+    setIsBeginDisabled(true) //set to false to test
+    setIsConnectEmotibitDisabled(false) //set to true to test
     console.log(
       `[HandleOpenModal]Begin is ${isBeginDisabled} and ConnectEmotibitDisabled is ${isConnectEmotibitDisabled}`
     )
@@ -124,7 +127,7 @@ export default function WaitingRoom() {
     console.log('Creating lobby...')
     handleSubmit()
     handleCloseModal()
-    setAllDevicesConnected(true) //set to true to test
+    setAllDevicesConnected(false) //set to true to test
   }
 
   const checkUsers = () => {
@@ -288,38 +291,52 @@ export default function WaitingRoom() {
 
   // Joined EmotiBit Settings Modal
   const handleRemoveEmoti = async () => {
-    if (!selectedEmotiBitId) return
+    console.log("Clicked on 'remove emotibit'")
+    // if (!selectedEmotiBitId) return
+    console.log("focusedDeviceSerial: " + focusedDeviceSerial)
+    console.log("focusedDeviceIP: " + focusedDeviceIP)
 
+    
     await axios.post(`${import.meta.env.VITE_BACKEND_PATH}/host/remove-device`, {
-      serialNumber: serialNumber,
-      ipAddress: IPAddress
+      serialNumber: focusedDeviceSerial,
+      ipAddress: focusedDeviceIP
     })
 
     console.log('after axios')
     console.log('removing emotibit')
 
-    const serialNumberToRemove = serialNumber
-    console.log(selectedEmotiBitId + 'selectedEmotiBitId')
+    // console.log(selectedEmotiBitId + "selectedEmotiBitId")
     // if(!selectedEmotiBitId) return;
 
-    // console.log("(handleRemoveEmoti): emotibit serial: " + focusedDeviceSerial + " IP: " + focusedDeviceIP)
-    // console.log("Removed emotibit with serial " + focusedDeviceSerial + " and deviceIP" + focusedDeviceIP )
+    console.log("(handleRemoveEmoti): emotibit serial: " + focusedDeviceSerial + " IP: " + focusedDeviceIP)
+    console.log("Removed emotibit with serial " + focusedDeviceSerial + " and deviceIP" + focusedDeviceIP )
+    
+    console.log("after axios")
+    console.log("removing emotibit")
 
-    console.log('after axios')
-    console.log('removing emotibit')
+    const serialNumberToRemove = focusedDeviceSerial;
 
-    setCurrentDevices((currentDevices) =>
-      currentDevices.filter(
-        (device) => device.associatedDevice.serialNumber !== serialNumberToRemove
-      )
-    )
-    setIsModalOpenSettings(false)
-  }
+    setCurrentDevices(currentDevices => 
+      currentDevices.filter(device => device.associatedDevice.serialNumber !== focusedDeviceSerial)
+    );
+    setIsModalOpenSettings(false);
+  } 
+  const handleOpenModalSettings = (userId: string, associatedDevice: JSON, wholeObj: JSON) => {
+    console.log("nruh" + JSON.stringify(associatedDevice));
+    setFocusedDeviceSerial(associatedDevice.serialNumber)
+    setFocusedDeviceIP(associatedDevice.ipAddress)
+    setFocusedAssociatedUser(wholeObj.nickname)
+    
+    if (!userId){
+      console.log("Selected emotibit is not associated to a user, userid is "+ userId)
+    }
 
-  const handleOpenModalSettings = (userId: string) => {
-    setSelectedEmotiBitId(userId)
-    setIsModalOpenSettings(true)
-  }
+    setSelectedEmotiBitId(userId);
+    console.log("selected emotibit" + selectedEmotiBitId)
+    setIsModalOpenSettings(true);
+    
+  };
+
 
   const handleCloseModalSettings = () => {
     setIsModalOpenSettings(false)
@@ -344,6 +361,7 @@ export default function WaitingRoom() {
         currentUsers[i].ipaddress,
         currentUsers[i].serialnumber,
         `${import.meta.env.VITE_BACKEND_PATH}`,
+
         currentUsers[i].userid,
         currentUsers[i].frontendsocketid,
         currentUsers[i].sessionid
@@ -363,6 +381,7 @@ export default function WaitingRoom() {
             socket: sessionStorage.getItem('socketID'),
             connection: true
           })
+
           console.log('All devices successfully updated')
         } catch (error) {
           console.error('Failed to update device status', error)
@@ -422,10 +441,12 @@ export default function WaitingRoom() {
         `<<HOST 389>>trying to kick spectator , sending sessionID ${sessionId} and socketID ${nicknameSocketID}`
       )
 
+
       axios.post(`${import.meta.env.VITE_BACKEND_PATH}/joiner/remove-spectator-from-session`, {
         sessionID: sessionId,
         socketID: nicknameSocketID
       })
+
       socket.emit('kick', nicknameSocketID)
     } else {
       nicknameSocketID = theUserMap.get(focusedUser)
@@ -585,7 +606,7 @@ export default function WaitingRoom() {
     const interval = setInterval(fetchUsers, 5000) // Refresh users every 5 seconds
 
     return () => clearInterval(interval)
-  }, [sessionID]) //Don't fetch any data until sessionID is set
+  }, [sessionID]); //Don't fetch any data until sessionID is set
 
   const handleBackButton = () => {
     navigateTo('/host/select-lab')
@@ -612,6 +633,7 @@ export default function WaitingRoom() {
   useEffect(() => {
     console.log('Current Devices', currentDevices)
   }, [currentDevices])
+
 
   return (
     <div className="flex flex-col items-center justify-center px-4 mx:px-8 w-full">
@@ -660,7 +682,7 @@ export default function WaitingRoom() {
                   <EmotiBitList
                     key={device.userId}
                     user={device}
-                    onAction={() => handleOpenModalSettings(device.userid)}
+                    onAction={() => {handleOpenModalSettings(device.userid, device.associatedDevice, device); console.log("HERE" + JSON.stringify(device))}}
                   />
                 )
                 //}
@@ -770,28 +792,17 @@ export default function WaitingRoom() {
         // button3="Update"
       >
         <div className="mb-6">
+
+          <label htmlFor="associated-user" className="block text-sm font-medium text-gray-700 mb-2">
+            Associated To: {focusedAssociatedUser}
+          </label>
           <label htmlFor="serialNumber" className="block text-sm font-medium text-gray-700 mb-2">
-            Serial Number
+            Serial Number: {focusedDeviceSerial}
           </label>
-          <input
-            type="text"
-            id="serialNumber"
-            className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            value={serialNumber}
-            onChange={(e) => setSerialNumber(e.target.value)}
-          />
-        </div>
-        <div className="mb-6">
           <label htmlFor="ipAddress" className="block text-sm font-medium text-gray-700 mb-2">
-            IP Address
+            IP Address: {focusedDeviceIP}
           </label>
-          <input
-            type="text"
-            id="ipAddress"
-            className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            value={IPAddress}
-            onChange={(e) => setIPAddress(e.target.value)}
-          />
+
         </div>
       </ModalComponent>
       <ModalComponent
@@ -805,6 +816,6 @@ export default function WaitingRoom() {
           <h1 className="text-md text-gray-700 mb-2">Are you sure you want to kick this joiner?</h1>
         </div>
       </ModalComponent>
-    </div>
-  )
-}
+  </div>
+  
+)}

@@ -60,6 +60,7 @@ interface JoinerState{
     experimentType: number;
     experimentTypeString: string;
     experimentPath: string;
+    imageCaption: string;
     galleryPhotos: IGallery[];
     users: Array<IUser>;
     sessionId: string;
@@ -87,6 +88,7 @@ interface JoinerState{
     setSecret: (secret: string) => void;
     setExperimentTypeString: (experimentTypeString: string) => void;
     setExperimentPath: (experimentPath: string) => void;
+    setImageCaption: (imageCaption: string) => void;
     addPhoto: (photo: IGallery) => void;
     setUserRole: (role: string) => void;
     setWasKicked: (wasKicked: boolean) => void;
@@ -107,6 +109,7 @@ export const useJoinerStore = create<JoinerState>()(
         experimentType: 0,
         experimentTypeString: '',
         experimentPath: '',
+        imageCaption: '',
         galleryPhotos: [],
         users: [],
         sessionId: '',
@@ -135,6 +138,7 @@ export const useJoinerStore = create<JoinerState>()(
         setSessionId: (id: string): void => set(() => ({sessionId: id})),
         setExperimentTypeString: (experimentTypeString: string): void => set(() => ({experimentTypeString: experimentTypeString})),
         setExperimentPath: (experimentPath: string): void => set(() => ({experimentPath: experimentPath})),
+        setImageCaption: (imageCaption: string): void => set(()=> ({imageCaption: imageCaption})),
         addPhoto: (photo): void => set((state) => ({galleryPhotos: [...state.galleryPhotos, photo]})),
         setUserRole: (role: string): void => set(() => ({userRole: role})),
         setWasKicked: (wasKicked: boolean): void => set(() => ({wasKicked: wasKicked})),

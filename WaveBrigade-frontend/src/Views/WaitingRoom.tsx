@@ -55,6 +55,9 @@ export default function WaitingRoom() {
     setUserRole,
     experimentTitle,
     experimentDesc,
+    setSerial,
+    setIsConnected,
+    setImageCaption
   } = useJoinerStore();
 
   // useEffect(() => {
@@ -203,15 +206,16 @@ export default function WaitingRoom() {
 
   useEffect(() => {
     const getSessionID = async () => {
-      console.log("verify-code, room code: ", roomCode)
-      const response = await axios.get(`${import.meta.env.VITE_BACKEND_PATH}/joiner/verify-code/${roomCode}`);
-
-      if(response.status === 200){
-        setSessionID(response.data.sessionID);
-        setSessionId(response.data.sessionID)
-      }
-    }; 
-
+      console.log("verify-code, room code: ", roomCode);
+      const response = await axios
+        .get(
+          `${import.meta.env.VITE_BACKEND_PATH}/joiner/verify-code/${roomCode}`
+        )
+        .then((response) => {
+          setSessionID(response.data.sessionID);
+          setSessionId(response.data.sessionID);
+        });
+    };
 
     setIsSpectator(userRole === "spectator");
     console.log("SPECTATOR AHH: ", isSpectator);
@@ -219,12 +223,17 @@ export default function WaitingRoom() {
   }, []);
 
   let interval;
+  let deviceInfo;
   useEffect(() => {
     if (!sessionID) return;
 
     const fetchUsers = async () => {
       console.log("****user role:" + userRole);
       try {
+        console.log("Serial: " + serial);
+        deviceInfo = await axios.get(`${import.meta.env.VITE_BACKEND_PATH}/database/device-info/${serial}`);
+        console.log("Recieved Device Info: " + JSON.stringify(deviceInfo.body));
+
         console.log(
           "Trying to get users from session " + sessionId,
           "type | ",
@@ -248,29 +257,34 @@ export default function WaitingRoom() {
             ? `${user.nickname} (Spectator)`
             : user.nickname
         );
+        setNickNames(nicknames);
 
         // initialize nicknames array
         // for (let i = 0; i < users.length; i++) {
         //   if (users[i].userrole === "spectator"){
         //     nicknames.push(users[i].nickname + " (Spectator)");
-
-        //   }else{
-        //     nicknames.push(users[i].nickname)
-        //   }
-        //   console.log("nicknames: " + JSON.stringify(nicknames) + "Length: " + nicknames.length)
-        //   setNickNames(nicknames);
-        // }
-        setNickNames(nicknames);
       } catch (error) {
-        console.error("Error fetching users:", error);
+        if (error.response?.status === 404) {
+          console.log("Device not found.");
+          setSerial("");
+          setIsConnected(false);
+        } else {
+          console.error("An error occurred:", error);
+        }
       }
     };
-
     fetchUsers();
     interval = setInterval(fetchUsers, 5000); // Refresh users every 5 seconds
 
     return () => clearInterval(interval);
   }, [sessionID]); //Don't fetch any data until sessionID is set
+
+  //listening for the host to disconnect
+  socket.on("end-experiment", (session) => {
+    if (session !== undefined && session === sessionId) {
+      navigateTo("/");
+    }
+  });
 
   useEffect(() => {
     const getExperimentData = async () => {
@@ -348,6 +362,8 @@ export default function WaitingRoom() {
           setExperimentTitle(experimentTitle);
           setExperimentDesc(experimentDesc);
           setExperimentPath(path);
+          setImageCaption(captions);
+          
         }
       } catch (error) {
         toast.error("Failed to receive photo data");
@@ -360,7 +376,7 @@ export default function WaitingRoom() {
         const response = await axios.get(
           `${
             import.meta.env.VITE_BACKEND_PATH
-          }/joiner/getGallery/${experimentID}`
+          }joiner/getGallery/${experimentID}`
         );
         if (response.status === 200) {
           toast.success("Successfully received gallery lab data.");
@@ -405,7 +421,7 @@ export default function WaitingRoom() {
         const response = await axios.get(
           `${
             import.meta.env.VITE_BACKEND_PATH
-          }/joiner/getArticleFile/${experimentID}`
+          }joiner/getArticleFile/${experimentID}`
         );
         if (response.status === 200) {
           toast.success("Successfully received article lab data.");
@@ -448,6 +464,14 @@ export default function WaitingRoom() {
   }, [experimentID, setExperimentDesc, setExperimentId, setExperimentTitle, setExperimentPath, experimentType]);
 
   useEffect(() => {
+    if (!isConnected && userRole !== "spectator") {
+      socket.disconnect(true);
+
+      navigateTo("/");
+    }
+  }, [isConnected]);
+
+  useEffect(() => {
     if (experimentType === 1) {
       setExperimentTypeString("VideoLab");
       setExperimentIcon(<IoVideocam style={{ fontSize: "20px" }} />);
@@ -469,6 +493,7 @@ export default function WaitingRoom() {
       console.log("Invalid experiment type");
     }
   }, [experimentType, setExperimentTypeString]);
+
   return (
     <div className="flex flex-col items-center justify-center px-4 md:px-8 py-8">
       <Toaster position="top-right" />
@@ -507,12 +532,10 @@ export default function WaitingRoom() {
                     <div>
                       {isConnected ? (
                         <span className="text-green-500 font-bold ml-1">
-
                           CONNECTED
                         </span>
                       ) : (
                         <span className="text-red-500 font-bold ml-1">
-
                           NOT CONNECTED
                         </span>
                       )}

@@ -171,6 +171,7 @@ export default function VideoInputForm(props: IVideoInputForm) {
           headers: { 'Content-Type': 'multipart/form-data' }
         }
       )
+
       console.log('After /video-lab, ', JSON.stringify(response.data))
 
       if (response.status === 200) {

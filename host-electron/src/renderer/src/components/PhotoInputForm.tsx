@@ -82,6 +82,7 @@ export default function PhotoInputForm(props: IPhotoInputForm) {
     try {
       //create a photo lab
       console.log('Sending data', JSON.stringify(data))
+
       const response = await axios.post(
         `${import.meta.env.VITE_BACKEND_PATH}/database/photo-lab`,
         data,
@@ -89,6 +90,7 @@ export default function PhotoInputForm(props: IPhotoInputForm) {
           headers: { 'Content-Type': 'multipart/form-data' }
         }
       )
+
       console.log('After /photo-lab, ', JSON.stringify(response.data))
 
       if (response.status === 200) {
@@ -260,7 +262,7 @@ export default function PhotoInputForm(props: IPhotoInputForm) {
               disabled={!experimentTitle.trim() || !isFileSelected}
               className={`mt-6 font-semibold py-3 px-6 rounded-md shadow-md transition duration-300 ease-in-out ${
                 experimentTitle.trim() && isFileSelected
-                  ? 'bg-[#7F56D9] hover:bg-violet-500 text-white'
+                  ? 'bg-[#7F56D9] hover:bg-violet-500 text-white cursor-pointer'
                   : 'bg-gray-400 text-white cursor-not-allowed'
               }`}
             >

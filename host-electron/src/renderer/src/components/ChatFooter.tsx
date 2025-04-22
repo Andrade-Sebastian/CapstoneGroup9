@@ -35,7 +35,7 @@ export default function ChatFooter() {
       />
       <button
         type="submit"
-        className="ml-2 px-4 py-2 bg-[#7F56D9] text-white rounded-md hover:bg-[#6B46C1] transition"
+        className="ml-2 px-4 py-2 bg-[#7F56D9] text-white rounded-md hover:bg-[#6B46C1] transition cursor-pointer"
       >
         Send
       </button>

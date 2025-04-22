@@ -232,7 +232,7 @@ export default function ActivityHost() {
     handleHostEndSession() //process destruction for all users
     console.log('in handle submit')
 
-    socket.emit('end-experiment')
+    socket.emit('end-experiment', sessionId);
 
     //delete all info pertaining to the session from the database
     axios.post(`${import.meta.env.VITE_BACKEND_PATH}/database/remove-session/${sessionId}`)
@@ -287,9 +287,11 @@ export default function ActivityHost() {
     const fetchUsers = async () => {
       try {
         console.log('Trying to get users from session ' + sessionID)
+
         const response = await axios.get(
           `${import.meta.env.VITE_BACKEND_PATH}/joiner/room-users/${sessionID}`
         )
+
         const users = response.data.users //Array of IUser objects
         const rawUsers = response.data.users;
         const userMap = new Map();
@@ -512,11 +514,11 @@ export default function ActivityHost() {
             ) : experimentType == 4 && isMediaAFile ? (
               // Not a huge bug but the source should be the article lab source, it's flip flopped, don't know why
               <div>
-                <iframe src={articleLabSource} width="800px" height="500px"></iframe>
+                <iframe src={articleLabSource} width="600px" height="500px"></iframe>
               </div>
             ) : experimentType == 4 && !isMediaAFile ? (
               <div>
-                <iframe src={articleURL} width="800px" height="500px"></iframe>
+                <iframe src={articleURL} width="700px" height="500px"></iframe>
               </div>
             )  : experimentType == 5 ?(
               <div className="flex flex-col justify-center items-center w-full h-full rounded-lg">

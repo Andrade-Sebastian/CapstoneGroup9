@@ -22,7 +22,7 @@ export default function EmotiBitList(props: IEmotiBitList) {
             <h1 className="text-lg font-medium text-black"> IP: {props.user.associatedDevice?.ipAddress || 'NA'}</h1>
           </div>
         </div>
-        <button type='button' className='py-3 px-6 transition duration-300 ease-in-out' onClick={props.onAction}>
+        <button type='button' className='py-3 px-6 transition duration-300 ease-in-out cursor-pointer' onClick={props.onAction}>
           <CiSettings className="text-gray-600 text-xl cursor-pointer hover:text-black size-10" />
         </button>
       </CardHeader>

@@ -48,87 +48,79 @@ export default function ChartComponent(props: IDataType) {
     //     acceptTimeState(timeState => [...timeState, timeStamp * 1000]);
     // }
 
-        // CHART TYPE IF STATEMENTS  
-        if(props.chart_type === 1){
-            min = 60;
-            max = 90;
-            current_data = heartRate;
-            console.log("HR: ", current_data);
-            //console.log( "ECG CHART")
-        }  
-        else if(props.chart_type === 2){
-            min = 80;
-            max = 98;
-            current_data = (ancDataFrame.data2 * 1.8) + 32;
-            //console.log("TEMP CHART: ", current_data);
-        }
-        else if(props.chart_type === 3){
-            min = 0;
-            max = 2;
-            current_data = (ancDataFrame.data1)
-            //console.log("EDA CHART" , current_data);
-        }
-        else{
-            console.log("Invalid Chart Type");
-            return 0;
-        }
-        
-
-        let counter = 0;
-        const intervalId = setInterval(() => {
-            counter++
-            const temp_data = current_data
-            max = Math.max(max, Math.round(temp_data));
-            min = max - 1;
-            //console.log("MAX: ", max);
-            //console.log("MIN: ", min);
-
-            if(counter >= 8){
-                console.log("Clearing interval");
-                max = current_data;;
-                min = max - 1;
-                clearInterval(intervalId);
-            }
-        }, 5000);
-
-        if(numOfPoints === 100){
-            console.log("100 POINTS RECIEVED");
-            const temp_plot = [...plotState];
-            average = calculateAverage(temp_plot);
-            temp_plot.shift();
-            temp_plot.push(current_data);
-            acceptPlotDataState(temp_plot);
-            //acceptPlotDataState(plotState => plotState.slice(0, (100 - plotState.length)));
-           // acceptPlotDataState(plotState => [...plotState, current_data]);
-        }
-        else{
-            acceptPlotDataState(plotState => [...plotState, current_data]);
-        }
-        
-        
+    // CHART TYPE IF STATEMENTS
+    if (props.chart_type === 1) {
+      min = 60;
+      max = 90;
+      current_data = heartRate;
+      console.log("HR: ", current_data);
+      //console.log( "ECG CHART")
+    } else if (props.chart_type === 2) {
+      min = 80;
+      max = 98;
+      current_data = ancDataFrame.data2 * 1.8 + 32;
+      //console.log("TEMP CHART: ", current_data);
+    } else if (props.chart_type === 3) {
+      min = 0;
+      max = 2;
+      current_data = ancDataFrame.data1;
+      //console.log("EDA CHART" , current_data);
+    } else {
+      console.log("Invalid Chart Type");
+      return 0;
     }
 
-    function calculateAverage(array){
-        let sum = 0;
-        for(let i = 0; i < array.length; i++){
-            sum = array[i] + sum;
-        }
-        const avg = sum/(array.length);
-        low = Math.min(...array);
-        high = Math.max(...array);
-        return avg
+    let counter = 0;
+    const intervalId = setInterval(() => {
+      counter++;
+      const temp_data = current_data;
+      max = Math.max(max, Math.round(temp_data));
+      min = max - 1;
+      //console.log("MAX: ", max);
+      //console.log("MIN: ", min);
+
+      if (counter >= 8) {
+        console.log("Clearing interval");
+        max = current_data;
+        min = max - 1;
+        clearInterval(intervalId);
+      }
+    }, 5000);
+
+    if (numOfPoints === 100) {
+      console.log("100 POINTS RECIEVED");
+      const temp_plot = [...plotState];
+      average = calculateAverage(temp_plot);
+      temp_plot.shift();
+      temp_plot.push(current_data);
+      acceptPlotDataState(temp_plot);
+      //acceptPlotDataState(plotState => plotState.slice(0, (100 - plotState.length)));
+      // acceptPlotDataState(plotState => [...plotState, current_data]);
+    } else {
+      acceptPlotDataState((plotState) => [...plotState, current_data]);
     }
+  }
 
-    useEffect(() => {
-        console.log("Clearing arrays");
-        acceptPlotDataState([]);
-        average = 0;
-        low = 0;
-        high = 0;
-    }, [props.chart_type]);
+  function calculateAverage(array) {
+    let sum = 0;
+    for (let i = 0; i < array.length; i++) {
+      sum = array[i] + sum;
+    }
+    const avg = sum / array.length;
+    low = Math.min(...array);
+    high = Math.max(...array);
+    return avg;
+  }
 
-    useEffect(() => {
+  useEffect(() => {
+    console.log("Clearing arrays");
+    acceptPlotDataState([]);
+    average = 0;
+    low = 0;
+    high = 0;
+  }, [props.chart_type]);
 
+  useEffect(() => {
     function brainflowConnect() {
       console.log(
         "(chartComponent.ts): Emitting brainflow-assignment with socketId:",
@@ -145,22 +137,33 @@ export default function ChartComponent(props: IDataType) {
     //     //addTempDataPoint(randomTemp, currentTime);
     // }
 
-        function onUpdate(payload){
-            const {ancData, auxData, heartRate, ipAddress, serialNumber, backendIp, hostSessionId, userId, frontEndSocketId, assignSocketId} = payload;
-            const selectedUser = String(userId);
-            if(String(props.user_id) === (selectedUser)){
-                addDataPoint(ancData, auxData, heartRate, ancData.timestamp);
-            }
-        };
-        //brainflowConnect();
-        socket.on("brainflow-assignment", brainflowConnect);
-        //Plot.relayout(Chart, onUpdate);
-        
-        // const counter = 0;
-        // const intervalId = setInterval(() => {
-            
-        //     simulateData();
-        //     Plot.extendTraces(Chart, { y: plotState, x: timeState});
+    function onUpdate(payload) {
+      const {
+        ancData,
+        auxData,
+        heartRate,
+        ipAddress,
+        serialNumber,
+        backendIp,
+        hostSessionId,
+        userId,
+        frontEndSocketId,
+        assignSocketId,
+      } = payload;
+      const selectedUser = String(userId);
+      if (String(props.user_id) === selectedUser) {
+        addDataPoint(ancData, auxData, heartRate, ancData.timestamp);
+      }
+    }
+    //brainflowConnect();
+    socket.on("brainflow-assignment", brainflowConnect);
+    //Plot.relayout(Chart, onUpdate);
+
+    // const counter = 0;
+    // const intervalId = setInterval(() => {
+
+    //     simulateData();
+    //     Plot.extendTraces(Chart, { y: plotState, x: timeState});
 
     //     if(counter > 100){
     //         Plot.relayout(Chart, {
@@ -177,54 +180,52 @@ export default function ChartComponent(props: IDataType) {
     //     console.log("Connect");
     // })
 
-        return () => {
-            socket.off("brainflow-assignment", brainflowConnect);
-            socket.off("update", onUpdate);
-        };
-    }, [addDataPoint, timeState]);
+    return () => {
+      socket.off("brainflow-assignment", brainflowConnect);
+      socket.off("update", onUpdate);
+    };
+  }, [addDataPoint, timeState]);
 
-    return(
-        <div className='h-auto w-auto'>
-            <div className='flex flex-row space-x-4'>
-                <div>Average: {average.toFixed(2)}</div>
-                <div> Low: {low.toFixed(2)}</div>
-                <div> High: {high.toFixed(2)}</div>
-            </div>
-            <div id="chart">
-                {/* <p> The user_id is: {props.user_id} </p> */}
-                
-                <Plot
-                    data={[
-                    {
-                        //x: timeState,
-                        y: plotState,
-                        mode: 'lines',          // Line chart
-                        type: 'line',
-                        name: props.chart_name, // Label for the trace
-                        line: {color: props.chart_color} //'rgb(255, 99, 132)'} // Line color
-                    },
-                    ]}
-                    layout = {{
-                        yaxis: {
-                            title: 'Temperature (°F)',//props.chart_name,,
-                            range: [min, max + 1],
-                            tick: 1,
-                        },
-                        margin: {
-                          l: 0,
-                          r: 0,
-                          b: 0,
-                          t: 0,
-                        },
-                        showlegend: true,
-                        responsive: true,
-                    }}
-                    config={{
-                        displayModeBar: false,
-                        scrollZoom: false 
-                      }}
-                />
-            </div> 
-        </div>
-    );
+  return (
+    <div className="flex flex-col w-full h-full max-h-full flex flex-col">
+      <div className="flex flex-row gap-4">
+        <div>Average: {average.toFixed(2)}</div>
+        <div> Low: {low.toFixed(2)}</div>
+        <div> High: {high.toFixed(2)}</div>
+      </div>
+      {/* <p> The user_id is: {props.user_id} </p> */}
+      <Plot
+        className="w-full h-full"
+        data={[
+          {
+            //x: timeState,
+            y: plotState,
+            mode: "lines", // Line chart
+            type: "line",
+            name: props.chart_name, // Label for the trace
+            line: { color: props.chart_color }, //'rgb(255, 99, 132)'} // Line color
+          },
+        ]}
+        layout={{
+          yaxis: {
+            title: "Temperature (°F)", //props.chart_name,,
+            range: [min, max + 1],
+            tick: 1,
+          },
+          margin: {
+            l: 0,
+            r: 0,
+            b: 0,
+            t: 0,
+          },
+          showlegend: true,
+          responsive: true,
+        }}
+        config={{
+          displayModeBar: false,
+          scrollZoom: false,
+        }}
+      />
+    </div>
+  );
 }
