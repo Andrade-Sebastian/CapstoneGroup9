@@ -64,6 +64,7 @@ export default function SpectatorActiveExperiment() {
     setWasKicked,
     userRole,
     socketId,
+    imageCaption
   } = useJoinerStore();
   const navigateTo = useNavigate();
 
@@ -498,13 +499,18 @@ export default function SpectatorActiveExperiment() {
                 className=" rounded-lg"
               />
             ) : experimentType == 2 ? (
-              <div className="flex justify-center items-center w-full h-full rounded-lg">
-                <img
-                  src={photoPath}
-                  className="rounded-lg object-contain max-w-4xl max-h-[55vh]"
-                  alt="Experiment Image"
-                />
-              </div>
+            <div className="flex flex-col items-center justify-center w-full h-full rounded-lg space-y-2">
+              <img
+                src={photoPath}
+                className="rounded-lg object-contain max-w-4xl max-h-[55vh]"
+                alt="Experiment Image"
+              />
+              {imageCaption && (
+                <p className="text-center text-lg font-semibold text-gray-700 px-4">
+                  {imageCaption}
+                </p>
+              )}
+            </div>
             ) : experimentType == 3 ? (
               <div className="flex flex-col justify-center items-center w-full h-full rounded-lg">
                 {galleryPath ? (
@@ -604,7 +610,7 @@ export default function SpectatorActiveExperiment() {
           </div>
           <div className="flex space-x-4">
             <button
-              className={`text-xl p-2 rounded-lg cursor-pointer${
+              className={`text-xl p-2 rounded-lg ${
                 selectedButton === "heartRate"
                   ? "bg-[#7F56D9] text-white"
                   : "bg-gray-300"
@@ -617,7 +623,7 @@ export default function SpectatorActiveExperiment() {
               <TbHeartRateMonitor />
             </button>
             <button
-              className={`text-xl p-2 rounded-lg cursor-pointer${
+              className={`text-xl p-2 rounded-lg ${
                 selectedButton === "temperature"
                   ? "bg-[#7F56D9] text-white"
                   : "bg-gray-300"
@@ -630,7 +636,7 @@ export default function SpectatorActiveExperiment() {
               <FaThermometerEmpty />
             </button>
             <button
-              className={`text-xl p-2 rounded-lg cursor-pointer${
+              className={`text-xl p-2 rounded-lg ${
                 selectedButton === "skin"
                   ? "bg-[#7F56D9] text-white"
                   : "bg-gray-300"
@@ -649,7 +655,7 @@ export default function SpectatorActiveExperiment() {
       <div className="hidden lg:block w-full lg:w-1/4 h-full p-4 bg-white shadow-md rounded-lg overflow-y-auto">
         <div className="flex border-b">
           <button
-            className={`rounded-lg flex-1 p-2 text-lg flex items-center justify-center cursor-pointer ${
+            className={`rounded-lg flex-1 p-2 text-lg flex items-center justify-center ${
               activeTab === "joiners"
                 ? "bg-[#7F56D9] text-white"
                 : "bg-gray-300"
@@ -659,7 +665,7 @@ export default function SpectatorActiveExperiment() {
             <FaUsers className="mr-2 mt-1 size-6" /> Joiners
           </button>
           <button
-            className={`rounded-lg flex-1 p-2 text-lg flex items-center justify-center cursor-pointer ${
+            className={`rounded-lg flex-1 p-2 text-lg flex items-center justify-center ${
               activeTab === "chat" ? "bg-[#7F56D9] text-white" : "bg-gray-300"
             }`}
             onClick={() => setActiveTab("chat")}

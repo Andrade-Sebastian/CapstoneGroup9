@@ -55,6 +55,7 @@ export default function WaitingRoom() {
     experimentDesc,
     setSerial,
     setIsConnected,
+    setImageCaption
   } = useJoinerStore();
 
   // useEffect(() => {
@@ -228,9 +229,7 @@ export default function WaitingRoom() {
       console.log("****user role:" + userRole);
       try {
         console.log("Serial: " + serial);
-        deviceInfo = await axios.get(
-          `${import.meta.env.VITE_BACKEND_PATH}/database/device-info/${serial}`
-        );
+        deviceInfo = await axios.get(`${import.meta.env.VITE_BACKEND_PATH}/database/device-info/${serial}`);
         console.log("Recieved Device Info: " + JSON.stringify(deviceInfo.body));
 
         console.log(
@@ -361,6 +360,8 @@ export default function WaitingRoom() {
           setExperimentTitle(experimentTitle);
           setExperimentDesc(experimentDesc);
           setExperimentPath(path);
+          setImageCaption(captions);
+          
         }
       } catch (error) {
         toast.error("Failed to receive photo data");

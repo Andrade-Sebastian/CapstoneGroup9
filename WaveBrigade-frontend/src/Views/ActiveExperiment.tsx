@@ -52,6 +52,7 @@ export default function ActiveExperiment() {
     socketId,
     setWasKicked,
     userRole,
+    imageCaption
   } = useJoinerStore();
   const navigateTo = useNavigate();
 
@@ -443,13 +444,18 @@ export default function ActiveExperiment() {
                 className=" rounded-lg"
               />
             ) : experimentType == 2 ? (
-              <div className="flex justify-center items-center w-full h-full rounded-lg">
-                <img
-                  src={photoPath}
-                  className="rounded-lg object-contain max-w-4xl max-h-[55vh]"
-                  alt="Experiment Image"
-                />
-              </div>
+            <div className="flex flex-col items-center justify-center w-full h-full rounded-lg space-y-2">
+              <img
+                src={photoPath}
+                className="rounded-lg object-contain max-w-4xl max-h-[55vh]"
+                alt="Experiment Image"
+              />
+              {imageCaption && (
+                <p className="text-center text-lg font-semibold text-gray-700 px-4">
+                  {imageCaption}
+                </p>
+              )}
+            </div>
             ) : experimentType == 3 ? (
               <div className="flex flex-col justify-center items-center w-full h-full rounded-lg">
                 {galleryPath ? (
