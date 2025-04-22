@@ -461,6 +461,15 @@ export default function WaitingRoom() {
   ]);
 
   useEffect(() => {
+    if (!isConnected){
+      socket.disconnect(true);
+      
+      navigateTo("/")
+
+    }
+  }, [isConnected])
+
+  useEffect(() => {
     if (experimentType === 1) {
       setExperimentTypeString("VideoLab");
       setExperimentIcon(<IoVideocam style={{ fontSize: "20px" }} />);
@@ -477,6 +486,9 @@ export default function WaitingRoom() {
       console.log("Invalid experiment type");
     }
   }, [experimentType, setExperimentTypeString]);
+
+
+
   return (
     <div className="flex flex-col items-center justify-center px-4 md:px-8 py-8">
       <Toaster position="top-right" />
