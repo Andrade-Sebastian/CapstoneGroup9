@@ -54,8 +54,7 @@ export default function WaitingRoom() {
     experimentTitle,
     experimentDesc,
     setSerial,
-    setIsConnected
-    
+    setIsConnected,
   } = useJoinerStore();
 
   // useEffect(() => {
@@ -207,9 +206,7 @@ export default function WaitingRoom() {
       console.log("verify-code, room code: ", roomCode);
       const response = await axios
         .get(
-          `${
-            import.meta.env.VITE_BACKEND_PATH
-          }/joiner/verify-code/${roomCode}`
+          `${import.meta.env.VITE_BACKEND_PATH}/joiner/verify-code/${roomCode}`
         )
         .then((response) => {
           setSessionID(response.data.sessionID);
@@ -230,10 +227,12 @@ export default function WaitingRoom() {
     const fetchUsers = async () => {
       console.log("****user role:" + userRole);
       try {
-        console.log("Serial: "+ serial)
-        deviceInfo = await axios.get(`${import.meta.env.VITE_BACKEND_PATH}/database/device-info/${serial}`);
-        console.log("Recieved Device Info: " + JSON.stringify(deviceInfo.body))
-        
+        console.log("Serial: " + serial);
+        deviceInfo = await axios.get(
+          `${import.meta.env.VITE_BACKEND_PATH}/database/device-info/${serial}`
+        );
+        console.log("Recieved Device Info: " + JSON.stringify(deviceInfo.body));
+
         console.log(
           "Trying to get users from session " + sessionId,
           "type | ",
@@ -265,25 +264,23 @@ export default function WaitingRoom() {
         //     nicknames.push(users[i].nickname + " (Spectator)");
       } catch (error) {
         if (error.response?.status === 404) {
-          console.log("Device not found.")
+          console.log("Device not found.");
           setSerial("");
-          setIsConnected(false)
-
-        }else {
-            console.error("An error occurred:", error);
-          }
+          setIsConnected(false);
+        } else {
+          console.error("An error occurred:", error);
         }
       }
+    };
     fetchUsers();
     interval = setInterval(fetchUsers, 5000); // Refresh users every 5 seconds
 
     return () => clearInterval(interval);
   }, [sessionID]); //Don't fetch any data until sessionID is set
 
-
   //listening for the host to disconnect
   socket.on("end-experiment", (session) => {
-    if(session !== undefined && session === sessionId){
+    if (session !== undefined && session === sessionId) {
       navigateTo("/");
     }
   });
@@ -294,7 +291,7 @@ export default function WaitingRoom() {
         const response = await axios.get(
           `${
             import.meta.env.VITE_BACKEND_PATH
-          }joiner/session/getInfo/${roomCode}`
+          }/joiner/session/getInfo/${roomCode}`
         );
         if (response.status === 200) {
           console.log("EXPERIMENT ID RETURNED: ", response.data.experimentid);
@@ -314,7 +311,7 @@ export default function WaitingRoom() {
         const response = await axios.get(
           `${
             import.meta.env.VITE_BACKEND_PATH
-          }joiner/getVideoFile/${experimentID}`
+          }/joiner/getVideoFile/${experimentID}`
         );
         if (response.status === 200) {
           toast.success("Successfully received video lab data.");
@@ -344,7 +341,6 @@ export default function WaitingRoom() {
         console.log("SENDING TO THE ROUTE EXPERIMENT ID: ", experimentID);
         const response = await axios.get(
           `${import.meta.env.VITE_BACKEND_PATH}/joiner/getPhoto/${experimentID}`
-
         );
         if (response.status === 200) {
           toast.success("Successfully received photo lab data.");
@@ -469,13 +465,12 @@ export default function WaitingRoom() {
   ]);
 
   useEffect(() => {
-    if (!isConnected){
+    if (!isConnected && userRole !== "spectator") {
       socket.disconnect(true);
-      
-      navigateTo("/")
 
+      navigateTo("/");
     }
-  }, [isConnected])
+  }, [isConnected]);
 
   useEffect(() => {
     if (experimentType === 1) {
@@ -494,8 +489,6 @@ export default function WaitingRoom() {
       console.log("Invalid experiment type");
     }
   }, [experimentType, setExperimentTypeString]);
-
-
 
   return (
     <div className="flex flex-col items-center justify-center px-4 md:px-8 py-8">
@@ -535,12 +528,10 @@ export default function WaitingRoom() {
                     <div>
                       {isConnected ? (
                         <span className="text-green-500 font-bold ml-1">
-
                           CONNECTED
                         </span>
                       ) : (
                         <span className="text-red-500 font-bold ml-1">
-
                           NOT CONNECTED
                         </span>
                       )}

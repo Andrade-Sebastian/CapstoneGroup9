@@ -60,13 +60,13 @@ const router = createBrowserRouter([
       },
       {
         path:"active-experiment",
-        // element: <PrivateRoute><ActiveExperiment /></PrivateRoute>
-        element: <ActiveExperiment/>
+        element: <PrivateRoute><ActiveExperiment /></PrivateRoute>
+        // element: <ActiveExperiment/>
       },
       {
         path:"active-experiment-spectator",
-        // element: <PrivateRoute><SpectatorActiveExperiment /></PrivateRoute>
-        element: <SpectatorActiveExperiment/>
+        element: <PrivateRoute><SpectatorActiveExperiment /></PrivateRoute>
+        // element: <SpectatorActiveExperiment/>
       },
   ]
       
