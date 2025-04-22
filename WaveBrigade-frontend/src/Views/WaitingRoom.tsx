@@ -280,6 +280,14 @@ export default function WaitingRoom() {
     return () => clearInterval(interval);
   }, [sessionID]); //Don't fetch any data until sessionID is set
 
+
+  //listening for the host to disconnect
+  socket.on("end-experiment", (session) => {
+    if(session !== undefined && session === sessionId){
+      navigateTo("/");
+    }
+  });
+
   useEffect(() => {
     const getExperimentData = async () => {
       try {

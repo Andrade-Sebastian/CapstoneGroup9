@@ -378,9 +378,9 @@ io.on("connection", (socket) => {
 
   session_handlers(io, socket, rooms, isHost);
 
-  socket.on("end-experiment", () => {
+  socket.on("end-experiment", (session) => {
     console.log("Ending experiment");
-    io.emit("end-experiment");
+    io.emit("end-experiment", session);
   });
 
   socket.on("disconnect", async (data) => {
@@ -397,6 +397,14 @@ io.on("connection", (socket) => {
       socket.id
     );
     const sessionIDstr = String(sessionIDnum);
+
+    try{
+      const session = await hostDisconnect(socket.id);
+      io.emit("end-experiment", session.sessionid);
+
+    } catch(error){
+      console.log("Couldn't find a session with that host socket id");
+    }
 
     try {
       console.log(
