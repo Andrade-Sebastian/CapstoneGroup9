@@ -228,9 +228,11 @@ export default function WaitingRoom() {
     const fetchUsers = async () => {
       console.log("****user role:" + userRole);
       try {
-        console.log("Serial: " + serial);
-        deviceInfo = await axios.get(`${import.meta.env.VITE_BACKEND_PATH}/database/device-info/${serial}`);
-        console.log("Recieved Device Info: " + JSON.stringify(deviceInfo.body));
+        if(userRole !== "spectator"){
+          console.log("Serial: " + serial);
+          deviceInfo = await axios.get(`${import.meta.env.VITE_BACKEND_PATH}/database/device-info/${serial}`);
+          console.log("Recieved Device Info: " + JSON.stringify(deviceInfo.body));
+        }
 
         console.log(
           "Trying to get users from session " + sessionId,
@@ -241,7 +243,8 @@ export default function WaitingRoom() {
 
         //SOCKET ID ISNT BEING SET - 4/17
         console.log("****socketId when getting users: " + socketId);
-        console.log("Trying to get users from session " + sessionID);
+        console.log("Trying to get users from session sessionID" + sessionID);
+        console.log("Trying to get users from session sessionId " + sessionId);
         const response = await axios.get(
           `${import.meta.env.VITE_BACKEND_PATH}/joiner/room-users/${sessionId}`
         );
