@@ -98,7 +98,7 @@ export default function HostSelectLabPage() {
 
   // export default function ExperimentCreationForm({ handleSubmit, setExperimentName, setLabDescription, userName }) {
   return (
-    <div className="flex flex-col md:flex-row h-screen w-full">
+    <div className="flex flex-col items-center justify-center min-h-screen md:flex-row w-full">
       <div className="hidden md:flex flex-col items-center justify-center lg:w-1/3 w-2/5">
       <Toaster position="top-right" />
         <SideComponent
@@ -138,14 +138,14 @@ export default function HostSelectLabPage() {
           >
             Continue
           </button>
-          <div className="flex justify-center">
+          {/* <div className="flex justify-center">
             <p
               className="text-semibold text-purple-600 hober:underline cursor-pointer"
               onClick={handlePreviousExperiments}
             >
               View Previously Made Experiments
             </p>
-          </div>
+          </div> */}
         </form>
       </div>
     </div>

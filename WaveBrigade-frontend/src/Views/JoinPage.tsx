@@ -271,7 +271,7 @@ export default function JoinPage() {
       </div>
 
       <div className="flex flex-col items-center justify-center w-2/5">
-        <form onSubmit={handleSubmit} className="w-full max-w-md">
+        <form onSubmit={handleSubmit} className="w-full max-w-md" autoComplete="off">
           <div className="mb-6">
             <div>
               <label

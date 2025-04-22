@@ -100,6 +100,7 @@ export default function HostCreateRoom() {
       return
     } else if (!password.trim() || password.length < 3) {
       toast.error('Please enter a password of at least more than three characters')
+      return
     }
 
     console.log('creating an experiment')
