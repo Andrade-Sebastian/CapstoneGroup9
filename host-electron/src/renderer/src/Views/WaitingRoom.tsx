@@ -284,6 +284,8 @@ export default function WaitingRoom() {
     // if (!selectedEmotiBitId) return
     console.log("focusedDeviceSerial: " + focusedDeviceSerial)
     console.log("focusedDeviceIP: " + focusedDeviceIP)
+
+    
     await axios.post(`${import.meta.env.VITE_BACKEND_PATH}/host/remove-device`, {
       serialNumber: focusedDeviceSerial,
       ipAddress: focusedDeviceIP
