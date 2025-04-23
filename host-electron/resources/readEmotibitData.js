@@ -65,10 +65,9 @@ var operationParameters = {
     sessionId: process.argv[7],
     assignSocketId: null
 };
-var ancHeaders = ['Package', 'EDA', 'Temperature', 'Thermistor', 'Timestamp', 'Unknown']; //create a list of headers for the csv
+//const ancHeaders = ['Package', 'EDA', 'Temperature', 'Thermistor', 'Timestamp', 'Unknown']; //create a list of headers for the csv
 // const ancFilePath = './operationParameters.userId/anc_data.csv';
 // const auxHeaders = ['Package', 'PPG_Red', 'PPG_Infa_Red', 'PPG_Green', 'Timestamp', 'Unknown'];
-// const auxFilePath = './operationParameters.userId/aux_data.csv';
 // const auxFilePath = './operationParameters.userId/aux_data.csv';
 //initializes the board 
 var board = new brainflow_1.BoardShim(brainflow_1.BoardIds.EMOTIBIT_BOARD, { serialNumber: operationParameters.serialNumber });
@@ -166,10 +165,8 @@ function sendData(socket) {
                         ppg_r = ppg_r.concat(anc_data[1]);
                         //heart rate can only start collecting if there are enough data samples
                         if (ppg_ir.length >= 1024 && ppg_r.length >= 1024) {
-                            brainflow_1.DataFilter.performBandPass(ppg_ir, 500, 5, 10, 2, 0, 0);
-                            brainflow_1.DataFilter.performBandPass(ppg_r, 500, 5, 10, 2, 0, 0);
-                            heart_rate = brainflow_1.DataFilter.getHeartRate(ppg_ir.slice(-1024), ppg_r.slice(-1024), 500, 1024);
-                            console.log("HEART RATE: ", heart_rate);
+                            heart_rate = brainflow_1.DataFilter.getHeartRate(ppg_ir.slice(-1024), ppg_r.slice(-1024), 25, 1024);
+                            //console.log("HR: ", heart_rate);
                         }
                         ancData = {
                             package: anc_data[0][0],

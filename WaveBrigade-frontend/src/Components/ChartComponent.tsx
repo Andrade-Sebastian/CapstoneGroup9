@@ -14,8 +14,6 @@ interface IDataType {
   user_id: string;
   className?: string;
 }
-let max = 98;
-let min = 93;
 let average = 0;
 let low = 0;
 let high = 0;
@@ -26,6 +24,8 @@ export default function ChartComponent(props: IDataType) {
 
   const [plotState, acceptPlotDataState] = useState<Array<number>>([]);
   const [timeState, acceptTimeState] = useState<Array<number>>([]);
+  const [min, setMin] = useState(0);
+  const [max, setMax] = useState(1);
   //const [edaState, acceptEdaDataState] = useState<Array<number>>([]);
 
   function addDataPoint(
@@ -38,31 +38,17 @@ export default function ChartComponent(props: IDataType) {
     const numOfTimeStamps = timeState.length;
     let current_data = 0;
 
-    console.log("LENGTH OF ARRAY: ", numOfPoints);
-
-    // if(numOfTimeStamps == 10){
-    //     timeState.shift();
-    //     acceptTimeState(timeState => [...timeState, timeStamp * 1000]);
-    // }
-    // else{
-    //     acceptTimeState(timeState => [...timeState, timeStamp * 1000]);
-    // }
+    //console.log("LENGTH OF ARRAY: ", numOfPoints);
 
     // CHART TYPE IF STATEMENTS
     if (props.chart_type === 1) {
-      min = 60;
-      max = 90;
       current_data = heartRate;
-      console.log("HR: ", current_data);
+      //console.log("HR: ", current_data);
       //console.log( "ECG CHART")
     } else if (props.chart_type === 2) {
-      min = 80;
-      max = 98;
       current_data = ancDataFrame.data2 * 1.8 + 32;
       //console.log("TEMP CHART: ", current_data);
     } else if (props.chart_type === 3) {
-      min = 0;
-      max = 2;
       current_data = ancDataFrame.data1;
       //console.log("EDA CHART" , current_data);
     } else {
@@ -70,25 +56,8 @@ export default function ChartComponent(props: IDataType) {
       return 0;
     }
 
-    let counter = 0;
-    const intervalId = setInterval(() => {
-      counter++;
-      const temp_data = current_data;
-      max = Math.max(max, Math.round(temp_data));
-      min = max - 1;
-      //console.log("MAX: ", max);
-      //console.log("MIN: ", min);
-
-      if (counter >= 8) {
-        console.log("Clearing interval");
-        max = current_data;
-        min = max - 1;
-        clearInterval(intervalId);
-      }
-    }, 5000);
-
     if (numOfPoints === 100) {
-      console.log("100 POINTS RECIEVED");
+      //console.log("100 POINTS RECIEVED");
       const temp_plot = [...plotState];
       average = calculateAverage(temp_plot);
       temp_plot.shift();
@@ -118,7 +87,41 @@ export default function ChartComponent(props: IDataType) {
     average = 0;
     low = 0;
     high = 0;
+    if(props.chart_type === 1){
+      setMin(60);
+      setMax(90);
+    }
+    else if(props.chart_type === 2){
+      
+        setMin(80);
+        setMax(98);
+    }
+    else if(props.chart_type === 3){
+      setMin(0);
+      setMax(2);
+    }
+    else{
+        setMin(0);
+        setMax(1);
+    }
+    // console.log("MAX: ", max);
+    //   console.log("MIN: ", min);
   }, [props.chart_type]);
+
+  //every 5 seconds check the max/min
+  useEffect(() => {
+    if (plotState.length === 0) return;
+
+    const timeout = setTimeout(() => {
+      const currentMin = Math.min(...plotState);
+      const currentMax = Math.max(...plotState);
+  
+      setMin(currentMin);
+      setMax(currentMax);
+    }, 5000); // delay updates by 5 seconds
+  
+    return () => clearTimeout(timeout); // cleanup
+  }, [plotState]);
 
   useEffect(() => {
     function brainflowConnect() {
@@ -212,12 +215,12 @@ export default function ChartComponent(props: IDataType) {
             range: [min, max + 1],
             tick: 1,
           },
-          margin: {
-            l: 0,
-            r: 0,
-            b: 0,
-            t: 0,
-          },
+          // margin: {
+          //   l: 0,
+          //   r: 0,
+          //   b: 0,
+          //   t: 0,
+          // },
           showlegend: true,
           responsive: true,
         }}
