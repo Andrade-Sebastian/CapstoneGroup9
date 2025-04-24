@@ -30,6 +30,9 @@ services:
     container_name: wb-joiner-frontend
     volumes:
       - ./WaveBrigade-frontend/src:/app/joiner/frontend/src
+    environment:
+      - BACKEND_PATH=rsjwavebrigade.com/backend
+      - BACKEND_SOCKET=rsjwavebrigade.com
     depends_on:
       - database 
       - backend-express
