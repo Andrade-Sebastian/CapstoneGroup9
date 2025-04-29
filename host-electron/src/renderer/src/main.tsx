@@ -4,7 +4,7 @@ import { RouterProvider } from 'react-router-dom';
 import { StrictMode } from 'react';
 import './index.css';
 import App from "./App";
-import { createBrowserRouter } from "react-router-dom";
+import { createBrowserRouter, createHashRouter } from "react-router-dom";
 import HostView from "./Views/HostView";
 import HostCreateRoom from "./Views/HostCreateRoom";
 import SelectMedia from "./Views/SelectMedia";
@@ -21,6 +21,7 @@ import ActivityRoom from './Views/ActivityHost';
 import Summary from './Views/Summary';
 import ActivityHost from './Views/ActivityHost';
 import ActivityStudentView from './Views/ActivityStudentView';
+
 const routing = 
   [
     {
@@ -122,6 +123,7 @@ const routing =
 
 
 const router = import.meta.env.MODE === 'production' ? createHashRouter(routing) : createBrowserRouter(routing)
+      
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
