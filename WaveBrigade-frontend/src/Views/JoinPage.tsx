@@ -30,10 +30,18 @@ export default function JoinPage() {
     setSessionId,
     setNickname,
     setRoomCode,
-
+    setMessages,
     setUserSocketId,
   } = useJoinerStore();
 
+  function clearZustandStates() {
+    setMessages([])
+  }
+
+  useEffect(() => {
+    console.log('Clearing zustand states...')
+    clearZustandStates()
+  }, [])
   useEffect(() => {
     socket.connect();
     console.log("SOCKET.connect() Setting user role to student")
