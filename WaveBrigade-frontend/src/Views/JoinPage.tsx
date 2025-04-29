@@ -123,6 +123,7 @@ export default function JoinPage() {
         useJoinerStore.getState().sessionId
       );
       console.log("useJoinerStore.getState().sessionId: " + useJoinerStore.getState().sessionId)
+      console.log(useJoinerStore.getState().sessionId)
       const nicknameIsUnique = await checkNicknameIsUnique(
         nickName,
         useJoinerStore.getState().sessionId
