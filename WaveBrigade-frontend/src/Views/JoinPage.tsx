@@ -67,7 +67,7 @@ export default function JoinPage() {
         socket.off("client-assignment");
       };
     });
-  }, [setExperimentActive]);
+  }, [setExperimentActive, setUserRole, setUserSocketId, wasKicked]);
 
   async function checkNicknameIsUnique(
     nickname: string, 
@@ -209,9 +209,7 @@ export default function JoinPage() {
       setRoomCode(StudentInputRoomCode); // Store the room code in global state
 
       const response = await axios.get(
-        `${
-          import.meta.env.VITE_BACKEND_PATH
-        }/joiner/verify-code/${StudentInputRoomCode}`
+        `${import.meta.env.VITE_BACKEND_PATH}/joiner/verify-code/${StudentInputRoomCode}`
       );
 
       console.log("Session ID: ", response.data.sessionID);
