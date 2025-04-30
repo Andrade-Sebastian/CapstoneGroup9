@@ -26,13 +26,13 @@ services:
   joiner-frontend:
     build:
       context: ./WaveBrigade-frontend
-      dockerfile: Dockerfile
+      dockerfile: deployment.Dockerfile
     container_name: wb-joiner-frontend
     volumes:
       - ./WaveBrigade-frontend/src:/app/joiner/frontend/src
     environment:
-      - BACKEND_PATH=rsjwavebrigade.com/backend
-      - BACKEND_SOCKET=rsjwavebrigade.com
+      - BACKEND_PATH=https://rsjwavebrigade.com/backend
+      - BACKEND_SOCKET=https://rsjwavebrigade.com
     depends_on:
       - database 
       - backend-express

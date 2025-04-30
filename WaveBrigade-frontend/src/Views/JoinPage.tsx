@@ -34,9 +34,13 @@ export default function JoinPage() {
     setUserSocketId,
   } = useJoinerStore();
 
+  // useEffect(() => {
+  //   console.log("(DEBUG) sessionId, sessionID: ", sessionId, sessionID);
+  // }, [sessionId, sessionID]);
+
   useEffect(() => {
     socket.connect();
-    console.log("SOCKET.connect() Setting user role to student")
+    console.log("SOCKET.connect() Setting user role to student");
 
     setUserRole("student");
     console.log("Global wasKicked variable: ", wasKicked);
@@ -46,18 +50,17 @@ export default function JoinPage() {
       toast.error("You were kicked from the room");
     }
 
-	socket.emit("client-assignment", );
-  socket.on("experiment-active", (data) => {
-    if(data.isActive === true){
-      toast.error("Experiment in progress, cannot join...")
-      setExperimentActive(data.isActive);
-      return;
-    }
-    else{
-      setExperimentActive(false);
-      // toast.error("Experiment in progress, cannot join...")
-    }
-  })
+    socket.emit("client-assignment");
+    socket.on("experiment-active", (data) => {
+      if (data.isActive === true) {
+        toast.error("Experiment in progress, cannot join...");
+        setExperimentActive(data.isActive);
+        return;
+      } else {
+        setExperimentActive(false);
+        // toast.error("Experiment in progress, cannot join...")
+      }
+    });
 
     socket.on("client-assignment", async (data) => {
       await setUserSocketId(data.socketId);
@@ -70,13 +73,18 @@ export default function JoinPage() {
   }, [setExperimentActive, setUserRole, setUserSocketId, wasKicked]);
 
   async function checkNicknameIsUnique(
-    nickname: string, 
+    nickname: string,
     sessionID: number
   ): Promise<boolean> {
-    console.log(`making request at ${import.meta.env.VITE_BACKEND_PATH}/database/unique-nickname/${sessionID}/${nickname}`
+    console.log(
+      `making request at ${
+        import.meta.env.VITE_BACKEND_PATH
+      }/database/unique-nickname/${sessionID}/${nickname}`
     );
-    const response = await axios.get(`${import.meta.env.VITE_BACKEND_PATH}/database/unique-nickname/${sessionID}/${nickname}`
-
+    const response = await axios.get(
+      `${
+        import.meta.env.VITE_BACKEND_PATH
+      }/database/unique-nickname/${sessionID}/${nickname}`
     );
     console.log("Is the nickname unique?", response.data.isUnique);
 
@@ -84,7 +92,6 @@ export default function JoinPage() {
   }
 
   const handleSubmit = async (e) => {
-
     console.log(
       new Date().toLocaleTimeString(),
       "Current socketID in Zustand: ",
@@ -122,8 +129,11 @@ export default function JoinPage() {
       const canSpectate = await checkSpectatorsAllowed(
         useJoinerStore.getState().sessionId
       );
-      console.log("useJoinerStore.getState().sessionId: " + useJoinerStore.getState().sessionId)
-      console.log(useJoinerStore.getState().sessionId)
+      console.log(
+        "useJoinerStore.getState().sessionId: " +
+          useJoinerStore.getState().sessionId
+      );
+      console.log(useJoinerStore.getState().sessionId);
       const nicknameIsUnique = await checkNicknameIsUnique(
         nickName,
         useJoinerStore.getState().sessionId
@@ -178,16 +188,18 @@ export default function JoinPage() {
       );
     }
   };
-  
-  
+
   const checkNickName = async (nickName: string) => {
     try {
       console.log("Checking nickname: ", nickName);
       const response = await axios.get(
         `${import.meta.env.VITE_BACKEND_PATH}/joiner/check-name/${nickName}`
-
       );
-      console.log(`HERE IS THE ENDPOINT FOR CHECKNICKNAME ${import.meta.env.VITE_BACKEND_PATH}/joiner/check-name/${nickName}`);
+      console.log(
+        `HERE IS THE ENDPOINT FOR CHECKNICKNAME ${
+          import.meta.env.VITE_BACKEND_PATH
+        }/joiner/check-name/${nickName}`
+      );
       console.log("RESPONSE STATUS RETURNED: ", response.status);
       if (response.status === 200) {
         console.log("Nickname is valid");
@@ -207,9 +219,11 @@ export default function JoinPage() {
     try {
       console.log("Validating room code..." + StudentInputRoomCode);
       setRoomCode(StudentInputRoomCode); // Store the room code in global state
-
+      console.log("VITE BACKEND PATH:", import.meta.env.VITE_BACKEND_PATH);
       const response = await axios.get(
-        `${import.meta.env.VITE_BACKEND_PATH}/joiner/verify-code/${StudentInputRoomCode}`
+        `${
+          import.meta.env.VITE_BACKEND_PATH
+        }/joiner/verify-code/${StudentInputRoomCode}`
       );
 
       console.log("Session ID: ", response.data.sessionID);
@@ -270,7 +284,11 @@ export default function JoinPage() {
       </div>
 
       <div className="flex flex-col items-center justify-center w-2/5">
-        <form onSubmit={handleSubmit} className="w-full max-w-md" autoComplete="off">
+        <form
+          onSubmit={handleSubmit}
+          className="w-full max-w-md"
+          autoComplete="off"
+        >
           <div className="mb-6">
             <div>
               <label

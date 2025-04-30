@@ -123,8 +123,8 @@ const routing =
 
 
 const router = import.meta.env.MODE === 'production' ? createHashRouter(routing) : createBrowserRouter(routing)
-      
 
+import.meta.env.MODE !== 'production' && console.log("")
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <RouterProvider router={router} />
