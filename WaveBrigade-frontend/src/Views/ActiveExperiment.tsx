@@ -215,7 +215,7 @@ export default function ActiveExperiment() {
       socket.off("end-experiment");
       //socket.off("update");
     };
-  }, []);
+  }, [articleURL, experimentId, experimentPath, experimentType, navigateTo, sessionId, videoID]);
 
   useEffect(() => {
     const fetchStoredPhoto = async () => {
