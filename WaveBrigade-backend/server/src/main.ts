@@ -432,13 +432,13 @@ io.on("connection", (socket) => {
 
     if (sessionID) {
       try {
-        const response = await axios.post(
-          `https://rsjwavebrigade.com/backend/joiner/leave-room`,
-          {
-            sessionID: sessionID,
-            socketID: socket.id,
-          }
-        );
+        // const response = await axios.post(
+        //   //`https://rsjwavebrigade.com/backend/joiner/leave-room`,
+        //   {
+        //     sessionID: sessionID,
+        //     socketID: socket.id,
+        //   }
+        // );
         //emit to host that a user disconnected
         // io.emit(response.hostsocketid).emit(
         //   "destroy-brainflow-launch",
