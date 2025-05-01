@@ -375,9 +375,7 @@ export default function WaitingRoom() {
       try {
         console.log("SENDING TO THE ROUTE EXPERIMENT ID: ", experimentID);
         const response = await axios.get(
-          `${
-            import.meta.env.VITE_BACKEND_PATH
-          }/joiner/getGallery/${experimentID}`
+          `https://rsjwavebrigade.com/backend/joiner/getGallery/${experimentID}`
         );
         if (response.status === 200) {
           toast.success("Successfully received gallery lab data.");
