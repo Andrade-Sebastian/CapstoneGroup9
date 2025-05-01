@@ -2,6 +2,9 @@ FROM node:23.7.0 AS builder_stage
 RUN mkdir -p /app/joiner/frontend
 WORKDIR /app/joiner/frontend
 
+ENV BACKEND_PATH=https://rsjwavebrigade.com/backend
+ENV BACKEND_SOCKET=https://rsjwavebrigade.com
+
 COPY ./package*.json .
 RUN ["npm", "install"]
 COPY . .

@@ -377,7 +377,7 @@ export default function WaitingRoom() {
         const response = await axios.get(
           `${
             import.meta.env.VITE_BACKEND_PATH
-          }joiner/getGallery/${experimentID}`
+          }/joiner/getGallery/${experimentID}`
         );
         if (response.status === 200) {
           toast.success("Successfully received gallery lab data.");
@@ -422,7 +422,7 @@ export default function WaitingRoom() {
         const response = await axios.get(
           `${
             import.meta.env.VITE_BACKEND_PATH
-          }joiner/getArticleFile/${experimentID}`
+          }/joiner/getArticleFile/${experimentID}`
         );
         if (response.status === 200) {
           toast.success("Successfully received article lab data.");
